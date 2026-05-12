@@ -88,19 +88,7 @@ export default function Logo({
                     ${isLoading ? "opacity-70 animate-pulse" : ""}
                 `}
             >
-                {showBeta && (
-                    <button
-                        onClick={(event) => {
-                            event.preventDefault();
-                            setIsBetaDialogOpen(true);
-                        }}
-                        className={`absolute flex items-center gap-1 ${
-                            isVertical ? "-top-4 right-0" : " top-[6px] -right-14"
-                        } py-0.5 px-2 text-indigo-500 bg-indigo-500/10 border border-indigo-500 rounded-full hover:bg-indigo-500/20 transition-colors cursor-pointer dark:text-white dark:bg-indigo-900/80 dark:border-indigo-800/80 dark:hover:bg-indigo-900/80`}
-                    >
-                        <span className="text-xs font-bold">Beta</span>
-                    </button>
-                )}
+                
                 <img
                     src={currentVariant.logo}
                     alt="logo"
