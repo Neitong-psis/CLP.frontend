@@ -82,9 +82,11 @@ export default function Logo({
     return (
         <>
             <div
-                className={`flex relative items-center justify-center max-w-full ${currentSize.gap} ${
-                    isVertical ? "flex-col" : "flex-row"
-                } ${isLoading ? "opacity-70 animate-pulse" : ""}`}
+                className={`flex relative items-center justify-center max-w-full 
+                    ${currentSize.gap} 
+                    ${isVertical ? "flex-col" : "flex-row"}
+                    ${isLoading ? "opacity-70 animate-pulse" : ""}
+                `}
             >
                 {showBeta && (
                     <button
