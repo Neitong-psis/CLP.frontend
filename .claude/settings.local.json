@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm \"d:/CADT/Intership/QBTech/me/QBTECH.frontend/src/components/layout/brand-logo.tsx\")"
+    ],
+    "additionalDirectories": [
+      "d:\\CADT\\Intership\\QBTech\\me\\QBTECH.frontend\\src\\components\\layout"
+    ]
+  }
+}

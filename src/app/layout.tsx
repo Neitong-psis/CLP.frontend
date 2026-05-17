@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/common/Footer";
-import Header from "@/components/common/Header";
+import { AppProviders } from "@/providers/app-providers";
+import { siteConfig } from "@/config/site";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: "EduHub",
-  description: "EduHub MOOC learning platform",
+  title: {
+    default: `${siteConfig.name} — Learner Dashboard`,
+    template: `%s · ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-[#F8FAFC] text-[#0F172A]`}>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

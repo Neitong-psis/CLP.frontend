@@ -13,14 +13,6 @@ export default function Header() {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo size="sm" />
 
-        {/* <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-slate-900">
-              {link.label}
-            </Link>
-          ))}
-        </nav> */}
-
         <div className="flex items-center gap-3">
           <Link
             href="/auth/login"
@@ -49,64 +41,3 @@ export default function Header() {
     </header>
   );
 }
-
-// "editor.autoIndent": "full",
-  // "editor.formatOnType": true,
-  // "editor.formatOnPaste": true,
-  // "editor.suggestOnTriggerCharacters": true,
-  // "editor.detectIndentation": true,
-  // "editor.inlineSuggest.enabled": false,
-  // "editor.quickSuggestions": {
-  //   "other": true,
-  //   "comments": false,
-  //   "strings": false,
-  // },
-
-  // "update.mode": "manual",
-
-  // "chat.disableAIFeatures": true,
-  // "chat.mcp.discovery.enabled": {
-  //   "claude-desktop": false,
-  //   "windsurf": false,
-  //   "cursor-global": false,
-  //   "cursor-workspace": false
-  // },
-
-  // "chat.viewTitle.enabled": false,
-  // "chat.viewWelcome.enabled": false,
-  // "chat.math.enabled": false,
-  // "chat.sendElementsToChat.enabled": false,
-  // "chat.checkpoints.enabled": false,
-  // "chat.commandCenter.enabled": false,
-  // "chat.agent.maxRequests": 0,
-  // "chat.detectParticipant.enabled": false,
-  // "chat.extensionTools.enabled": false,
-  // "mermaid-chat.enabled": false,
-  // "chat.extensionUnification.enabled": false,
-  // "chat.mcp.access": "none",
-  // "chat.mcp.autostart": "never",
-  // "chat.mcp.assisted.nuget.enabled": false,
-  // "chat.mcp.gallery.enabled": false,
-  // "telemetry.editStats.details.enabled": false,
-  // "telemetry.editStats.showDecorations": false,
-  // "telemetry.feedback.enabled": false,
-  // "telemetry.telemetryLevel": "off",
-  // "chat.agent.enabled": false,
-  // "chat.allowAnonymousAccess": false,
-  // "chat.customAgentInSubagent.enabled": false,
-  // "chat.edits2.enabled": false,
-  // "inlineChat.enableV2": false,
-  // "chat.useAgentSkills": false,
-
-  // "github.copilot.enable": false,
-  // "github.copilot.inlineSuggest.enable": false,
-  // "terminal.integrated.allowedLinkSchemes": [
-  //   "file",
-  //   "http",
-  //   "https",
-  //   "mailto",
-  //   "vscode",
-  //   "vscode-insiders",
-  //   "docker-desktop"
-  // ],
-  // "terminal.integrated.enableMultiLinePasteWarning": "never",
