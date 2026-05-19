@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail } from "lucide-react";
 import { Field, InputWrapper, PasswordToggle, SubmitBtn, inputCls } from "./shared";
 
 export default function LogInForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form className="space-y-5 2xl:space-y-6 3xl:space-y-7" onSubmit={(e) => e.preventDefault()}>
+    <form
+      className="space-y-5 2xl:space-y-6 3xl:space-y-7"
+      onSubmit={(e) => { e.preventDefault(); router.push("/dashboard"); }}
+    >
       <Field label="Email" htmlFor="email">
         <InputWrapper icon={<Mail className="h-[18px] w-[18px] text-slate-400 2xl:h-5 2xl:w-5" />}>
           <input

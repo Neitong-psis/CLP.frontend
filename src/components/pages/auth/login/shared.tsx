@@ -78,3 +78,43 @@ export function SubmitBtn({ label }: { label: string }) {
     </button>
   );
 }
+
+/* ── Password strength ── */
+
+const LEVELS = [
+  { label: "Weak",   bar: "bg-red-400",    text: "text-red-500"    },
+  { label: "Fair",   bar: "bg-orange-400", text: "text-orange-500" },
+  { label: "Good",   bar: "bg-yellow-400", text: "text-yellow-600" },
+  { label: "Strong", bar: "bg-green-500",  text: "text-green-600"  },
+] as const;
+
+function calcStrength(pwd: string): number {
+  let s = 0;
+  if (pwd.length >= 8)                          s++;
+  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd))  s++;
+  if (/[0-9]/.test(pwd))                        s++;
+  if (/[^A-Za-z0-9]/.test(pwd))                s++;
+  return Math.min(Math.max(s - 1, 0), 3);
+}
+
+export function PasswordStrength({ value }: { value: string }) {
+  if (!value) return null;
+  const level = calcStrength(value);
+  const { label, bar, text } = LEVELS[level];
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <div className="flex gap-1">
+        {LEVELS.map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+              i <= level ? bar : "bg-slate-200"
+            }`}
+          />
+        ))}
+      </div>
+      <p className={`text-xs font-medium ${text}`}>{label} password</p>
+    </div>
+  );
+}

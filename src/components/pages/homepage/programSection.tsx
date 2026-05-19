@@ -1,7 +1,8 @@
 'use client';
 
+import Link from "next/link";
 import { PROGRAMS } from "@/config/homepage";
-import { ArrowRight, Link } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import SectionHeader from "./sectionHeader";
 
 export default function ProgramsSection() {
@@ -35,7 +36,7 @@ export default function ProgramsSection() {
                   {program.tag}
                 </span>
               </div>
-
+              
               <h3 className="relative text-xl font-bold text-[#00003e]">
                 {program.title}
               </h3>

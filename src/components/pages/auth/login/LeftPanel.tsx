@@ -3,6 +3,16 @@ import Logo from "@/components/common/Logo";
 export default function LeftPanel() {
   return (
     <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-[#00003e] p-10 lg:flex lg:w-[44%] lg:flex-none xl:w-[42%] xl:p-14 2xl:w-[40%] 2xl:p-20 3xl:w-[38%] 3xl:p-28">
+      {/* Dot-grid pattern */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
       {/* Ambient glows */}
       <div
         aria-hidden
