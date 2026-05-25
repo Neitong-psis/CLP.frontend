@@ -6,7 +6,7 @@ import { NewsletterForm } from "@/components/common/NewsletterForm";
 import { FOOTER_LEGAL_LINKS, FOOTER_PROGRAMS, FOOTER_QUICK_LINKS } from "@/config/navigation";
 import { BRAND } from "@/config/brand";
 import { CONTACT } from "@/config/contact";
-import { QBTECH_LOGO_1, QBTECH_LOGO_2 } from "@logos";
+import { QBTECH_LOGO_2 } from "@logos";
 import type { NavLink } from "@/types/navigation";
 
 const Logo = dynamic(() => import("@/components/common/Logo"));
@@ -190,7 +190,7 @@ export default function Footer() {
               Designed &amp; Developed by
             </span>
             <img
-              src={QBTECH_LOGO_1}
+              src={QBTECH_LOGO_2}
               alt={BRAND.poweredBy.name}
               className="h-7 w-auto opacity-50 transition-opacity group-hover:opacity-100"
             />
