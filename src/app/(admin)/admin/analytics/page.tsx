@@ -22,20 +22,17 @@ const METRICS = [
   {
     label: 'Published Courses',
     value: ADMIN_COURSES.filter(
-      (c) => c.status === 'Published',
+      (c) => c.status === 'Public',
     ).length.toString(),
     change: '+2',
     icon: BookOpen,
     color: 'bg-brand-gold/20 text-brand-gold',
   },
   {
-    label: 'Avg. Completion',
-    value: `${Math.round(
-      ADMIN_COURSES.filter((c) => c.completionRate > 0).reduce(
-        (a, c) => a + c.completionRate,
-        0,
-      ) / ADMIN_COURSES.filter((c) => c.completionRate > 0).length,
-    )}%`,
+    label: 'Avg. Rating',
+    value: `${(
+      ADMIN_COURSES.reduce((a, c) => a + c.rating, 0) / ADMIN_COURSES.length
+    ).toFixed(1)}`,
     change: '+5%',
     icon: TrendingUp,
     color: 'bg-emerald-500/20 text-emerald-400',

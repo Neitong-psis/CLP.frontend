@@ -20,6 +20,7 @@ import {
   GraduationCap,
   BadgeCheck,
   Activity,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import Logo from '@/components/common/Logo';
@@ -92,16 +93,10 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
   admin: {
     navItems: [
       { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
-      { href: '/admin/users', icon: Users, label: 'Users', badge: 3 },
-      { href: '/admin/courses', icon: BookOpen, label: 'Courses' },
-      { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-      {
-        href: '/admin/certifications',
-        icon: BadgeCheck,
-        label: 'Certifications',
-      },
+      { href: '/admin/users', icon: Users, label: 'Users' },
+      { href: '/admin/courses', icon: BookOpen, label: 'Courses', badge: 3 },
+      { href: '/admin/certifications', icon: BadgeCheck, label: 'Certifications' },
       { href: '/admin/settings', icon: Settings, label: 'Settings' },
-      { href: '/admin/system', icon: Activity, label: 'System Health' },
     ],
     rootHref: '/admin',
     roleChip: { label: 'Platform Admin', icon: ShieldCheck },

@@ -12,9 +12,9 @@ export default function FooterBottomBar({ theme }: FooterBottomBarProps) {
 
   return (
     <div
-      className={`border-t ${isBlue ? 'bg-brand-navy/60 border-white/10' : 'border-slate-200 bg-slate-50'}`}
+      className={`border-t ${isBlue ? 'bg-brand-navy/60 border-white/[0.06]' : 'border-slate-200 bg-slate-50'}`}
     >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <span
           className={`text-xs whitespace-nowrap ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
         >

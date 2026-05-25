@@ -1,6 +1,6 @@
 'use client';
 
-import { HERO_STATS } from "@/config/homepage";
+import { HERO_STATS } from '@/config/homepage';
 
 export default function StatsBar() {
   return (
@@ -14,7 +14,7 @@ export default function StatsBar() {
             <span className="text-3xl font-bold text-[#00003e] sm:text-4xl">
               {stat.value}
             </span>
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#00003e]/50">
+            <span className="text-xs font-semibold tracking-widest text-[#00003e]/50 uppercase">
               {stat.label}
             </span>
           </div>

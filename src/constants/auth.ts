@@ -12,9 +12,9 @@ export const AUTH_TABS: Record<
   }
 > = {
   login: {
-    label: 'Sign In',
+    label: 'Log In',
     heading: 'Welcome Back!',
-    sub: 'Sign in to continue your learning journey',
+    sub: 'Log in to continue your learning journey',
     ctaPrefix: "Don't have an account?",
     ctaAction: 'Sign up',
     ctaTab: 'signup',
@@ -24,7 +24,7 @@ export const AUTH_TABS: Record<
     heading: 'Create Your Account',
     sub: 'Join thousands of learners worldwide',
     ctaPrefix: 'Already have an account?',
-    ctaAction: 'Sign in',
+    ctaAction: 'Log in',
     ctaTab: 'login',
   },
 };

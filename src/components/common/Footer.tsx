@@ -1,36 +1,42 @@
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { Mail, MapPin, Phone } from "lucide-react";
-import Image from "next/image";
-import { FacebookIcon, LinkedinIcon, YoutubeIcon } from "@/components/common/icons/SocialIcons";
-import { NewsletterForm } from "@/components/common/NewsletterForm";
-import { FOOTER_LEGAL_LINKS, FOOTER_PROGRAMS, FOOTER_QUICK_LINKS } from "@/config/navigation";
-import { BRAND } from "@/config/brand";
-import { CONTACT } from "@/config/contact";
-import { QBTECH_LOGO_2 } from "@logos";
-import type { NavLink } from "@/types/navigation";
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { Mail, MapPin, Phone } from 'lucide-react';
+import Image from 'next/image';
+import {
+  FacebookIcon,
+  LinkedinIcon,
+  YoutubeIcon,
+} from '@/components/common/icons/SocialIcons';
+import { NewsletterForm } from '@/components/common/NewsletterForm';
+import {
+  FOOTER_LEGAL_LINKS,
+  FOOTER_PROGRAMS,
+  FOOTER_QUICK_LINKS,
+} from '@/config/navigation';
+import { BRAND } from '@/config/brand';
+import { CONTACT } from '@/config/contact';
+import { QBTECH_LOGO_2 } from '@logos';
+import type { NavLink } from '@/types/navigation';
 
-const Logo = dynamic(() => import("@/components/common/Logo"));
+const Logo = dynamic(() => import('@/components/common/Logo'));
 
 const SOCIALS = [
-  { icon: FacebookIcon, href: CONTACT.socials.facebook, label: "Facebook" },
-  { icon: YoutubeIcon,  href: CONTACT.socials.youtube,  label: "YouTube"  },
-  { icon: LinkedinIcon, href: CONTACT.socials.linkedin,  label: "LinkedIn" },
+  { icon: FacebookIcon, href: CONTACT.socials.facebook, label: 'Facebook' },
+  { icon: YoutubeIcon, href: CONTACT.socials.youtube, label: 'YouTube' },
+  { icon: LinkedinIcon, href: CONTACT.socials.linkedin, label: 'LinkedIn' },
 ] as const;
-
 
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden bg-[#00003e] text-white">
-
       {/* ── Decorative background layer ────────────────────────── */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            "radial-gradient(circle, #f4a300 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+            'radial-gradient(circle, #f4a300 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
         }}
       />
       <div
@@ -48,15 +54,16 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <div className="mb-2 inline-flex items-center gap-2">
               <span className="h-px w-8 bg-[#f4a300]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f4a300]">
+              <span className="text-[11px] font-semibold tracking-[0.18em] text-[#f4a300] uppercase">
                 Stay Connected
               </span>
             </div>
-            <h3 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">
+            <h3 className="font-serif text-2xl leading-tight font-bold text-white sm:text-3xl">
               Get learning insights, straight to your inbox.
             </h3>
             <p className="mt-1 text-sm text-white/50">
-              Join our newsletter for the latest updates, tips, and exclusive content.
+              Join our newsletter for the latest updates, tips, and exclusive
+              content.
             </p>
           </div>
 
@@ -67,7 +74,6 @@ export default function Footer() {
       {/* ── Main content grid ──────────────────────────────────── */}
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8">
-
           {/* Brand block — spans 5 cols */}
           <div className="md:col-span-5 lg:col-span-4">
             <Logo size="md" variant="light" />
@@ -114,7 +120,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="md:col-span-12 lg:col-span-3">
-            <h4 className="mb-5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#f4a300]">
+            <h4 className="mb-5 text-[11px] font-bold tracking-[0.18em] text-[#f4a300] uppercase">
               Reach Out
             </h4>
             <ul className="flex flex-col gap-4">
@@ -131,7 +137,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href={`tel:${CONTACT.phone.replace(/\s/g, "")}`}
+                  href={`tel:${CONTACT.phone.replace(/\s/g, '')}`}
                   className="group flex items-start gap-3 text-sm text-white/60 transition-all hover:text-white"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 transition-colors group-hover:border-[#f4a300]/40 group-hover:bg-[#f4a300]/10">
@@ -158,14 +164,21 @@ export default function Footer() {
       {/* ── Bottom bar ─────────────────────────────────────────── */}
       <div className="relative border-t border-white/10 bg-black/20 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 sm:px-6 md:flex-row lg:px-8">
-
           {/* Copyright + legal */}
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/40">
-            <span>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</span>
-            <span className="hidden h-3 w-px bg-white/15 md:inline-block" aria-hidden />
+            <span>
+              © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
+            </span>
+            <span
+              className="hidden h-3 w-px bg-white/15 md:inline-block"
+              aria-hidden
+            />
             {FOOTER_LEGAL_LINKS.map((link, idx) => (
               <span key={link.href} className="flex items-center gap-3">
-                <Link href={link.href} className="transition-colors hover:text-[#f4a300]">
+                <Link
+                  href={link.href}
+                  className="transition-colors hover:text-[#f4a300]"
+                >
                   {link.label}
                 </Link>
                 {idx < FOOTER_LEGAL_LINKS.length - 1 && (
@@ -182,7 +195,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="group flex items-center gap-3"
           >
-            <span className="text-[10px] uppercase tracking-[0.18em] text-white/30 transition-colors group-hover:text-white/60">
+            <span className="text-[10px] tracking-[0.18em] text-white/30 uppercase transition-colors group-hover:text-white/60">
               Designed &amp; Developed by
             </span>
             <Image
@@ -207,7 +220,7 @@ interface FooterLinkColumnProps {
 function FooterLinkColumn({ title, links }: FooterLinkColumnProps) {
   return (
     <div>
-      <h4 className="mb-5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#f4a300]">
+      <h4 className="mb-5 text-[11px] font-bold tracking-[0.18em] text-[#f4a300] uppercase">
         {title}
       </h4>
       <ul className="flex flex-col gap-3">
@@ -217,7 +230,10 @@ function FooterLinkColumn({ title, links }: FooterLinkColumnProps) {
               href={link.href}
               className="group inline-flex items-center gap-1.5 text-sm text-white/60 transition-all duration-200 hover:text-white"
             >
-              <span className="h-px w-0 bg-[#f4a300] transition-all duration-300 group-hover:w-4" aria-hidden />
+              <span
+                className="h-px w-0 bg-[#f4a300] transition-all duration-300 group-hover:w-4"
+                aria-hidden
+              />
               <span className="transition-transform duration-200 group-hover:translate-x-1">
                 {link.label}
               </span>

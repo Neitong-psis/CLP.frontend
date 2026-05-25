@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, type FormEvent } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, type FormEvent } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 export function NewsletterForm() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
