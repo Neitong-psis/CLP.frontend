@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useCallback, type ChangeEvent } from "react";
+import { useState, useCallback, type ChangeEvent } from 'react';
 
 interface UseSearchReturn {
   query: string;
@@ -8,14 +8,14 @@ interface UseSearchReturn {
   clear: () => void;
 }
 
-export function useSearch(initialQuery = ""): UseSearchReturn {
+export function useSearch(initialQuery = ''): UseSearchReturn {
   const [query, setQuery] = useState(initialQuery);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   }, []);
 
-  const clear = useCallback(() => setQuery(""), []);
+  const clear = useCallback(() => setQuery(''), []);
 
   return { query, handleChange, clear };
 }

@@ -1,16 +1,12 @@
-import Header from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
-
-export default function MainLayout({
+export default function LearnerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </>
+    <div className="flex min-h-screen">
+      {/* <Sidebar /> */}
+      <main className="bg-brand-navy flex-1">{children}</main>
+    </div>
   );
 }
