@@ -31,11 +31,6 @@ const APPROVAL_CATEGORY_STYLE: Record<string, string> = {
   'Data Science': 'bg-teal-100 text-teal-600',
 };
 
-function formatEnrolled(n: number) {
-  if (n >= 1000) return (n / 1000).toFixed(0) + 'k';
-  return String(n);
-}
-
 export default function AdminCoursesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
@@ -43,14 +38,18 @@ export default function AdminCoursesPage() {
 
   const filtered = ADMIN_COURSES.filter((c) => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;
-    if (search && !c.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !c.title.toLowerCase().includes(search.toLowerCase()))
+      return false;
     return true;
   });
 
   const filteredQueue = APPROVAL_QUEUE.filter((q) => {
     if (!approvalSearch) return true;
     const s = approvalSearch.toLowerCase();
-    return q.title.toLowerCase().includes(s) || q.instructor.toLowerCase().includes(s);
+    return (
+      q.title.toLowerCase().includes(s) ||
+      q.instructor.toLowerCase().includes(s)
+    );
   });
 
   return (
@@ -62,7 +61,7 @@ export default function AdminCoursesPage() {
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         {/* Filter bar */}
-        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow">
           <div className="flex flex-wrap gap-3">
             {/* Search */}
             <div className="relative min-w-[200px] flex-1">
@@ -72,7 +71,7 @@ export default function AdminCoursesPage() {
                 placeholder="Search courses..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
+                className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pr-3 pl-9 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
               />
             </div>
 
@@ -128,7 +127,7 @@ export default function AdminCoursesPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -269,7 +268,7 @@ export default function AdminCoursesPage() {
                 placeholder="Search queue..."
                 value={approvalSearch}
                 onChange={(e) => setApprovalSearch(e.target.value)}
-                className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-52 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
+                className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-52 rounded-lg border border-slate-200 bg-white pr-3 pl-9 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
               />
             </div>
           </div>
@@ -278,7 +277,7 @@ export default function AdminCoursesPage() {
             {filteredQueue.map((item) => (
               <div
                 key={item.id}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow"
               >
                 {/* Category chip */}
                 <span
@@ -292,14 +291,16 @@ export default function AdminCoursesPage() {
                 </span>
 
                 {/* Title */}
-                <p className="mt-3 text-sm font-bold text-slate-900 leading-snug">
+                <p className="mt-3 text-sm leading-snug font-bold text-slate-900">
                   {item.title}
                 </p>
 
                 {/* Meta */}
                 <div className="mt-2 space-y-1">
                   <p className="text-xs text-slate-500">
-                    <span className="font-medium text-slate-700">Educator:</span>{' '}
+                    <span className="font-medium text-slate-700">
+                      Educator:
+                    </span>{' '}
                     {item.instructor}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -307,7 +308,9 @@ export default function AdminCoursesPage() {
                     {item.lessons}
                   </p>
                   <p className="text-xs text-slate-500">
-                    <span className="font-medium text-slate-700">Submitted:</span>{' '}
+                    <span className="font-medium text-slate-700">
+                      Submitted:
+                    </span>{' '}
                     {item.submittedAt}
                   </p>
                 </div>

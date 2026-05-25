@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   GraduationCap,
   BadgeCheck,
-  Activity,
   DollarSign,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
@@ -93,10 +92,14 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
   admin: {
     navItems: [
       { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
+      { href: '/admin/analytics', icon: DollarSign, label: 'Revenue' },
       { href: '/admin/users', icon: Users, label: 'Users' },
       { href: '/admin/courses', icon: BookOpen, label: 'Courses', badge: 3 },
-      { href: '/admin/certifications', icon: BadgeCheck, label: 'Certifications' },
-      { href: '/admin/settings', icon: Settings, label: 'Settings' },
+      {
+        href: '/admin/certifications',
+        icon: BadgeCheck,
+        label: 'Certificates',
+      },
     ],
     rootHref: '/admin',
     roleChip: { label: 'Platform Admin', icon: ShieldCheck },

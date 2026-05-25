@@ -1,10 +1,162 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, PlusCircle, MoreHorizontal, Star } from 'lucide-react';
+import { Search, PlusCircle, MoreHorizontal, Star, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { EDUCATOR_COURSES, type CourseStatus } from '@/constants/educator';
 import EducatorTopBar from '@/components/pages/educator/EducatorTopBar';
+
+const FIELD_CLS =
+  'w-full rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2 focus:ring-brand-gold/20 focus:bg-white transition-colors';
+
+const SELECT_CLS =
+  'w-full rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-gold/20 focus:bg-white transition-colors appearance-none cursor-pointer';
+
+function NewCourseModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">New Course</h2>
+            <p className="mt-1.5 text-sm text-slate-500">
+              Fill in the details below to create and publish a new course.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5">
+          <div className="col-span-2">
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Course Title
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Complete Web Development Bootcamp"
+              className={FIELD_CLS}
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Category
+            </label>
+            <select className={SELECT_CLS} defaultValue="">
+              <option value="" disabled>
+                Select category
+              </option>
+              <option>Web Development</option>
+              <option>Data Science</option>
+              <option>Cloud Computing</option>
+              <option>Programming</option>
+              <option>DevOps</option>
+              <option>Design</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Level
+            </label>
+            <select className={SELECT_CLS} defaultValue="">
+              <option value="" disabled>
+                Select level
+              </option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
+
+          <div className="col-span-2">
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              placeholder="What will students learn in this course?"
+              className={cn(FIELD_CLS, 'resize-none')}
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Price (USD)
+            </label>
+            <input
+              type="number"
+              placeholder="0.00"
+              min={0}
+              step={0.01}
+              className={FIELD_CLS}
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Status
+            </label>
+            <select className={SELECT_CLS} defaultValue="Draft">
+              <option value="Draft">Draft</option>
+              <option value="Published">Published</option>
+              <option value="Under Review">Under Review</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Estimated Duration
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. 12 hours"
+              className={FIELD_CLS}
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-900">
+              Total Lessons
+            </label>
+            <input
+              type="number"
+              placeholder="0"
+              min={0}
+              className={FIELD_CLS}
+            />
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button className="bg-brand-gold hover:bg-brand-gold-dark rounded-full px-6 py-2.5 text-sm font-bold text-white transition-colors">
+            Create Course
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const STATUS_STYLE: Record<CourseStatus, string> = {
   Published: 'bg-brand-gold/15 text-brand-gold',
@@ -21,6 +173,7 @@ const LEVEL_STYLE: Record<string, string> = {
 export default function EducatorCoursesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const filtered = EDUCATOR_COURSES.filter((c) => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;
@@ -35,7 +188,10 @@ export default function EducatorCoursesPage() {
         title="My Courses"
         subtitle={`${EDUCATOR_COURSES.length} total courses`}
         actions={
-          <button className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
+          >
             <PlusCircle className="h-4 w-4" />
             New Course
           </button>
@@ -180,6 +336,8 @@ export default function EducatorCoursesPage() {
           )}
         </div>
       </div>
+
+      {modalOpen && <NewCourseModal onClose={() => setModalOpen(false)} />}
     </div>
   );
 }

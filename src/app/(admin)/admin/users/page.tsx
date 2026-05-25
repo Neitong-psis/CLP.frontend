@@ -26,7 +26,12 @@ const SELECT_CLS =
   'w-full rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-gold/20 focus:bg-white transition-colors appearance-none cursor-pointer';
 
 function initials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 function AddUserModal({ onClose }: { onClose: () => void }) {
@@ -52,11 +57,7 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
             <label className="mb-2 block text-sm font-bold text-slate-900">
               Name
             </label>
-            <input
-              type="text"
-              placeholder="Full name"
-              className={FIELD_CLS}
-            />
+            <input type="text" placeholder="Full name" className={FIELD_CLS} />
           </div>
           <div>
             <label className="mb-2 block text-sm font-bold text-slate-900">
@@ -74,7 +75,9 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
               Role
             </label>
             <select className={SELECT_CLS} defaultValue="">
-              <option value="" disabled>Learner</option>
+              <option value="" disabled>
+                Learner
+              </option>
               <option value="Learner">Learner</option>
               <option value="Educator">Educator</option>
               <option value="Admin">Admin</option>
@@ -85,7 +88,9 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
               Status
             </label>
             <select className={SELECT_CLS} defaultValue="">
-              <option value="" disabled>Active</option>
+              <option value="" disabled>
+                Active
+              </option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
               <option value="Suspended">Suspended</option>
@@ -119,21 +124,13 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
             <label className="mb-2 block text-sm font-bold text-slate-900">
               Phone
             </label>
-            <input
-              type="tel"
-              placeholder="+1 555 0100"
-              className={FIELD_CLS}
-            />
+            <input type="tel" placeholder="+1 555 0100" className={FIELD_CLS} />
           </div>
           <div>
             <label className="mb-2 block text-sm font-bold text-slate-900">
               Student / Staff ID
             </label>
-            <input
-              type="text"
-              placeholder="CLP-1008"
-              className={FIELD_CLS}
-            />
+            <input type="text" placeholder="CLP-1008" className={FIELD_CLS} />
           </div>
 
           <div>
@@ -182,7 +179,9 @@ export default function AdminUsersPage() {
   const filtered = ADMIN_USERS.filter((u) => {
     if (!search) return true;
     const s = search.toLowerCase();
-    return u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s);
+    return (
+      u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s)
+    );
   });
 
   return (
@@ -197,7 +196,7 @@ export default function AdminUsersPage() {
         <div className="mb-5 flex justify-end">
           <button
             onClick={() => setModalOpen(true)}
-            className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors"
+            className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
           >
             <UserPlus className="h-4 w-4" />
             Add User
@@ -213,13 +212,13 @@ export default function AdminUsersPage() {
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
+              className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-10 w-full rounded-xl border border-slate-200 bg-white pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

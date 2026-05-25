@@ -1,14 +1,13 @@
 import Sidebar from '@/components/common/sidebar/Sidebar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-100">
       <div className="hidden lg:flex lg:h-full lg:shrink-0">
         <Sidebar role="admin" />
       </div>

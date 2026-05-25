@@ -21,9 +21,7 @@ const METRICS = [
   },
   {
     label: 'Published Courses',
-    value: ADMIN_COURSES.filter(
-      (c) => c.status === 'Public',
-    ).length.toString(),
+    value: ADMIN_COURSES.filter((c) => c.status === 'Public').length.toString(),
     change: '+2',
     icon: BookOpen,
     color: 'bg-brand-gold/20 text-brand-gold',

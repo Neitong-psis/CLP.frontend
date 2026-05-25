@@ -1,12 +1,4 @@
-import Link from 'next/link';
-import {
-  Users,
-  BookOpen,
-  Star,
-  DollarSign,
-  ArrowUpRight,
-  Plus,
-} from 'lucide-react';
+import { Users, BookOpen, Star, DollarSign, ArrowUpRight } from 'lucide-react';
 import {
   EDUCATOR_USER,
   DASHBOARD_STATS,
@@ -120,15 +112,6 @@ export default function EducatorDashboardPage() {
       <EducatorTopBar
         title="Educator Dashboard"
         subtitle={`Live workspace synced for ${EDUCATOR_USER.email}`}
-        actions={
-          <Link
-            href="/educator/courses/create"
-            className="bg-brand-gold text-brand-navy hover:bg-brand-gold-dark flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition"
-          >
-            <Plus className="h-4 w-4" />
-            New Course
-          </Link>
-        }
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
