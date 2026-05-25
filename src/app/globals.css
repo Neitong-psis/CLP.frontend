@@ -1,7 +1,132 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Class-based dark mode — add/remove .dark on <html> */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-navy: #00003e;
+  --color-brand-navy-tint: #06065e;
+  --color-brand-gold: #f4a300;
+  --color-brand-gold-dark: #e09400;
+  --color-brand-red: #e00025;
+}
 
 @layer base {
   body {
     @apply min-h-screen bg-white text-slate-900 antialiased;
   }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+  }
+
+  /* Suppress native browser password-reveal buttons (Edge ::-ms-reveal, Chrome autofill key) */
+  input[type='password']::-ms-reveal,
+  input[type='password']::-ms-clear,
+  input[type='password']::-webkit-credentials-auto-fill-button,
+  input[type='password']::-webkit-strong-password-auto-fill-button {
+    display: none !important;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes slide-up {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Registered as @utility (not @layer utilities) so Tailwind variants —
+   motion-safe:, etc. — actually generate. Longhand props are used so the
+   `animation` shorthand doesn't reset the separate delay-* utilities. */
+@utility animate-fade-in-up {
+  animation-name: fade-in-up;
+  animation-duration: 0.7s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+@utility animate-fade-in {
+  animation-name: fade-in;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+@utility animate-scale-in {
+  animation-name: scale-in;
+  animation-duration: 0.6s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+@utility animate-float {
+  animation-name: float;
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@utility animate-slide-up {
+  animation-name: slide-up;
+  animation-duration: 0.75s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+/* Animation-delay utilities. Tailwind's built-in delay-* targets
+   transition-delay; these intentionally override it for animation-delay. */
+@utility delay-100 {
+  animation-delay: 0.1s;
+}
+@utility delay-200 {
+  animation-delay: 0.2s;
+}
+@utility delay-300 {
+  animation-delay: 0.3s;
+}
+@utility delay-400 {
+  animation-delay: 0.4s;
+}
+@utility delay-500 {
+  animation-delay: 0.5s;
 }

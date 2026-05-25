@@ -1,0 +1,74 @@
+'use client';
+
+import { Mail, MapPin, Phone } from 'lucide-react';
+import { CONTACT } from '@/constants/contact';
+import type { FooterTheme } from './types';
+
+interface FooterContactProps {
+  theme: FooterTheme;
+}
+
+export default function FooterContact({ theme }: FooterContactProps) {
+  const isBlue = theme === 'blue';
+
+  const linkClass = `group flex items-start gap-3 text-sm transition-all ${
+    isBlue
+      ? 'text-white/60 hover:text-white'
+      : 'text-slate-500 hover:text-slate-900'
+  }`;
+
+  const iconContainerClass = `flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors group-hover:border-[#f4a300]/40 group-hover:bg-[#f4a300]/10 ${
+    isBlue ? 'border-white/10' : 'border-slate-200'
+  }`;
+
+  const staticItemClass = `flex items-start gap-3 text-sm ${
+    isBlue ? 'text-white/60' : 'text-slate-500'
+  }`;
+
+  const staticIconClass = `flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
+    isBlue ? 'border-white/10' : 'border-slate-200'
+  }`;
+
+  return (
+    <div className="md:col-span-12 lg:col-span-3">
+      <h4 className="mb-5 text-[11px] font-bold tracking-[0.18em] text-[#f4a300] uppercase">
+        Reach Out
+      </h4>
+      <ul className="flex flex-col gap-4">
+        <li>
+          <a href={`mailto:${CONTACT.email}`} className={linkClass}>
+            <span className={iconContainerClass}>
+              <Mail className="h-4 w-4 text-[#f4a300]" />
+            </span>
+            <span className="pt-1.5 transition-[translate] duration-200 group-hover:translate-x-0.5">
+              {CONTACT.email}
+            </span>
+          </a>
+        </li>
+        <li>
+          <a
+            href={`tel:${CONTACT.phone.replace(/\s/g, '')}`}
+            className={linkClass}
+          >
+            <span className={iconContainerClass}>
+              <Phone className="h-4 w-4 text-[#f4a300]" />
+            </span>
+            <span className="pt-1.5 transition-[translate] duration-200 group-hover:translate-x-0.5">
+              {CONTACT.phone}
+            </span>
+          </a>
+        </li>
+        <li className={staticItemClass}>
+          <span className={staticIconClass}>
+            <MapPin className="h-4 w-4 text-[#f4a300]" />
+          </span>
+          <span className="pt-1.5 leading-relaxed">
+            {CONTACT.address.street}, {CONTACT.address.city},
+            <br />
+            {CONTACT.address.country}
+          </span>
+        </li>
+      </ul>
+    </div>
+  );
+}
