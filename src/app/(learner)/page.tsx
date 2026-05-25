@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Play, Quote, Star } from "lucide-react";
-import { BRAND } from "@/config/brand";
+import { ArrowRight, Star } from "lucide-react";
 import {
-  HERO_STATS,
   PROGRAMS,
   FEATURES,
   TESTIMONIALS,

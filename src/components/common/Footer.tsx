@@ -1,6 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Mail, MapPin, Phone, GraduationCap, Award, Globe2 } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 import { FacebookIcon, LinkedinIcon, YoutubeIcon } from "@/components/common/icons/SocialIcons";
 import { NewsletterForm } from "@/components/common/NewsletterForm";
 import { FOOTER_LEGAL_LINKS, FOOTER_PROGRAMS, FOOTER_QUICK_LINKS } from "@/config/navigation";
@@ -17,11 +18,6 @@ const SOCIALS = [
   { icon: LinkedinIcon, href: CONTACT.socials.linkedin,  label: "LinkedIn" },
 ] as const;
 
-const TRUST_BADGES = [
-  { icon: GraduationCap, label: "Accredited Curriculum" },
-  { icon: Award,         label: "ISO 9001 Certified"    },
-  { icon: Globe2,        label: "Recognized in 12+ Countries" },
-] as const;
 
 export default function Footer() {
   return (
@@ -189,9 +185,11 @@ export default function Footer() {
             <span className="text-[10px] uppercase tracking-[0.18em] text-white/30 transition-colors group-hover:text-white/60">
               Designed &amp; Developed by
             </span>
-            <img
+            <Image
               src={QBTECH_LOGO_2}
               alt={BRAND.poweredBy.name}
+              height={28}
+              width={120}
               className="h-7 w-auto opacity-50 transition-opacity group-hover:opacity-100"
             />
           </a>
