@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const inputCls =
   'w-full bg-transparent py-0 pl-10 pr-4 text-sm text-[#00003e] placeholder:text-slate-400 outline-none 2xl:text-base 3xl:text-lg';
@@ -18,7 +19,7 @@ export function Field({
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="3xl:text-lg block text-sm font-semibold text-[#00003e] 2xl:text-base"
+        className="3xl:text-lg block text-sm font-semibold text-brand-navy 2xl:text-base"
       >
         {label}
       </label>
@@ -60,21 +61,29 @@ export function PasswordToggle({
       aria-label={show ? 'Hide password' : 'Show password'}
     >
       {show ? (
-        <EyeOff className="h-[18px] w-[18px] 2xl:h-5 2xl:w-5" />
+        <EyeOff className="h-4.5 w-4.5 2xl:h-5 2xl:w-5" />
       ) : (
-        <Eye className="h-[18px] w-[18px] 2xl:h-5 2xl:w-5" />
+        <Eye className="h-4.5 w-4.5 2xl:h-5 2xl:w-5" />
       )}
     </button>
   );
 }
 
-export function SubmitBtn({ label }: { label: string }) {
+export function SubmitBtn({
+  label,
+  disabled,
+}: {
+  label: string;
+  disabled?: boolean;
+}) {
   return (
-    <button
+    <Button
       type="submit"
-      className="3xl:py-5 3xl:text-lg w-full rounded-xl bg-[#f4a300] py-3.5 text-sm font-bold text-white shadow-md shadow-[#f4a300]/30 transition-all duration-200 hover:bg-[#e09400] hover:shadow-lg hover:shadow-[#f4a300]/40 active:scale-[0.98] 2xl:rounded-2xl 2xl:py-4 2xl:text-base"
+      variant="secondary"
+      disabled={disabled}
+      className="3xl:py-5 3xl:text-lg h-auto w-full rounded-xl py-3.5 text-sm font-bold shadow-md shadow-brand-gold/30 active:scale-[0.98] hover:shadow-lg hover:shadow-brand-gold/40 2xl:rounded-2xl 2xl:py-4 2xl:text-base"
     >
       {label}
-    </button>
+    </Button>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import LogInForm from './LogInForm';
 import SignUpForm from './SignUpForm';
 import OAuthButtons from './OAuthButtons';
@@ -13,10 +14,10 @@ export default function AuthCard() {
   return (
     <div>
       <div className="mb-5 2xl:mb-6">
-        <h2 className="3xl:text-4xl text-xl leading-tight font-bold text-[#00003e] sm:text-[1.6rem] 2xl:text-3xl">
+        <h2 className="3xl:text-4xl text-xl leading-tight font-bold text-brand-navy sm:text-[1.6rem] 2xl:text-3xl">
           {tab === 'login' ? 'Log In to Your Account' : 'Create an Account'}
         </h2>
-        <p className="3xl:text-lg mt-1.5 text-sm text-[#00003e]/45 2xl:mt-2 2xl:text-base">
+        <p className="3xl:text-lg mt-1.5 text-sm text-brand-navy/45 2xl:mt-2 2xl:text-base">
           {tab === 'login'
             ? 'Enter your credentials to access your courses'
             : 'Start your learning journey today'}
@@ -26,17 +27,18 @@ export default function AuthCard() {
       {/* Tab switcher */}
       <div className="mb-5 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 2xl:mb-6 2xl:rounded-2xl">
         {(['login', 'signup'] as Tab[]).map((t) => (
-          <button
+          <Button
             key={t}
+            variant="ghost"
             onClick={() => setTab(t)}
-            className={`3xl:text-lg rounded-[10px] py-2.5 text-sm font-semibold transition-all duration-200 2xl:rounded-xl 2xl:py-3 2xl:text-base ${
+            className={`3xl:text-lg w-full rounded-[10px] py-2.5 font-semibold 2xl:rounded-xl 2xl:py-3 2xl:text-base ${
               tab === t
-                ? 'bg-white text-[#f4a300] shadow-sm ring-1 ring-slate-200/60'
-                : 'text-[#00003e]/45 hover:text-[#00003e]/70'
+                ? 'bg-white text-brand-gold shadow-sm ring-1 ring-slate-200/60 hover:bg-white hover:text-brand-gold'
+                : 'text-brand-navy/45 hover:bg-transparent hover:text-brand-navy/70'
             }`}
           >
             {t === 'login' ? 'Log In' : 'Sign Up'}
-          </button>
+          </Button>
         ))}
       </div>
 

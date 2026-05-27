@@ -21,6 +21,7 @@ export default function EducatorSettingsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <EducatorTopBar
+        role="educator"
         title="Settings"
         subtitle={`Profile & preferences · ${EDUCATOR_USER.email}`}
       />

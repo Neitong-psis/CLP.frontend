@@ -7,6 +7,7 @@ export default function MyLearningPage() {
   return (
     <div className="flex min-h-full flex-col">
       <TopBar
+        role="learner"
         title="My Learning"
         subtitle={`${ENROLLED_COURSES.length} courses enrolled`}
       />

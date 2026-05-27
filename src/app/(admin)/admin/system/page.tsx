@@ -31,6 +31,7 @@ export default function AdminSystemPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="System Health"
         subtitle="Real-time service status and infrastructure monitoring"
       />

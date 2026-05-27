@@ -55,6 +55,7 @@ export default function EducatorAnalyticsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <EducatorTopBar
+        role="educator"
         title="Analytics"
         subtitle="Your course performance and learner insights"
       />

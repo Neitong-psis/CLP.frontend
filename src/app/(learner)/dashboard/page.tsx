@@ -20,7 +20,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-full bg-slate-50">
-      <TopBar title={`${greeting}, ${firstName}!`} subtitle={dateLabel} />
+      <TopBar
+        role="learner"
+        title={`${greeting}, ${firstName}!`}
+        subtitle={dateLabel}
+      />
 
       <div className="px-4 py-6 sm:px-6 lg:px-8">
         {/* Row 1 — stat cards */}

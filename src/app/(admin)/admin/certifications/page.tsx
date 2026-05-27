@@ -235,6 +235,7 @@ export default function AdminCertificationsPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="Certification Center"
         subtitle="Live workspace synced for admin@clp.com"
       />

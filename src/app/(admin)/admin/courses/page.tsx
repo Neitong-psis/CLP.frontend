@@ -55,6 +55,7 @@ export default function AdminCoursesPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="Course Management"
         subtitle="Live workspace synced for admin@clp.com"
       />

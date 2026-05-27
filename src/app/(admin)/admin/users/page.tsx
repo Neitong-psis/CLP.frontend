@@ -187,6 +187,7 @@ export default function AdminUsersPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="User Management"
         subtitle="Live workspace synced for admin@clp.com"
       />
