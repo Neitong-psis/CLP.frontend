@@ -17,6 +17,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="Settings"
         subtitle={`Platform configuration · ${ADMIN_USER.email}`}
       />

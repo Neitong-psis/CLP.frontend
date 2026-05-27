@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { HERO_CONTENT } from '@/constants/hero';
-import { ButtonLink } from '@/components/ui/ButtonLink';
+import { ButtonLink } from '@/components/ui/button';
 import { HighlightedWord } from '@/components/ui/HighlightedWord';
 import { fadeUp, slideUp, animationDelay } from './hero.animations';
 

@@ -48,6 +48,7 @@ export default function SettingsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <TopBar
+        role="learner"
         title="Settings"
         subtitle={`Live workspace synced for ${MOCK_USER.email}`}
       />

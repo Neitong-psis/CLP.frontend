@@ -110,6 +110,7 @@ export default function EducatorDashboardPage() {
   return (
     <div className="flex min-h-full flex-col bg-white">
       <EducatorTopBar
+        role="educator"
         title="Educator Dashboard"
         subtitle={`Live workspace synced for ${EDUCATOR_USER.email}`}
       />

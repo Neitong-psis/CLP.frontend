@@ -118,6 +118,7 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="Analytics"
         subtitle="Platform performance and learner insights"
       />

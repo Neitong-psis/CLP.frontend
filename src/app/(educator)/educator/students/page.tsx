@@ -34,6 +34,7 @@ export default function EducatorStudentsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <EducatorTopBar
+        role="educator"
         title="Students"
         subtitle={`${EDUCATOR_STUDENTS.length} enrolled across all courses`}
       />
