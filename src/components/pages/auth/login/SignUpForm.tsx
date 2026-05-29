@@ -9,7 +9,7 @@ import {
   FieldGroup,
   FieldLabel,
   FieldError,
-} from '@/components/ui/field/Field';
+} from '@/components/ui/Field';
 import { InputWrapper, PasswordToggle, SubmitBtn, inputCls } from './shared';
 
 const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
@@ -51,7 +51,7 @@ export default function SignUpForm() {
         form.handleSubmit();
       }}
     >
-      <FieldGroup className="gap-3 2xl:gap-4 3xl:gap-5">
+      <FieldGroup className="3xl:gap-5 gap-3 2xl:gap-4">
         <form.Field
           name="fullName"
           validators={{
@@ -66,7 +66,7 @@ export default function SignUpForm() {
               <Field data-invalid={isInvalid}>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="3xl:text-lg text-sm font-semibold text-brand-navy 2xl:text-base"
+                  className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
                 >
                   Full Name
                 </FieldLabel>
@@ -85,14 +85,18 @@ export default function SignUpForm() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     className={inputCls}
                   />
                 </InputWrapper>
                 {isInvalid && (
                   <FieldError
                     id={`${field.name}-error`}
-                    errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: String(e),
+                    }))}
                   />
                 )}
               </Field>
@@ -114,7 +118,7 @@ export default function SignUpForm() {
               <Field data-invalid={isInvalid}>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="3xl:text-lg text-sm font-semibold text-brand-navy 2xl:text-base"
+                  className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
                 >
                   Email
                 </FieldLabel>
@@ -133,14 +137,18 @@ export default function SignUpForm() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     className={inputCls}
                   />
                 </InputWrapper>
                 {isInvalid && (
                   <FieldError
                     id={`${field.name}-error`}
-                    errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: String(e),
+                    }))}
                   />
                 )}
               </Field>
@@ -165,7 +173,7 @@ export default function SignUpForm() {
               <Field data-invalid={isInvalid}>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="3xl:text-lg text-sm font-semibold text-brand-navy 2xl:text-base"
+                  className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
                 >
                   Password
                 </FieldLabel>
@@ -221,7 +229,9 @@ export default function SignUpForm() {
                 {isInvalid && (
                   <FieldError
                     id={`${field.name}-error`}
-                    errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: String(e),
+                    }))}
                   />
                 )}
               </Field>

@@ -140,7 +140,9 @@ function StepBar({ current }: { current: number }) {
             key={n}
             className={cn(
               'flex items-center gap-3 rounded-xl border p-4 transition-colors',
-              isActive ? 'border-brand-gold bg-white' : 'border-slate-200 bg-white',
+              isActive
+                ? 'border-brand-gold bg-white'
+                : 'border-slate-200 bg-white',
             )}
           >
             <div
@@ -287,7 +289,7 @@ function CourseInfoStep({
               </FormField>
 
               <FormField label="Enter price">
-                <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-brand-gold focus-within:ring-1 focus-within:ring-brand-gold/20">
+                <div className="focus-within:border-brand-gold focus-within:ring-brand-gold/20 flex overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:ring-1">
                   <span className="border-r border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
                     $
                   </span>
@@ -301,7 +303,9 @@ function CourseInfoStep({
                     className="flex-1 bg-transparent px-3 py-2 text-sm text-slate-700 outline-none disabled:opacity-40"
                   />
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400">Price shown in USD ($).</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Price shown in USD ($).
+                </p>
               </FormField>
             </div>
           </div>
@@ -312,10 +316,12 @@ function CourseInfoStep({
           <label className={labelCls}>Thumbnail</label>
           <button
             type="button"
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 p-8 text-center transition hover:border-brand-gold hover:bg-brand-gold/5"
+            className="hover:border-brand-gold hover:bg-brand-gold/5 flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 p-8 text-center transition"
           >
             <ImageIcon className="h-7 w-7 text-slate-300" />
-            <span className="text-xs font-semibold text-slate-500">Click to upload</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Click to upload
+            </span>
             <span className="text-[11px] text-slate-400">16:9 recommended</span>
           </button>
           <p className="mt-2 text-[11px] text-slate-400">
@@ -393,7 +399,7 @@ function SectionItem({
         {section.type === 'image' && (
           <button
             type="button"
-            className="flex h-24 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400 transition hover:border-brand-gold hover:text-brand-gold"
+            className="hover:border-brand-gold hover:text-brand-gold flex h-24 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400 transition"
           >
             Click to upload lesson image
           </button>
@@ -402,12 +408,16 @@ function SectionItem({
         {section.type === 'video' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="mb-1 text-[11px] font-semibold text-slate-500">Video Title</p>
+              <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                Video Title
+              </p>
               <input
                 type="text"
                 placeholder="Video Title"
                 value={section.videoTitle}
-                onChange={(e) => onUpdate({ ...section, videoTitle: e.target.value })}
+                onChange={(e) =>
+                  onUpdate({ ...section, videoTitle: e.target.value })
+                }
                 className={cn(inputCls, 'text-xs')}
               />
             </div>
@@ -419,7 +429,9 @@ function SectionItem({
                 type="url"
                 placeholder="https://..."
                 value={section.videoUrl}
-                onChange={(e) => onUpdate({ ...section, videoUrl: e.target.value })}
+                onChange={(e) =>
+                  onUpdate({ ...section, videoUrl: e.target.value })
+                }
                 className={cn(inputCls, 'text-xs')}
               />
             </div>
@@ -432,23 +444,31 @@ function SectionItem({
 
             <div className="flex items-start gap-4">
               <div className="flex-1">
-                <p className="mb-1 text-[11px] font-semibold text-slate-500">Question</p>
+                <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                  Question
+                </p>
                 <input
                   type="text"
                   placeholder="Ask a question..."
                   value={section.question}
-                  onChange={(e) => onUpdate({ ...section, question: e.target.value })}
+                  onChange={(e) =>
+                    onUpdate({ ...section, question: e.target.value })
+                  }
                   className={cn(inputCls, 'text-xs')}
                 />
               </div>
               <div className="shrink-0">
-                <p className="mb-1 text-[11px] font-semibold text-slate-500">Answer format</p>
+                <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                  Answer format
+                </p>
                 <div className="flex overflow-hidden rounded-lg border border-slate-200 text-[11px] font-semibold">
                   {(['single', 'multiple'] as const).map((fmt, i) => (
                     <button
                       key={fmt}
                       type="button"
-                      onClick={() => onUpdate({ ...section, answerFormat: fmt })}
+                      onClick={() =>
+                        onUpdate({ ...section, answerFormat: fmt })
+                      }
                       className={cn(
                         'px-3 py-1.5 transition-colors',
                         i > 0 && 'border-l border-slate-200',
@@ -485,7 +505,7 @@ function SectionItem({
                           ),
                         })
                       }
-                      className="h-3.5 w-3.5 accent-brand-gold"
+                      className="accent-brand-gold h-3.5 w-3.5"
                     />
                     <input
                       type="text"
@@ -499,7 +519,7 @@ function SectionItem({
                         })
                       }
                       placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                      className="flex-1 bg-transparent text-xs text-slate-600 outline-none placeholder-slate-300"
+                      className="flex-1 bg-transparent text-xs text-slate-600 placeholder-slate-300 outline-none"
                     />
                     <button
                       type="button"
@@ -527,13 +547,13 @@ function SectionItem({
                     ],
                   })
                 }
-                className="mt-2 flex items-center gap-1 text-xs font-semibold text-brand-gold transition hover:opacity-75"
+                className="text-brand-gold mt-2 flex items-center gap-1 text-xs font-semibold transition hover:opacity-75"
               >
                 <Plus className="h-3 w-3" /> Add option
               </button>
               <p className="mt-2 text-[10px] text-slate-400">
-                One checked answer creates a Single Choice question. Two or more checked answers
-                create a Multiple Choice question.
+                One checked answer creates a Single Choice question. Two or more
+                checked answers create a Multiple Choice question.
               </p>
             </div>
           </div>
@@ -542,27 +562,37 @@ function SectionItem({
         {section.type === 'assignment' && (
           <div className="space-y-3">
             <div>
-              <p className="mb-1 text-[11px] font-semibold text-slate-500">Lesson Assignment</p>
+              <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                Lesson Assignment
+              </p>
               <textarea
                 rows={3}
                 placeholder="Assignment description, expected outcome, and submission requirements..."
                 value={section.assignmentDesc}
-                onChange={(e) => onUpdate({ ...section, assignmentDesc: e.target.value })}
+                onChange={(e) =>
+                  onUpdate({ ...section, assignmentDesc: e.target.value })
+                }
                 className={cn(inputCls, 'resize-none text-xs')}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="mb-1 text-[11px] font-semibold text-slate-500">Due date</p>
+                <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                  Due date
+                </p>
                 <input
                   type="date"
                   value={section.dueDate}
-                  onChange={(e) => onUpdate({ ...section, dueDate: e.target.value })}
+                  onChange={(e) =>
+                    onUpdate({ ...section, dueDate: e.target.value })
+                  }
                   className={cn(inputCls, 'text-xs')}
                 />
               </div>
               <div>
-                <p className="mb-1 text-[11px] font-semibold text-slate-500">Submission type</p>
+                <p className="mb-1 text-[11px] font-semibold text-slate-500">
+                  Submission type
+                </p>
                 <div className="relative">
                   <select
                     value={section.submissionType}
@@ -611,9 +641,9 @@ function LessonItem({
         className="flex cursor-pointer items-center gap-3 px-4 py-2.5"
         onClick={() => onUpdate({ ...lesson, expanded: !lesson.expanded })}
       >
-        <CheckSquare className="h-4 w-4 shrink-0 text-brand-gold" />
+        <CheckSquare className="text-brand-gold h-4 w-4 shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-brand-navy">
+          <p className="text-brand-navy truncate text-[13px] font-semibold">
             Lesson {lessonIndex + 1}: {lesson.title}
           </p>
           <p className="text-[11px] text-slate-400">
@@ -671,7 +701,13 @@ function LessonItem({
           {/* Add content buttons */}
           <div className="flex flex-wrap gap-2">
             {(
-              ['text', 'image', 'video', 'quiz', 'assignment'] as ContentSection['type'][]
+              [
+                'text',
+                'image',
+                'video',
+                'quiz',
+                'assignment',
+              ] as ContentSection['type'][]
             ).map((type) => {
               const Icon = SECTION_ICONS[type];
               return (
@@ -679,7 +715,7 @@ function LessonItem({
                   key={type}
                   type="button"
                   onClick={() => onAddSection(type)}
-                  className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand-gold hover:text-brand-gold"
+                  className="hover:border-brand-gold hover:text-brand-gold flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition"
                 >
                   <Icon className="h-3 w-3" />
                   Add {SECTION_LABELS[type]}
@@ -749,7 +785,10 @@ function ModuleItem({
   };
 
   const updateLesson = (i: number, updated: Lesson) =>
-    onUpdate({ ...mod, lessons: mod.lessons.map((l, j) => (j === i ? updated : l)) });
+    onUpdate({
+      ...mod,
+      lessons: mod.lessons.map((l, j) => (j === i ? updated : l)),
+    });
 
   const deleteLesson = (i: number) =>
     onUpdate({ ...mod, lessons: mod.lessons.filter((_, j) => j !== i) });
@@ -776,9 +815,9 @@ function ModuleItem({
         className="flex cursor-pointer items-center gap-3 bg-slate-50 px-5 py-3.5"
         onClick={() => onUpdate({ ...mod, expanded: !mod.expanded })}
       >
-        <BookOpen className="h-4.5 w-4.5 shrink-0 text-brand-gold" />
+        <BookOpen className="text-brand-gold h-4.5 w-4.5 shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-brand-navy">
+          <p className="text-brand-navy text-sm font-bold">
             Module {modIndex + 1} ({mod.lessons.length} Lesson
             {mod.lessons.length !== 1 ? 's' : ''})
           </p>
@@ -850,7 +889,7 @@ function ModuleItem({
           <button
             type="button"
             onClick={addLesson}
-            className="flex items-center gap-1.5 text-xs font-semibold text-brand-gold transition hover:opacity-75"
+            className="text-brand-gold flex items-center gap-1.5 text-xs font-semibold transition hover:opacity-75"
           >
             <Plus className="h-3.5 w-3.5" /> Add Lesson
           </button>
@@ -896,9 +935,12 @@ function CourseContentStep({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-brand-navy">Course Curriculum</h2>
+          <h2 className="text-brand-navy text-base font-bold">
+            Course Curriculum
+          </h2>
           <p className="text-xs text-slate-400">
-            Build a scalable Course / Module / Lesson / Content / Quiz / Assignment structure
+            Build a scalable Course / Module / Lesson / Content / Quiz /
+            Assignment structure
           </p>
         </div>
         <Button
@@ -960,7 +1002,7 @@ function AccordionSection({
         onClick={() => setOpen((v) => !v)}
       >
         <div>
-          <p className="text-sm font-bold text-brand-navy">{title}</p>
+          <p className="text-brand-navy text-sm font-bold">{title}</p>
           <p className="text-xs text-slate-400">{desc}</p>
         </div>
         {open ? (
@@ -969,7 +1011,9 @@ function AccordionSection({
           <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
         )}
       </button>
-      {open && <div className="border-t border-slate-100 px-5 py-5">{children}</div>}
+      {open && (
+        <div className="border-t border-slate-100 px-5 py-5">{children}</div>
+      )}
     </div>
   );
 }
@@ -986,7 +1030,9 @@ function PreviewPublishStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-base font-bold text-brand-navy">Step 3. Preview &amp; Publish</h2>
+        <h2 className="text-brand-navy text-base font-bold">
+          Step 3. Preview &amp; Publish
+        </h2>
         <p className="text-sm text-slate-400">
           Review each section, fix missing details, then save or publish.
         </p>
@@ -1002,11 +1048,15 @@ function PreviewPublishStep({
             No thumbnail uploaded
           </div>
           <div className="flex-1 space-y-1">
-            <p className="text-base font-bold text-brand-navy">
+            <p className="text-brand-navy text-base font-bold">
               {info.title || 'Course Title'}
             </p>
-            <p className="text-sm text-slate-500">{info.subtitle || 'Course Subtitle'}</p>
-            <p className="text-xs text-slate-400">{info.description || 'Course Description'}</p>
+            <p className="text-sm text-slate-500">
+              {info.subtitle || 'Course Subtitle'}
+            </p>
+            <p className="text-xs text-slate-400">
+              {info.description || 'Course Description'}
+            </p>
             <div className="flex flex-wrap gap-2 pt-2">
               {info.category && (
                 <span className="rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
@@ -1019,11 +1069,11 @@ function PreviewPublishStep({
                 </span>
               )}
               {info.pricingType === 'free' ? (
-                <span className="rounded-md bg-brand-gold/15 px-2.5 py-0.5 text-xs font-semibold text-brand-gold">
+                <span className="bg-brand-gold/15 text-brand-gold rounded-md px-2.5 py-0.5 text-xs font-semibold">
                   Free
                 </span>
               ) : info.price ? (
-                <span className="rounded-md bg-brand-gold/15 px-2.5 py-0.5 text-xs font-semibold text-brand-gold">
+                <span className="bg-brand-gold/15 text-brand-gold rounded-md px-2.5 py-0.5 text-xs font-semibold">
                   Paid ${info.price}
                 </span>
               ) : null}
@@ -1042,12 +1092,13 @@ function PreviewPublishStep({
           <div className="space-y-2">
             {modules.map((mod, i) => (
               <div key={mod.id} className="flex items-center gap-2 text-sm">
-                <BookOpen className="h-4 w-4 text-brand-gold" />
-                <span className="font-medium text-brand-navy">
+                <BookOpen className="text-brand-gold h-4 w-4" />
+                <span className="text-brand-navy font-medium">
                   Module {i + 1}: {mod.title}
                 </span>
                 <span className="text-slate-400">
-                  — {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
+                  — {mod.lessons.length} lesson
+                  {mod.lessons.length !== 1 ? 's' : ''}
                 </span>
               </div>
             ))}
@@ -1074,11 +1125,13 @@ function PreviewPublishStep({
             <div className="flex items-center gap-3 pt-1.5">
               <button
                 type="button"
-                className="relative h-5 w-9 rounded-full bg-brand-gold"
+                className="bg-brand-gold relative h-5 w-9 rounded-full"
               >
                 <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
               </button>
-              <span className="text-xs text-slate-500">Keep as draft until submitted</span>
+              <span className="text-xs text-slate-500">
+                Keep as draft until submitted
+              </span>
             </div>
           </FormField>
         </div>
@@ -1107,7 +1160,9 @@ export default function NewCoursePage() {
     <div className="flex min-h-full flex-col bg-slate-50">
       <div className="flex-1 px-6 py-6 lg:px-8">
         <p className="text-xs font-medium text-slate-400">New course</p>
-        <h1 className="mb-6 mt-0.5 text-2xl font-bold text-brand-navy">Create a Course</h1>
+        <h1 className="text-brand-navy mt-0.5 mb-6 text-2xl font-bold">
+          Create a Course
+        </h1>
 
         <StepBar current={step} />
 
@@ -1132,7 +1187,9 @@ export default function NewCoursePage() {
             variant="outline"
             className="gap-2"
             onClick={() =>
-              step === 1 ? router.push('/educator/courses') : setStep((s) => s - 1)
+              step === 1
+                ? router.push('/educator/courses')
+                : setStep((s) => s - 1)
             }
           >
             <ArrowLeft className="h-4 w-4" />

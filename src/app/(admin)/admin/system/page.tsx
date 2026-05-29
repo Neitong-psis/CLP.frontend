@@ -1,5 +1,5 @@
-import { Activity, Server, Database, Wifi, CheckCircle } from 'lucide-react';
-import AdminTopBar from '@/components/pages/admin/AdminTopBar';
+﻿import { Activity, Server, Database, Wifi, CheckCircle } from 'lucide-react';
+import AdminTopBar from '@/components/common/TopBar';
 
 const SERVICES = [
   { name: 'Web Server', uptime: '99.98%', latency: '42ms', status: 'Healthy' },
@@ -47,7 +47,7 @@ export default function AdminSystemPage() {
               All Core Systems Operational
             </p>
             <p className="text-[11px] text-white/40">
-              Last checked: just now · 4 of 6 services healthy
+              Last checked: just now Â· 4 of 6 services healthy
             </p>
           </div>
         </div>

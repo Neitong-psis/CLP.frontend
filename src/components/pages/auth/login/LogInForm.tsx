@@ -10,7 +10,7 @@ import {
   FieldGroup,
   FieldLabel,
   FieldError,
-} from '@/components/ui/field/Field';
+} from '@/components/ui/Field';
 import { InputWrapper, PasswordToggle, SubmitBtn, inputCls } from './shared';
 
 export default function LogInForm() {
@@ -50,7 +50,7 @@ export default function LogInForm() {
               <Field data-invalid={isInvalid}>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="3xl:text-lg text-sm font-semibold text-brand-navy 2xl:text-base"
+                  className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
                 >
                   Email
                 </FieldLabel>
@@ -69,14 +69,18 @@ export default function LogInForm() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     className={inputCls}
                   />
                 </InputWrapper>
                 {isInvalid && (
                   <FieldError
                     id={`${field.name}-error`}
-                    errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: String(e),
+                    }))}
                   />
                 )}
               </Field>
@@ -98,7 +102,7 @@ export default function LogInForm() {
               <Field data-invalid={isInvalid}>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="3xl:text-lg text-sm font-semibold text-brand-navy 2xl:text-base"
+                  className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
                 >
                   Password
                 </FieldLabel>
@@ -123,14 +127,18 @@ export default function LogInForm() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     className={inputCls}
                   />
                 </InputWrapper>
                 {isInvalid && (
                   <FieldError
                     id={`${field.name}-error`}
-                    errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: String(e),
+                    }))}
                   />
                 )}
               </Field>
@@ -148,7 +156,7 @@ export default function LogInForm() {
                 id={field.name}
                 checked={field.state.value}
                 onChange={(e) => field.handleChange(e.target.checked)}
-                className="h-4 w-4 rounded-md border-slate-300 accent-brand-gold 2xl:h-5 2xl:w-5"
+                className="accent-brand-gold h-4 w-4 rounded-md border-slate-300 2xl:h-5 2xl:w-5"
               />
               Remember me
             </label>
@@ -156,16 +164,14 @@ export default function LogInForm() {
         </form.Field>
         <Link
           href="/auth/forgot-password"
-          className="3xl:text-lg text-sm font-semibold text-brand-gold transition-opacity hover:opacity-75 2xl:text-base"
+          className="3xl:text-lg text-brand-gold text-sm font-semibold transition-opacity hover:opacity-75 2xl:text-base"
         >
           Forgot password?
         </Link>
       </div>
 
       <form.Subscribe selector={(s) => s.isSubmitting}>
-        {(isSubmitting) => (
-          <SubmitBtn label="Log In" disabled={isSubmitting} />
-        )}
+        {(isSubmitting) => <SubmitBtn label="Log In" disabled={isSubmitting} />}
       </form.Subscribe>
     </form>
   );

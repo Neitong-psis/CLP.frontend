@@ -30,15 +30,15 @@ export default function FooterContact({ theme }: FooterContactProps) {
   }`;
 
   return (
-    <div className="md:col-span-12 lg:col-span-3">
-      <h4 className="mb-5 text-[11px] font-bold tracking-[0.18em] text-[#f4a300] uppercase">
+    <div>
+      <h4 className="text-brand-gold mb-4 text-[11px] font-bold tracking-[0.18em] uppercase sm:mb-5">
         Reach Out
       </h4>
       <ul className="flex flex-col gap-4">
         <li>
           <a href={`mailto:${CONTACT.email}`} className={linkClass}>
             <span className={iconContainerClass}>
-              <Mail className="h-4 w-4 text-[#f4a300]" />
+              <Mail className="text-brand-gold h-4 w-4" />
             </span>
             <span className="pt-1.5 transition-[translate] duration-200 group-hover:translate-x-0.5">
               {CONTACT.email}
@@ -51,7 +51,7 @@ export default function FooterContact({ theme }: FooterContactProps) {
             className={linkClass}
           >
             <span className={iconContainerClass}>
-              <Phone className="h-4 w-4 text-[#f4a300]" />
+              <Phone className="text-brand-gold h-4 w-4" />
             </span>
             <span className="pt-1.5 transition-[translate] duration-200 group-hover:translate-x-0.5">
               {CONTACT.phone}
@@ -60,7 +60,7 @@ export default function FooterContact({ theme }: FooterContactProps) {
         </li>
         <li className={staticItemClass}>
           <span className={staticIconClass}>
-            <MapPin className="h-4 w-4 text-[#f4a300]" />
+            <MapPin className="text-brand-gold h-4 w-4" />
           </span>
           <span className="pt-1.5 leading-relaxed">
             {CONTACT.address.street}, {CONTACT.address.city},

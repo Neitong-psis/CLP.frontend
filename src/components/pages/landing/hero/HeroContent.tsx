@@ -3,44 +3,34 @@ import { cn } from '@/utils/cn';
 import { HERO_CONTENT } from '@/constants/hero';
 import { ButtonLink } from '@/components/ui/button';
 import { HighlightedWord } from '@/components/ui/HighlightedWord';
-import { fadeUp, slideUp, animationDelay } from './hero.animations';
+import { fadeUp, animationDelay } from './hero.animations';
 
 const { headline, subhead, primaryCta, secondaryCta } = HERO_CONTENT;
 
 export function HeroContent() {
   return (
-    <div className="flex flex-col gap-7">
-      <div className="overflow-hidden">
-        <h1
-          className={cn(
-            'font-heading text-brand-navy text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl',
-            slideUp,
-            animationDelay.sm,
-          )}
-        >
-          {headline.lead}{' '}
-          <HighlightedWord>{headline.highlight}</HighlightedWord>{' '}
-          {headline.tail}
-        </h1>
-      </div>
+    <div className="flex flex-col items-center gap-8 text-center">
+      <h1 className="font-heading text-brand-navy max-w-4xl text-4xl leading-[1.05] font-bold tracking-tight sm:text-6xl lg:text-7xl">
+        {headline.lead}{' '}
+        <HighlightedWord delay={250}>{headline.highlight}</HighlightedWord>{' '}
+        {headline.tail}
+      </h1>
 
-      <div className="overflow-hidden">
-        <p
-          className={cn(
-            'text-brand-navy/60 max-w-lg text-base leading-relaxed sm:text-lg',
-            slideUp,
-            animationDelay.md,
-          )}
-        >
-          {subhead}
-        </p>
-      </div>
+      <p
+        className={cn(
+          'text-brand-navy/65 max-w-xl text-base leading-relaxed sm:text-lg',
+          fadeUp,
+          animationDelay.lg,
+        )}
+      >
+        {subhead}
+      </p>
 
       <div
         className={cn(
-          'flex flex-wrap items-center gap-3 pt-1',
+          'flex flex-wrap items-center justify-center gap-3 pt-1',
           fadeUp,
-          animationDelay.lg,
+          animationDelay.xl,
         )}
       >
         <ButtonLink

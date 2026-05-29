@@ -19,7 +19,7 @@ export function Field({
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="3xl:text-lg block text-sm font-semibold text-brand-navy 2xl:text-base"
+        className="3xl:text-lg text-brand-navy block text-sm font-semibold 2xl:text-base"
       >
         {label}
       </label>
@@ -81,7 +81,7 @@ export function SubmitBtn({
       type="submit"
       variant="secondary"
       disabled={disabled}
-      className="3xl:py-5 3xl:text-lg h-auto w-full rounded-xl py-3.5 text-sm font-bold shadow-md shadow-brand-gold/30 active:scale-[0.98] hover:shadow-lg hover:shadow-brand-gold/40 2xl:rounded-2xl 2xl:py-4 2xl:text-base"
+      className="3xl:py-5 3xl:text-lg shadow-brand-gold/30 hover:shadow-brand-gold/40 h-auto w-full rounded-xl py-3.5 text-sm font-bold shadow-md hover:shadow-lg active:scale-[0.98] 2xl:rounded-2xl 2xl:py-4 2xl:text-base"
     >
       {label}
     </Button>

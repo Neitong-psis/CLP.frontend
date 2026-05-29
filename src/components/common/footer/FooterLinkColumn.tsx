@@ -23,7 +23,7 @@ export default function FooterLinkColumn({
 
   return (
     <div>
-      <h4 className="mb-5 text-[11px] font-bold tracking-[0.18em] text-[#f4a300] uppercase">
+      <h4 className="text-brand-gold mb-4 text-[11px] font-bold tracking-[0.18em] uppercase sm:mb-5">
         {title}
       </h4>
       <ul className="flex flex-col gap-3">

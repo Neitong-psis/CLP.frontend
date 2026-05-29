@@ -20,15 +20,17 @@ export default function Footer({ theme = 'blue' }: FooterProps) {
     <footer
       className={
         isBlue
-          ? 'bg-[#00003e] text-white'
+          ? 'bg-brand-navy text-white'
           : 'border-t border-slate-200 bg-white text-slate-900'
       }
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8">
-          <FooterBrand theme={theme} />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 md:py-16 lg:px-8">
+        <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-8 sm:gap-y-10 md:grid-cols-12 md:gap-x-8 md:gap-y-0">
+          <div className="col-span-3 md:col-span-4">
+            <FooterBrand theme={theme} />
+          </div>
 
-          <div className="md:col-span-3 lg:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <FooterLinkColumn
               theme={theme}
               title="Quick Links"
@@ -36,7 +38,7 @@ export default function Footer({ theme = 'blue' }: FooterProps) {
             />
           </div>
 
-          <div className="md:col-span-4 lg:col-span-3">
+          <div className="col-span-1 md:col-span-3">
             <FooterLinkColumn
               theme={theme}
               title="Programs"
@@ -44,7 +46,9 @@ export default function Footer({ theme = 'blue' }: FooterProps) {
             />
           </div>
 
-          <FooterContact theme={theme} />
+          <div className="col-span-1 md:col-span-3">
+            <FooterContact theme={theme} />
+          </div>
         </div>
       </div>
 
