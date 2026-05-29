@@ -34,11 +34,12 @@ export const courseSchema = z.object({
       `Description must be under ${MAX_DESCRIPTION} characters`,
     ),
   category: z.string().min(1, 'Please select a category'),
-  level: z.enum(LEVELS, {
-    error: 'Please select a level',
+  level: z.enum([...LEVELS], {
+    invalid_type_error: 'Please select a level',
+    required_error: 'Please select a level',
   }),
   price: z.coerce
-    .number({ error: 'Must be a number' })
+    .number({ invalid_type_error: 'Must be a number' })
     .min(0, 'Price cannot be negative'),
   duration: z.string().min(1, 'Duration is required'),
   tags: z.array(z.string()).min(1, 'Add at least one tag'),
