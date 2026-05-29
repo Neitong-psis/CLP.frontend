@@ -1,10 +1,12 @@
 import {
   ArrowUpRight,
+  ArrowDownRight,
   DollarSign,
   Activity,
   Globe,
   type LucideIcon,
 } from 'lucide-react';
+import { cn } from '@/utils/cn';
 import { REVENUE_STATS } from '@/constants/admin';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,16 +37,24 @@ function RevenueStatCard({
   icon: Icon,
   iconColor,
 }: RevenueStatItem) {
+  const isNegative = change.startsWith('-');
+  const ChangeIcon = isNegative ? ArrowDownRight : ArrowUpRight;
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow transition-colors hover:border-slate-300">
       <div className="mb-3 flex items-center justify-between">
         <div
           className={`flex h-9 w-9 items-center justify-center rounded-full ${iconColor}`}
         >
           <Icon className="h-4 w-4" />
         </div>
-        <span className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-600">
-          <ArrowUpRight className="h-3 w-3" />
+        <span
+          className={cn(
+            'flex items-center gap-0.5 text-[11px] font-semibold',
+            isNegative ? 'text-red-500' : 'text-emerald-600',
+          )}
+        >
+          <ChangeIcon className="h-3 w-3" />
           {change}
         </span>
       </div>

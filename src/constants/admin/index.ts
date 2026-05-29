@@ -349,12 +349,12 @@ export const MONTHLY_REVENUE = [
 ];
 
 export const REVENUE_BY_CATEGORY = [
-  { name: 'Web Dev', amount: '$20.4k', pct: 100 },
-  { name: 'Data Science', amount: '$60.7k', pct: 74 },
-  { name: 'Cloud', amount: '$49.1k', pct: 60 },
-  { name: 'Programming', amount: '$41.2k', pct: 50 },
-  { name: 'DevOps', amount: '$33.9k', pct: 41 },
-  { name: 'Design', amount: '$21.9k', pct: 26 },
+  { name: 'Data Science', amount: '$60.7k', pct: 100 },
+  { name: 'Cloud', amount: '$49.1k', pct: 81 },
+  { name: 'Programming', amount: '$41.2k', pct: 68 },
+  { name: 'DevOps', amount: '$33.9k', pct: 56 },
+  { name: 'Design', amount: '$21.9k', pct: 36 },
+  { name: 'Web Dev', amount: '$20.4k', pct: 34 },
 ];
 
 export const QUIZ_ANALYTICS = [

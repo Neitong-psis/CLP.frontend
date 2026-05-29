@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import {
@@ -6,6 +6,7 @@ import {
   Award,
   FileText,
   ArrowUpRight,
+  ArrowDownRight,
   Plus,
   Search,
   Filter,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import TopBar from '@/components/common/TopBar';
+import { useToast } from '@/components/ui/toast';
 
 type Tab = 'dashboard' | 'templates' | 'issuance';
 type IssuanceStatus = 'Verify' | 'Pending';
@@ -162,12 +164,12 @@ const ISSUANCE_HISTORY = [
   },
 ];
 
-function CertPreview() {
+function CertPreview({ name, category }: { name: string; category: string }) {
   return (
     <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow">
       <div className="flex items-start justify-between text-[10px] font-bold tracking-wider text-slate-400 uppercase">
         <span>CLP</span>
-        <span>Standard</span>
+        <span>{category}</span>
       </div>
       <div className="mt-3 text-center">
         <p className="text-brand-gold text-[9px] font-bold tracking-widest uppercase">
@@ -176,7 +178,10 @@ function CertPreview() {
         <p className="mt-2 text-sm font-bold text-slate-900">Learner Name</p>
         <p className="mt-0.5 text-[11px] text-slate-500">Course Title</p>
       </div>
-      <div className="mt-4 flex items-end justify-between text-[10px] text-slate-400">
+      <div className="mt-3 text-center">
+        <p className="text-[10px] font-semibold text-slate-600">{name}</p>
+      </div>
+      <div className="mt-3 flex items-end justify-between text-[10px] text-slate-400">
         <span>Date</span>
         <span>Signature</span>
       </div>
@@ -184,9 +189,15 @@ function CertPreview() {
   );
 }
 
-function TemplateCard({ tpl }: { tpl: (typeof CERT_TEMPLATES)[number] }) {
+function TemplateCard({
+  tpl,
+  onEdit,
+}: {
+  tpl: (typeof CERT_TEMPLATES)[number];
+  onEdit: (name: string) => void;
+}) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow transition-colors hover:border-slate-300">
       <div className="bg-slate-50 p-5">
         <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
           <Award className="h-4 w-4 text-blue-500" />
@@ -217,6 +228,12 @@ function TemplateCard({ tpl }: { tpl: (typeof CERT_TEMPLATES)[number] }) {
           <FileText className="h-3 w-3" />
           Issued {tpl.issued.toLocaleString()} times
         </p>
+        <button
+          onClick={() => onEdit(tpl.name)}
+          className="mt-3 w-full rounded-lg border border-slate-200 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+        >
+          Edit Template
+        </button>
       </div>
     </div>
   );
@@ -225,12 +242,29 @@ function TemplateCard({ tpl }: { tpl: (typeof CERT_TEMPLATES)[number] }) {
 export default function AdminCertificationsPage() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [histSearch, setHistSearch] = useState('');
+  const { toast } = useToast();
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'dashboard', label: 'Dashboard' },
     { key: 'templates', label: 'Templates' },
     { key: 'issuance', label: 'Issuance History' },
   ];
+
+  function handleDownload(id: string) {
+    toast(`Certificate ${id} downloaded.`, 'success');
+  }
+
+  function handleCopyLink(id: string) {
+    const url = `https://clp.app/verify/${id}`;
+    navigator.clipboard.writeText(url).then(
+      () => toast(`Link copied: ${url}`, 'success'),
+      () => toast('Could not copy link.', 'error'),
+    );
+  }
+
+  function handleHistory(recipient: string) {
+    toast(`Showing history for ${recipient}.`, 'info');
+  }
 
   return (
     <div className="flex min-h-full flex-col">
@@ -259,7 +293,10 @@ export default function AdminCertificationsPage() {
               </button>
             ))}
           </div>
-          <button className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow transition-colors">
+          <button
+            onClick={() => toast('Template creation coming soon.', 'info')}
+            className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
+          >
             <Plus className="h-4 w-4" />
             Create Template
           </button>
@@ -269,31 +306,42 @@ export default function AdminCertificationsPage() {
         {tab === 'dashboard' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {CERT_STATS.map(({ label, value, change, icon: Icon, color }) => (
-                <div
-                  key={label}
-                  className="rounded-xl border border-slate-200 bg-white p-5 shadow"
-                >
-                  <div className="mb-4 flex items-start justify-between">
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-full',
-                        color,
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
+              {CERT_STATS.map(({ label, value, change, icon: Icon, color }) => {
+                const isNegative = change.startsWith('-');
+                const ChangeIcon = isNegative ? ArrowDownRight : ArrowUpRight;
+                return (
+                  <div
+                    key={label}
+                    className="rounded-xl border border-slate-200 bg-white p-5 shadow transition-colors hover:border-slate-300"
+                  >
+                    <div className="mb-4 flex items-start justify-between">
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 items-center justify-center rounded-full',
+                          color,
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span
+                        className={cn(
+                          'flex items-center gap-0.5 text-[11px] font-semibold',
+                          isNegative ? 'text-red-500' : 'text-emerald-600',
+                        )}
+                      >
+                        <ChangeIcon className="h-3 w-3" />
+                        {change}
+                      </span>
                     </div>
-                    <span className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-600">
-                      <ArrowUpRight className="h-3 w-3" />
-                      {change}
-                    </span>
+                    <p className="text-xs font-medium text-slate-500">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-slate-900">
+                      {value}
+                    </p>
                   </div>
-                  <p className="text-xs font-medium text-slate-500">{label}</p>
-                  <p className="mt-1 text-2xl font-bold text-slate-900">
-                    {value}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
@@ -311,7 +359,7 @@ export default function AdminCertificationsPage() {
                   {RECENT_ISSUANCES.map((cert) => (
                     <li
                       key={cert.id}
-                      className="flex items-center gap-3 px-5 py-3.5"
+                      className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50">
                         <Award className="text-brand-gold h-4 w-4" />
@@ -389,13 +437,21 @@ export default function AdminCertificationsPage() {
                 Template Preview
               </h3>
               <p className="mt-0.5 text-sm text-slate-500">
-                Executive Completion
+                Preview each template design before publishing.
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="flex flex-col gap-3">
-                    <CertPreview />
-                    <button className="bg-brand-gold w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90">
+                {CERT_TEMPLATES.map((tpl) => (
+                  <div key={tpl.name} className="flex flex-col gap-3">
+                    <CertPreview name={tpl.name} category={tpl.category} />
+                    <button
+                      onClick={() =>
+                        toast(
+                          `Launching Canva Editor for "${tpl.name}"…`,
+                          'info',
+                        )
+                      }
+                      className="bg-brand-gold w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                    >
                       Open Canva Editor
                     </button>
                   </div>
@@ -412,7 +468,13 @@ export default function AdminCertificationsPage() {
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 {CERT_TEMPLATES.map((tpl) => (
-                  <TemplateCard key={tpl.name} tpl={tpl} />
+                  <TemplateCard
+                    key={tpl.name}
+                    tpl={tpl}
+                    onEdit={(name) =>
+                      toast(`Opening editor for "${name}"…`, 'info')
+                    }
+                  />
                 ))}
               </div>
             </div>
@@ -442,7 +504,10 @@ export default function AdminCertificationsPage() {
                     className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-64 rounded-lg border border-slate-200 bg-slate-50 pr-3 pl-9 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
                   />
                 </div>
-                <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
+                <button
+                  onClick={() => toast('Filters coming soon.', 'info')}
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+                >
                   <Filter className="h-3.5 w-3.5" />
                   Filter
                 </button>
@@ -502,18 +567,21 @@ export default function AdminCertificationsPage() {
                         <div className="flex justify-end gap-1.5">
                           <button
                             aria-label="Download"
+                            onClick={() => handleDownload(row.id)}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                           >
                             <Download className="h-3.5 w-3.5" />
                           </button>
                           <button
                             aria-label="Copy link"
+                            onClick={() => handleCopyLink(row.id)}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                           >
                             <Link2 className="h-3.5 w-3.5" />
                           </button>
                           <button
                             aria-label="History"
+                            onClick={() => handleHistory(row.recipient)}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                           >
                             <Clock className="h-3.5 w-3.5" />
