@@ -1,14 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Plus, Star, Check, X } from 'lucide-react';
+import {
+  Search,
+  Star,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Eye,
+  Trash2,
+} from 'lucide-react';
 import { cn } from '@/utils/cn';
 import {
   ADMIN_COURSES,
   APPROVAL_QUEUE,
   type CourseStatus,
 } from '@/constants/admin';
-import AdminTopBar from '@/components/pages/admin/AdminTopBar';
+import { Button } from '@/components/ui/button/Button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import TopBar from '@/components/common/TopBar';
+
+const PAGE_SIZE = 8;
 
 const STATUS_STYLE: Record<CourseStatus, string> = {
   Public: 'border border-emerald-200 bg-emerald-50 text-emerald-600',
@@ -31,9 +53,17 @@ const APPROVAL_CATEGORY_STYLE: Record<string, string> = {
   'Data Science': 'bg-teal-100 text-teal-600',
 };
 
+const STATUS_FILTERS: Array<CourseStatus | 'All'> = [
+  'All',
+  'Public',
+  'Pending',
+  'Archive',
+];
+
 export default function AdminCoursesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
+  const [page, setPage] = useState(1);
   const [approvalSearch, setApprovalSearch] = useState('');
 
   const filtered = ADMIN_COURSES.filter((c) => {
@@ -42,6 +72,26 @@ export default function AdminCoursesPage() {
       return false;
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const pageStart =
+    filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(currentPage * PAGE_SIZE, filtered.length);
+
+  function handleSearch(val: string) {
+    setSearch(val);
+    setPage(1);
+  }
+
+  function handleStatusFilter(val: CourseStatus | 'All') {
+    setStatusFilter(val);
+    setPage(1);
+  }
 
   const filteredQueue = APPROVAL_QUEUE.filter((q) => {
     if (!approvalSearch) return true;
@@ -54,84 +104,52 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <AdminTopBar
+      <TopBar
+        role="admin"
         title="Course Management"
         subtitle="Live workspace synced for admin@clp.com"
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        {/* Filter bar */}
-        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow">
-          <div className="flex flex-wrap gap-3">
-            {/* Search */}
-            <div className="relative min-w-[200px] flex-1">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="search"
-                placeholder="Search courses..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pr-3 pl-9 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
-              />
-            </div>
-
-            {/* Category filter pill */}
-            <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              <span>Category</span>
-              <Plus className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-
-            {/* Educator filter pill */}
-            <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              <span>Educator</span>
-              <Plus className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-
-            {/* Status filter pills */}
-            <div className="flex items-center gap-1.5">
-              {(['All', 'Public', 'Pending', 'Archive'] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
-                  className={cn(
-                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                    statusFilter === s
-                      ? 'bg-brand-gold text-white'
-                      : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100',
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            {/* Enrollment filter */}
-            <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              <span>Enrollment</span>
-              <Plus className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-
-            {/* Rating filter */}
-            <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              <Star className="h-3.5 w-3.5 text-slate-400" />
-              <span>Rating</span>
-              <Plus className="h-3.5 w-3.5 text-slate-400" />
-            </button>
-
-            {/* Created date filter */}
-            <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              <span>Created date</span>
-              <Plus className="h-3.5 w-3.5 text-slate-400" />
-            </button>
+        {/* Toolbar */}
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <div className="relative min-w-48 flex-1">
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              placeholder="Search courses..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border border-slate-200 bg-white pr-3 pl-9 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
+            />
+          </div>
+          <div className="flex gap-0.5 rounded-full border border-slate-200 bg-white p-1">
+            {STATUS_FILTERS.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleStatusFilter(s)}
+                className={cn(
+                  'rounded-full px-3.5 py-1 text-xs font-semibold transition-colors',
+                  statusFilter === s
+                    ? 'bg-brand-gold text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700',
+                )}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
+                    #
+                  </th>
                   {(
                     [
                       ['COURSE', 'left'],
@@ -157,13 +175,15 @@ export default function AdminCoursesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((course) => (
+                {paginated.map((course, idx) => (
                   <tr
                     key={course.id}
                     className="transition-colors hover:bg-slate-50"
                   >
-                    {/* Course title + level */}
-                    <td className="max-w-[220px] px-5 py-4">
+                    <td className="px-4 py-4 text-xs text-slate-400">
+                      {pageStart + idx}
+                    </td>
+                    <td className="max-w-55 px-5 py-4">
                       <p className="truncate text-sm font-semibold text-teal-600">
                         {course.title}
                       </p>
@@ -171,13 +191,9 @@ export default function AdminCoursesPage() {
                         {course.level}
                       </p>
                     </td>
-
-                    {/* Educator */}
                     <td className="px-5 py-4 text-sm text-slate-600">
                       {course.instructor}
                     </td>
-
-                    {/* Category badge */}
                     <td className="px-5 py-4">
                       <span
                         className={cn(
@@ -189,26 +205,18 @@ export default function AdminCoursesPage() {
                         {course.category}
                       </span>
                     </td>
-
-                    {/* Enrollments */}
                     <td className="px-5 py-4 text-sm text-slate-700">
                       {course.enrolled.toLocaleString()}
                     </td>
-
-                    {/* Rating */}
                     <td className="px-5 py-4">
                       <span className="flex items-center gap-1 text-sm font-semibold text-slate-700">
                         <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                         {course.rating.toFixed(1)}
                       </span>
                     </td>
-
-                    {/* Created */}
                     <td className="px-5 py-4 text-sm text-slate-500">
                       {course.createdAt}
                     </td>
-
-                    {/* Status badge */}
                     <td className="px-5 py-4">
                       <span
                         className={cn(
@@ -219,22 +227,45 @@ export default function AdminCoursesPage() {
                         {course.status}
                       </span>
                     </td>
-
-                    {/* Actions */}
                     <td className="px-5 py-4">
-                      <div className="flex justify-end gap-1.5">
-                        <button
-                          aria-label="Approve course"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-emerald-50 hover:text-emerald-500"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          aria-label="Reject course"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
+                      <div className="flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label="Course actions"
+                              className="rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 [&_svg]:size-4"
+                            >
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="border border-slate-200 bg-white shadow-md"
+                          >
+                            <DropdownMenuLabel className="text-slate-400">
+                              Actions
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem className="text-slate-700 focus:bg-slate-50 focus:text-slate-900">
+                              <Eye className="h-3.5 w-3.5" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-slate-700 focus:bg-slate-50 focus:text-slate-900">
+                              <Pencil className="h-3.5 w-3.5" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">
+                              <Check className="h-3.5 w-3.5" />
+                              Publish
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-slate-100" />
+                            <DropdownMenuItem className="text-rose-500 focus:bg-rose-50 focus:text-rose-600">
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
@@ -248,6 +279,49 @@ export default function AdminCoursesPage() {
               No courses match your search.
             </p>
           )}
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
+            <p className="text-xs text-slate-400">
+              Showing {pageStart}–{pageEnd} of {filtered.length} courses
+            </p>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30"
+              >
+                <ChevronLeft />
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <Button
+                  key={p}
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setPage(p)}
+                  className={cn(
+                    'rounded-lg text-xs',
+                    p === currentPage
+                      ? 'bg-slate-900 text-white hover:bg-slate-800 hover:text-white'
+                      : 'text-slate-500 hover:bg-slate-100',
+                  )}
+                >
+                  {p}
+                </Button>
+              ))}
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30"
+              >
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Approval Queue */}
@@ -277,9 +351,8 @@ export default function AdminCoursesPage() {
             {filteredQueue.map((item) => (
               <div
                 key={item.id}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow"
+                className="rounded-xl border border-slate-200 bg-white p-5"
               >
-                {/* Category chip */}
                 <span
                   className={cn(
                     'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
@@ -289,13 +362,9 @@ export default function AdminCoursesPage() {
                 >
                   {item.category}
                 </span>
-
-                {/* Title */}
                 <p className="mt-3 text-sm leading-snug font-bold text-slate-900">
                   {item.title}
                 </p>
-
-                {/* Meta */}
                 <div className="mt-2 space-y-1">
                   <p className="text-xs text-slate-500">
                     <span className="font-medium text-slate-700">
@@ -314,8 +383,6 @@ export default function AdminCoursesPage() {
                     {item.submittedAt}
                   </p>
                 </div>
-
-                {/* Actions */}
                 <div className="mt-4 flex gap-2">
                   <button className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-50 py-2 text-xs font-bold text-emerald-600 transition-colors hover:bg-emerald-100">
                     <Check className="h-3.5 w-3.5" />

@@ -7,27 +7,12 @@ export default function CertificatesPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <TopBar
+        role="learner"
         title="My Certificates"
         subtitle={`Live workspace synced for ${MOCK_USER.email}`}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        {/* Section header */}
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-brand-navy text-xl font-bold">
-              My Certificates
-            </h2>
-            <p className="mt-0.5 text-sm text-slate-400">
-              Completed course certificates, verification status, and credential
-              history.
-            </p>
-          </div>
-          <span className="border-brand-gold text-brand-gold shrink-0 rounded-full border px-3 py-1 text-xs font-bold">
-            Pending
-          </span>
-        </div>
-
         {/* Stat cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-white p-5">

@@ -5,7 +5,7 @@ import {
   EDUCATOR_STUDENTS,
   EDUCATOR_COURSES,
 } from '@/constants/educator';
-import EducatorTopBar from '@/components/pages/educator/EducatorTopBar';
+import EducatorTopBar from '@/components/common/TopBar';
 
 const BAR_MAX = Math.max(...WEEKLY_ENROLLMENTS.map((d) => d.count));
 
@@ -55,6 +55,7 @@ export default function EducatorAnalyticsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <EducatorTopBar
+        role="educator"
         title="Analytics"
         subtitle="Your course performance and learner insights"
       />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import AdminTopBar from '@/components/pages/admin/AdminTopBar';
+import TopBar from '@/components/common/TopBar';
 
 type Tab = 'dashboard' | 'templates' | 'issuance';
 type IssuanceStatus = 'Verify' | 'Pending';
@@ -234,7 +234,8 @@ export default function AdminCertificationsPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <AdminTopBar
+      <TopBar
+        role="admin"
         title="Certification Center"
         subtitle="Live workspace synced for admin@clp.com"
       />

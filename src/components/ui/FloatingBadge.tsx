@@ -47,7 +47,7 @@ export function FloatingBadge({
       className={cn(BASE_CLASSES, styles.container, className)}
     >
       {Icon && (
-        <span className="flex-shrink-0">
+        <span className="shrink-0">
           <Icon aria-hidden className={styles.icon} />
         </span>
       )}

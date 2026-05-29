@@ -14,44 +14,46 @@ export default function FooterBottomBar({ theme }: FooterBottomBarProps) {
     <div
       className={`border-t ${isBlue ? 'bg-brand-navy/60 border-white/[0.06]' : 'border-slate-200 bg-slate-50'}`}
     >
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <span
-          className={`text-xs whitespace-nowrap ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
-        >
-          {BRAND.poweredBy.name} &copy; {new Date().getFullYear()} All Rights
-          Reserved
-        </span>
-
-        <div
-          className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
-        >
-          {FOOTER_LEGAL_LINKS.map((link, idx) => (
-            <span key={link.href} className="flex items-center gap-3">
-              <Link
-                href={link.href}
-                className="hover:text-brand-gold transition-colors"
-              >
-                {link.label}
-              </Link>
-              {idx < FOOTER_LEGAL_LINKS.length - 1 && (
-                <span
-                  className={isBlue ? 'text-white/25' : 'text-slate-300'}
-                  aria-hidden
-                >
-                  &middot;
-                </span>
-              )}
-            </span>
-          ))}
-        </div>
-
-        <div className="text-right whitespace-nowrap">
-          <p className="text-brand-gold text-xs">{BRAND.platform.name}</p>
-          <p
-            className={`text-[10px] ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:text-left">
+          <span
+            className={`text-xs ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
           >
-            {BRAND.platform.description}
-          </p>
+            {BRAND.poweredBy.name} &copy; {new Date().getFullYear()} All Rights
+            Reserved
+          </span>
+
+          <div
+            className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
+          >
+            {FOOTER_LEGAL_LINKS.map((link, idx) => (
+              <span key={link.href} className="flex items-center gap-3">
+                <Link
+                  href={link.href}
+                  className="hover:text-brand-gold transition-colors"
+                >
+                  {link.label}
+                </Link>
+                {idx < FOOTER_LEGAL_LINKS.length - 1 && (
+                  <span
+                    className={isBlue ? 'text-white/25' : 'text-slate-300'}
+                    aria-hidden
+                  >
+                    &middot;
+                  </span>
+                )}
+              </span>
+            ))}
+          </div>
+
+          <div className="sm:text-right">
+            <p className="text-brand-gold text-xs">{BRAND.platform.name}</p>
+            <p
+              className={`text-[10px] ${isBlue ? 'text-white/40' : 'text-slate-400'}`}
+            >
+              {BRAND.platform.description}
+            </p>
+          </div>
         </div>
       </div>
     </div>

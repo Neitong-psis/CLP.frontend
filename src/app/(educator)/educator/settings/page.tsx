@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Upload, Camera, GraduationCap } from 'lucide-react';
 import { EDUCATOR_USER } from '@/constants/educator';
-import EducatorTopBar from '@/components/pages/educator/EducatorTopBar';
+import EducatorTopBar from '@/components/common/TopBar';
 
 const inputCls =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-colors focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10';
@@ -21,6 +21,7 @@ export default function EducatorSettingsPage() {
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
       <EducatorTopBar
+        role="educator"
         title="Settings"
         subtitle={`Profile & preferences · ${EDUCATOR_USER.email}`}
       />
