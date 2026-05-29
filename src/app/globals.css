@@ -78,6 +78,14 @@
     transform: translateY(0);
   }
 }
+@keyframes highlight-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
 
 /* Registered as @utility (not @layer utilities) so Tailwind variants —
    motion-safe:, etc. — actually generate. Longhand props are used so the
@@ -111,6 +119,13 @@
   animation-duration: 0.75s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
+}
+@utility animate-highlight-in {
+  animation-name: highlight-in;
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  transform-origin: left center;
 }
 
 /* Animation-delay utilities. Tailwind's built-in delay-* targets

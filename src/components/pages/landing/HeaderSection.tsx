@@ -16,24 +16,24 @@ export default function HeaderSection({
   const isDark = variant === 'dark';
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-3 inline-flex items-center gap-2">
-        <span className="h-px w-8 bg-[#f4a300]" />
-        <span className="text-[11px] font-bold tracking-[0.2em] text-[#f4a300] uppercase">
+      <div className="mb-2 inline-flex items-center gap-2 sm:mb-3">
+        <span className="bg-brand-gold h-px w-6 sm:w-8" />
+        <span className="text-brand-gold text-[10px] font-bold tracking-[0.2em] uppercase sm:text-[11px]">
           {eyebrow}
         </span>
-        <span className="h-px w-8 bg-[#f4a300]" />
+        <span className="bg-brand-gold h-px w-6 sm:w-8" />
       </div>
       <h2
-        className={`text-3xl leading-tight font-bold tracking-tight sm:text-4xl ${
-          isDark ? 'text-white' : 'text-[#00003e]'
+        className={`text-2xl leading-tight font-bold tracking-tight sm:text-3xl md:text-4xl ${
+          isDark ? 'text-white' : 'text-brand-navy'
         }`}
       >
         {title}
       </h2>
       {description && (
         <p
-          className={`mt-4 max-w-2xl text-base leading-relaxed ${
-            isDark ? 'text-white/60' : 'text-[#00003e]/60'
+          className={`mt-3 max-w-2xl text-sm leading-relaxed sm:mt-4 sm:text-base ${
+            isDark ? 'text-white/60' : 'text-brand-navy/60'
           }`}
         >
           {description}

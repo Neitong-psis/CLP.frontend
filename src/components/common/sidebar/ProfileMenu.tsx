@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, Languages, HelpCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuItem,
@@ -57,36 +56,87 @@ export default function ProfileMenu({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="top" align="start" className="w-56">
-        <div className="px-4 py-3">
-          <p className="text-sm font-semibold text-white">{user.name}</p>
-          <p className="text-xs text-white/40">{user.email}</p>
+      <DropdownMenuContent
+        side="top"
+        align="start"
+        className="w-56 border border-slate-100 bg-white p-0 shadow-lg"
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3.5">
+          <div className="bg-brand-gold flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
+            {user.initials}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-slate-900">
+              {user.name}
+            </p>
+            <p className="truncate text-xs text-slate-400">{user.email}</p>
+          </div>
         </div>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href={profileHref} className="flex items-center gap-2">
-              <User className="size-4" />
-              Profile
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={settingsHref} className="flex items-center gap-2">
-              <Settings className="size-4" />
-              Settings
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <a
-            href="/auth"
-            className="flex items-center gap-2 text-red-400 focus:text-red-400"
+
+        <DropdownMenuSeparator className="bg-slate-100" />
+
+        <div className="px-2 py-1.5">
+          <DropdownMenuItem
+            asChild
+            className="rounded-lg text-slate-700 focus:bg-slate-50 focus:text-slate-900"
           >
-            <LogOut className="size-4" />
-            Sign out
-          </a>
-        </DropdownMenuItem>
+            <Link
+              href={settingsHref}
+              className="flex items-center gap-3 px-2 py-2"
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-50">
+                <Settings className="size-3.5 text-amber-500" />
+              </span>
+              <span className="text-sm font-medium">Settings</span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="my-1 bg-slate-100" />
+
+          <DropdownMenuItem
+            asChild
+            className="rounded-lg text-slate-700 focus:bg-slate-50 focus:text-slate-900"
+          >
+            <Link
+              href={profileHref}
+              className="flex items-center gap-3 px-2 py-2"
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-50">
+                <Languages className="size-3.5 text-blue-500" />
+              </span>
+              <span className="text-sm font-medium">Language</span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="my-1 bg-slate-100" />
+
+          <DropdownMenuItem
+            asChild
+            className="rounded-lg text-slate-700 focus:bg-slate-50 focus:text-slate-900"
+          >
+            <a href="#" className="flex items-center gap-3 px-2 py-2">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+                <HelpCircle className="size-3.5 text-emerald-500" />
+              </span>
+              <span className="text-sm font-medium">Learn More</span>
+            </a>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="my-1 bg-slate-100" />
+
+          <DropdownMenuItem
+            asChild
+            className="rounded-lg text-rose-500 focus:bg-rose-50 focus:text-rose-600"
+          >
+            <a href="/auth" className="flex items-center gap-3 px-2 py-2">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-rose-50">
+                <LogOut className="size-3.5 text-rose-500" />
+              </span>
+              <span className="text-sm font-medium">Logout</span>
+            </a>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -22,7 +22,7 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'z-50 min-w-[180px] overflow-hidden rounded-xl bg-[#00003e] py-1.5',
+          'bg-brand-navy z-50 min-w-45 overflow-hidden rounded-xl py-1.5',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -42,7 +42,7 @@ function DropdownMenuLabel({
   return (
     <DropdownMenuPrimitive.Label
       className={cn(
-        'px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] text-[#f4a300]/70 uppercase',
+        'text-brand-gold/70 px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] uppercase',
         className,
       )}
       {...props}
@@ -60,7 +60,7 @@ function DropdownMenuItem({
         'relative flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-white/60 outline-none select-none',
         'transition-colors duration-100',
         'focus:bg-white/[0.07] focus:text-white',
-        'data-[disabled]:pointer-events-none data-[disabled]:opacity-30',
+        'data-disabled:pointer-events-none data-disabled:opacity-30',
         className,
       )}
       {...props}
@@ -74,7 +74,7 @@ function DropdownMenuSeparator({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
   return (
     <DropdownMenuPrimitive.Separator
-      className={cn('mx-3 my-1.5 h-px bg-white/[0.08]', className)}
+      className={cn('mx-3 my-1.5 h-px bg-white/8', className)}
       {...props}
     />
   );
@@ -107,7 +107,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       className={cn(
-        'z-50 min-w-[160px] overflow-hidden rounded-xl bg-[#00003e] py-1.5',
+        'bg-brand-navy z-50 min-w-40 overflow-hidden rounded-xl py-1.5',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',

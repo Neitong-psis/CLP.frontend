@@ -34,3 +34,4 @@ export const favicons = {
   default: FAVICON_DEFAULT,
   light: FAVICON_LIGHT,
 } as const;
+

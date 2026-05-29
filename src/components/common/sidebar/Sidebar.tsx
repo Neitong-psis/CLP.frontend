@@ -12,6 +12,7 @@ import {
   Award,
   Users,
   BarChart3,
+  DollarSign,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
@@ -88,10 +89,11 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
   },
   admin: {
     navItems: [
-      { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-      { href: '/admin/users', icon: Users, label: 'Users', badge: 3 },
-      { href: '/admin/courses', icon: BookOpen, label: 'Courses' },
-      { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+      { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
+      { href: '/admin/courses', icon: BookOpen, label: 'Courses', badge: 3 },
+      { href: '/admin/users', icon: Users, label: 'Users' },
+      { href: '/admin/certifications', icon: Award, label: 'Certificates' },
+      { href: '/admin/revenue', icon: DollarSign, label: 'Revenue' },
     ],
     rootHref: '/admin',
     roleChip: { label: ADMIN_USER.role, icon: ShieldCheck },

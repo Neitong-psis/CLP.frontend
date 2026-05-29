@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { EDUCATOR_STUDENTS, type StudentRow } from '@/constants/educator';
-import EducatorTopBar from '@/components/pages/educator/EducatorTopBar';
+import EducatorTopBar from '@/components/common/TopBar';
 
 type StudentStatus = StudentRow['status'];
 
@@ -119,7 +119,7 @@ export default function EducatorStudentsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="max-w-[180px] px-5 py-3.5">
+                    <td className="max-w-45 px-5 py-3.5">
                       <p className="truncate text-slate-500">
                         {student.course}
                       </p>

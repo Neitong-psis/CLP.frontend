@@ -14,10 +14,10 @@ export default function AuthCard() {
   return (
     <div>
       <div className="mb-5 2xl:mb-6">
-        <h2 className="3xl:text-4xl text-xl leading-tight font-bold text-brand-navy sm:text-[1.6rem] 2xl:text-3xl">
+        <h2 className="3xl:text-4xl text-brand-navy text-xl leading-tight font-bold sm:text-[1.6rem] 2xl:text-3xl">
           {tab === 'login' ? 'Log In to Your Account' : 'Create an Account'}
         </h2>
-        <p className="3xl:text-lg mt-1.5 text-sm text-brand-navy/45 2xl:mt-2 2xl:text-base">
+        <p className="3xl:text-lg text-brand-navy/45 mt-1.5 text-sm 2xl:mt-2 2xl:text-base">
           {tab === 'login'
             ? 'Enter your credentials to access your courses'
             : 'Start your learning journey today'}
@@ -33,8 +33,8 @@ export default function AuthCard() {
             onClick={() => setTab(t)}
             className={`3xl:text-lg w-full rounded-[10px] py-2.5 font-semibold 2xl:rounded-xl 2xl:py-3 2xl:text-base ${
               tab === t
-                ? 'bg-white text-brand-gold shadow-sm ring-1 ring-slate-200/60 hover:bg-white hover:text-brand-gold'
-                : 'text-brand-navy/45 hover:bg-transparent hover:text-brand-navy/70'
+                ? 'text-brand-gold hover:text-brand-gold bg-white shadow-sm ring-1 ring-slate-200/60 hover:bg-white'
+                : 'text-brand-navy/45 hover:text-brand-navy/70 hover:bg-transparent'
             }`}
           >
             {t === 'login' ? 'Log In' : 'Sign Up'}

@@ -357,6 +357,30 @@ export const REVENUE_BY_CATEGORY = [
   { name: 'Design', amount: '$21.9k', pct: 26 },
 ];
 
+export const QUIZ_ANALYTICS = [
+  {
+    title: 'Python Fundamentals Quiz',
+    difficult: 'List comprehensions',
+    completion: 88,
+    avgScore: 79,
+    passRate: 74,
+  },
+  {
+    title: 'Web Security Assessment',
+    difficult: 'CSRF vs XSS',
+    completion: 70,
+    avgScore: 65,
+    passRate: 61,
+  },
+  {
+    title: 'Machine Learning Checkpoint',
+    difficult: 'Bias-variance tradeoff',
+    completion: 93,
+    avgScore: 85,
+    passRate: 90,
+  },
+] as const;
+
 export const PLATFORM_ANALYTICS_DATA = [
   { month: 'Jun', users: 12000, enrollments: 28000 },
   { month: 'Jul', users: 18000, enrollments: 34000 },
