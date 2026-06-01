@@ -1,8 +1,8 @@
 'use client';
 
-import { PROGRAMS } from "@/config/homepage";
-import { ArrowRight, Link } from "lucide-react";
-import SectionHeader from "./sectionHeader";
+import { PROGRAMS } from '@/config/homepage';
+import { ArrowRight, Link } from 'lucide-react';
+import SectionHeader from './sectionHeader';
 
 export default function ProgramsSection() {
   return (
@@ -24,14 +24,14 @@ export default function ProgramsSection() {
               {/* Hover accent */}
               <div
                 aria-hidden
-                className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#f4a300]/0 transition-all duration-500 group-hover:bg-[#f4a300]/10"
+                className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-[#f4a300]/0 transition-all duration-500 group-hover:bg-[#f4a300]/10"
               />
 
               <div className="relative flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00003e] text-[#f4a300] transition-colors group-hover:bg-[#f4a300] group-hover:text-[#00003e]">
                   <program.icon className="h-5 w-5" />
                 </div>
-                <span className="rounded-full bg-[#00003e]/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[#00003e]/60">
+                <span className="rounded-full bg-[#00003e]/5 px-2.5 py-1 text-[10px] font-bold tracking-widest text-[#00003e]/60 uppercase">
                   {program.tag}
                 </span>
               </div>

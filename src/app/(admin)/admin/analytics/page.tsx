@@ -1,4 +1,4 @@
-import { TrendingUp, Users, BookOpen, Award, ArrowUpRight } from 'lucide-react';
+﻿import { TrendingUp, Users, BookOpen, Award, ArrowUpRight } from 'lucide-react';
 import {
   WEEKLY_ENROLLMENTS,
   TOP_COURSES,
@@ -7,7 +7,7 @@ import {
   REVENUE_BY_CATEGORY,
   PLATFORM_ANALYTICS_DATA,
 } from '@/constants/admin';
-import AdminTopBar from '@/components/pages/admin/AdminTopBar';
+import AdminTopBar from '@/components/common/TopBar';
 
 const BAR_MAX = Math.max(...WEEKLY_ENROLLMENTS.map((d) => d.count));
 
@@ -21,21 +21,16 @@ const METRICS = [
   },
   {
     label: 'Published Courses',
-    value: ADMIN_COURSES.filter(
-      (c) => c.status === 'Published',
-    ).length.toString(),
+    value: ADMIN_COURSES.filter((c) => c.status === 'Public').length.toString(),
     change: '+2',
     icon: BookOpen,
     color: 'bg-brand-gold/20 text-brand-gold',
   },
   {
-    label: 'Avg. Completion',
-    value: `${Math.round(
-      ADMIN_COURSES.filter((c) => c.completionRate > 0).reduce(
-        (a, c) => a + c.completionRate,
-        0,
-      ) / ADMIN_COURSES.filter((c) => c.completionRate > 0).length,
-    )}%`,
+    label: 'Avg. Rating',
+    value: `${(
+      ADMIN_COURSES.reduce((a, c) => a + c.rating, 0) / ADMIN_COURSES.length
+    ).toFixed(1)}`,
     change: '+5%',
     icon: TrendingUp,
     color: 'bg-emerald-500/20 text-emerald-400',
@@ -74,7 +69,7 @@ function LineChart() {
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className="w-full"
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <linearGradient id="aGrad" x1="0" y1="0" x2="0" y2="1">
@@ -108,7 +103,7 @@ function LineChart() {
           y={H - 4}
           textAnchor="middle"
           fontSize={9}
-          fill="rgba(255,255,255,0.3)"
+          fill="rgba(255,255,255,0.45)"
         >
           {d.month}
         </text>
@@ -121,8 +116,9 @@ const CAT_MAX = Math.max(...REVENUE_BY_CATEGORY.map((c) => c.pct));
 
 export default function AdminAnalyticsPage() {
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="bg-brand-navy flex min-h-full flex-col">
       <AdminTopBar
+        role="admin"
         title="Analytics"
         subtitle="Platform performance and learner insights"
       />
@@ -133,7 +129,7 @@ export default function AdminAnalyticsPage() {
           {METRICS.map(({ label, value, change, icon: Icon, color }) => (
             <div
               key={label}
-              className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4"
+              className="rounded-xl border border-white/[0.07] bg-white/3 p-4"
             >
               <div
                 className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ${color}`}
@@ -152,7 +148,7 @@ export default function AdminAnalyticsPage() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Weekly enrollment chart */}
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+          <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
             <h3 className="mb-0.5 text-sm font-bold text-white">
               Weekly Enrollments
             </h3>
@@ -177,7 +173,7 @@ export default function AdminAnalyticsPage() {
           </div>
 
           {/* Category breakdown */}
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+          <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
             <h3 className="mb-0.5 text-sm font-bold text-white">
               Revenue by Category
             </h3>
@@ -209,7 +205,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Platform analytics line chart */}
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+        <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
           <h3 className="mb-0.5 text-sm font-bold text-white">
             Platform Analytics
           </h3>
@@ -222,7 +218,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Top performing courses */}
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03]">
+        <div className="rounded-xl border border-white/[0.07] bg-white/3">
           <div className="border-b border-white/[0.07] px-5 py-4">
             <h3 className="text-sm font-bold text-white">
               Top Performing Courses
@@ -249,10 +245,10 @@ export default function AdminAnalyticsPage() {
                 {TOP_COURSES.map((course, i) => (
                   <tr
                     key={course.title}
-                    className="border-b border-white/[0.04] hover:bg-white/[0.02]"
+                    className="border-b border-white/4 hover:bg-white/2"
                   >
                     <td className="px-5 py-3.5">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.05] text-[11px] font-bold text-white/40">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/5 text-[11px] font-bold text-white/40">
                         {i + 1}
                       </span>
                     </td>
@@ -265,7 +261,7 @@ export default function AdminAnalyticsPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <div
-                          className="overflow-hidden rounded-full bg-white/[0.08]"
+                          className="overflow-hidden rounded-full bg-white/8"
                           style={{ height: '6px', width: '80px' }}
                         >
                           <div

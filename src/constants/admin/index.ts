@@ -5,8 +5,8 @@ export const ADMIN_USER = {
   role: 'Platform Admin',
 };
 
-export type UserStatus = 'Active' | 'Inactive' | 'Suspended';
-export type UserRole = 'Learner' | 'Instructor' | 'Admin';
+export type UserStatus = 'Active' | 'Inactive' | 'Suspended' | 'Achieved';
+export type UserRole = 'Learner' | 'Educator' | 'Admin';
 
 export interface AdminUserRow {
   id: string;
@@ -22,87 +22,77 @@ export interface AdminUserRow {
 export const ADMIN_USERS: AdminUserRow[] = [
   {
     id: 'u1',
-    name: 'Sopheaktra Meng',
-    email: 'sopheaktra@ayla.edu.kh',
+    name: 'John Doe',
+    email: 'john@example.com',
     role: 'Learner',
     status: 'Active',
     enrolled: 5,
-    joined: 'Jan 2026',
+    joined: 'Jan 15, 2024',
     lastActive: '2h ago',
   },
   {
     id: 'u2',
-    name: 'John Doe',
-    email: 'learner@clp.com',
-    role: 'Learner',
-    status: 'Active',
-    enrolled: 3,
-    joined: 'Feb 2026',
-    lastActive: '1d ago',
-  },
-  {
-    id: 'u3',
     name: 'Dr. Angela Yu',
-    email: 'angela@clp.com',
-    role: 'Instructor',
+    email: 'angela@example.com',
+    role: 'Educator',
     status: 'Active',
     enrolled: 0,
-    joined: 'Dec 2025',
+    joined: 'Jun 20, 2023',
     lastActive: '3h ago',
   },
   {
-    id: 'u4',
-    name: 'Kiril Eremenko',
-    email: 'kiril@clp.com',
-    role: 'Instructor',
+    id: 'u3',
+    name: 'Sarah Wilson',
+    email: 'sarah@example.com',
+    role: 'Admin',
     status: 'Active',
     enrolled: 0,
-    joined: 'Nov 2025',
+    joined: 'Mar 10, 2023',
+    lastActive: '1d ago',
+  },
+  {
+    id: 'u4',
+    name: 'Mike Johnson',
+    email: 'mike@example.com',
+    role: 'Learner',
+    status: 'Achieved',
+    enrolled: 12,
+    joined: 'Feb 28, 2024',
     lastActive: '5d ago',
   },
   {
     id: 'u5',
-    name: 'Jane Smith',
-    email: 'jane.smith@clp.com',
-    role: 'Learner',
-    status: 'Inactive',
-    enrolled: 1,
-    joined: 'Mar 2026',
-    lastActive: '2w ago',
+    name: 'Kirill Eremenko',
+    email: 'kirill@example.com',
+    role: 'Educator',
+    status: 'Active',
+    enrolled: 0,
+    joined: 'Aug 12, 2023',
+    lastActive: '5d ago',
   },
   {
     id: 'u6',
-    name: 'Alex Johnson',
-    email: 'alex.j@clp.com',
+    name: 'Priya Sharma',
+    email: 'priya@example.com',
     role: 'Learner',
-    status: 'Active',
-    enrolled: 4,
-    joined: 'Jan 2026',
-    lastActive: '30m ago',
+    status: 'Inactive',
+    enrolled: 3,
+    joined: 'Mar 5, 2025',
+    lastActive: '2w ago',
   },
   {
     id: 'u7',
-    name: 'Sarah Lee',
-    email: 'sarah.lee@clp.com',
+    name: 'Tom Chen',
+    email: 'tom@example.com',
     role: 'Learner',
-    status: 'Suspended',
-    enrolled: 2,
-    joined: 'Feb 2026',
-    lastActive: '1w ago',
-  },
-  {
-    id: 'u8',
-    name: 'Jose Portilla',
-    email: 'jose@clp.com',
-    role: 'Instructor',
     status: 'Active',
-    enrolled: 0,
-    joined: 'Oct 2025',
-    lastActive: '1d ago',
+    enrolled: 8,
+    joined: 'Apr 1, 2025',
+    lastActive: '30m ago',
   },
 ];
 
-export type CourseStatus = 'Published' | 'Draft' | 'Archived';
+export type CourseStatus = 'Public' | 'Pending' | 'Archive';
 
 export interface AdminCourseRow {
   id: string;
@@ -111,7 +101,7 @@ export interface AdminCourseRow {
   level: string;
   instructor: string;
   enrolled: number;
-  completionRate: number;
+  rating: number;
   status: CourseStatus;
   createdAt: string;
 }
@@ -124,20 +114,20 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     level: 'Beginner',
     instructor: 'Dr. Angela Yu',
     enrolled: 234567,
-    completionRate: 68,
-    status: 'Archived',
-    createdAt: 'Jan 2026',
+    rating: 4.8,
+    status: 'Archive',
+    createdAt: 'May 13, 2026',
   },
   {
     id: 'ac2',
     title: 'Machine Learning A-Z: Python & R',
     category: 'Data Science',
     level: 'Intermediate',
-    instructor: 'Kiril Eremenko',
-    enrolled: 190810,
-    completionRate: 45,
-    status: 'Published',
-    createdAt: 'Dec 2025',
+    instructor: 'Kirill Eremenko',
+    enrolled: 189432,
+    rating: 4.9,
+    status: 'Public',
+    createdAt: 'May 12, 2026',
   },
   {
     id: 'ac3',
@@ -145,10 +135,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     category: 'Cloud Computing',
     level: 'Advanced',
     instructor: 'Stephane Maarek',
-    enrolled: 156000,
-    completionRate: 30,
-    status: 'Published',
-    createdAt: 'Nov 2025',
+    enrolled: 156789,
+    rating: 4.7,
+    status: 'Public',
+    createdAt: 'May 11, 2026',
   },
   {
     id: 'ac4',
@@ -156,10 +146,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     category: 'Programming',
     level: 'Beginner',
     instructor: 'Jonas Schmedtmann',
-    enrolled: 245678,
-    completionRate: 72,
-    status: 'Published',
-    createdAt: 'Oct 2025',
+    enrolled: 345678,
+    rating: 4.9,
+    status: 'Public',
+    createdAt: 'May 10, 2026',
   },
   {
     id: 'ac5',
@@ -167,32 +157,32 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     category: 'Web Development',
     level: 'Intermediate',
     instructor: 'Maximilian Schwarzmuller',
-    enrolled: 178765,
-    completionRate: 58,
-    status: 'Draft',
-    createdAt: 'Jan 2026',
+    enrolled: 298765,
+    rating: 4.8,
+    status: 'Pending',
+    createdAt: 'May 9, 2026',
   },
   {
     id: 'ac6',
+    title: 'Python for Data Science',
+    category: 'Data Science',
+    level: 'Beginner',
+    instructor: 'Jose Portilla',
+    enrolled: 187654,
+    rating: 4.7,
+    status: 'Public',
+    createdAt: 'May 8, 2026',
+  },
+  {
+    id: 'ac7',
     title: 'Docker & Kubernetes: The Practical Guide',
     category: 'DevOps',
     level: 'Intermediate',
     instructor: 'Maximilian Schwarzmuller',
-    enrolled: 94000,
-    completionRate: 40,
-    status: 'Published',
-    createdAt: 'Feb 2026',
-  },
-  {
-    id: 'ac7',
-    title: 'Complete Python Bootcamp',
-    category: 'Programming',
-    level: 'Beginner',
-    instructor: 'Jose Portilla',
-    enrolled: 315758,
-    completionRate: 75,
-    status: 'Published',
-    createdAt: 'Sep 2025',
+    enrolled: 134567,
+    rating: 4.8,
+    status: 'Public',
+    createdAt: 'May 7, 2026',
   },
   {
     id: 'ac8',
@@ -200,10 +190,79 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     category: 'Design',
     level: 'Beginner',
     instructor: 'Daniel Walter Scott',
-    enrolled: 0,
-    completionRate: 0,
-    status: 'Draft',
-    createdAt: 'Apr 2026',
+    enrolled: 98765,
+    rating: 4.6,
+    status: 'Archive',
+    createdAt: 'May 6, 2026',
+  },
+  {
+    id: 'ac9',
+    title: 'Advanced React Patterns',
+    category: 'Web Development',
+    level: 'Advanced',
+    instructor: 'Kent C. Dodds',
+    enrolled: 85432,
+    rating: 4.9,
+    status: 'Pending',
+    createdAt: 'May 5, 2026',
+  },
+  {
+    id: 'ac10',
+    title: 'Full-Stack Next.js',
+    category: 'Web Development',
+    level: 'Intermediate',
+    instructor: 'Vercel Team',
+    enrolled: 125432,
+    rating: 4.9,
+    status: 'Public',
+    createdAt: 'May 4, 2026',
+  },
+  {
+    id: 'ac11',
+    title: 'Complete Python Bootcamp',
+    category: 'Programming',
+    level: 'Beginner',
+    instructor: 'Jose Portilla',
+    enrolled: 456789,
+    rating: 4.8,
+    status: 'Public',
+    createdAt: 'May 3, 2026',
+  },
+];
+
+export interface ApprovalQueueItem {
+  id: string;
+  title: string;
+  instructor: string;
+  category: string;
+  lessons: number;
+  submittedAt: string;
+}
+
+export const APPROVAL_QUEUE: ApprovalQueueItem[] = [
+  {
+    id: 'aq1',
+    title: 'Advanced Kubernetes Orchestration',
+    instructor: 'Raj Patel',
+    category: 'DevOps',
+    lessons: 42,
+    submittedAt: 'May 8, 2026',
+  },
+  {
+    id: 'aq2',
+    title: 'Zero to Full-Stack Next.js 15',
+    instructor: 'Sophie Chen',
+    category: 'Web Development',
+    lessons: 68,
+    submittedAt: 'May 9, 2026',
+  },
+  {
+    id: 'aq3',
+    title: 'Deep Learning with PyTorch',
+    instructor: 'Marcus Johnson',
+    category: 'Data Science',
+    lessons: 55,
+    submittedAt: 'May 10, 2026',
   },
 ];
 
@@ -228,8 +287,8 @@ export const DASHBOARD_STATS = [
 
 export const USER_DISTRIBUTION = [
   { label: 'Admins', count: 1, color: '#f4a300' },
-  { label: 'Educators', count: 2, color: '#4e9af1' },
-  { label: 'Learners', count: 4, color: '#10b981' },
+  { label: 'Educators', count: 2, color: '#10b981' },
+  { label: 'Learners', count: 4, color: '#3b82f6' },
 ];
 
 export type TopCourseVisibility = 'Public' | 'Pending' | 'Archive';
@@ -290,13 +349,37 @@ export const MONTHLY_REVENUE = [
 ];
 
 export const REVENUE_BY_CATEGORY = [
-  { name: 'Web Dev', amount: '$20.4k', pct: 100 },
-  { name: 'Data Science', amount: '$60.7k', pct: 74 },
-  { name: 'Cloud', amount: '$49.1k', pct: 60 },
-  { name: 'Programming', amount: '$41.2k', pct: 50 },
-  { name: 'DevOps', amount: '$33.9k', pct: 41 },
-  { name: 'Design', amount: '$21.9k', pct: 26 },
+  { name: 'Data Science', amount: '$60.7k', pct: 100 },
+  { name: 'Cloud', amount: '$49.1k', pct: 81 },
+  { name: 'Programming', amount: '$41.2k', pct: 68 },
+  { name: 'DevOps', amount: '$33.9k', pct: 56 },
+  { name: 'Design', amount: '$21.9k', pct: 36 },
+  { name: 'Web Dev', amount: '$20.4k', pct: 34 },
 ];
+
+export const QUIZ_ANALYTICS = [
+  {
+    title: 'Python Fundamentals Quiz',
+    difficult: 'List comprehensions',
+    completion: 88,
+    avgScore: 79,
+    passRate: 74,
+  },
+  {
+    title: 'Web Security Assessment',
+    difficult: 'CSRF vs XSS',
+    completion: 70,
+    avgScore: 65,
+    passRate: 61,
+  },
+  {
+    title: 'Machine Learning Checkpoint',
+    difficult: 'Bias-variance tradeoff',
+    completion: 93,
+    avgScore: 85,
+    passRate: 90,
+  },
+] as const;
 
 export const PLATFORM_ANALYTICS_DATA = [
   { month: 'Jun', users: 12000, enrollments: 28000 },

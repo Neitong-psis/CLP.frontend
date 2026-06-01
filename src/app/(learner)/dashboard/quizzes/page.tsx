@@ -24,6 +24,7 @@ export default function QuizzesPage() {
   return (
     <div className="min-h-full bg-slate-50">
       <TopBar
+        role="learner"
         title="Quizzes"
         subtitle="Continue unfinished quizzes, review scores, and track completion"
       />

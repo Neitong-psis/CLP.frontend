@@ -1,15 +1,9 @@
-import Link from "next/link";
-import { ArrowRight, Play, Quote, Star } from "lucide-react";
-import { BRAND } from "@/config/brand";
-import {
-  HERO_STATS,
-  PROGRAMS,
-  FEATURES,
-  TESTIMONIALS,
-} from "@/config/homepage";
+import Link from 'next/link';
+import { ArrowRight, Star } from 'lucide-react';
+import { PROGRAMS, FEATURES, TESTIMONIALS } from '@/config/homepage';
 
-import HeroSection from "@/components/pages/homepage/hero";
-import StatsBar from "@/components/pages/homepage/statsBar";
+import HeroSection from '@/components/pages/homepage/hero';
+import StatsBar from '@/components/pages/homepage/statsBar';
 
 export default function Home() {
   return (
@@ -23,8 +17,6 @@ export default function Home() {
     </>
   );
 }
-
-
 
 /* ─────────────────────────── PROGRAMS ─────────────────────────── */
 
@@ -48,14 +40,14 @@ function ProgramsSection() {
               {/* Hover accent */}
               <div
                 aria-hidden
-                className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#f4a300]/0 transition-all duration-500 group-hover:bg-[#f4a300]/10"
+                className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-[#f4a300]/0 transition-all duration-500 group-hover:bg-[#f4a300]/10"
               />
 
               <div className="relative flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00003e] text-[#f4a300] transition-colors group-hover:bg-[#f4a300] group-hover:text-[#00003e]">
                   <program.icon className="h-5 w-5" />
                 </div>
-                <span className="rounded-full bg-[#00003e]/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[#00003e]/60">
+                <span className="rounded-full bg-[#00003e]/5 px-2.5 py-1 text-[10px] font-bold tracking-widest text-[#00003e]/60 uppercase">
                   {program.tag}
                 </span>
               </div>
@@ -90,8 +82,8 @@ function WhyChooseUsSection() {
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            "radial-gradient(circle, #f4a300 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+            'radial-gradient(circle, #f4a300 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
         }}
       />
 
@@ -146,7 +138,10 @@ function TestimonialsSection() {
             >
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-[#f4a300] text-[#f4a300]" />
+                  <Star
+                    key={i}
+                    className="h-4 w-4 fill-[#f4a300] text-[#f4a300]"
+                  />
                 ))}
               </div>
               <blockquote className="flex-1 text-base leading-relaxed text-[#00003e]/80">
@@ -187,10 +182,10 @@ function CTASection() {
           />
 
           <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00003e]/60">
+            <span className="text-xs font-bold tracking-[0.2em] text-[#00003e]/60 uppercase">
               Limited Seats · Spring 2026
             </span>
-            <h2 className="text-3xl font-bold leading-tight tracking-tight text-[#00003e] sm:text-4xl">
+            <h2 className="text-3xl leading-tight font-bold tracking-tight text-[#00003e] sm:text-4xl">
               Your leadership journey starts here.
             </h2>
             <p className="text-base text-[#00003e]/70">
@@ -225,28 +220,28 @@ interface SectionHeaderProps {
   eyebrow: string;
   title: string;
   description?: string;
-  variant?: "light" | "dark";
+  variant?: 'light' | 'dark';
 }
 
 function SectionHeader({
   eyebrow,
   title,
   description,
-  variant = "light",
+  variant = 'light',
 }: SectionHeaderProps) {
-  const isDark = variant === "dark";
+  const isDark = variant === 'dark';
   return (
     <div className="flex flex-col items-center text-center">
       <div className="mb-3 inline-flex items-center gap-2">
         <span className="h-px w-8 bg-[#f4a300]" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4a300]">
+        <span className="text-[11px] font-bold tracking-[0.2em] text-[#f4a300] uppercase">
           {eyebrow}
         </span>
         <span className="h-px w-8 bg-[#f4a300]" />
       </div>
       <h2
-        className={`text-3xl font-bold leading-tight tracking-tight sm:text-4xl ${
-          isDark ? "text-white" : "text-[#00003e]"
+        className={`text-3xl leading-tight font-bold tracking-tight sm:text-4xl ${
+          isDark ? 'text-white' : 'text-[#00003e]'
         }`}
       >
         {title}
@@ -254,7 +249,7 @@ function SectionHeader({
       {description && (
         <p
           className={`mt-4 max-w-2xl text-base leading-relaxed ${
-            isDark ? "text-white/60" : "text-[#00003e]/60"
+            isDark ? 'text-white/60' : 'text-[#00003e]/60'
           }`}
         >
           {description}

@@ -26,9 +26,7 @@ export default function LogInForm() {
     >
       <Field label="Email" htmlFor="email">
         <InputWrapper
-          icon={
-            <Mail className="h-[18px] w-[18px] text-slate-400 2xl:h-5 2xl:w-5" />
-          }
+          icon={<Mail className="h-4.5 w-4.5 text-slate-400 2xl:h-5 2xl:w-5" />}
         >
           <input
             id="email"
@@ -42,9 +40,7 @@ export default function LogInForm() {
 
       <Field label="Password" htmlFor="password">
         <InputWrapper
-          icon={
-            <Lock className="h-[18px] w-[18px] text-slate-400 2xl:h-5 2xl:w-5" />
-          }
+          icon={<Lock className="h-4.5 w-4.5 text-slate-400 2xl:h-5 2xl:w-5" />}
           suffix={
             <PasswordToggle
               show={showPassword}
@@ -66,13 +62,13 @@ export default function LogInForm() {
         <label className="3xl:text-lg flex cursor-pointer items-center gap-2.5 text-sm text-slate-600 2xl:text-base">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded-md border-slate-300 accent-[#f4a300] 2xl:h-5 2xl:w-5"
+            className="accent-brand-gold h-4 w-4 rounded-md border-slate-300 2xl:h-5 2xl:w-5"
           />
           Remember me
         </label>
         <Link
           href="/auth/forgot-password"
-          className="3xl:text-lg text-sm font-semibold text-[#f4a300] transition-opacity hover:opacity-75 2xl:text-base"
+          className="3xl:text-lg text-brand-gold text-sm font-semibold transition-opacity hover:opacity-75 2xl:text-base"
         >
           Forgot password?
         </Link>

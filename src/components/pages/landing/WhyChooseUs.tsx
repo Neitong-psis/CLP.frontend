@@ -5,7 +5,7 @@ import SectionHeader from './HeaderSection';
 
 export default function WhyChooseUsSection() {
   return (
-    <section className="relative overflow-hidden bg-[#00003e] py-20 text-white sm:py-24">
+    <section className="bg-brand-navy relative overflow-hidden py-12 text-white sm:py-16 md:py-20 lg:py-24">
       {/* Dot pattern */}
       <div
         aria-hidden
@@ -25,26 +25,20 @@ export default function WhyChooseUsSection() {
           variant="dark"
         />
 
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:mt-12 lg:grid-cols-4 lg:gap-6">
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-all duration-300 hover:border-[#f4a300]/30 hover:bg-white/[0.05]"
+              className="group hover:border-brand-gold/30 relative overflow-hidden rounded-2xl border border-white/10 bg-white/2 p-5 transition-all duration-300 hover:bg-white/5 sm:p-6"
             >
-              {/* Glow bloom behind the icon — radiates outward on hover */}
-              <div
-                aria-hidden
-                className="absolute top-2 left-2 h-20 w-20 rounded-full bg-[#f4a300]/0 blur-xl transition-all duration-500 group-hover:bg-[#f4a300]/30"
-              />
-
               {/* Bottom line that grows left → right */}
               <div
                 aria-hidden
-                className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-[#f4a300]/50 transition-[scale] duration-500 ease-out group-hover:scale-x-100"
+                className="bg-brand-gold/50 absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 transition-[scale] duration-500 ease-out group-hover:scale-x-100"
               />
 
-              <div className="relative mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#f4a300]/10 text-[#f4a300] ring-1 ring-[#f4a300]/20 transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-[#f4a300] group-hover:text-[#00003e]">
-                <feature.icon className="h-5 w-5" />
+              <div className="bg-brand-gold/10 text-brand-gold ring-brand-gold/20 group-hover:bg-brand-gold group-hover:text-brand-navy relative mb-4 flex h-10 w-10 items-center justify-center rounded-xl ring-1 transition-all duration-300 group-hover:-translate-y-1 sm:mb-5 sm:h-12 sm:w-12">
+                <feature.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <h3 className="relative mb-2 text-base font-bold text-white">
                 {feature.title}

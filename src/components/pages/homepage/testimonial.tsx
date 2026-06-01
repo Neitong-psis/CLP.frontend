@@ -1,8 +1,8 @@
 'use client';
 
-import SectionHeader from "./sectionHeader";
-import { TESTIMONIALS } from "@/config/homepage";
-import { Star } from "lucide-react";
+import SectionHeader from './sectionHeader';
+import { TESTIMONIALS } from '@/config/homepage';
+import { Star } from 'lucide-react';
 
 export default function TestimonialsSection() {
   return (
@@ -22,7 +22,10 @@ export default function TestimonialsSection() {
             >
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-[#f4a300] text-[#f4a300]" />
+                  <Star
+                    key={i}
+                    className="h-4 w-4 fill-[#f4a300] text-[#f4a300]"
+                  />
                 ))}
               </div>
               <blockquote className="flex-1 text-base leading-relaxed text-[#00003e]/80">

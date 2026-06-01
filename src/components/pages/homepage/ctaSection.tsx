@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Link } from "lucide-react";
+import { ArrowRight, Link } from 'lucide-react';
 
 export default function CTASection() {
   return (
@@ -18,10 +18,10 @@ export default function CTASection() {
           />
 
           <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00003e]/60">
+            <span className="text-xs font-bold tracking-[0.2em] text-[#00003e]/60 uppercase">
               Limited Seats · Spring 2026
             </span>
-            <h2 className="text-3xl font-bold leading-tight tracking-tight text-[#00003e] sm:text-4xl">
+            <h2 className="text-3xl leading-tight font-bold tracking-tight text-[#00003e] sm:text-4xl">
               Your leadership journey starts here.
             </h2>
             <p className="text-base text-[#00003e]/70">

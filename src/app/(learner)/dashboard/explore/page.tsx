@@ -7,6 +7,7 @@ export default function ExplorePage() {
   return (
     <div className="flex min-h-full flex-col">
       <TopBar
+        role="learner"
         title="Explore Courses"
         subtitle={`Live workspace synced for ${MOCK_USER.email}`}
       />

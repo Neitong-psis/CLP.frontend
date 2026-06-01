@@ -1,7 +1,7 @@
 'use client';
 
-import { FEATURES } from "@/config/homepage";
-import SectionHeader from "./sectionHeader";
+import { FEATURES } from '@/config/homepage';
+import SectionHeader from './sectionHeader';
 
 export default function WhyChooseUsSection() {
   return (
@@ -12,8 +12,8 @@ export default function WhyChooseUsSection() {
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            "radial-gradient(circle, #f4a300 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+            'radial-gradient(circle, #f4a300 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
         }}
       />
 

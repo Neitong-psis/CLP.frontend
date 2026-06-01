@@ -56,6 +56,7 @@ export default function ProgressPage() {
   return (
     <div className="min-h-full bg-slate-50">
       <TopBar
+        role="learner"
         title="Progress & Achievements"
         subtitle={`${MOCK_USER.weeklyDaysCompleted} of ${MOCK_USER.totalWeeklyDays} study days completed this week`}
       />

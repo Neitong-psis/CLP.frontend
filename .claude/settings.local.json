@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(npx prettier *)",
-      "PowerShell(taskkill *)"
+      "PowerShell(taskkill *)",
+      "Bash(git rm *)",
+      "Bash(npm run *)",
+      "Bash(curl -sS -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -sS http://localhost:3000/)",
+      "Bash(npx eslint *)"
     ]
   }
 }
