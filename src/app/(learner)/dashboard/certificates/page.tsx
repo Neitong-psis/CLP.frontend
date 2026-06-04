@@ -1,6 +1,6 @@
 import { Download, Share2, Copy, ShieldCheck } from 'lucide-react';
 import { CERTIFICATES, MOCK_USER } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
+import TopBar from '@/feature/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 export default function CertificatesPage() {

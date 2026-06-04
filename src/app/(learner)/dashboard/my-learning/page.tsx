@@ -1,6 +1,6 @@
 import { ENROLLED_COURSES } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
-import MyLearningTabs from '@/components/pages/learner/my_learner/MyLearningTabs';
+import TopBar from '@/feature/learner/TopBar';
+import MyLearningTabs from '@/feature/learner/my_learner/MyLearningTabs';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 export default function MyLearningPage() {

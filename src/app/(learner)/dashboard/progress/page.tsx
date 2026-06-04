@@ -15,7 +15,7 @@ import {
   SKILLS,
   WEEKLY_ACTIVITY,
 } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
+import TopBar from '@/feature/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 function skillLevel(p: number) {
@@ -74,11 +74,11 @@ export default function ProgressPage() {
                   {MOCK_USER.xp.toLocaleString()}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-medium text-white">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs font-medium text-white">
                     <Flame className="text-brand-gold h-3.5 w-3.5" />
                     {MOCK_USER.streak}-day streak
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-medium text-white">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs font-medium text-white">
                     <Target className="text-brand-gold h-3.5 w-3.5" />
                     {MOCK_USER.weeklyDaysCompleted}/{MOCK_USER.totalWeeklyDays}{' '}
                     days this week
@@ -236,7 +236,7 @@ export default function ProgressPage() {
 
                     <div className="relative flex w-full flex-1 flex-col justify-end">
                       <div
-                        className="bg-brand-gold/[0.08] absolute bottom-0 w-full rounded-t-sm"
+                        className="bg-brand-gold/8 absolute bottom-0 w-full rounded-t-sm"
                         style={{ height: `${targetLinePct}%` }}
                       />
                       <div

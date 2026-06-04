@@ -1,6 +1,6 @@
 import { EXPLORE_COURSES, MOCK_USER } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
-import ExploreFilter from '@/components/pages/learner/explore/ExploreFilter';
+import TopBar from '@/feature/learner/TopBar';
+import ExploreFilter from '@/feature/learner/explore/ExploreFilter';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 export default function ExplorePage() {

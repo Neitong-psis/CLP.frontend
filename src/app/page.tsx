@@ -1,22 +1,27 @@
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/footer/Footer';
-import HeroSection from '@/components/pages/landing/HeroSection';
-import StatsBar from '@/components/pages/landing/statBar/StatsBar';
-import ProgramsSection from '@/components/pages/landing/ProgramSection';
-import WhyChooseUsSection from '@/components/pages/landing/WhyChooseUs';
-import TestimonialsSection from '@/components/pages/landing/Testimonial';
-import CTASection from '@/components/pages/landing/CtaSection';
+import HeroSection from '@/feature/landing/HeroSection';
+import StatsBar from '@/feature/landing/statBar/StatsBar';
+import ProgramsSection from '@/feature/landing/ProgramSection';
+import TestimonialsSection from '@/feature/landing/Testimonial';
+import CTASection from '@/feature/landing/CtaSection';
+import TrustedBy from '@/feature/landing/TrustedBy';
+import NewsSection from '@/feature/landing/NewsSection';
+import FaqSection from '@/feature/landing/FaqSection';
 
 export default function Home() {
   return (
-    <div className="min-h-screen overflow-hidden scroll-smooth bg-gray-50">
+    <div className="min-h-screen overflow-hidden scroll-smooth bg-white">
       <Header />
       <main className="flex-1">
         <HeroSection />
+        <TrustedBy />
         <StatsBar />
         <ProgramsSection />
-        <WhyChooseUsSection />
+        {/* <WhyChooseUsSection /> */}
+        <NewsSection />
         <TestimonialsSection />
+        <FaqSection />
         <CTASection />
       </main>
       <Footer />

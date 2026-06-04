@@ -1,9 +1,9 @@
 ﻿import { MOCK_USER } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
-import StatCards from '@/components/pages/learner/dashboard/StatCards';
-import LearningProgress from '@/components/pages/learner/dashboard/LearningProgress';
-import RecommendedCourses from '@/components/pages/learner/dashboard/RecommendedCourses';
-import UpcomingQuizzes from '@/components/pages/learner/dashboard/UpcomingQuizzes';
+import TopBar from '@/feature/learner/TopBar';
+import StatCards from '@/feature/learner/dashboard/StatCards';
+import LearningProgress from '@/feature/learner/dashboard/LearningProgress';
+import RecommendedCourses from '@/feature/learner/dashboard/RecommendedCourses';
+import UpcomingQuizzes from '@/feature/learner/dashboard/UpcomingQuizzes';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import { Spacer } from '@/components/ui/Spacer';
 

@@ -16,7 +16,7 @@ export default function NotFound() {
       {/* Background 404 watermark — centered on the page */}
       <span
         aria-hidden
-        className="font-heading pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-[10rem] leading-none font-black tracking-tighter text-[#00003e]/[0.05] select-none sm:text-[16rem]"
+        className="font-heading text-brand-navy/5 pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-[10rem] leading-none font-black tracking-tighter select-none sm:text-[16rem]"
       >
         404
       </span>
@@ -26,7 +26,7 @@ export default function NotFound() {
         <Link
           href="/"
           aria-label="AYLA home"
-          className="rounded-lg transition-opacity duration-200 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f4a300] focus-visible:ring-offset-4"
+          className="focus-visible:ring-brand-gold rounded-lg transition-opacity duration-200 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4"
         >
           <Logo size="md" variant="alt" />
         </Link>
@@ -36,7 +36,7 @@ export default function NotFound() {
 
       {/* Main content — sits at the true vertical center, over the 404 */}
       <div className="relative z-10 flex flex-col items-center gap-8">
-        <h1 className="font-heading text-3xl font-bold tracking-tight text-[#00003e] sm:text-4xl">
+        <h1 className="font-heading text-brand-navy text-3xl font-bold tracking-tight sm:text-4xl">
           Page not found
         </h1>
 
@@ -46,7 +46,7 @@ export default function NotFound() {
           <BackButton />
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-[#f4a300] px-6 py-2.5 text-sm font-semibold text-[#00003e] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e09400] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f4a300] focus-visible:ring-offset-2"
+            className="bg-brand-gold text-brand-navy hover:bg-brand-orange focus-visible:ring-brand-gold inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             <Home aria-hidden className="h-4 w-4" />
             Back to home

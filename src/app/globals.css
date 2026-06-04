@@ -12,6 +12,12 @@
   --color-brand-gold: #f4a300;
   --color-brand-gold-dark: #e09400;
   --color-brand-red: #e00025;
+
+  /* Dashboard accent ramps — blue + indigo (see Platform Overview redesign) */
+  --color-accent-blue: #3b5bfd;
+  --color-accent-blue-soft: #eef1ff;
+  --color-accent-indigo: #6366f1;
+  --color-accent-indigo-soft: #eef0fe;
 }
 
 @layer base {
@@ -61,6 +67,30 @@
     transform: scale(1);
   }
 }
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes marquee-x {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes marquee-px {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(var(--marquee-w, 0px) * -1));
+  }
+}
 @keyframes float {
   0%,
   100% {
@@ -72,10 +102,22 @@
 }
 @keyframes slide-up {
   from {
-    transform: translateY(110%);
+    opacity: 0;
+    transform: translateY(60%);
   }
   to {
+    opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes slide-up-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-40%);
   }
 }
 @keyframes highlight-in {
@@ -108,6 +150,12 @@
   animation-timing-function: ease-out;
   animation-fill-mode: both;
 }
+@utility animate-marquee {
+  animation-name: marquee;
+  animation-duration: 32s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
 @utility animate-float {
   animation-name: float;
   animation-duration: 4s;
@@ -116,8 +164,14 @@
 }
 @utility animate-slide-up {
   animation-name: slide-up;
-  animation-duration: 0.75s;
+  animation-duration: 0.6s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+@utility animate-slide-up-out {
+  animation-name: slide-up-out;
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
   animation-fill-mode: both;
 }
 @utility animate-highlight-in {

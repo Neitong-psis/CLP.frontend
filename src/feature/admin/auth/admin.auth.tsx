@@ -22,6 +22,11 @@ export function validateAdminCredentials(
   return { email: email.toLowerCase(), name: credential.name, role: 'admin' };
 }
 
+export function getAdminSessionRaw(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(SESSION_KEY);
+}
+
 export function getAdminSession(): AdminSession | null {
   if (typeof window === 'undefined') return null;
   try {

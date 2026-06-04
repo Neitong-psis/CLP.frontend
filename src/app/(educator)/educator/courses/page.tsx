@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import EducatorTopBar from '@/components/common/TopBar';
-import CreateCourseWizard from '@/components/pages/educator/courses/CreateCourseWizard';
-import { CourseTable } from '@/components/pages/educator/courses/CourseTable';
+import CreateCourseWizard from '@/feature/educator/courses/CreateCourseWizard';
+import { CourseTable } from '@/feature/educator/courses/CourseTable';
 
 export default function EducatorCoursesPage() {
   const [wizardOpen, setWizardOpen] = useState(false);

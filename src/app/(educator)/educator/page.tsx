@@ -7,10 +7,10 @@ import {
 } from '@/constants/educator';
 
 import TopBar from '@/components/common/TopBar';
-import { StatCard } from '@/components/pages/educator/dashboard/StatCard';
-import { EnrollmentTrendCard } from '@/components/pages/educator/dashboard/EnrollmentTrendCard';
-import { QuizAnalyticsCard } from '@/components/pages/educator/dashboard/QuizAnalyticsCard';
-import { CourseInsightsGrid } from '@/components/pages/educator/dashboard/CourseInsightsGrid';
+import { StatCard } from '@/feature/educator/dashboard/StatCard';
+import { EnrollmentTrendCard } from '@/feature/educator/dashboard/EnrollmentTrendCard';
+import { QuizAnalyticsCard } from '@/feature/educator/dashboard/QuizAnalyticsCard';
+import { CourseInsightsGrid } from '@/feature/educator/dashboard/CourseInsightsGrid';
 
 const STAT_ICONS = [Users, BookOpen, Star, DollarSign];
 const STAT_BG = [

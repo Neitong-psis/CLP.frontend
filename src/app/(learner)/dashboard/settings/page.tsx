@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { User, BookOpen, Bell, Shield, Upload, Camera } from 'lucide-react';
 import { MOCK_USER } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
+import TopBar from '@/feature/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 const inputCls =

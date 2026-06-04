@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/toast';
 import {
   Search,
@@ -404,6 +404,118 @@ function DeleteModal({
   );
 }
 
+// ── Row context menu ─────────────────────────────────────────────────────────
+
+interface ContextMenuState {
+  course: AdminCourseRow;
+  x: number;
+  y: number;
+}
+
+function RowContextMenu({
+  course,
+  x,
+  y,
+  onView,
+  onEdit,
+  onPublish,
+  onDelete,
+  onClose,
+}: {
+  course: AdminCourseRow;
+  x: number;
+  y: number;
+  onView: () => void;
+  onEdit: () => void;
+  onPublish: () => void;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ x, y });
+
+  // Clamp to viewport after first render so menu never clips off-screen
+  useEffect(() => {
+    if (!ref.current) return;
+    const { width, height } = ref.current.getBoundingClientRect();
+    setPos({
+      x: x + width > window.innerWidth ? x - width : x,
+      y: y + height > window.innerHeight ? y - height : y,
+    });
+  }, [x, y]);
+
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      aria-label={`Actions for ${course.title}`}
+      className="fixed z-50 min-w-35 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+      style={{ top: pos.y, left: pos.x }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Course name label */}
+      <p className="truncate px-3 pt-2 pb-1.5 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
+        {course.title.length > 26
+          ? course.title.slice(0, 26) + '…'
+          : course.title}
+      </p>
+      <div className="mb-1 border-t border-slate-100" />
+
+      <button
+        role="menuitem"
+        onClick={() => {
+          onView();
+          onClose();
+        }}
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+      >
+        <Eye className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+        View
+      </button>
+
+      <button
+        role="menuitem"
+        onClick={() => {
+          onEdit();
+          onClose();
+        }}
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+      >
+        <Pencil className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+        Edit
+      </button>
+
+      {course.status !== 'Public' && (
+        <button
+          role="menuitem"
+          onClick={() => {
+            onPublish();
+            onClose();
+          }}
+          className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:bg-emerald-50 focus-visible:outline-none"
+        >
+          <Check className="h-3.5 w-3.5 shrink-0" />
+          Publish
+        </button>
+      )}
+
+      <div className="my-1 border-t border-slate-100" />
+
+      <button
+        role="menuitem"
+        onClick={() => {
+          onDelete();
+          onClose();
+        }}
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-rose-500 transition-colors hover:bg-rose-50 focus-visible:bg-rose-50 focus-visible:outline-none"
+      >
+        <Trash2 className="h-3.5 w-3.5 shrink-0" />
+        Delete
+      </button>
+    </div>
+  );
+}
+
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminCoursesPage() {
@@ -418,6 +530,22 @@ export default function AdminCoursesPage() {
   const [viewCourse, setViewCourse] = useState<AdminCourseRow | null>(null);
   const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+
+  // Close context menu on click-outside or Escape
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    window.addEventListener('click', close);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('click', close);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [contextMenu]);
 
   const { toast } = useToast();
 
@@ -538,6 +666,18 @@ export default function AdminCoursesPage() {
           onClose={() => setDeleteCourse(null)}
         />
       )}
+      {contextMenu && (
+        <RowContextMenu
+          course={contextMenu.course}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onView={() => setViewCourse(contextMenu.course)}
+          onEdit={() => setEditCourse(contextMenu.course)}
+          onPublish={() => handlePublish(contextMenu.course.id)}
+          onDelete={() => setDeleteCourse(contextMenu.course)}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
 
       <div className="flex min-h-full flex-col">
         <TopBar
@@ -614,7 +754,14 @@ export default function AdminCoursesPage() {
                   {paginated.map((course, idx) => (
                     <tr
                       key={course.id}
-                      className="transition-colors hover:bg-slate-50"
+                      className={cn(
+                        'transition-colors hover:bg-slate-50',
+                        contextMenu?.course.id === course.id && 'bg-slate-50',
+                      )}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextMenu({ course, x: e.clientX, y: e.clientY });
+                      }}
                     >
                       <td className="px-4 py-4 text-xs text-slate-400">
                         {pageStart + idx}

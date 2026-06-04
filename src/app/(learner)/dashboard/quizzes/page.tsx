@@ -1,5 +1,5 @@
 import { QUIZZES } from '@/config/learner';
-import TopBar from '@/components/pages/learner/TopBar';
+import TopBar from '@/feature/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 const STATUS_BADGE: Record<string, string> = {

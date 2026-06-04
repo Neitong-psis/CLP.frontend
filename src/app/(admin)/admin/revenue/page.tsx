@@ -4,9 +4,9 @@
   REVENUE_BY_CATEGORY,
 } from '@/constants/admin';
 import TopBar from '@/components/common/TopBar';
-import { RevenueStatsGrid } from '@/components/pages/admin/dashboard/RevenueStatsGrid';
-import { MonthlyRevenueCard } from '@/components/pages/admin/dashboard/MonthlyRevenueCard';
-import { RevenueByCategoryCard } from '@/components/pages/admin/dashboard/RevenueByCategoryCard';
+import { RevenueStatsGrid } from '@/feature/admin/components/dashboard/RevenueStatsGrid';
+import { MonthlyRevenueCard } from '@/feature/admin/components/dashboard/MonthlyRevenueCard';
+import { RevenueByCategoryCard } from '@/feature/admin/components/dashboard/RevenueByCategoryCard';
 
 export default function AdminRevenuePage() {
   return (
@@ -16,10 +16,12 @@ export default function AdminRevenuePage() {
         title="Revenue"
         subtitle={`Live workspace synced for ${ADMIN_USER.email}`}
       />
-      <div className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex-2 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         <RevenueStatsGrid />
-        <MonthlyRevenueCard data={MONTHLY_REVENUE} />
-        <RevenueByCategoryCard data={REVENUE_BY_CATEGORY} />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <MonthlyRevenueCard data={MONTHLY_REVENUE} />
+          <RevenueByCategoryCard data={REVENUE_BY_CATEGORY} />
+        </div>
       </div>
     </div>
   );
