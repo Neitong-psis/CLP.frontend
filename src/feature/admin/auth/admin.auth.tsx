@@ -7,9 +7,9 @@ export interface AdminSession {
 }
 
 const ADMIN_CREDENTIALS: Record<string, { password: string; name: string }> = {
-  [process.env.NEXT_PUBLIC_ADMIN_EMAIL!]: {
-    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD!,
-    name: process.env.NEXT_PUBLIC_ADMIN_NAME!,
+  [(process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? 'admin@psis.edu.kh').toLowerCase()]: {
+    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? 'admin123',
+    name: process.env.NEXT_PUBLIC_ADMIN_NAME ?? 'Admin',
   },
 };
 
