@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   GraduationCap,
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import Logo from '@/components/common/Logo';
 import ProfileMenu from '@/components/common/sidebar/ProfileMenu';
 import { MOCK_USER } from '@/constants/learner';
@@ -48,19 +48,19 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
     navItems: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       {
-        href: '/dashboard/my-learning',
+        href: '/my-learning',
         icon: BookOpen,
         label: 'My Learning',
         badge: 3,
       },
-      { href: '/dashboard/explore', icon: Compass, label: 'Explore' },
+      { href: '/explore', icon: Compass, label: 'Explore' },
       {
-        href: '/dashboard/progress',
+        href: '/progress',
         icon: TrendingUp,
         label: 'Progress & Achievements',
       },
-      { href: '/dashboard/quizzes', icon: Brain, label: 'Quizzes', badge: 2 },
-      { href: '/dashboard/certificates', icon: Award, label: 'Certificates' },
+      { href: '/quizzes', icon: Brain, label: 'Quizzes', badge: 2 },
+      { href: '/certificates', icon: Award, label: 'Certificates' },
     ],
     rootHref: '/dashboard',
     roleChip: { label: MOCK_USER.role },

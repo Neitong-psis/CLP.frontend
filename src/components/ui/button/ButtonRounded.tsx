@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import { Button, type ButtonProps } from './Button';
 
 export function ButtonRounded({ className, ...props }: ButtonProps) {

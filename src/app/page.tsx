@@ -1,13 +1,13 @@
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/footer/Footer';
-import HeroSection from '@/feature/landing/HeroSection';
-import StatsBar from '@/feature/landing/statBar/StatsBar';
-import ProgramsSection from '@/feature/landing/ProgramSection';
-import TestimonialsSection from '@/feature/landing/Testimonial';
-import CTASection from '@/feature/landing/CtaSection';
-import TrustedBy from '@/feature/landing/TrustedBy';
-import NewsSection from '@/feature/landing/NewsSection';
-import FaqSection from '@/feature/landing/FaqSection';
+import HeroSection from '@/components/pages/landing/HeroSection';
+import StatsBar from '@/components/pages/landing/statBar/StatsBar';
+import ProgramsSection from '@/components/pages/landing/ProgramSection';
+import TestimonialsSection from '@/components/pages/landing/Testimonial';
+import CTASection from '@/components/pages/landing/CtaSection';
+import TrustedBy from '@/components/pages/landing/TrustedBy';
+import NewsSection from '@/components/pages/landing/NewsSection';
+import FaqSection from '@/components/pages/landing/FaqSection';
 
 export default function Home() {
   return (

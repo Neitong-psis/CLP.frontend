@@ -4,9 +4,9 @@
   REVENUE_BY_CATEGORY,
 } from '@/constants/admin';
 import TopBar from '@/components/common/TopBar';
-import { RevenueStatsGrid } from '@/feature/admin/components/dashboard/RevenueStatsGrid';
-import { MonthlyRevenueCard } from '@/feature/admin/components/dashboard/MonthlyRevenueCard';
-import { RevenueByCategoryCard } from '@/feature/admin/components/dashboard/RevenueByCategoryCard';
+import { RevenueStatsGrid } from '@/components/pages/admin/components/dashboard/RevenueStatsGrid';
+import { MonthlyRevenueCard } from '@/components/pages/admin/components/dashboard/MonthlyRevenueCard';
+import { RevenueByCategoryCard } from '@/components/pages/admin/components/dashboard/RevenueByCategoryCard';
 
 export default function AdminRevenuePage() {
   return (

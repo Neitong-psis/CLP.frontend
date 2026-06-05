@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { easeOutCubic, prefersReducedMotion } from '@/utils/animation';
+import { easeOutCubic, prefersReducedMotion } from '@/lib/utils/animation';
 
 const DEFAULT_DURATION_MS = 1800;
 

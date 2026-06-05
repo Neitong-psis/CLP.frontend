@@ -4,27 +4,22 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import Logo from '@/components/common/Logo';
-import { RetryButton } from '@/components/pages/error/RetryButton';
+import { RetryButton } from '@/components/helper/RetryButton';
 import { Spacer } from '@/components/ui/Spacer';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }
 
-export default function ErrorPage({ error, unstable_retry }: ErrorPageProps) {
+export default function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white px-6 text-center">
-      <span
-        aria-hidden
-        className="font-heading pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-[10rem] leading-none font-black tracking-tighter text-[#00003e]/[0.05] select-none sm:text-[16rem]"
-      >
-        500
-      </span>
+      <Watermark size="md" />
 
       <div className="absolute top-20 left-1/2 -translate-x-1/2">
         <Link
@@ -51,7 +46,7 @@ export default function ErrorPage({ error, unstable_retry }: ErrorPageProps) {
         <Spacer height={8} />
 
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <RetryButton onRetry={unstable_retry} />
+          <RetryButton onRetry={reset} />
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-full border border-[#00003e]/20 px-6 py-2.5 text-sm font-semibold text-[#00003e] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#00003e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f4a300]"
@@ -62,5 +57,21 @@ export default function ErrorPage({ error, unstable_retry }: ErrorPageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function Watermark({ size }: { size: 'sm' | 'md'; className?: string }) {
+  const sizeClasses = {
+    sm: 'text-[8rem] sm:text-[14rem]',
+    md: 'text-[10rem] sm:text-[16rem]',
+  };
+
+  return (
+    <span
+      aria-hidden
+      className={`font-heading pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center select-none ${sizeClasses[size]} leading-none font-black tracking-tighter text-[#00003e]/[0.05]`}
+    >
+      500
+    </span>
   );
 }

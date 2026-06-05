@@ -8,7 +8,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">
       {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:h-full lg:flex-shrink-0">
+      <div className="hidden lg:flex lg:h-full lg:shrink-0">
         <Sidebar role="learner" />
       </div>
 

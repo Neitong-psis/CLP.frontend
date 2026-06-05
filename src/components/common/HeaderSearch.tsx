@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { Search } from 'lucide-react';
 import { useSearch } from '@/hooks/useSearch';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 
 interface HeaderSearchProps {
   compact?: boolean;

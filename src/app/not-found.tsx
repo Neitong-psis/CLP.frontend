@@ -2,12 +2,15 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import Logo from '@/components/common/Logo';
-import { BackButton } from '@/components/pages/not-found/BackButton';
 import { Spacer } from '@/components/ui/Spacer';
+import { BackButton } from '@/components/helper/BackButton';
 
 export const metadata: Metadata = {
   title: '404 – Page Not Found',
   description: 'The page you are looking for does not exist.',
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  ),
 };
 
 export default function NotFound() {

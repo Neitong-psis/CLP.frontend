@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/Popover';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import {
   type AdminUserRow,
   type UserRole,

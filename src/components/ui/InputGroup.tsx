@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/TextArea';
-import { cvm, VariantProps } from '@/utils/cva';
+import { cvm, VariantProps } from '@/lib/utils/cva';
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (

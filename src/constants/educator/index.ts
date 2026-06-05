@@ -95,15 +95,176 @@ export const EDUCATOR_COURSES: EducatorCourse[] = [
   },
 ];
 
+// ── Course tasks (My Courses workspace) ──────────────────────────────────────
+// The educator workspace is organised as a task board: every course moves
+// through To Do → In Writing → Under Review → Published (or Archived).
+
+export type CourseTaskStatus =
+  | 'To Do'
+  | 'In Writing'
+  | 'Under Review'
+  | 'Published'
+  | 'Archived';
+
+export type TaskPriority = 'High' | 'Medium' | 'Low';
+
+export interface CourseTask {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price: string;
+  assignedBy: string;
+  status: CourseTaskStatus;
+  priority: TaskPriority;
+  dueDate: string;
+}
+
+export const COURSE_TASK_STATUSES: CourseTaskStatus[] = [
+  'To Do',
+  'In Writing',
+  'Under Review',
+  'Published',
+  'Archived',
+];
+
+export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
+  {
+    id: 'ct1',
+    title: 'AI Productivity for Office Teams',
+    description:
+      'Planning a practical course on using AI tools for daily operations, research, and team workflows.',
+    category: 'AI',
+    price: '$29',
+    assignedBy: 'Sarah Wilson',
+    status: 'To Do',
+    priority: 'High',
+    dueDate: 'May 30, 2026',
+  },
+  {
+    id: 'ct2',
+    title: 'Business Analytics with Excel and Power BI',
+    description:
+      'Planning dashboards, spreadsheet models, and Power BI reporting lessons for business teams.',
+    category: 'Business',
+    price: '$39',
+    assignedBy: 'Sarah Wilson',
+    status: 'To Do',
+    priority: 'High',
+    dueDate: 'May 30, 2026',
+  },
+  {
+    id: 'ct3',
+    title: 'Intro to Python for Educators',
+    description:
+      'Planning beginner-friendly Python lessons for teachers who want to use coding in classrooms.',
+    category: 'Programming',
+    price: 'Free',
+    assignedBy: 'Sarah Wilson',
+    status: 'To Do',
+    priority: 'Medium',
+    dueDate: 'Jun 4, 2026',
+  },
+  {
+    id: 'ct4',
+    title: 'Digital Marketing Campaign Strategy',
+    description:
+      'Planning a strategy-first course covering campaign goals, channels, budgets, and performance reviews.',
+    category: 'Marketing',
+    price: '$24.99',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'High',
+    dueDate: 'May 28, 2026',
+  },
+  {
+    id: 'ct5',
+    title: 'Foundations of Cloud Computing',
+    description:
+      'Drafting core cloud concepts, service models, deployment patterns, and real-world examples.',
+    category: 'Cloud',
+    price: '$34',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'Medium',
+    dueDate: 'Jun 1, 2026',
+  },
+  {
+    id: 'ct6',
+    title: 'Agile Project Management Basics',
+    description:
+      'Lessons on sprints, backlogs, and ceremonies are written and ready for the admin review pass.',
+    category: 'Business',
+    price: '$32',
+    assignedBy: 'Sarah Wilson',
+    status: 'Under Review',
+    priority: 'High',
+    dueDate: 'May 26, 2026',
+  },
+  {
+    id: 'ct7',
+    title: 'Responsive Web Design Essentials',
+    description:
+      'Mobile-first layout course submitted for approval — awaiting reviewer feedback before publishing.',
+    category: 'Web Development',
+    price: '$29',
+    assignedBy: 'Sarah Wilson',
+    status: 'Under Review',
+    priority: 'Medium',
+    dueDate: 'May 27, 2026',
+  },
+  {
+    id: 'ct8',
+    title: 'Complete Web Development Bootcamp',
+    description:
+      'Live for learners with strong completion rates. Track performance and reviews in analytics.',
+    category: 'Web Development',
+    price: '$49',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 10',
+  },
+  {
+    id: 'ct9',
+    title: 'Advanced CSS & Sass: Flexbox, Grid, Animations',
+    description:
+      'Published and enrolling. Consider a refresh lesson on container queries next quarter.',
+    category: 'Web Development',
+    price: '$24',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 22',
+  },
+  {
+    id: 'ct10',
+    title: 'Legacy jQuery Patterns',
+    description:
+      'Archived after the framework refresh. Restore if you want to modernise and republish it.',
+    category: 'Programming',
+    price: '$19',
+    assignedBy: 'Sarah Wilson',
+    status: 'Archived',
+    priority: 'Low',
+    dueDate: 'Archived Mar 2',
+  },
+];
+
+export type StudentStatus = 'Active' | 'Inactive' | 'Completed';
+export type StudentActivity = 'Highly active' | 'Active' | 'At risk';
+
 export interface StudentRow {
   id: string;
   name: string;
   email: string;
   course: string;
   progress: number;
-  status: 'Active' | 'Inactive' | 'Completed';
+  activity: StudentActivity;
+  status: StudentStatus;
   enrolled: string;
   lastSeen: string;
+  earnings: string;
 }
 
 export const EDUCATOR_STUDENTS: StudentRow[] = [
@@ -113,9 +274,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'alex.j@clp.com',
     course: 'Complete Web Development Bootcamp',
     progress: 84,
+    activity: 'Highly active',
     status: 'Active',
     enrolled: 'Jan 2026',
     lastSeen: '30m ago',
+    earnings: '$49',
   },
   {
     id: 's2',
@@ -123,9 +286,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'sopheaktra@ayla.edu.kh',
     course: 'Complete Web Development Bootcamp',
     progress: 62,
+    activity: 'Active',
     status: 'Active',
     enrolled: 'Feb 2026',
     lastSeen: '2h ago',
+    earnings: '$49',
   },
   {
     id: 's3',
@@ -133,9 +298,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'learner@clp.com',
     course: 'Advanced CSS & Sass',
     progress: 91,
+    activity: 'Highly active',
     status: 'Completed',
     enrolled: 'Dec 2025',
     lastSeen: '1d ago',
+    earnings: '$24',
   },
   {
     id: 's4',
@@ -143,9 +310,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'sarah.lee@clp.com',
     course: 'Node.js, Express, MongoDB & More',
     progress: 38,
+    activity: 'At risk',
     status: 'Inactive',
     enrolled: 'Mar 2026',
     lastSeen: '2w ago',
+    earnings: '$29',
   },
   {
     id: 's5',
@@ -153,9 +322,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'jane.smith@clp.com',
     course: 'Complete Web Development Bootcamp',
     progress: 55,
+    activity: 'Active',
     status: 'Active',
     enrolled: 'Feb 2026',
     lastSeen: '4h ago',
+    earnings: '$49',
   },
   {
     id: 's6',
@@ -163,9 +334,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'marcus.r@clp.com',
     course: 'React & TypeScript – Full Stack',
     progress: 73,
+    activity: 'Highly active',
     status: 'Active',
     enrolled: 'Apr 2026',
     lastSeen: '1h ago',
+    earnings: '$24',
   },
   {
     id: 's7',
@@ -173,9 +346,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'emily.c@clp.com',
     course: 'Advanced CSS & Sass',
     progress: 100,
+    activity: 'Highly active',
     status: 'Completed',
     enrolled: 'Jan 2026',
     lastSeen: '3d ago',
+    earnings: '$24',
   },
   {
     id: 's8',
@@ -183,9 +358,11 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     email: 'david.k@clp.com',
     course: 'Node.js, Express, MongoDB & More',
     progress: 20,
+    activity: 'At risk',
     status: 'Active',
     enrolled: 'May 2026',
     lastSeen: '6h ago',
+    earnings: '$29',
   },
 ];
 

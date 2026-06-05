@@ -14,7 +14,7 @@ import {
   Link2,
   Clock,
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
 

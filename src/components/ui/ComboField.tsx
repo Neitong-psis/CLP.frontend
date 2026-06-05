@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/utils/cn';
-import { cvm, type VariantProps } from '@/utils/cva';
+import { cn } from '@/lib/utils/cn';
+import { cvm, type VariantProps } from '@/lib/utils/cva';
 import { Field, FieldLabel } from '@/components/ui/Field';
 import { Label } from '@/components/ui/Label';
 import {

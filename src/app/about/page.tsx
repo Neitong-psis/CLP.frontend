@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/footer/Footer';
-import HeaderSection from '@/feature/landing/HeaderSection';
+import HeaderSection from '@/components/common/SectionHeader';
 import { ArrowRight, GraduationCap, Heart, Globe, Shield } from 'lucide-react';
 import { BRAND } from '@/constants/brand';
 import { HERO_STATS, TRUST_BADGES } from '@/constants/homepage';
 import { useInView } from '@/hooks/useInView';
-import { entranceClass, entranceStyle } from '@/utils/animation';
+import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 

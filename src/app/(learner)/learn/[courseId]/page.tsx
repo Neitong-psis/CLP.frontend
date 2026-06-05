@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ALL_COURSES, COURSE_CONTENTS } from '@/config/learner';
-import CoursePlayer from '@/feature/learner/my_learner/CoursePlayer';
+import CoursePlayer from '@/components/pages/learner/my_learner/CoursePlayer';
 
 interface PageProps {
   params: Promise<{ courseId: string }>;

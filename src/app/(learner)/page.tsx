@@ -1,9 +1,9 @@
-import HeroSection from '@/feature/landing/HeroSection';
-import StatsBar from '@/feature/landing/statBar/StatsBar';
-import ProgramsSection from '@/feature/landing/ProgramSection';
-import WhyChooseUsSection from '@/feature/landing/WhyChooseUs';
-import TestimonialsSection from '@/feature/landing/Testimonial';
-import CTASection from '@/feature/landing/CtaSection';
+import HeroSection from '@/components/pages/landing/HeroSection';
+import StatsBar from '@/components/pages/landing/statBar/StatsBar';
+import ProgramsSection from '@/components/pages/landing/ProgramSection';
+import WhyChooseUsSection from '@/components/pages/landing/WhyChooseUs';
+import TestimonialsSection from '@/components/pages/landing/Testimonial';
+import CTASection from '@/components/pages/landing/CtaSection';
 
 export default function Home() {
   return (

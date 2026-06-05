@@ -13,7 +13,7 @@ import {
   ShieldOff,
   ShieldCheck,
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import { type AdminUserRow } from '@/constants/admin';
 import { Button } from '@/components/ui/button/Button';
 import {
@@ -25,20 +25,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TopBar from '@/components/common/TopBar';
-import { useUserManagement } from '@/feature/admin/hooks/useUserManagement';
-import { useUserFilter } from '@/feature/admin/hooks/useUserFilter';
+import { useUserManagement } from '@/components/pages/admin/hooks/useUserManagement';
+import { useUserFilter } from '@/components/pages/admin/hooks/useUserFilter';
 import {
   Chip,
   DeleteModal,
   EditModal,
   ViewModal,
-} from '@/feature/admin/components/users/UserModals';
+} from '@/components/pages/admin/components/users/UserModals';
 import {
   ROLE_AVATAR_BG,
   ROLE_COLOR,
   STATUS_COLOR,
   userInitials,
-} from '@/feature/admin/components/users/constants';
+} from '@/components/pages/admin/components/users/constants';
 import AddUserModal from './AddUserModal';
 
 const TABLE_COLS = [

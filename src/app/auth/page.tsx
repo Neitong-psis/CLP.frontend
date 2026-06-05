@@ -1,5 +1,5 @@
-import RightPanel from '@/feature/auth/RightPanel';
-import LeftPanel from '@/feature/auth/LeftPanel';
+import RightPanel from '@/components/pages/auth/RightPanel';
+import LeftPanel from '@/components/pages/auth/LeftPanel';
 
 export default function LoginPage() {
   return (

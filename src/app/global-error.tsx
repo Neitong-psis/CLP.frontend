@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import { inter, jakarta } from '@/config/font';
-import { RetryButton } from '@/components/pages/error/RetryButton';
+import { RetryButton } from '@/components/helper/RetryButton';
 import './globals.css';
 
 interface GlobalErrorProps {

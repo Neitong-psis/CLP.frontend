@@ -23,7 +23,7 @@ import {
 import Logo from '@/components/common/Logo';
 import { HeaderSearch } from '@/components/common/HeaderSearch';
 import { NAV_LINKS, type NavLink } from '@/constants/navigation';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   Courses: BookOpen,

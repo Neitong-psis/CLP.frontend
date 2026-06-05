@@ -230,42 +230,6 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
   },
 ];
 
-export interface ApprovalQueueItem {
-  id: string;
-  title: string;
-  instructor: string;
-  category: string;
-  lessons: number;
-  submittedAt: string;
-}
-
-export const APPROVAL_QUEUE: ApprovalQueueItem[] = [
-  {
-    id: 'aq1',
-    title: 'Advanced Kubernetes Orchestration',
-    instructor: 'Raj Patel',
-    category: 'DevOps',
-    lessons: 42,
-    submittedAt: 'May 8, 2026',
-  },
-  {
-    id: 'aq2',
-    title: 'Zero to Full-Stack Next.js 15',
-    instructor: 'Sophie Chen',
-    category: 'Web Development',
-    lessons: 68,
-    submittedAt: 'May 9, 2026',
-  },
-  {
-    id: 'aq3',
-    title: 'Deep Learning with PyTorch',
-    instructor: 'Marcus Johnson',
-    category: 'Data Science',
-    lessons: 55,
-    submittedAt: 'May 10, 2026',
-  },
-];
-
 export const DASHBOARD_STATS = [
   { label: 'Total Users', value: '7', change: '+13%', icon: 'users' },
   { label: 'Active Courses', value: '7', change: '+4%', icon: 'book' },

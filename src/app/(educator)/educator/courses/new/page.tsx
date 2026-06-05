@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/toast';
 import {
   Check,
   ChevronDown,
@@ -20,7 +21,7 @@ import {
   ArrowRight,
   X,
 } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1018,18 +1019,26 @@ function AccordionSection({
   );
 }
 
+function priceLabel(info: CourseInfo): string {
+  if (info.pricingType === 'free') return 'Free';
+  return info.price ? `$${info.price}` : '—';
+}
+
 function PreviewPublishStep({
   info,
   modules,
+  missing,
 }: {
   info: CourseInfo;
   modules: CourseModule[];
+  missing: string[];
 }) {
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
+  const ready = missing.length === 0;
 
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mb-5">
         <h2 className="text-brand-navy text-base font-bold">
           Step 3. Preview &amp; Publish
         </h2>
@@ -1038,104 +1047,149 @@ function PreviewPublishStep({
         </p>
       </div>
 
-      <AccordionSection
-        title="1. Course Info"
-        desc="Thumbnail, title, badges, and description."
-        defaultOpen
-      >
-        <div className="flex gap-5">
-          <div className="flex h-28 w-44 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-400">
-            No thumbnail uploaded
-          </div>
-          <div className="flex-1 space-y-1">
-            <p className="text-brand-navy text-base font-bold">
-              {info.title || 'Course Title'}
-            </p>
-            <p className="text-sm text-slate-500">
-              {info.subtitle || 'Course Subtitle'}
-            </p>
-            <p className="text-xs text-slate-400">
-              {info.description || 'Course Description'}
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              {info.category && (
-                <span className="rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                  {info.category}
-                </span>
-              )}
-              {info.level && (
-                <span className="rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                  {info.level}
-                </span>
-              )}
-              {info.pricingType === 'free' ? (
-                <span className="bg-brand-gold/15 text-brand-gold rounded-md px-2.5 py-0.5 text-xs font-semibold">
-                  Free
-                </span>
-              ) : info.price ? (
-                <span className="bg-brand-gold/15 text-brand-gold rounded-md px-2.5 py-0.5 text-xs font-semibold">
-                  Paid ${info.price}
-                </span>
-              ) : null}
+      <div className="space-y-4">
+        <AccordionSection
+          title="1. Course Preview"
+          desc="Thumbnail, title, badges, and description."
+          defaultOpen
+        >
+          <div className="flex flex-col gap-5 sm:flex-row">
+            <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-400 sm:w-44">
+              No thumbnail uploaded
             </div>
-          </div>
-        </div>
-      </AccordionSection>
-
-      <AccordionSection
-        title="2. Course Contents"
-        desc={`${modules.length} module${modules.length !== 1 ? 's' : ''} and ${totalLessons} lesson${totalLessons !== 1 ? 's' : ''}.`}
-      >
-        {modules.length === 0 ? (
-          <p className="text-sm text-slate-400">No modules added.</p>
-        ) : (
-          <div className="space-y-2">
-            {modules.map((mod, i) => (
-              <div key={mod.id} className="flex items-center gap-2 text-sm">
-                <BookOpen className="text-brand-gold h-4 w-4" />
-                <span className="text-brand-navy font-medium">
-                  Module {i + 1}: {mod.title}
-                </span>
-                <span className="text-slate-400">
-                  — {mod.lessons.length} lesson
-                  {mod.lessons.length !== 1 ? 's' : ''}
+            <div className="flex-1 space-y-1">
+              <p className="text-brand-navy text-base font-bold">
+                {info.title || 'Untitled Course'}
+              </p>
+              {info.subtitle && (
+                <p className="text-sm text-slate-500">{info.subtitle}</p>
+              )}
+              <p className="text-sm text-slate-400">
+                {info.description || 'No course description added yet.'}
+              </p>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {info.category && (
+                  <span className="text-brand-navy rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+                    {info.category}
+                  </span>
+                )}
+                {info.level && (
+                  <span className="text-brand-navy rounded-md border border-slate-200 px-2.5 py-0.5 text-xs font-medium">
+                    {info.level}
+                  </span>
+                )}
+                <span className="bg-brand-gold/15 text-brand-gold rounded-md px-2.5 py-0.5 text-xs font-semibold">
+                  {info.pricingType === 'free'
+                    ? 'Free'
+                    : `Paid ${priceLabel(info)}`}
                 </span>
               </div>
-            ))}
+            </div>
           </div>
-        )}
-      </AccordionSection>
+        </AccordionSection>
 
-      <AccordionSection
-        title="3. Publish Settings"
-        desc="Visibility, draft behavior, and final action."
-      >
-        <div className="grid grid-cols-2 gap-4">
-          <FormField label="Visibility">
-            <div className="relative">
-              <select className={cn(selectCls)}>
-                <option>Public</option>
-                <option>Private</option>
-                <option>Unlisted</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+        <AccordionSection
+          title="2. Curriculum Preview"
+          desc={`${modules.length} module${modules.length !== 1 ? 's' : ''} and ${totalLessons} lesson${totalLessons !== 1 ? 's' : ''}.`}
+        >
+          {modules.length === 0 ? (
+            <p className="text-sm text-slate-400">No modules added.</p>
+          ) : (
+            <div className="space-y-2">
+              {modules.map((mod, i) => (
+                <div key={mod.id} className="flex items-center gap-2 text-sm">
+                  <BookOpen className="text-brand-gold h-4 w-4" />
+                  <span className="text-brand-navy font-medium">
+                    Module {i + 1}: {mod.title}
+                  </span>
+                  <span className="text-slate-400">
+                    — {mod.lessons.length} lesson
+                    {mod.lessons.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              ))}
             </div>
-          </FormField>
-          <FormField label="Draft behavior">
-            <div className="flex items-center gap-3 pt-1.5">
-              <button
-                type="button"
-                className="bg-brand-gold relative h-5 w-9 rounded-full"
-              >
-                <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
-              </button>
-              <span className="text-xs text-slate-500">
-                Keep as draft until submitted
-              </span>
-            </div>
-          </FormField>
-        </div>
-      </AccordionSection>
+          )}
+        </AccordionSection>
+
+        <AccordionSection
+          title="3. Publish Settings"
+          desc="Visibility, draft behavior, and final action."
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField label="Visibility">
+              <div className="relative">
+                <select className={cn(selectCls)}>
+                  <option>Public</option>
+                  <option>Private</option>
+                  <option>Unlisted</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              </div>
+            </FormField>
+            <FormField label="Draft behavior">
+              <div className="flex items-center gap-3 pt-1.5">
+                <span className="bg-brand-gold relative inline-flex h-5 w-9 items-center rounded-full">
+                  <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
+                </span>
+                <span className="text-xs text-slate-500">
+                  Keep as draft until submitted
+                </span>
+              </div>
+            </FormField>
+          </div>
+        </AccordionSection>
+
+        <AccordionSection
+          title="4. Final Review Summary"
+          desc="Module count, level, price, status, and warnings."
+          defaultOpen
+        >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SummaryStat label="Modules" value={String(modules.length)} />
+            <SummaryStat label="Level" value={info.level || '—'} />
+            <SummaryStat label="Price" value={priceLabel(info)} />
+            <SummaryStat label="Status" value="To Do" />
+          </div>
+
+          <div
+            className={cn(
+              'mt-4 rounded-xl border p-4',
+              ready
+                ? 'border-emerald-200 bg-emerald-50/60'
+                : 'border-amber-200 bg-amber-50/60',
+            )}
+          >
+            {ready ? (
+              <p className="text-sm font-medium text-emerald-700">
+                Course is ready for the selected publish action.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm font-bold text-amber-700">
+                  Missing required fields
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {missing.map((m) => (
+                    <li key={m} className="text-sm text-amber-700">
+                      {m}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        </AccordionSection>
+      </div>
+    </div>
+  );
+}
+
+function SummaryStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-3.5">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-brand-navy mt-0.5 text-sm font-bold">{value}</p>
     </div>
   );
 }
@@ -1144,6 +1198,7 @@ function PreviewPublishStep({
 
 export default function NewCoursePage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [info, setInfo] = useState<CourseInfo>({
     title: '',
@@ -1155,6 +1210,30 @@ export default function NewCoursePage() {
     price: '',
   });
   const [modules, setModules] = useState<CourseModule[]>([]);
+
+  const missing = useMemo(() => {
+    const list: string[] = [];
+    if (!info.title.trim()) list.push('Course title is required.');
+    if (!info.description.trim()) list.push('Course description is required.');
+    if (modules.length === 0) list.push('Add at least one module.');
+    return list;
+  }, [info.title, info.description, modules.length]);
+
+  const canSubmit = missing.length === 0;
+
+  function handleSaveDraft() {
+    toast('Draft saved. You can finish it anytime.', 'success');
+  }
+
+  function handleSubmit() {
+    if (!canSubmit) {
+      setStep(3);
+      toast('Fix the missing fields before submitting.', 'error');
+      return;
+    }
+    toast('Course submitted to admin for review.', 'success');
+    router.push('/educator/courses');
+  }
 
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
@@ -1176,7 +1255,13 @@ export default function NewCoursePage() {
           {step === 2 && (
             <CourseContentStep modules={modules} setModules={setModules} />
           )}
-          {step === 3 && <PreviewPublishStep info={info} modules={modules} />}
+          {step === 3 && (
+            <PreviewPublishStep
+              info={info}
+              modules={modules}
+              missing={missing}
+            />
+          )}
         </div>
       </div>
 
@@ -1197,7 +1282,11 @@ export default function NewCoursePage() {
           </Button>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleSaveDraft}
+            >
               <Save className="h-4 w-4" />
               Save draft
             </Button>
@@ -1211,7 +1300,15 @@ export default function NewCoursePage() {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button variant="secondary" className="gap-2">
+              <Button
+                variant="secondary"
+                className="gap-2 disabled:opacity-50"
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                title={
+                  canSubmit ? undefined : 'Complete required fields to submit'
+                }
+              >
                 Submit to Admin
                 <ArrowRight className="h-4 w-4" />
               </Button>

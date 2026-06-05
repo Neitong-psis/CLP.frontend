@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@/utils/cn';
-import { cvm, type VariantProps } from '@/utils/cva';
+import { cn } from '@/lib/utils/cn';
+import { cvm, type VariantProps } from '@/lib/utils/cva';
 
 const buttonLinkVariants = cvm(
   'group inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-200 ease-out hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',

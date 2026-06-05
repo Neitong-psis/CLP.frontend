@@ -1,5 +1,5 @@
-import AdminGuard from '@/feature/admin/components/auth/AdminGuard';
-import AdminShell from '@/feature/admin/components/auth/AdminShell';
+import AdminGuard from '@/components/pages/admin/components/auth/AdminGuard';
+import AdminShell from '@/components/pages/admin/components/auth/AdminShell';
 import { ToastProvider } from '@/components/ui/toast';
 
 export default function AdminLayout({
