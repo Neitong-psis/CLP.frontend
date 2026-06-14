@@ -20,9 +20,96 @@
   --color-accent-indigo-soft: #eef0fe;
 }
 
+/* ───────────────────────────────────────────────────────────────────────────
+   Semantic design tokens. Components consume these (bg-background,
+   text-foreground, border-border, bg-card, …) and never branch on theme.
+   Light values live on :root; .dark overrides them. Brand tokens above stay
+   constant across themes.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.21 0.034 264.4);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.034 264.4);
+  --surface: oklch(0.984 0.003 247.9);
+  --surface-muted: oklch(0.968 0.007 247.9);
+  --muted: oklch(0.968 0.007 247.9);
+  --muted-foreground: oklch(0.554 0.041 257.4);
+  --border: oklch(0.929 0.013 255.5);
+
+  /* Chart / data-viz sub-palette — SVG fill/stroke read these natively. */
+  --chart-line: var(--color-brand-navy);
+  --chart-bar: var(--color-accent-blue);
+  --chart-bar-hover: #2547f0;
+  --chart-accent: var(--color-brand-gold);
+  --chart-grid: #e2e8f0;
+  --chart-axis-text: #94a3b8;
+  --chart-dot-halo: var(--card); /* the old #fff — must track the card */
+  --chart-bar-neutral: #1e293b; /* neutral (non-active) bars */
+  --chart-bar-neutral-hover: #334155;
+  --chart-emerald: #10b981; /* "enrollments"/positive series · pass ≥ 80% */
+  --chart-blue: #3b82f6; /* "users"/info series */
+  --chart-indigo: #6366f1; /* distribution: learners */
+  --chart-warn: #f59e0b; /* pass-rate 60–79% (theme-stable) */
+  --chart-bad: #f43f5e; /* pass-rate < 60% (theme-stable) */
+}
+
+.dark {
+  /* Deeper background + richer blue chroma across all levels */
+  --background: oklch(0.145 0.03 265);
+  --foreground: oklch(0.965 0.008 248);
+  --card: oklch(0.195 0.038 266);
+  --card-foreground: oklch(0.965 0.008 248);
+  --surface: oklch(0.24 0.04 266);
+  --surface-muted: oklch(0.265 0.038 266);
+  --muted: oklch(0.265 0.038 266);
+  --muted-foreground: oklch(0.728 0.04 256);
+  --border: oklch(0.33 0.042 266);
+
+  /* Navy is invisible on dark — series go light; accent + halo carry over. */
+  --chart-line: #c7d2fe;
+  --chart-bar: #5b78ff;
+  --chart-bar-hover: #7d93ff;
+  --chart-grid: #1e2a3a;
+  --chart-axis-text: #64748b;
+  --chart-bar-neutral: #cbd5e1;
+  --chart-bar-neutral-hover: #94a3b8;
+  --chart-emerald: #34d399;
+  --chart-blue: #60a5fa;
+  --chart-indigo: #818cf8;
+}
+
+/* Expose semantic + chart tokens to Tailwind. `inline` makes utilities resolve
+   to the var() references above, so bg-background / border-border / bg-chart-bar
+   flip automatically when .dark toggles the underlying values. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-chart-line: var(--chart-line);
+  --color-chart-bar: var(--chart-bar);
+  --color-chart-bar-hover: var(--chart-bar-hover);
+  --color-chart-accent: var(--chart-accent);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis-text: var(--chart-axis-text);
+  --color-chart-dot-halo: var(--chart-dot-halo);
+  --color-chart-bar-neutral: var(--chart-bar-neutral);
+  --color-chart-bar-neutral-hover: var(--chart-bar-neutral-hover);
+  --color-chart-emerald: var(--chart-emerald);
+  --color-chart-blue: var(--chart-blue);
+  --color-chart-indigo: var(--chart-indigo);
+}
+
 @layer base {
   body {
-    @apply min-h-screen bg-white text-slate-900 antialiased;
+    @apply bg-background text-foreground min-h-screen antialiased;
   }
   h1,
   h2,
@@ -180,6 +267,21 @@
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
   transform-origin: left center;
+}
+/* SVG line drawing — requires pathLength={1} and strokeDasharray="1" on the path. */
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@utility animate-draw-line {
+  animation-name: draw-line;
+  animation-duration: 1.4s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
 }
 
 /* Animation-delay utilities. Tailwind's built-in delay-* targets

@@ -14,19 +14,19 @@ export default function FooterContact({ theme }: FooterContactProps) {
   const linkClass = `group flex items-start gap-3 text-sm transition-all ${
     isBlue
       ? 'text-white/60 hover:text-white'
-      : 'text-slate-500 hover:text-slate-900'
+      : 'text-muted-foreground hover:text-foreground'
   }`;
 
   const iconContainerClass = `flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors group-hover:border-[#f4a300]/40 group-hover:bg-[#f4a300]/10 ${
-    isBlue ? 'border-white/10' : 'border-slate-200'
+    isBlue ? 'border-white/10' : 'border-border'
   }`;
 
   const staticItemClass = `flex items-start gap-3 text-sm ${
-    isBlue ? 'text-white/60' : 'text-slate-500'
+    isBlue ? 'text-white/60' : 'text-muted-foreground'
   }`;
 
   const staticIconClass = `flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
-    isBlue ? 'border-white/10' : 'border-slate-200'
+    isBlue ? 'border-white/10' : 'border-border'
   }`;
 
   return (

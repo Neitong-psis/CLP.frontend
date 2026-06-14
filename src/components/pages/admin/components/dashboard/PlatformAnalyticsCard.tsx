@@ -34,8 +34,16 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
       <defs>
         <linearGradient id="laGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          <stop
+            offset="0%"
+            stopColor="var(--chart-emerald)"
+            stopOpacity="0.15"
+          />
+          <stop
+            offset="100%"
+            stopColor="var(--chart-emerald)"
+            stopOpacity="0"
+          />
         </linearGradient>
       </defs>
 
@@ -46,7 +54,7 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
             x2={pad.l + iW}
             y1={uy(t)}
             y2={uy(t)}
-            stroke="#e2e8f0"
+            stroke="var(--chart-grid)"
             strokeWidth={1}
           />
           <text
@@ -54,7 +62,7 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
             y={uy(t)}
             textAnchor="end"
             fontSize={9}
-            fill="#94a3b8"
+            fill="var(--chart-axis-text)"
             dominantBaseline="middle"
           >
             {t === 0 ? '0' : String(t)}
@@ -66,14 +74,14 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
       <path
         d={ePath}
         fill="none"
-        stroke="#10b981"
+        stroke="var(--chart-emerald)"
         strokeWidth={2.5}
         strokeLinejoin="round"
       />
       <path
         d={uPath}
         fill="none"
-        stroke="#3b82f6"
+        stroke="var(--chart-blue)"
         strokeWidth={2.5}
         strokeLinejoin="round"
       />
@@ -85,7 +93,7 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
           y={H - 8}
           textAnchor="middle"
           fontSize={9}
-          fill="#94a3b8"
+          fill="var(--chart-axis-text)"
         >
           {d.month}
         </text>
@@ -96,20 +104,20 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
 
 export function PlatformAnalyticsCard({ data }: PlatformAnalyticsCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow">
-      <h3 className="text-sm font-bold text-slate-900">Platform Analytics</h3>
-      <p className="mt-1 mb-5 text-xs text-slate-500">
+    <div className="border-border bg-card rounded-xl border p-5 shadow">
+      <h3 className="text-foreground text-sm font-bold">Platform Analytics</h3>
+      <p className="text-muted-foreground mt-1 mb-5 text-xs">
         Platform growth across users, enrollments, and activity over the last 12
         months.
       </p>
       <LineChart data={data} />
       <div className="mt-4 flex justify-center gap-6">
-        <span className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+        <span className="text-muted-foreground flex items-center gap-2 text-xs">
+          <span className="bg-chart-blue h-2.5 w-2.5 rounded-full" />
           Users
         </span>
-        <span className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        <span className="text-muted-foreground flex items-center gap-2 text-xs">
+          <span className="bg-chart-emerald h-2.5 w-2.5 rounded-full" />
           Enrollments
         </span>
       </div>

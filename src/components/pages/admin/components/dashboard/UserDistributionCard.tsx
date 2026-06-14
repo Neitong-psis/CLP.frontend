@@ -20,9 +20,9 @@ export interface UserDistributionCardProps {
 // ─── Default data ─────────────────────────────────────────────────────────────
 
 const DEFAULT_DATA: RoleSegment[] = [
-  { label: 'Learners', count: 4, color: '#6366f1' },
-  { label: 'Educators', count: 2, color: '#10b981' },
-  { label: 'Admins', count: 1, color: '#f59e0b' },
+  { label: 'Learners', count: 4, color: 'var(--chart-indigo)' },
+  { label: 'Educators', count: 2, color: 'var(--chart-emerald)' },
+  { label: 'Admins', count: 1, color: 'var(--chart-warn)' },
 ];
 
 // ─── Donut geometry (160 × 160 px) ───────────────────────────────────────────
@@ -73,21 +73,21 @@ export function UserDistributionCard({
   return (
     <section
       className={cn(
-        'flex h-full flex-col rounded-2xl border-[0.5px] border-slate-200 bg-white',
+        'border-border bg-card flex h-full flex-col rounded-2xl border-[0.5px]',
         className,
       )}
       aria-label="User distribution"
     >
       {/* Header */}
-      <div className="flex items-baseline justify-between border-b border-slate-100 px-5 py-4">
-        <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+      <div className="border-border flex items-baseline justify-between border-b px-5 py-4">
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
           User Distribution
         </p>
         <div className="flex items-baseline gap-1">
-          <span className="text-[20px] leading-none font-semibold text-slate-900 tabular-nums">
+          <span className="text-foreground text-[20px] leading-none font-semibold tabular-nums">
             {total.toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-400">users</span>
+          <span className="text-muted-foreground text-[11px]">users</span>
         </div>
       </div>
 
@@ -172,11 +172,11 @@ export function UserDistributionCard({
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span
               className="text-[30px] leading-none font-semibold tabular-nums transition-colors duration-200"
-              style={{ color: active ? active.color : '#0f172a' }}
+              style={{ color: active ? active.color : 'var(--foreground)' }}
             >
               {active ? active.count : total}
             </span>
-            <span className="mt-1 text-[12px] text-slate-500 transition-all duration-200">
+            <span className="text-muted-foreground mt-1 text-[12px] transition-all duration-200">
               {active ? active.label.toLowerCase() : 'total'}
             </span>
           </div>
@@ -210,21 +210,21 @@ export function UserDistributionCard({
                     className={cn(
                       'flex-1 text-[13px] transition-colors duration-200',
                       activeIdx === i
-                        ? 'font-medium text-slate-900'
-                        : 'text-slate-700',
+                        ? 'text-foreground font-medium'
+                        : 'text-foreground',
                     )}
                   >
                     {seg.label}
                   </span>
-                  <span className="text-[13px] font-semibold text-slate-900 tabular-nums">
+                  <span className="text-foreground text-[13px] font-semibold tabular-nums">
                     {seg.count}
                   </span>
-                  <span className="w-9 text-right text-[12px] text-slate-400 tabular-nums">
+                  <span className="text-muted-foreground w-9 text-right text-[12px] tabular-nums">
                     {seg.pct}%
                   </span>
                 </div>
                 <div
-                  className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100"
+                  className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
                   role="progressbar"
                   aria-valuenow={seg.pct}
                   aria-valuemin={0}
@@ -247,12 +247,12 @@ export function UserDistributionCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-1.5 border-t border-slate-100 px-5 py-3">
+      <div className="border-border flex items-center gap-1.5 border-t px-5 py-3">
         <span
           className="size-1.5 animate-pulse rounded-full bg-emerald-400"
           aria-hidden="true"
         />
-        <span className="text-[11px] text-slate-400">{period}</span>
+        <span className="text-muted-foreground text-[11px]">{period}</span>
       </div>
     </section>
   );

@@ -19,17 +19,17 @@ export default function LeftPanel() {
         <Logo
           variant="light"
           size="lg"
-          className="3xl:!w-[400px] !w-[260px] xl:!w-[300px] 2xl:!w-[340px]"
+          className="3xl:!w-[400px] w-65! xl:w-75! 2xl:w-85!"
         />
 
         {/* Hero copy */}
         <div className="3xl:space-y-10 space-y-6 2xl:space-y-8">
           <div className="inline-flex items-center justify-center gap-2">
-            <span className="h-px w-8 bg-[#f4a300]" />
-            <span className="3xl:text-sm text-[11px] font-bold tracking-[0.2em] text-[#f4a300] uppercase 2xl:text-xs">
+            <span className="bg-brand-gold h-px w-8" />
+            <span className="3xl:text-sm text-brand-gold text-[11px] font-bold tracking-[0.2em] uppercase 2xl:text-xs">
               Welcome back
             </span>
-            <span className="h-px w-8 bg-[#f4a300]" />
+            <span className="bg-brand-gold h-px w-8" />
           </div>
 
           <h1 className="3xl:text-7xl text-4xl leading-[1.1] font-bold tracking-tight text-white xl:text-5xl 2xl:text-6xl">
@@ -47,7 +47,7 @@ export default function LeftPanel() {
 
       {/* Copyright pinned to bottom-center */}
       <p className="3xl:bottom-28 3xl:text-base absolute bottom-10 text-xs text-white/25 xl:bottom-14 2xl:bottom-20 2xl:text-sm">
-        © {new Date().getFullYear()} AYLA. All rights reserved.
+        © {new Date().getFullYear()} QBTech. All rights reserved.
       </p>
     </div>
   );

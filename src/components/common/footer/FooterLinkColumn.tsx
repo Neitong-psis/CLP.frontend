@@ -34,7 +34,7 @@ export default function FooterLinkColumn({
               className={`inline-flex items-center text-sm transition-all duration-200 ease-out hover:translate-x-1 ${
                 isBlue
                   ? 'text-white/60 hover:text-white'
-                  : 'text-slate-500 hover:text-slate-900'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {link.label}

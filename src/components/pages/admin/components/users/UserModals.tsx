@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Pencil, X } from 'lucide-react';
+import { Eye, EyeOff, Pencil, RefreshCw, X } from 'lucide-react';
+import { generateUserPassword } from '@/features/users';
 import { cn } from '@/lib/utils/cn';
 import {
   type AdminUserRow,
@@ -72,11 +73,11 @@ function ModalShell({
   return (
     <Dialog.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content
           className={cn(
             'fixed top-1/2 left-1/2 z-50 flex w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2',
-            'flex-col overflow-hidden rounded-2xl bg-white shadow-2xl',
+            'bg-card ring-border flex-col overflow-hidden rounded-2xl shadow-2xl ring-1',
             maxWidth,
           )}
         >
@@ -85,14 +86,14 @@ function ModalShell({
           </Dialog.Description>
 
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <Dialog.Title className="text-base font-bold text-slate-900">
+          <div className="border-border flex items-center justify-between border-b px-6 py-4">
+            <Dialog.Title className="text-foreground text-base font-bold">
               {title}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 aria-label="Close dialog"
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -101,7 +102,7 @@ function ModalShell({
 
           <div className="flex-1 px-6 py-5">{children}</div>
 
-          <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-6 py-4">
+          <div className="border-border flex items-center justify-end gap-2 border-t px-6 py-4">
             {footer}
           </div>
         </Dialog.Content>
@@ -157,15 +158,15 @@ export function ViewModal({
             >
               {userInitials(user.name)}
             </div>
-            <p className="font-semibold text-slate-900">{user.name}</p>
-            <p className="text-xs text-slate-400">{user.email}</p>
+            <p className="text-foreground font-semibold">{user.name}</p>
+            <p className="text-muted-foreground text-xs">{user.email}</p>
             <div className="flex gap-1.5">
               <Chip color={ROLE_COLOR[user.role]}>{user.role}</Chip>
               <Chip color={STATUS_COLOR[user.status]}>{user.status}</Chip>
             </div>
           </div>
 
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+          <div className="divide-border border-border divide-y rounded-xl border">
             {(
               [
                 ['Enrolled Courses', String(user.enrolled)],
@@ -177,10 +178,10 @@ export function ViewModal({
                 key={label}
                 className="flex items-center justify-between px-4 py-3"
               >
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-muted-foreground text-xs font-semibold">
                   {label}
                 </span>
-                <span className="text-xs font-medium text-slate-700">
+                <span className="text-foreground text-xs font-medium">
                   {value}
                 </span>
               </div>
@@ -195,8 +196,8 @@ export function ViewModal({
 // ─── EditModal ────────────────────────────────────────────────────────────────
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/10';
-const labelCls = 'mb-1.5 block text-xs font-semibold text-slate-500';
+  'h-9 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/10';
+const labelCls = 'mb-1.5 block text-xs font-semibold text-muted-foreground';
 
 /**
  * Form state initialises from `user` at mount.
@@ -205,18 +206,27 @@ const labelCls = 'mb-1.5 block text-xs font-semibold text-slate-500';
 export function EditModal({
   open,
   user,
+  initialPassword,
   onSave,
   onClose,
 }: {
   open: boolean;
   user: AdminUserRow | null;
-  onSave: (updated: AdminUserRow) => void;
+  initialPassword?: string;
+  onSave: (updated: AdminUserRow, newPassword?: string) => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [role, setRole] = useState<UserRole>(user?.role ?? 'Learner');
   const [status, setStatus] = useState<UserStatus>(user?.status ?? 'Active');
+  const [newPassword, setNewPassword] = useState(initialPassword ?? '');
+  const [showPwd, setShowPwd] = useState(!!initialPassword);
+
+  const generatePwd = useCallback(() => {
+    setNewPassword(generateUserPassword());
+    setShowPwd(true);
+  }, []);
 
   return (
     <ModalShell
@@ -224,6 +234,7 @@ export function EditModal({
       onClose={onClose}
       title="Edit User"
       description={user ? `Editing profile for ${user.name}` : 'Edit user'}
+      maxWidth="max-w-lg"
       footer={
         <>
           <Button variant="ghost" className={CANCEL_BTN_CLS} onClick={onClose}>
@@ -233,7 +244,11 @@ export function EditModal({
             variant="secondary"
             className="rounded-xl px-5"
             onClick={() =>
-              user && onSave({ ...user, name, email, role, status })
+              user &&
+              onSave(
+                { ...user, name, email, role, status },
+                newPassword.trim() || undefined,
+              )
             }
           >
             Save changes
@@ -292,7 +307,7 @@ export function EditModal({
                     'flex-1 rounded-lg border py-2 text-xs font-semibold transition-colors',
                     role === r
                       ? ROLE_COLOR[r]
-                      : 'border-slate-200 text-slate-400 hover:bg-slate-50',
+                      : 'border-border text-muted-foreground hover:bg-muted',
                   )}
                 >
                   {r}
@@ -320,12 +335,57 @@ export function EditModal({
                     'rounded-lg border py-2 text-xs font-semibold transition-colors',
                     status === s
                       ? STATUS_COLOR[s]
-                      : 'border-slate-200 text-slate-400 hover:bg-slate-50',
+                      : 'border-border text-muted-foreground hover:bg-muted',
                   )}
                 >
                   {s}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Optional password change */}
+          <div className="border-border border-t pt-4">
+            <label htmlFor="edit-password" className={labelCls}>
+              {initialPassword ? 'Reset Password' : 'New Password'}
+              {!initialPassword && (
+                <span className="text-muted-foreground/70 font-normal normal-case">
+                  {' '}
+                  — leave blank to keep current
+                </span>
+              )}
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  id="edit-password"
+                  type={showPwd ? 'text' : 'password'}
+                  placeholder="Enter new password…"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className={cn(inputCls, 'pr-9 font-mono tracking-wide')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  tabIndex={-1}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2.5 -translate-y-1/2"
+                >
+                  {showPwd ? (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={generatePwd}
+                title="Generate password"
+                className="border-border text-muted-foreground hover:bg-muted hover:text-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         </div>
@@ -369,8 +429,8 @@ export function DeleteModal({
         </>
       }
     >
-      <p className="text-sm leading-relaxed text-slate-500">
-        <span className="font-semibold text-slate-800">
+      <p className="text-muted-foreground text-sm leading-relaxed">
+        <span className="text-foreground font-semibold">
           &ldquo;{name}&rdquo;
         </span>{' '}
         will be permanently removed. This action cannot be undone.

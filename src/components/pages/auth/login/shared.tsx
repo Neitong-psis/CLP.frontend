@@ -1,7 +1,13 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import type { AnyFieldApi } from '@tanstack/form-core';
 import { Button } from '@/components/ui/button';
+import {
+  Field as UiField,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/Field';
 
 export const inputCls =
   'w-full bg-transparent py-0 pl-10 pr-4 text-sm text-[#00003e] placeholder:text-slate-400 outline-none 2xl:text-base 3xl:text-lg';
@@ -66,6 +72,52 @@ export function PasswordToggle({
         <Eye className="h-4.5 w-4.5 2xl:h-5 2xl:w-5" />
       )}
     </button>
+  );
+}
+
+export interface FormFieldProps {
+  field: AnyFieldApi;
+  label: string;
+  icon: React.ReactNode;
+  suffix?: React.ReactNode;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+}
+
+export function FormField({
+  field,
+  label,
+  icon,
+  suffix,
+  inputProps,
+}: FormFieldProps) {
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  return (
+    <UiField data-invalid={isInvalid}>
+      <FieldLabel
+        htmlFor={field.name as string}
+        className="3xl:text-lg text-brand-navy text-sm font-semibold 2xl:text-base"
+      >
+        {label}
+      </FieldLabel>
+      <InputWrapper icon={icon} suffix={suffix}>
+        <input
+          id={field.name as string}
+          name={field.name as string}
+          value={field.state.value as string}
+          onBlur={field.handleBlur}
+          aria-invalid={isInvalid}
+          aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+          className={inputCls}
+          {...inputProps}
+        />
+      </InputWrapper>
+      {isInvalid && (
+        <FieldError
+          id={`${field.name}-error`}
+          errors={field.state.meta.errors.map((e) => ({ message: String(e) }))}
+        />
+      )}
+    </UiField>
   );
 }
 

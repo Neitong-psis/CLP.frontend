@@ -29,11 +29,11 @@ const BASELINE = PAD.t + IH;
 const Y_MAX = 100;
 const Y_TICKS = [25, 50, 75, 100];
 
-const BAR_DEFAULT = '#1e293b';
-const BAR_HOVER = '#334155';
-const ACCENT = '#3b5bfd';
-const LABEL = '#94a3b8';
-const GRID = '#f1f5f9';
+const BAR_DEFAULT = 'var(--chart-bar-neutral)';
+const BAR_HOVER = 'var(--chart-bar-neutral-hover)';
+const ACCENT = 'var(--chart-bar)';
+const LABEL = 'var(--chart-axis-text)';
+const GRID = 'var(--chart-grid)';
 
 const fmt = (v: number) => `$${v}k`;
 
@@ -145,7 +145,7 @@ function BarChart({
             x2={hiX}
             y1={boxY + boxH}
             y2={hiBarTopY}
-            stroke="#cbd5e1"
+            stroke="var(--chart-grid)"
             strokeWidth={1}
             strokeDasharray="3 3"
           />
@@ -154,7 +154,7 @@ function BarChart({
             cy={hiBarTopY}
             r={4}
             fill={ACCENT}
-            stroke="#fff"
+            stroke="var(--chart-dot-halo)"
             strokeWidth={2}
           />
           <rect
@@ -163,8 +163,8 @@ function BarChart({
             width={boxW}
             height={boxH}
             rx={8}
-            fill="#fff"
-            stroke="#e2e8f0"
+            fill="var(--card)"
+            stroke="var(--border)"
             strokeWidth={1}
           />
           <text
@@ -173,7 +173,7 @@ function BarChart({
             textAnchor="middle"
             fontSize={13}
             fontWeight={500}
-            fill="#0f172a"
+            fill="var(--foreground)"
           >
             {fmt(hi.amount)}
           </text>
@@ -212,21 +212,23 @@ export function MonthlyRevenueCard({
   return (
     <section
       className={cn(
-        'flex flex-col rounded-2xl border-[0.5px] border-slate-200 bg-white',
+        'border-border bg-card flex flex-col rounded-2xl border-[0.5px]',
         className,
       )}
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+      <div className="border-border flex items-start justify-between gap-4 border-b px-6 py-5">
         <div>
-          <h3 className="text-[14px] font-medium text-slate-900">
+          <h3 className="text-foreground text-[14px] font-medium">
             Monthly Revenue
           </h3>
-          <p className="mt-0.5 text-[13px] text-slate-500">Last 12 months</p>
+          <p className="text-muted-foreground mt-0.5 text-[13px]">
+            Last 12 months
+          </p>
         </div>
         {current && (
           <div className="text-right">
-            <p className="text-[26px] leading-none font-semibold text-slate-900 tabular-nums">
+            <p className="text-foreground text-[26px] leading-none font-semibold tabular-nums">
               {fmt(current.amount)}
             </p>
             {pctChange !== null && (

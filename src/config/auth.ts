@@ -28,3 +28,13 @@ export const signUpSchema = z.object({
 
 export type LoginValues = z.infer<typeof loginSchema>;
 export type SignUpValues = z.infer<typeof signUpSchema>;
+
+function fieldValidator<T>(schema: z.ZodType<T>) {
+  return ({ value }: { value: T }): string | undefined =>
+    schema.safeParse(value).error?.issues[0]?.message;
+}
+
+export const validateEmail = fieldValidator(loginSchema.shape.email);
+export const validatePassword = fieldValidator(loginSchema.shape.password);
+export const validateFullName = fieldValidator(signUpSchema.shape.fullName);
+export const validateNewPassword = fieldValidator(signUpSchema.shape.password);

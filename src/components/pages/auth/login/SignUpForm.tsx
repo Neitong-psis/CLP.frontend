@@ -3,14 +3,21 @@
 import { useState } from 'react';
 import { Lock, Mail, User } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
-import { signUpSchema } from '@/config/auth';
+import {
+  validateEmail,
+  validateFullName,
+  validateNewPassword,
+} from '@/config/auth';
 import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldError,
 } from '@/components/ui/Field';
+import { useAuth } from '@/hooks/use-auth';
+import { isApiError } from '@/lib/api/errors';
 import { InputWrapper, PasswordToggle, SubmitBtn, inputCls } from './shared';
+// auth API is handled via `useAuth()` in this form; remove direct api imports
 
 const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
 const STRENGTH_COLORS = [
@@ -29,8 +36,14 @@ function getPasswordStrength(password: string): number {
   return score;
 }
 
-export default function SignUpForm() {
+interface Props {
+  onSuccess?: () => void;
+}
+
+export default function SignUpForm({ onSuccess }: Props) {
   const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const { register } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -39,7 +52,26 @@ export default function SignUpForm() {
       password: '',
     },
     onSubmit: async ({ value }) => {
-      console.log('Sign up:', value);
+      setFormError(null);
+      const [firstName = value.fullName, ...rest] = value.fullName
+        .trim()
+        .split(/\s+/);
+      const lastName = rest.join(' ') || firstName;
+      try {
+        await register({
+          firstName,
+          lastName,
+          email: value.email,
+          password: value.password,
+        });
+        onSuccess?.();
+      } catch (error) {
+        setFormError(
+          isApiError(error)
+            ? error.message
+            : 'Registration failed. Please try again.',
+        );
+      }
     },
   });
 
@@ -48,6 +80,7 @@ export default function SignUpForm() {
       className="3xl:space-y-5 space-y-3 2xl:space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
+        if (form.state.isSubmitting) return;
         form.handleSubmit();
       }}
     >
@@ -55,8 +88,8 @@ export default function SignUpForm() {
         <form.Field
           name="fullName"
           validators={{
-            onChange: signUpSchema.shape.fullName,
-            onBlur: signUpSchema.shape.fullName,
+            onChange: validateFullName,
+            onBlur: validateFullName,
           }}
         >
           {(field) => {
@@ -107,8 +140,8 @@ export default function SignUpForm() {
         <form.Field
           name="email"
           validators={{
-            onChange: signUpSchema.shape.email,
-            onBlur: signUpSchema.shape.email,
+            onChange: validateEmail,
+            onBlur: validateEmail,
           }}
         >
           {(field) => {
@@ -159,8 +192,8 @@ export default function SignUpForm() {
         <form.Field
           name="password"
           validators={{
-            onChange: signUpSchema.shape.password,
-            onBlur: signUpSchema.shape.password,
+            onChange: validateNewPassword,
+            onBlur: validateNewPassword,
           }}
         >
           {(field) => {
@@ -240,9 +273,21 @@ export default function SignUpForm() {
         </form.Field>
       </FieldGroup>
 
+      {formError && (
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {formError}
+        </p>
+      )}
+
       <form.Subscribe selector={(s) => s.isSubmitting}>
         {(isSubmitting) => (
-          <SubmitBtn label="Create Account" disabled={isSubmitting} />
+          <SubmitBtn
+            label={isSubmitting ? 'Creating account…' : 'Create Account'}
+            disabled={isSubmitting}
+          />
         )}
       </form.Subscribe>
     </form>

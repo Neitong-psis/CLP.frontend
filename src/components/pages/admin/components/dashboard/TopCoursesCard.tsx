@@ -31,21 +31,21 @@ const AVATAR_TONES = [
 ];
 
 function completionColor(pct: number): string {
-  if (pct >= 80) return '#10b981';
-  if (pct >= 60) return '#f59e0b';
-  return '#f43f5e';
+  if (pct >= 80) return 'var(--chart-emerald)';
+  if (pct >= 60) return 'var(--chart-warn)';
+  return 'var(--chart-bad)';
 }
 
 function completionPill(pct: number): string {
-  if (pct >= 80) return 'bg-emerald-50 text-emerald-700';
-  if (pct >= 60) return 'bg-amber-50 text-amber-700';
-  return 'bg-rose-50 text-rose-700';
+  if (pct >= 80) return 'bg-emerald-500/10 text-emerald-500';
+  if (pct >= 60) return 'bg-amber-500/10 text-amber-500';
+  return 'bg-rose-500/10 text-rose-500';
 }
 
 function rankStyle(i: number): string {
   if (i === 0) return 'text-accent-blue font-bold';
-  if (i < 3) return 'text-slate-600 font-medium';
-  return 'text-slate-300 font-medium';
+  if (i < 3) return 'text-foreground font-medium';
+  return 'text-muted-foreground font-medium';
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -54,30 +54,30 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-2xl border-[0.5px] border-slate-200 bg-white',
+        'border-border bg-card overflow-hidden rounded-2xl border-[0.5px]',
         className,
       )}
       aria-label="Top performing courses"
     >
-      <header className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-        <h3 className="text-[14px] font-medium text-slate-900">
+      <header className="border-border flex items-center justify-between border-b px-6 py-4">
+        <h3 className="text-foreground text-[14px] font-medium">
           Top Performing Courses
         </h3>
-        <span className="text-[12px] text-slate-400">
+        <span className="text-muted-foreground text-[12px]">
           {data.length} courses
         </span>
       </header>
 
       {data.length === 0 ? (
-        <p className="px-6 py-10 text-center text-[13px] text-slate-400">
+        <p className="text-muted-foreground px-6 py-10 text-center text-[13px]">
           No course data yet.
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-border divide-y">
           {data.map((course, i) => (
             <li
               key={course.title}
-              className="flex cursor-pointer items-center gap-4 px-6 py-3.5 transition-colors duration-150 hover:bg-slate-50"
+              className="hover:bg-muted flex cursor-pointer items-center gap-4 px-6 py-3.5 transition-colors duration-150"
             >
               {/* Rank */}
               <span
@@ -103,15 +103,15 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
 
               {/* Identity + inline progress */}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-slate-900">
+                <p className="text-foreground truncate text-[13px] font-medium">
                   {course.title}
                 </p>
                 {course.instructor && (
-                  <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                  <p className="text-muted-foreground mt-0.5 truncate text-[11px]">
                     {course.instructor}
                   </p>
                 )}
-                <div className="mt-1.5 h-0.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="bg-muted mt-1.5 h-0.5 overflow-hidden rounded-full">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -124,10 +124,10 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
 
               {/* Enrollment */}
               <div className="hidden shrink-0 text-right sm:block">
-                <p className="text-[13px] font-medium text-slate-900 tabular-nums">
+                <p className="text-foreground text-[13px] font-medium tabular-nums">
                   {course.students}
                 </p>
-                <p className="text-[11px] text-slate-400">enrolled</p>
+                <p className="text-muted-foreground text-[11px]">enrolled</p>
               </div>
 
               {/* Completion pill */}

@@ -69,11 +69,22 @@ export function PasswordToggle({
   );
 }
 
-export function SubmitBtn({ label }: { label: string }) {
+export function SubmitBtn({
+  label,
+  disabled,
+}: {
+  label: string;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="submit"
-      className="3xl:py-5 3xl:text-lg w-full rounded-lg bg-[#f4a300] py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#e09400] 2xl:py-4 2xl:text-base"
+      disabled={disabled}
+      className={`3xl:py-5 3xl:text-lg w-full rounded-lg py-3.5 text-sm font-bold text-white transition-colors 2xl:py-4 2xl:text-base ${
+        disabled
+          ? 'pointer-events-none bg-slate-300'
+          : 'bg-[#f4a300] hover:bg-[#e09400]'
+      }`}
     >
       {label}
     </button>

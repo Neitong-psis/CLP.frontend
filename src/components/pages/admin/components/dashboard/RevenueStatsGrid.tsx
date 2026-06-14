@@ -41,7 +41,7 @@ function RevenueStatCard({
   const ChangeIcon = isNegative ? ArrowDownRight : ArrowUpRight;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow transition-colors hover:border-slate-300">
+    <div className="border-border bg-card hover:border-border rounded-xl border p-4 shadow transition-colors">
       <div className="mb-3 flex items-center justify-between">
         <div
           className={`flex h-9 w-9 items-center justify-center rounded-full ${iconColor}`}
@@ -58,8 +58,8 @@ function RevenueStatCard({
           {change}
         </span>
       </div>
-      <p className="text-[11px] font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 text-xl font-bold text-slate-900">{value}</p>
+      <p className="text-muted-foreground text-[11px] font-medium">{label}</p>
+      <p className="text-foreground mt-0.5 text-xl font-bold">{value}</p>
     </div>
   );
 }

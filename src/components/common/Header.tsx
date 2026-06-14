@@ -19,9 +19,12 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { useTranslations } from 'next-intl';
 import Logo from '@/components/common/Logo';
 import { HeaderSearch } from '@/components/common/HeaderSearch';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { NAV_LINKS, type NavLink } from '@/constants/navigation';
 import { cn } from '@/lib/utils/cn';
 
@@ -138,6 +141,7 @@ function DesktopNavItem({
 // ─── Mobile nav menu ──────────────────────────────────────────────────────────
 
 function MobileNavMenu({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('header');
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const itemBase =
@@ -215,21 +219,102 @@ function MobileNavMenu({ onClose }: { onClose: () => void }) {
 
       <div aria-hidden className="bg-brand-navy/10 mx-4 my-1.5 h-px" />
 
-      <Link href="/auth" onClick={onClose} className={cn(itemBase, itemColor)}>
-        <LogIn aria-hidden className="h-4 w-4 shrink-0 opacity-50" />
-        <span className="flex-1 font-medium">Login</span>
-      </Link>
-      <Link
-        href="/auth"
-        onClick={onClose}
-        className={cn(
-          itemBase,
-          'text-brand-gold hover:bg-brand-gold/5 font-semibold',
-        )}
-      >
-        <UserPlus aria-hidden className="h-4 w-4 shrink-0" />
-        <span className="flex-1">Register</span>
-      </Link>
+      {/* Mobile Login */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setExpanded(expanded === '__login' ? null : '__login')}
+          className={cn(
+            itemBase,
+            itemColor,
+            expanded === '__login' && 'text-brand-navy!',
+          )}
+        >
+          <LogIn aria-hidden className="h-4 w-4 shrink-0 opacity-50" />
+          <span className="flex-1 text-left font-medium">{t('login')}</span>
+          <ChevronDown
+            aria-hidden
+            className={cn(
+              'h-4 w-4 opacity-40 transition-[rotate] duration-200',
+              expanded === '__login' && 'rotate-180 opacity-70',
+            )}
+          />
+        </button>
+        <div
+          className={cn(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            expanded === '__login' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="border-brand-navy/10 ml-4 border-l py-0.5">
+              <Link
+                href="/auth?tab=login&role=learner"
+                onClick={onClose}
+                className="text-brand-navy/55 hover:bg-brand-navy/4 hover:text-brand-navy block px-4 py-2 text-sm transition-colors"
+              >
+                {t('learner')}
+              </Link>
+              <Link
+                href="/auth?tab=login&role=educator"
+                onClick={onClose}
+                className="text-brand-navy/55 hover:bg-brand-navy/4 hover:text-brand-navy block px-4 py-2 text-sm transition-colors"
+              >
+                {t('educator')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Register */}
+      <div>
+        <button
+          type="button"
+          onClick={() =>
+            setExpanded(expanded === '__register' ? null : '__register')
+          }
+          className={cn(
+            itemBase,
+            'text-brand-gold hover:bg-brand-gold/5 font-semibold',
+          )}
+        >
+          <UserPlus aria-hidden className="h-4 w-4 shrink-0" />
+          <span className="flex-1 text-left">{t('register')}</span>
+          <ChevronDown
+            aria-hidden
+            className={cn(
+              'h-4 w-4 opacity-40 transition-[rotate] duration-200',
+              expanded === '__register' && 'rotate-180 opacity-70',
+            )}
+          />
+        </button>
+        <div
+          className={cn(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            expanded === '__register' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="border-brand-gold/20 ml-4 border-l py-0.5">
+              <Link
+                href="/auth?tab=signup&role=learner"
+                onClick={onClose}
+                className="text-brand-gold/70 hover:bg-brand-gold/5 hover:text-brand-gold block px-4 py-2 text-sm transition-colors"
+              >
+                {t('learner')}
+              </Link>
+              <Link
+                href="/auth?tab=signup&role=educator"
+                onClick={onClose}
+                className="text-brand-gold/70 hover:bg-brand-gold/5 hover:text-brand-gold block px-4 py-2 text-sm transition-colors"
+              >
+                {t('educator')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -237,6 +322,7 @@ function MobileNavMenu({ onClose }: { onClose: () => void }) {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 export default function Header() {
+  const t = useTranslations('header');
   const headerRef = useRef<HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -339,44 +425,98 @@ export default function Header() {
               scrolled ? 'bg-brand-navy/15' : 'bg-white/15',
             )}
           />
-          <Link
-            href="/auth"
-            className={cn(
-              'group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 hover:-translate-y-px focus:outline-none',
-              scrolled
-                ? 'border-brand-navy/20 text-brand-navy hover:border-brand-navy hover:text-white'
-                : 'border-white/25 text-white/80 hover:border-white/50 hover:text-white hover:shadow-[0_0_0_3px_rgba(255,255,255,0.08)]',
-            )}
-          >
-            {/* Fill slides up from bottom on hover */}
-            <span
-              aria-hidden
-              className={cn(
-                'absolute inset-0 translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0',
-                scrolled ? 'bg-brand-navy' : 'bg-white/10',
-              )}
-            />
-            <LogIn
-              aria-hidden
-              className="relative h-4 w-4 transition-[translate] duration-200 group-hover:translate-x-0.5"
-            />
-            <span className="relative">Login</span>
-          </Link>
-          <Link
-            href="/auth"
-            className="group bg-brand-gold text-brand-navy relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-4 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_0_0_4px_rgba(244,163,0,0.25)] focus:outline-none"
-          >
-            {/* Brightness sweep left-to-right */}
-            <span
-              aria-hidden
-              className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-x-0"
-            />
-            <UserPlus
-              aria-hidden
-              className="relative h-4 w-4 transition-[scale] duration-200 group-hover:scale-110"
-            />
-            <span className="relative">Register</span>
-          </Link>
+
+          {/* Login dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  'group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 hover:-translate-y-px focus:outline-none',
+                  scrolled
+                    ? 'border-brand-navy/20 text-brand-navy hover:border-brand-navy hover:text-white'
+                    : 'border-white/25 text-white/80 hover:border-white/50 hover:text-white hover:shadow-[0_0_0_3px_rgba(255,255,255,0.08)]',
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute inset-0 translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0',
+                    scrolled ? 'bg-brand-navy' : 'bg-white/10',
+                  )}
+                />
+                <LogIn
+                  aria-hidden
+                  className="relative h-4 w-4 transition-[translate] duration-200 group-hover:translate-x-0.5"
+                />
+                <span className="relative">{t('login')}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg"
+            >
+              <DropdownMenuItem
+                asChild
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+              >
+                <Link href="/auth?tab=login&role=learner">
+                  <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
+                  {t('learner')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                asChild
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+              >
+                <Link href="/auth?tab=login&role=educator">
+                  <BookOpen aria-hidden className="h-4 w-4 opacity-60" />
+                  {t('educator')}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Register dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="group bg-brand-gold text-brand-navy relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-4 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_0_0_4px_rgba(244,163,0,0.25)] focus:outline-none">
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-300 ease-out group-hover:translate-x-0"
+                />
+                <UserPlus
+                  aria-hidden
+                  className="relative h-4 w-4 transition-[scale] duration-200 group-hover:scale-110"
+                />
+                <span className="relative">{t('register')}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg"
+            >
+              <DropdownMenuItem
+                asChild
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+              >
+                <Link href="/auth?tab=signup&role=learner">
+                  <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
+                  {t('learner')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                asChild
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+              >
+                <Link href="/auth?tab=signup&role=educator">
+                  <BookOpen aria-hidden className="h-4 w-4 opacity-60" />
+                  {t('educator')}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <LanguageSwitcher scrolled={scrolled} />
         </div>
 
         {/* Mobile hamburger */}
@@ -384,7 +524,7 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
               className={cn(
                 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none md:hidden',
                 scrolled

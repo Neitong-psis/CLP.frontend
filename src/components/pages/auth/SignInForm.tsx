@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, Mail, User } from 'lucide-react';
 import {
@@ -12,20 +11,50 @@ import {
   SubmitBtn,
   inputCls,
 } from './shared';
+import { apiRegister, parseApiError } from '@/lib/api/auth';
 
 export default function SignInForm() {
-  const router = useRouter();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setAuthError(null);
+    setIsSubmitting(true);
+    try {
+      const parts = fullName.trim().split(/\s+/);
+      const firstName = parts[0] ?? '';
+      const lastName = parts.slice(1).join(' ') || firstName;
+      await apiRegister(firstName, lastName, email, password);
+      setRegistered(true);
+    } catch (err) {
+      setAuthError(parseApiError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (registered) {
+    return (
+      <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-6 text-center">
+        <p className="text-sm font-semibold text-emerald-700">
+          Account created! Check your email to confirm your address before
+          logging in.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form
       className="space-y-3 2xl:space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        router.push('/dashboard');
-      }}
+      onSubmit={(e) => void handleSubmit(e)}
     >
       {/* Full Name */}
       <Field label="Full Name" htmlFor="signup-name">
@@ -39,6 +68,8 @@ export default function SignInForm() {
             type="text"
             placeholder="Your full name"
             autoComplete="name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
             className={inputCls}
           />
         </InputWrapper>
@@ -56,6 +87,8 @@ export default function SignInForm() {
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className={inputCls}
           />
         </InputWrapper>
@@ -110,7 +143,19 @@ export default function SignInForm() {
         </span>
       </label>
 
-      <SubmitBtn label="Create Account" />
+      {authError && (
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {authError}
+        </p>
+      )}
+
+      <SubmitBtn
+        label={isSubmitting ? 'Creating account…' : 'Create Account'}
+        disabled={isSubmitting}
+      />
     </form>
   );
 }

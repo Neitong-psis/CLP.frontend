@@ -1,6 +1,9 @@
 import Link from 'next/link';
-import { Bell, Plus, Moon, Globe } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { NotificationBell } from '@/components/common/NotificationBell';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import type { SidebarRole } from '@/components/common/sidebar/Sidebar';
 
 interface TopBarAction {
@@ -30,21 +33,22 @@ const ROLE_BADGE: Record<SidebarRole, { label: string; className: string }> = {
   },
 };
 
-const iconBtn =
-  'flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700';
+// iconBtn removed — not used
 
 export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
   const badge = ROLE_BADGE[role];
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-4 sm:h-16 sm:px-6 lg:px-8">
+    <header className="border-border bg-card sticky top-0 z-10 flex h-14 shrink-0 items-center gap-4 border-b px-4 sm:h-16 sm:px-6 lg:px-8">
       {/* Title */}
       <div className="min-w-0 flex-1">
-        <h1 className="text-brand-navy truncate text-base font-bold sm:text-lg">
+        <h1 className="text-foreground truncate text-base font-bold sm:text-lg">
           {title}
         </h1>
         {subtitle && (
-          <p className="truncate text-[11px] text-slate-400">{subtitle}</p>
+          <p className="text-muted-foreground truncate text-[11px]">
+            {subtitle}
+          </p>
         )}
       </div>
 
@@ -68,20 +72,13 @@ export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
         </span>
 
         {/* Dark mode toggle */}
-        <button aria-label="Toggle dark mode" className={iconBtn}>
-          <Moon className="size-4" />
-        </button>
+        <ThemeToggle className="size-8" />
 
         {/* Notifications */}
-        <button aria-label="Notifications" className={`relative ${iconBtn}`}>
-          <Bell className="size-4" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500" />
-        </button>
+        <NotificationBell />
 
-        {/* Language / Globe */}
-        <button aria-label="Language" className={iconBtn}>
-          <Globe className="size-4" />
-        </button>
+        {/* Language picker */}
+        <LanguageSwitcher scrolled={false} />
       </div>
     </header>
   );

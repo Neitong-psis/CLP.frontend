@@ -21,7 +21,7 @@ export default function Footer({ theme = 'blue' }: FooterProps) {
       className={
         isBlue
           ? 'bg-brand-navy text-white'
-          : 'border-t border-slate-200 bg-white text-slate-900'
+          : 'border-border bg-background text-foreground border-t'
       }
     >
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 md:py-16 lg:px-8">

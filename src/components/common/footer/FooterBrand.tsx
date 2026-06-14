@@ -21,7 +21,7 @@ export default function FooterBrand({ theme }: FooterBrandProps) {
         />
       </div>
       <p
-        className={`mt-3 max-w-sm text-sm leading-relaxed sm:mt-4 sm:text-base ${isBlue ? 'text-white/70' : 'text-slate-500'}`}
+        className={`mt-3 max-w-sm text-sm leading-relaxed sm:mt-4 sm:text-base ${isBlue ? 'text-white/70' : 'text-muted-foreground'}`}
       >
         {BRAND.tagline}
       </p>

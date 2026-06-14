@@ -13,9 +13,9 @@ export interface QuizAnalyticsCardProps {
 // ─── Pass-rate ring ───────────────────────────────────────────────────────────
 
 function passRateColor(pct: number): string {
-  if (pct >= 80) return '#10b981';
-  if (pct >= 60) return '#f59e0b';
-  return '#f43f5e';
+  if (pct >= 80) return 'var(--chart-emerald)';
+  if (pct >= 60) return 'var(--chart-warn)';
+  return 'var(--chart-bad)';
 }
 
 function PassRateRing({ pct }: { pct: number }) {
@@ -37,7 +37,7 @@ function PassRateRing({ pct }: { pct: number }) {
           cy={SIZE / 2}
           r={R}
           fill="none"
-          stroke="#f1f5f9"
+          stroke="var(--chart-grid)"
           strokeWidth={5}
         />
         <circle
@@ -68,8 +68,8 @@ function PassRateRing({ pct }: { pct: number }) {
 function StatRow({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-[12px] text-slate-500">{label}</dt>
-      <dd className="text-[13px] font-medium text-slate-900 tabular-nums">
+      <dt className="text-muted-foreground text-[12px]">{label}</dt>
+      <dd className="text-foreground text-[13px] font-medium tabular-nums">
         {value}%
       </dd>
     </div>
@@ -82,10 +82,10 @@ export function QuizAnalyticsCard({ data, className }: QuizAnalyticsCardProps) {
   return (
     <section className={className} aria-label="Quiz analytics">
       <div className="mb-4 flex items-baseline justify-between">
-        <h2 className="text-[14px] font-medium text-slate-900">
+        <h2 className="text-foreground text-[14px] font-medium">
           Quiz Analytics
         </h2>
-        <span className="text-[12px] text-slate-400">
+        <span className="text-muted-foreground text-[12px]">
           {data.length} quizzes
         </span>
       </div>
@@ -94,21 +94,21 @@ export function QuizAnalyticsCard({ data, className }: QuizAnalyticsCardProps) {
         {data.map((q) => (
           <div
             key={q.title}
-            className="cursor-pointer rounded-2xl border-[0.5px] border-slate-200 bg-white p-5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-slate-300"
+            className="border-border bg-card hover:border-muted-foreground/40 cursor-pointer rounded-2xl border-[0.5px] p-5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5"
           >
-            {/* Title row + ring */}
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[13px] leading-snug font-medium text-slate-900">
+                <p className="text-foreground text-[13px] leading-snug font-medium">
                   {q.title}
                 </p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Pass rate</p>
+                <p className="text-muted-foreground mt-0.5 text-[11px]">
+                  Pass rate
+                </p>
               </div>
               <PassRateRing pct={q.passRate} />
             </div>
 
-            {/* Stats */}
-            <dl className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+            <dl className="border-border mt-4 space-y-2 border-t pt-4">
               <StatRow label="Completion" value={q.completion} />
               <StatRow label="Avg Score" value={q.avgScore} />
             </dl>

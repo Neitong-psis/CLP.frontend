@@ -1,5 +1,14 @@
 {
   "permissions": {
-    "allow": ["Bash(npm ls *)"]
+    "allow": [
+      "Bash(npm ls *)",
+      "Bash(cd \"d:/CADT/Intership/QBTech/me/QBTECH.frontend\")",
+      "Bash(seq 1 30)",
+      "Bash(grep -q \"Ready in\" \"C:/Users/Neitong/AppData/Local/Temp/claude/d--CADT-Intership-QBTech-me-QBTECH-frontend/cfd1a5bf-5b73-40d5-aa3a-1448bcc91de1/tasks/b7ztfnsjl.output\")",
+      "Bash(echo \"READY\")",
+      "Bash(break)",
+      "Bash(curl -s \"http://localhost:3000/\")",
+      "Bash(grep -oiE '\\(error[^<]{0,200}|Cannot[^<]{0,160}|Module[^<]{0,160}|Failed to[^<]{0,160}|ENOENT[^<]{0,160}|is not[^<]{0,120}\\)')"
+    ]
   }
 }

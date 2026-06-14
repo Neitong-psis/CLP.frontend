@@ -31,6 +31,8 @@ export const rootMetadata: Metadata = {
     description: site.description,
     images: [site.image],
   },
+  // Base URL used to resolve relative image paths for Open Graph / Twitter
+  metadataBase: new URL(site.url),
 };
 
 export function generatePageMetadata({

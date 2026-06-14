@@ -41,6 +41,10 @@ interface RoleConfig {
   rootHref: string;
   roleChip: { label: string; icon?: React.ElementType };
   user: { name: string; email: string; initials: string; level?: number };
+  settingsHref?: string;
+  profileHref?: string;
+  learnMoreHref?: string;
+  logoutHref?: string;
 }
 
 const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
@@ -70,6 +74,8 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
       initials: MOCK_USER.initials,
       level: MOCK_USER.level,
     },
+    settingsHref: '/settings',
+    profileHref: '/settings',
   },
   educator: {
     navItems: [
@@ -98,13 +104,19 @@ const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
     rootHref: '/admin',
     roleChip: { label: ADMIN_USER.role, icon: ShieldCheck },
     user: ADMIN_USER,
+    learnMoreHref: '/admin/learn-more',
+    logoutHref: '/admin/login',
   },
 };
+
+/** Two-character uppercase initials from a display name. */
+// initials helper removed — unused in current sidebar implementation
 
 export default function Sidebar({ role }: { role: SidebarRole }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { navItems, rootHref, roleChip, user } = ROLE_CONFIG[role];
+  const { navItems, rootHref, roleChip, user, learnMoreHref, logoutHref } =
+    ROLE_CONFIG[role];
   const settingsHref = `${rootHref}/settings`;
   const profileHref = `${rootHref}/profile`;
 
@@ -238,6 +250,8 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
           roleLabel={roleChip.label}
           settingsHref={settingsHref}
           profileHref={profileHref}
+          learnMoreHref={learnMoreHref}
+          logoutHref={logoutHref}
           collapsed={collapsed}
         />
       </div>
