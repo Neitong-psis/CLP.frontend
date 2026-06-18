@@ -1,3 +1,7 @@
+'use client';
+
+import { useAdminDashboardT } from '@/i18n';
+
 export interface QuizAnalyticsItem {
   readonly title: string;
   readonly completion: number;
@@ -79,14 +83,15 @@ function StatRow({ label, value }: { label: string; value: number }) {
 // ─── QuizAnalyticsCard ────────────────────────────────────────────────────────
 
 export function QuizAnalyticsCard({ data, className }: QuizAnalyticsCardProps) {
+  const t = useAdminDashboardT();
   return (
     <section className={className} aria-label="Quiz analytics">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="text-foreground text-[14px] font-medium">
-          Quiz Analytics
+          {t('quizAnalytics')}
         </h2>
         <span className="text-muted-foreground text-[12px]">
-          {data.length} quizzes
+          {t('quizzes', { count: data.length })}
         </span>
       </div>
 
@@ -102,15 +107,15 @@ export function QuizAnalyticsCard({ data, className }: QuizAnalyticsCardProps) {
                   {q.title}
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-[11px]">
-                  Pass rate
+                  {t('passRate')}
                 </p>
               </div>
               <PassRateRing pct={q.passRate} />
             </div>
 
             <dl className="border-border mt-4 space-y-2 border-t pt-4">
-              <StatRow label="Completion" value={q.completion} />
-              <StatRow label="Avg Score" value={q.avgScore} />
+              <StatRow label={t('completion')} value={q.completion} />
+              <StatRow label={t('avgScore')} value={q.avgScore} />
             </dl>
           </div>
         ))}

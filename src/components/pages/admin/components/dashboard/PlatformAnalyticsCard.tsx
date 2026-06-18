@@ -1,3 +1,7 @@
+'use client';
+
+import { useAdminPlatformAnalyticsT } from '@/i18n';
+
 export interface AnalyticsPoint {
   month: string;
   users: number;
@@ -103,22 +107,20 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
 }
 
 export function PlatformAnalyticsCard({ data }: PlatformAnalyticsCardProps) {
+  const t = useAdminPlatformAnalyticsT();
   return (
     <div className="border-border bg-card rounded-xl border p-5 shadow">
-      <h3 className="text-foreground text-sm font-bold">Platform Analytics</h3>
-      <p className="text-muted-foreground mt-1 mb-5 text-xs">
-        Platform growth across users, enrollments, and activity over the last 12
-        months.
-      </p>
+      <h3 className="text-foreground text-sm font-bold">{t('title')}</h3>
+      <p className="text-muted-foreground mt-1 mb-5 text-xs">{t('subtitle')}</p>
       <LineChart data={data} />
       <div className="mt-4 flex justify-center gap-6">
         <span className="text-muted-foreground flex items-center gap-2 text-xs">
           <span className="bg-chart-blue h-2.5 w-2.5 rounded-full" />
-          Users
+          {t('legendUsers')}
         </span>
         <span className="text-muted-foreground flex items-center gap-2 text-xs">
           <span className="bg-chart-emerald h-2.5 w-2.5 rounded-full" />
-          Enrollments
+          {t('legendEnrollments')}
         </span>
       </div>
     </div>

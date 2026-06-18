@@ -3,6 +3,9 @@
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/common/sidebar/Sidebar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
+import { MobileSidebarProvider } from '@/context/MobileSidebarContext';
+import { MobileSidebarDrawer } from '@/components/common/sidebar/MobileSidebarDrawer';
+import { ADMIN_USER } from '@/constants/admin';
 
 export default function AdminShell({
   children,
@@ -15,18 +18,23 @@ export default function AdminShell({
   if (isLogin) return <>{children}</>;
 
   return (
-    <div className="bg-muted flex h-screen overflow-hidden">
-      <div className="hidden lg:flex lg:h-full lg:shrink-0">
-        <Sidebar role="admin" />
-      </div>
-      <main className="flex flex-1 flex-col overflow-hidden">
-        {/* Top bar placeholder removed to avoid duplicate language picker */}
-
-        <div className="flex-1 overflow-y-auto">
-          {children}
-          <FooterBottomBar theme="light" />
+    <MobileSidebarProvider userInitials={ADMIN_USER.initials}>
+      <div className="bg-background flex h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:h-full lg:shrink-0">
+          <Sidebar role="admin" />
         </div>
-      </main>
-    </div>
+
+        <MobileSidebarDrawer role="admin" />
+
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            {children}
+            <div className="hidden lg:block">
+              <FooterBottomBar theme="light" />
+            </div>
+          </div>
+        </main>
+      </div>
+    </MobileSidebarProvider>
   );
 }

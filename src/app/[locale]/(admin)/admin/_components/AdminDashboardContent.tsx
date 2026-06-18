@@ -1,5 +1,6 @@
 'use client';
 
+import { useAdminDashboardT } from '@/i18n';
 import { QUIZ_ANALYTICS } from '@/constants/admin';
 import TopBar from '@/components/common/TopBar';
 import { DashboardStatGrid } from '@/components/pages/admin/components/dashboard/DashboardStatGrid';
@@ -14,11 +15,8 @@ import { useCourseStats } from '@/hooks/useCourseStats';
 import { cn } from '@/lib/utils/cn';
 
 export function AdminDashboardContent() {
+  const t = useAdminDashboardT();
   const isFirstVisit = useFirstVisit('admin-overview');
-
-  // Track page-level loading only on first visit so the skeleton knows when to exit.
-  // On return visits the hooks still run but isFirstVisit is false, so the results
-  // are irrelevant to the overlay and the individual components handle their own state.
   const { loading: usersLoading } = useUserStats();
   const { loading: coursesLoading } = useCourseStats();
 
@@ -26,7 +24,6 @@ export function AdminDashboardContent() {
 
   return (
     <div className="bg-background relative flex min-h-full flex-col">
-      {/* Full-page skeleton overlay — visible only during the very first load */}
       {isFirstVisit && (
         <div
           className={cn(
@@ -38,7 +35,7 @@ export function AdminDashboardContent() {
         </div>
       )}
 
-      {/* Real content — opacity-0 while skeleton is covering it on first visit */}
+      {/* Real content */}
       <div
         className={cn(
           'flex min-h-full flex-col',
@@ -46,9 +43,9 @@ export function AdminDashboardContent() {
           showPageSkeleton && 'opacity-0',
         )}
       >
-        <TopBar role="admin" title="Platform Overview" />
+        <TopBar role="admin" title={t('platformOverview')} />
 
-        <div className="flex-1 space-y-8 px-6 py-8 lg:px-8">
+        <div className="flex-1 space-y-8 px-4 py-6 sm:px-6 lg:px-8">
           <DashboardStatGrid firstVisit={isFirstVisit} />
 
           <div className="grid gap-6 lg:grid-cols-3">

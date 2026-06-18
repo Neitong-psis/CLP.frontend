@@ -54,31 +54,41 @@ export function QuizAnalyticsCard({ data }: QuizAnalyticsCardProps) {
         {data.map((q, qi) => (
           <div
             key={q.title}
-            className="border-border hover:border-brand-gold/40 rounded-xl border p-4 transition-all duration-200 hover:bg-amber-50/40 hover:shadow-sm"
+            className="group border-border hover:border-brand-gold/50 relative cursor-default overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_28px_-8px_rgba(0,0,0,0.2)]"
           >
-            <p className="text-foreground text-sm font-bold">{q.title}</p>
-            <p className="text-muted-foreground mt-0.5 mb-4 text-[11px]">
-              Difficult: {q.difficult}
-            </p>
-            <div className="border-border space-y-3 border-t pt-3">
-              <QuizStatRow
-                label="Completion"
-                value={q.completion}
-                barClass="bg-brand-gold"
-                delay={0.3 + qi * 0.1}
-              />
-              <QuizStatRow
-                label="Avg score"
-                value={q.avgScore}
-                barClass="bg-chart-line"
-                delay={0.4 + qi * 0.1}
-              />
-              <QuizStatRow
-                label="Pass rate"
-                value={q.passRate}
-                barClass="bg-emerald-500"
-                delay={0.5 + qi * 0.1}
-              />
+            {/* Subtle gold wash that fades in — works in both modes */}
+            <div className="bg-brand-gold/5 pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+            {/* Left accent bar */}
+            <div className="bg-brand-gold pointer-events-none absolute top-3 bottom-3 left-0 w-0.5 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-100" />
+
+            <div className="relative">
+              <p className="text-foreground group-hover:text-brand-gold text-sm font-bold transition-colors duration-200">
+                {q.title}
+              </p>
+              <p className="text-muted-foreground mt-0.5 mb-4 text-[11px]">
+                Difficult: {q.difficult}
+              </p>
+              <div className="border-border space-y-3 border-t pt-3">
+                <QuizStatRow
+                  label="Completion"
+                  value={q.completion}
+                  barClass="bg-brand-gold"
+                  delay={0.3 + qi * 0.1}
+                />
+                <QuizStatRow
+                  label="Avg score"
+                  value={q.avgScore}
+                  barClass="bg-chart-line"
+                  delay={0.4 + qi * 0.1}
+                />
+                <QuizStatRow
+                  label="Pass rate"
+                  value={q.passRate}
+                  barClass="bg-emerald-500"
+                  delay={0.5 + qi * 0.1}
+                />
+              </div>
             </div>
           </div>
         ))}

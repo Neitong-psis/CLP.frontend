@@ -1,27 +1,19 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { ThemeProvider as CustomThemeProvider } from '@/hooks/useTheme';
 
 /**
- * Single source of truth for theme configuration. Wraps `next-themes` so the
- * rest of the app depends on this module — not the library — for theme state.
+ * Thin re-export of the custom ThemeProvider.
  *
- * - `attribute="class"` toggles `.dark` on <html> (matches the `@variant dark`
- *   selector in globals.css).
- * - `defaultTheme="system"` + `enableSystem` honor the OS preference first.
- * - `disableTransitionOnChange` prevents color transitions from animating on
- *   theme switch (avoids a flash of half-transitioned colors).
+ * We deliberately avoid `next-themes` here: its ThemeProvider renders a
+ * `<script>` element inside the React component tree, which triggers a React 19
+ * warning ("Encountered a script tag while rendering React component").
+ *
+ * FOUC prevention is handled via a `qb_theme` cookie — the root layout reads
+ * it server-side and sets the initial `dark` class on `<html>` before the
+ * page reaches the client. No inline scripts needed.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-    </NextThemesProvider>
-  );
+  return <CustomThemeProvider>{children}</CustomThemeProvider>;
 }

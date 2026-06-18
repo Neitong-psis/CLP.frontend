@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { useAdminUsersAddModalT } from '@/i18n';
 import {
   X,
   UserRound,
@@ -80,6 +81,7 @@ export default function AddUserModal({
   onClose: () => void;
   onCreate: (input: SaveUserInput) => void;
 }) {
+  const t = useAdminUsersAddModalT();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -169,7 +171,7 @@ export default function AddUserModal({
               <h2 className="text-lg font-bold text-white">
                 {firstName || lastName
                   ? [firstName, lastName].filter(Boolean).join(' ')
-                  : 'New User'}
+                  : t('newUser')}
               </h2>
               <div className="mt-1 flex items-center gap-2">
                 <span
@@ -181,7 +183,7 @@ export default function AddUserModal({
                   {role}
                 </span>
                 <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-500">
-                  Active
+                  {t('active')}
                 </span>
               </div>
             </div>
@@ -193,7 +195,7 @@ export default function AddUserModal({
           <div className="space-y-5">
             {/* Name row */}
             <div className="grid grid-cols-2 gap-4">
-              <Field label="First Name" error={errors.firstName}>
+              <Field label={t('firstName')} error={errors.firstName}>
                 <input
                   type="text"
                   placeholder="Sarah"
@@ -208,7 +210,7 @@ export default function AddUserModal({
                   className={cn(inputCls, errors.firstName && inputErrorCls)}
                 />
               </Field>
-              <Field label="Last Name">
+              <Field label={t('lastName')}>
                 <input
                   type="text"
                   placeholder="Wilson"
@@ -220,7 +222,7 @@ export default function AddUserModal({
             </div>
 
             {/* Email */}
-            <Field label="Email Address" error={errors.email}>
+            <Field label={t('emailAddress')} error={errors.email}>
               <input
                 type="email"
                 placeholder="name@example.com"
@@ -237,7 +239,7 @@ export default function AddUserModal({
             </Field>
 
             {/* Password */}
-            <Field label="Temporary Password" error={errors.password}>
+            <Field label={t('temporaryPassword')} error={errors.password}>
               <div className="relative flex items-center gap-2">
                 <div className="relative min-w-0 flex-1">
                   <input
@@ -281,7 +283,7 @@ export default function AddUserModal({
                       ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500'
                       : 'border-border bg-muted text-muted-foreground hover:bg-background hover:text-foreground',
                   )}
-                  title="Copy password"
+                  title={t('copyPassword')}
                 >
                   {copied ? (
                     <Check className="h-4 w-4" />
@@ -295,7 +297,7 @@ export default function AddUserModal({
                   type="button"
                   onClick={regenerate}
                   className="border-border bg-muted text-muted-foreground hover:bg-background hover:text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors"
-                  title="Generate new password"
+                  title={t('generatePassword')}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </button>
@@ -303,8 +305,7 @@ export default function AddUserModal({
 
               <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-[11px]">
                 <Info className="h-3 w-3 shrink-0" />
-                Copy and share this password — the user can change it after
-                first login.
+                {t('passwordHint')}
               </p>
             </Field>
 
@@ -312,7 +313,7 @@ export default function AddUserModal({
 
             {/* Role */}
             <div>
-              <label className={labelCls}>Role</label>
+              <label className={labelCls}>{t('role')}</label>
               <div className="flex gap-2">
                 {ROLES.map((r) => (
                   <button
@@ -336,23 +337,21 @@ export default function AddUserModal({
 
         {/* ── Footer ──────────────────────────────────────────────────────────── */}
         <div className="border-border bg-surface/50 flex items-center justify-between border-t px-8 py-4">
-          <p className="text-muted-foreground text-xs">
-            Fields marked <span className="text-rose-400">*</span> are required.
-          </p>
+          <p className="text-muted-foreground text-xs">{t('requiredNote')}</p>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               className="border-border text-foreground hover:bg-muted rounded-xl border px-5"
               onClick={onClose}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               variant="secondary"
               className="rounded-xl px-6 font-semibold"
               onClick={handleSubmit}
             >
-              Create User
+              {t('createUser')}
             </Button>
           </div>
         </div>

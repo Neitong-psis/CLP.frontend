@@ -98,6 +98,7 @@ export function toAdminUserRow(user: AdminUser): AdminUserRow {
     email: user.email ?? '—',
     role: resolveRoleLabel(user),
     status: resolveStatusLabel(user),
+    inviteStatus: 'Approved',
     enrolled: 0,
     joined: formatJoined(user.createdAt),
     lastActive: '—',

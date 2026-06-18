@@ -78,7 +78,7 @@ export default function ProfileMenu({
       <DropdownMenuContent
         side="top"
         align="start"
-        className="border-border bg-card w-56 border p-0 shadow-lg"
+        className="border-border bg-card w-56 border p-0 shadow-lg dark:bg-[#071225]"
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3.5">

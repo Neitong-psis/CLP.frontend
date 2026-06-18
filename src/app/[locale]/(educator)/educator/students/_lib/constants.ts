@@ -16,15 +16,15 @@ export const STATUS_LABEL: Record<StudentStatus, string> = {
 };
 
 export const STATUS_STYLE: Record<StudentStatus, string> = {
-  Active: 'border-blue-200 bg-blue-50 text-blue-600',
-  Inactive: 'border-slate-200 bg-slate-100 text-slate-500',
-  Completed: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+  Active: 'border-blue-400/30 bg-blue-500/10 text-blue-500',
+  Inactive: 'border-border bg-muted text-muted-foreground',
+  Completed: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-500',
 };
 
 export const ACTIVITY_STYLE: Record<StudentActivity, string> = {
-  'Highly active': 'border-emerald-200 bg-emerald-50 text-emerald-600',
-  Active: 'border-blue-200 bg-blue-50 text-blue-600',
-  'At risk': 'border-rose-200 bg-rose-50 text-rose-600',
+  'Highly active': 'border-emerald-400/30 bg-emerald-500/10 text-emerald-500',
+  Active: 'border-blue-400/30 bg-blue-500/10 text-blue-500',
+  'At risk': 'border-rose-400/30 bg-rose-500/10 text-rose-500',
 };
 
 export function initials(name: string) {

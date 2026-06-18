@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useEducatorAnalyticsCompletionT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { useCountUp } from '@/hooks/useCountUp';
 import { cn } from '@/lib/utils/cn';
 import { COMPLETION_SEGMENTS, COMPLETION_TOTAL } from '../_lib/metrics';
 
 export function CompletionRanges() {
+  const t = useEducatorAnalyticsCompletionT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.3 });
   const [active, setActive] = useState<number | null>(null);
   const total = useCountUp(COMPLETION_TOTAL, { active: inView });
@@ -14,14 +16,12 @@ export function CompletionRanges() {
   return (
     <div
       ref={ref}
-      className="h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-6"
+      className="border-border bg-card h-full rounded-2xl border p-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-6"
     >
       <div className="mb-5">
-        <h3 className="text-brand-navy text-sm font-bold">
-          Student Completion Ranges
-        </h3>
-        <p className="mt-0.5 text-[11px] text-slate-400">
-          How far along your students are
+        <h3 className="text-foreground text-sm font-bold">{t('title')}</h3>
+        <p className="text-muted-foreground mt-0.5 text-[11px]">
+          {t('subtitle')}
         </p>
       </div>
 
@@ -29,13 +29,13 @@ export function CompletionRanges() {
         {/* Donut */}
         <div className="relative h-40 w-40 shrink-0">
           <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-            {/* Track */}
+            {/* Track — uses CSS variable so it respects dark mode */}
             <circle
               cx="50"
               cy="50"
               r="42"
               fill="none"
-              stroke="#f1f5f9"
+              stroke="var(--color-border)"
               strokeWidth="13"
             />
             {COMPLETION_SEGMENTS.map((s, i) => {
@@ -68,11 +68,11 @@ export function CompletionRanges() {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {active === null ? (
               <>
-                <span className="text-brand-navy text-2xl font-black tabular-nums">
+                <span className="text-foreground text-2xl font-black tabular-nums">
                   {Math.round(total)}
                 </span>
-                <span className="text-[10px] font-medium tracking-wide text-slate-400 uppercase">
-                  Students
+                <span className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
+                  {t('students')}
                 </span>
               </>
             ) : (
@@ -83,8 +83,8 @@ export function CompletionRanges() {
                 >
                   {COMPLETION_SEGMENTS[active].pct}%
                 </span>
-                <span className="text-[10px] font-medium tracking-wide text-slate-400 uppercase">
-                  {COMPLETION_SEGMENTS[active].count} students
+                <span className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
+                  {t('count', { count: COMPLETION_SEGMENTS[active].count })}
                 </span>
               </>
             )}
@@ -101,7 +101,7 @@ export function CompletionRanges() {
                 onMouseLeave={() => setActive(null)}
                 className={cn(
                   '-mx-2 flex w-[calc(100%+1rem)] items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left transition-colors',
-                  active === i ? 'bg-slate-50' : 'hover:bg-slate-50/60',
+                  active === i ? 'bg-muted/60' : 'hover:bg-muted/40',
                 )}
               >
                 <span className="flex items-center gap-2.5">
@@ -112,13 +112,13 @@ export function CompletionRanges() {
                       transform: active === i ? 'scale(1.4)' : 'scale(1)',
                     }}
                   />
-                  <span className="text-brand-navy text-xs font-medium">
-                    {s.label} complete
+                  <span className="text-foreground text-xs font-medium">
+                    {t('complete', { label: s.label })}
                   </span>
                 </span>
-                <span className="text-[11px] text-slate-400 tabular-nums">
+                <span className="text-muted-foreground text-[11px] tabular-nums">
                   {s.count}
-                  <span className="text-slate-300"> · {s.pct}%</span>
+                  <span className="text-muted-foreground/50"> · {s.pct}%</span>
                 </span>
               </button>
             </li>

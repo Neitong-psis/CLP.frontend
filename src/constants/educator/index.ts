@@ -1,3 +1,11 @@
+import {
+  type LucideIcon,
+  Users,
+  BookOpen,
+  Star,
+  DollarSign,
+} from 'lucide-react';
+
 export const EDUCATOR_USER = {
   name: 'Dr. Angela Yu',
   email: 'angela@clp.com',
@@ -430,6 +438,55 @@ export const DASHBOARD_STATS = [
   { label: 'Monthly Earnings', value: '$7,960', change: '+24%' },
 ] as const;
 
+export interface DashboardStatConfig {
+  label: string;
+  value: string;
+  change: string;
+  icon: LucideIcon;
+  iconBg: string;
+  gradient: string;
+  href: string;
+}
+
+export const EDUCATOR_STAT_CONFIG: DashboardStatConfig[] = [
+  {
+    label: 'Total Students',
+    value: '4,751',
+    change: '+18%',
+    icon: Users,
+    iconBg: 'bg-brand-navy',
+    gradient: 'from-blue-700 to-indigo-900',
+    href: '/educator/students',
+  },
+  {
+    label: 'Published Courses',
+    value: '3',
+    change: '+2',
+    icon: BookOpen,
+    iconBg: 'bg-brand-gold',
+    gradient: 'from-amber-500 to-orange-600',
+    href: '/educator/courses',
+  },
+  {
+    label: 'Avg Rating',
+    value: '4.7',
+    change: '+0.2',
+    icon: Star,
+    iconBg: 'bg-brand-gold',
+    gradient: 'from-violet-600 to-purple-900',
+    href: '/educator/analytics',
+  },
+  {
+    label: 'Monthly Earnings',
+    value: '$7,960',
+    change: '+24%',
+    icon: DollarSign,
+    iconBg: 'bg-brand-navy',
+    gradient: 'from-emerald-500 to-teal-800',
+    href: '/educator/analytics',
+  },
+];
+
 export const MONTHLY_ENROLLMENTS = [
   { month: 'Jun', count: 80 },
   { month: 'Jul', count: 105 },
@@ -449,6 +506,11 @@ export const DASHBOARD_TOP_COURSES = [
   { title: 'React Masterclass', students: 1842, rating: 4.9 },
   { title: 'Node.js Fundamentals', students: 1203, rating: 4.7 },
   { title: 'TypeScript Deep Dive', students: 876, rating: 4.8 },
+  { title: 'GraphQL Essentials', students: 654, rating: 4.6 },
+  { title: 'Advanced CSS & Sass', students: 521, rating: 4.5 },
+  { title: 'Docker for Developers', students: 438, rating: 4.7 },
+  { title: 'Testing with Jest', students: 312, rating: 4.4 },
+  { title: 'Next.js Production', students: 289, rating: 4.8 },
 ];
 
 export const COMPLETION_RATES = [
@@ -456,6 +518,10 @@ export const COMPLETION_RATES = [
   { title: 'Node.js Fundamentals', rate: 68 },
   { title: 'TypeScript Deep Dive', rate: 81 },
   { title: 'GraphQL Essentials', rate: 59 },
+  { title: 'Advanced CSS & Sass', rate: 71 },
+  { title: 'Docker for Developers', rate: 63 },
+  { title: 'Testing with Jest', rate: 55 },
+  { title: 'Next.js Production', rate: 77 },
 ];
 
 export const QUIZ_ANALYTICS = [

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BookOpen, Mail, User, UserPlus, X } from 'lucide-react';
+import { useEducatorStudentsModalT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import { EDUCATOR_COURSES } from '@/constants/educator';
 import type { NewStudentInput } from '../_lib/useStudentFilter';
@@ -9,7 +10,7 @@ import type { NewStudentInput } from '../_lib/useStudentFilter';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputCls =
-  'focus:border-brand-gold focus:ring-brand-gold/10 h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 transition-colors outline-none focus:ring-2';
+  'focus:border-brand-gold focus:ring-brand-gold/10 h-10 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors outline-none focus:ring-2';
 
 export function AddStudentModal({
   open,
@@ -20,8 +21,6 @@ export function AddStudentModal({
   onClose: () => void;
   onAdd: (input: NewStudentInput) => void;
 }) {
-  // Mount the content only while open — state initialises fresh on every
-  // open, so no reset-in-effect is needed.
   if (!open) return null;
   return <AddStudentModalContent onClose={onClose} onAdd={onAdd} />;
 }
@@ -33,6 +32,7 @@ function AddStudentModalContent({
   onClose: () => void;
   onAdd: (input: NewStudentInput) => void;
 }) {
+  const t = useEducatorStudentsModalT();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [course, setCourse] = useState('');
@@ -42,11 +42,9 @@ function AddStudentModalContent({
     (c) => c.status === 'Published',
   );
 
-  const nameError = name.trim().length < 2 ? 'Enter the student name' : null;
-  const emailError = !EMAIL_RE.test(email.trim())
-    ? 'Enter a valid email address'
-    : null;
-  const courseError = course === '' ? 'Choose a course' : null;
+  const nameError = name.trim().length < 2 ? t('errorName') : null;
+  const emailError = !EMAIL_RE.test(email.trim()) ? t('errorEmail') : null;
+  const courseError = course === '' ? t('errorCourse') : null;
   const valid = !nameError && !emailError && !courseError;
 
   useEffect(() => {
@@ -67,14 +65,14 @@ function AddStudentModalContent({
 
   return (
     <div
-      className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Add student"
-        className="animate-scale-in w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+        className="animate-scale-in bg-card w-full max-w-md rounded-2xl p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between">
@@ -84,18 +82,16 @@ function AddStudentModalContent({
             </span>
             <div>
               <h2 className="text-brand-navy text-base font-bold">
-                Add Student
+                {t('title')}
               </h2>
-              <p className="text-xs text-slate-400">
-                Invite a learner to one of your courses
-              </p>
+              <p className="text-muted-foreground text-xs">{t('subtitle')}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -103,16 +99,16 @@ function AddStudentModalContent({
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
-              Full name
+            <label className="text-foreground/80 mb-1.5 block text-xs font-semibold">
+              {t('fullName')}
             </label>
             <div className="relative">
-              <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <User className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Dara Chan"
+                placeholder={t('namePlaceholder')}
                 autoFocus
                 className={inputCls}
               />
@@ -123,16 +119,16 @@ function AddStudentModalContent({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
-              Email
+            <label className="text-foreground/80 mb-1.5 block text-xs font-semibold">
+              {t('email')}
             </label>
             <div className="relative">
-              <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="student@example.com"
+                placeholder={t('emailPlaceholder')}
                 className={inputCls}
               />
             </div>
@@ -142,22 +138,22 @@ function AddStudentModalContent({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
-              Course
+            <label className="text-foreground/80 mb-1.5 block text-xs font-semibold">
+              {t('course')}
             </label>
             <div className="relative">
-              <BookOpen className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <BookOpen className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <select
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 className={cn(
                   inputCls,
                   'appearance-none pr-8',
-                  course === '' && 'text-slate-400',
+                  course === '' && 'text-muted-foreground',
                 )}
               >
                 <option value="" disabled>
-                  Select a published course…
+                  {t('selectCourse')}
                 </option>
                 {publishedCourses.map((c) => (
                   <option key={c.id} value={c.title}>
@@ -175,24 +171,26 @@ function AddStudentModalContent({
             <button
               type="button"
               onClick={onClose}
-              className="h-10 flex-1 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+              className="border-border text-foreground/80 hover:bg-muted h-10 flex-1 rounded-xl border text-sm font-semibold transition-colors"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={touched && !valid}
               className="bg-brand-gold h-10 flex-1 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Send Invite
+              {t('sendInvite')}
             </button>
           </div>
         </form>
 
-        <p className="mt-4 text-center text-[11px] text-slate-400">
-          The student appears as{' '}
-          <span className="font-semibold text-slate-500">Inactive</span> until
-          they accept the invitation.
+        <p className="text-muted-foreground mt-4 text-center text-[11px]">
+          {t('pendingNote1')}{' '}
+          <span className="text-foreground/70 font-semibold">
+            {t('inactive')}
+          </span>{' '}
+          {t('pendingNote2')}
         </p>
       </div>
     </div>

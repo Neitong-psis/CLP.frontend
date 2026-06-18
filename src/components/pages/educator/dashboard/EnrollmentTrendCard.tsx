@@ -274,7 +274,7 @@ export function EnrollmentTrendCard({
             <p className="text-foreground text-2xl font-black">
               {total.toLocaleString()}
             </p>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-500">
               <TrendingUp className="h-3 w-3" />
               {growth >= 0 ? '+' : ''}
               {growth}%

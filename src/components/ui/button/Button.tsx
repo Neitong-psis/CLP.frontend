@@ -16,11 +16,11 @@ export const buttonVariants = cvm(
     variants: {
       variant: {
         default:
-          'bg-brand-navy text-white hover:bg-brand-navy-tint focus-visible:ring-brand-navy',
+          'bg-brand-navy text-white hover:bg-brand-navy-tint focus-visible:ring-brand-navy dark:bg-brand-gold dark:text-brand-navy dark:hover:bg-brand-gold-dark dark:focus-visible:ring-brand-gold',
         outline:
-          'border border-brand-navy/15 bg-white text-brand-navy hover:bg-brand-navy/[0.04] focus-visible:ring-brand-navy',
+          'border border-brand-navy/15 bg-transparent text-brand-navy hover:bg-brand-navy/[0.04] focus-visible:ring-brand-navy dark:border-white/25 dark:text-white/80 dark:hover:bg-white/[0.07] dark:hover:text-white',
         ghost:
-          'text-brand-navy hover:bg-brand-navy/[0.06] focus-visible:ring-brand-navy',
+          'text-brand-navy hover:bg-brand-navy/[0.06] focus-visible:ring-brand-navy dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white',
         destructive:
           'bg-brand-red text-white hover:bg-brand-red/90 focus-visible:ring-brand-red',
         secondary:

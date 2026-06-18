@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   type LucideIcon,
 } from 'lucide-react';
+import { useEducatorStudentsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
 interface StatCardDef {
@@ -41,36 +42,38 @@ export function StatsStrip({
   onAchieved: () => void;
   onAtRisk: () => void;
 }) {
+  const t = useEducatorStudentsT();
+
   const cards: StatCardDef[] = [
     {
-      label: 'Total Learners',
+      label: t('statTotal'),
       value: counts.total,
       icon: Users,
-      iconCls: 'bg-brand-navy/5 text-brand-navy',
+      iconCls: 'bg-muted text-foreground/70',
       active: statusFilter === 'All' && !riskOnly,
       onClick: onAll,
     },
     {
-      label: 'Active',
+      label: t('statActive'),
       value: counts.active,
       icon: UserCheck,
-      iconCls: 'bg-blue-50 text-blue-500',
+      iconCls: 'bg-blue-500/10 text-blue-500',
       active: statusFilter === 'Active' && !riskOnly,
       onClick: onActive,
     },
     {
-      label: 'Achieved',
+      label: t('statAchieved'),
       value: counts.achieved,
       icon: GraduationCap,
-      iconCls: 'bg-emerald-50 text-emerald-500',
+      iconCls: 'bg-emerald-500/10 text-emerald-500',
       active: statusFilter === 'Completed' && !riskOnly,
       onClick: onAchieved,
     },
     {
-      label: 'At Risk',
+      label: t('statAtRisk'),
       value: counts.atRisk,
       icon: AlertTriangle,
-      iconCls: 'bg-rose-50 text-rose-500',
+      iconCls: 'bg-rose-500/10 text-rose-500',
       active: riskOnly,
       onClick: onAtRisk,
     },
@@ -85,10 +88,10 @@ export function StatsStrip({
             type="button"
             onClick={onClick}
             className={cn(
-              'animate-fade-in-up flex items-center gap-3 rounded-2xl border bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+              'animate-fade-in-up bg-card flex items-center gap-3 rounded-2xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
               active
                 ? 'border-brand-gold ring-brand-gold/15 shadow-sm ring-2'
-                : 'border-slate-200 hover:border-slate-300',
+                : 'border-border hover:border-border',
               i === 1 && 'delay-100',
               i === 2 && 'delay-200',
               i === 3 && 'delay-300',
@@ -103,10 +106,10 @@ export function StatsStrip({
               <Icon className="h-5 w-5" />
             </span>
             <span className="min-w-0">
-              <span className="text-brand-navy block text-xl font-black tabular-nums">
+              <span className="text-foreground block text-xl font-black tabular-nums">
                 {value}
               </span>
-              <span className="block truncate text-[11px] font-medium text-slate-400">
+              <span className="text-muted-foreground block truncate text-[11px] font-medium">
                 {label}
               </span>
             </span>

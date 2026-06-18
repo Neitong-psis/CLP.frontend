@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminDashboardT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,9 +50,10 @@ function arcPath(start: number, end: number): string {
 
 export function UserDistributionCard({
   data = DEFAULT_DATA,
-  period = 'Live user records',
+  period,
   className,
 }: UserDistributionCardProps) {
+  const t = useAdminDashboardT();
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   const total = data.reduce((sum, d) => sum + d.count, 0);
@@ -81,13 +83,15 @@ export function UserDistributionCard({
       {/* Header */}
       <div className="border-border flex items-baseline justify-between border-b px-5 py-4">
         <p className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
-          User Distribution
+          {t('userDistribution')}
         </p>
         <div className="flex items-baseline gap-1">
           <span className="text-foreground text-[20px] leading-none font-semibold tabular-nums">
             {total.toLocaleString()}
           </span>
-          <span className="text-muted-foreground text-[11px]">users</span>
+          <span className="text-muted-foreground text-[11px]">
+            {t('users')}
+          </span>
         </div>
       </div>
 
@@ -177,7 +181,7 @@ export function UserDistributionCard({
               {active ? active.count : total}
             </span>
             <span className="text-muted-foreground mt-1 text-[12px] transition-all duration-200">
-              {active ? active.label.toLowerCase() : 'total'}
+              {active ? active.label.toLowerCase() : t('total')}
             </span>
           </div>
         </div>
@@ -252,7 +256,9 @@ export function UserDistributionCard({
           className="size-1.5 animate-pulse rounded-full bg-emerald-400"
           aria-hidden="true"
         />
-        <span className="text-muted-foreground text-[11px]">{period}</span>
+        <span className="text-muted-foreground text-[11px]">
+          {period ?? t('liveUserRecords')}
+        </span>
       </div>
     </section>
   );

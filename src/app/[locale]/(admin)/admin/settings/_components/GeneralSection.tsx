@@ -1,37 +1,39 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminSettingsT } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { ComboField } from '@/components/ui/ComboField';
 import { Button } from '@/components/ui/button/Button';
 import { SettingsField } from './SettingsField';
 import { SettingsSection } from './SettingsSection';
 
-const INFO_CARDS = [
-  {
-    title: 'Security',
-    desc: 'Admin sessions, profile updates, and sensitive actions use confirmation prompts.',
-  },
-  {
-    title: 'Notifications',
-    desc: 'Course approvals, certificates, enrollment changes, and system alerts stay synced in the header.',
-  },
-  {
-    title: 'Learn More',
-    desc: 'CLP workspace guidance, support contact, and operating details are kept in Settings for review.',
-  },
-];
-
 export function GeneralSection() {
+  const t = useAdminSettingsT();
   const [platformName, setPlatformName] = useState(
     'CLP - Content Learning Platform',
   );
   const [supportEmail, setSupportEmail] = useState('support@clp.io');
 
+  const INFO_CARDS = [
+    {
+      title: t('infoSecurity'),
+      desc: t('infoSecurityDesc'),
+    },
+    {
+      title: t('infoNotifications'),
+      desc: t('infoNotificationsDesc'),
+    },
+    {
+      title: t('infoLearnMore'),
+      desc: t('infoLearnMoreDesc'),
+    },
+  ];
+
   return (
-    <SettingsSection title="General">
-      <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4">
-        <SettingsField label="Platform Name">
+    <SettingsSection title={t('general')}>
+      <div className="mt-5 grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
+        <SettingsField label={t('platformName')}>
           <Input
             value={platformName}
             onChange={(e) => setPlatformName(e.target.value)}
@@ -39,7 +41,7 @@ export function GeneralSection() {
           />
         </SettingsField>
 
-        <SettingsField label="Support Email">
+        <SettingsField label={t('supportEmail')}>
           <Input
             type="email"
             value={supportEmail}
@@ -49,11 +51,11 @@ export function GeneralSection() {
         </SettingsField>
 
         <ComboField
-          label="Default Language"
+          label={t('defaultLanguage')}
           items={['English', 'Khmer', 'French', 'Chinese']}
         />
         <ComboField
-          label="Time Zone"
+          label={t('timeZone')}
           items={[
             'Asia/Phnom_Penh (UTC+7)',
             'UTC',
@@ -63,7 +65,7 @@ export function GeneralSection() {
         />
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-4">
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {INFO_CARDS.map(({ title, desc }) => (
           <div
             key={title}
@@ -82,7 +84,7 @@ export function GeneralSection() {
           variant="secondary"
           className="rounded-lg px-5 py-2.5 text-sm font-bold text-white"
         >
-          Save Settings
+          {t('saveSettings')}
         </Button>
       </div>
     </SettingsSection>

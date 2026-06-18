@@ -13,15 +13,15 @@ export default function CourseReviewPage() {
 
   if (!task) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center gap-3 bg-slate-50 px-6 py-20 text-center">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-slate-100">
-          <SearchX className="h-6 w-6 text-slate-400" />
+      <div className="bg-background flex min-h-full flex-col items-center justify-center gap-3 px-6 py-20 text-center">
+        <div className="bg-muted flex size-12 items-center justify-center rounded-2xl">
+          <SearchX className="text-muted-foreground h-6 w-6" />
         </div>
         <div>
-          <p className="text-brand-navy text-base font-bold">
+          <p className="text-foreground text-base font-bold">
             Course not found
           </p>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <p className="text-muted-foreground mt-0.5 text-sm">
             This course may have been moved or removed.
           </p>
         </div>

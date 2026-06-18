@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/Field';
 
 export const inputCls =
-  'w-full bg-transparent py-0 pl-10 pr-4 text-sm text-[#00003e] placeholder:text-slate-400 outline-none 2xl:text-base 3xl:text-lg';
+  'w-full bg-transparent py-0 pl-10 pr-4 text-sm text-brand-navy placeholder:text-slate-400 outline-none 2xl:text-base 3xl:text-lg';
 
 export function Field({
   label,

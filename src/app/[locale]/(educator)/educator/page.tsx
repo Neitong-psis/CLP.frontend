@@ -1,65 +1,69 @@
-import { Users, BookOpen, Star, DollarSign } from 'lucide-react';
-
-import {
-  DASHBOARD_STATS,
-  MONTHLY_ENROLLMENTS,
-  QUIZ_ANALYTICS,
-} from '@/constants/educator';
+import { MONTHLY_ENROLLMENTS, QUIZ_ANALYTICS } from '@/constants/educator';
 
 import TopBar from '@/components/common/TopBar';
-import { StatCard } from '@/components/pages/educator/dashboard/StatCard';
+import { RoleGate } from '@/components/auth/RoleGate';
+import { ROLE } from '@/constants/roles';
+import { GreetingHero } from '@/components/pages/educator/dashboard/GreetingHero';
+import { DashboardStats } from '@/components/pages/educator/dashboard/DashboardStats';
 import { EnrollmentTrendCard } from '@/components/pages/educator/dashboard/EnrollmentTrendCard';
 import { QuizAnalyticsCard } from '@/components/pages/educator/dashboard/QuizAnalyticsCard';
 import { CourseInsightsGrid } from '@/components/pages/educator/dashboard/CourseInsightsGrid';
-import { RoleGate } from '@/components/auth/RoleGate';
-import { ROLE } from '@/constants/roles';
-
-const STAT_ICONS = [Users, BookOpen, Star, DollarSign];
-const STAT_BG = [
-  'bg-brand-navy',
-  'bg-brand-gold',
-  'bg-brand-gold',
-  'bg-brand-navy',
-];
-const STAT_DELAYS = ['', 'delay-100', 'delay-200', 'delay-300'];
 
 export default function EducatorDashboardPage() {
   return (
     <RoleGate
       roles={[ROLE.EDUCATOR]}
-      loadingFallback={<p className="p-6 text-sm text-slate-300">Loading…</p>}
-      fallback={
-        <p className="p-6 text-sm text-slate-300">No educator access.</p>
-      }
+      loadingFallback={<DashboardSkeleton />}
+      fallback={<AccessDenied />}
     >
-      <div className="flex min-h-full flex-col bg-white">
+      <div className="bg-background flex min-h-full flex-col">
         <TopBar role="educator" title="Educator Dashboard" />
-        <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {DASHBOARD_STATS.map(({ label, value, change }, i) => (
-              <div
-                key={label}
-                className={`animate-fade-in-up ${STAT_DELAYS[i]}`}
-              >
-                <StatCard
-                  label={label}
-                  value={value}
-                  change={change}
-                  icon={STAT_ICONS[i]}
-                  iconBg={STAT_BG[i]}
-                />
-              </div>
-            ))}
-          </div>
+
+        <div className="flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <GreetingHero />
+          <DashboardStats />
+
           <div className="animate-fade-in-up delay-200">
             <EnrollmentTrendCard data={MONTHLY_ENROLLMENTS} />
           </div>
-          <CourseInsightsGrid className="animate-fade-in-up mb-6 delay-300" />
+
+          <CourseInsightsGrid className="animate-fade-in-up mb-5 delay-300 sm:mb-6" />
+
           <div className="animate-fade-in-up delay-400">
             <QuizAnalyticsCard data={QUIZ_ANALYTICS} />
           </div>
         </div>
       </div>
     </RoleGate>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="animate-pulse px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <div className="bg-muted mb-5 h-52 rounded-2xl sm:hidden" />
+      <div className="mb-5 hidden sm:mb-6 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-muted h-28 rounded-2xl" />
+        ))}
+      </div>
+      <div className="bg-muted mb-6 h-64 rounded-2xl" />
+      <div className="mb-6 grid gap-6 lg:grid-cols-2">
+        <div className="bg-muted h-56 rounded-2xl" />
+        <div className="bg-muted h-56 rounded-2xl" />
+      </div>
+      <div className="bg-muted h-48 rounded-2xl" />
+    </div>
+  );
+}
+
+function AccessDenied() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 p-6 text-center">
+      <p className="text-foreground text-sm font-semibold">Access restricted</p>
+      <p className="text-muted-foreground text-xs">
+        You need an Educator account to view this page.
+      </p>
+    </div>
   );
 }

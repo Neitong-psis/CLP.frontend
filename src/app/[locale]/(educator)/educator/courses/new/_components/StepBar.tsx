@@ -24,13 +24,13 @@ export function StepBar({
   const progress = ((current - 1) / (WIZARD_STEPS.length - 1)) * 100;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="border-border bg-card rounded-2xl border p-4 shadow-sm sm:p-5">
       {/* Compact progress meta */}
       <div className="mb-4 flex items-center justify-between sm:hidden">
-        <span className="text-sm font-bold text-zinc-900">
+        <span className="text-foreground text-sm font-bold">
           {WIZARD_STEPS[current - 1]?.title}
         </span>
-        <span className="text-xs font-medium text-zinc-400">
+        <span className="text-muted-foreground text-xs font-medium">
           Step {current} of {WIZARD_STEPS.length}
         </span>
       </div>
@@ -66,9 +66,9 @@ export function StepBar({
                     reached &&
                       !isActive &&
                       !isComplete &&
-                      'bg-blue-50 text-blue-600 ring-1 ring-blue-200 group-hover:bg-blue-100',
+                      'bg-blue-50 text-blue-600 ring-1 ring-blue-200 group-hover:bg-blue-100 dark:bg-blue-500/10 dark:ring-blue-500/30 dark:group-hover:bg-blue-500/20',
                     !reached &&
-                      'bg-zinc-100 text-zinc-400 ring-1 ring-zinc-200',
+                      'bg-muted text-muted-foreground ring-border ring-1',
                   )}
                 >
                   {isComplete ? (
@@ -83,12 +83,12 @@ export function StepBar({
                   <span
                     className={cn(
                       'block truncate text-sm font-bold transition-colors',
-                      reached ? 'text-zinc-900' : 'text-zinc-400',
+                      reached ? 'text-foreground' : 'text-muted-foreground',
                     )}
                   >
                     {step.title}
                   </span>
-                  <span className="block truncate text-[11px] text-zinc-400">
+                  <span className="text-muted-foreground block truncate text-[11px]">
                     {step.desc}
                   </span>
                 </span>
@@ -96,7 +96,7 @@ export function StepBar({
 
               {/* Connector rail that fills as steps complete */}
               {i < WIZARD_STEPS.length - 1 && (
-                <div className="mx-2 h-0.5 flex-1 overflow-hidden rounded-full bg-zinc-200 sm:mx-4">
+                <div className="bg-border mx-2 h-0.5 flex-1 overflow-hidden rounded-full sm:mx-4">
                   <div
                     className={cn(
                       'h-full rounded-full bg-blue-600 transition-all duration-500 ease-out',
@@ -111,7 +111,7 @@ export function StepBar({
       </div>
 
       {/* Slim overall progress bar (desktop) */}
-      <div className="mt-4 hidden h-1 overflow-hidden rounded-full bg-zinc-100 sm:block">
+      <div className="bg-muted mt-4 hidden h-1 overflow-hidden rounded-full sm:block">
         <div
           className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}

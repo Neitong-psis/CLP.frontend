@@ -1,6 +1,7 @@
 'use client';
 
 import { Lock, Mail } from 'lucide-react';
+import { useAdminLoginT } from '@/i18n';
 import { validateEmail, validatePassword } from '@/config/auth';
 import { FieldGroup } from '@/components/ui/Field';
 import {
@@ -13,6 +14,7 @@ import { useAdminLogin } from '../_lib/useAdminLogin';
 // ── component ────────────────────────────────────────────────────
 
 export default function AdminLoginForm() {
+  const t = useAdminLoginT();
   const { form, showPassword, setShowPassword, authError, clearError } =
     useAdminLogin();
 
@@ -32,13 +34,13 @@ export default function AdminLoginForm() {
           {(field) => (
             <FormField
               field={field}
-              label="Email"
+              label={t('email')}
               icon={
                 <Mail className="h-4.5 w-4.5 text-slate-400 2xl:h-5 2xl:w-5" />
               }
               inputProps={{
                 type: 'email',
-                placeholder: 'example@domain.com',
+                placeholder: t('emailPlaceholder'),
                 autoComplete: 'email',
                 onChange: (e) => {
                   clearError();
@@ -56,7 +58,7 @@ export default function AdminLoginForm() {
           {(field) => (
             <FormField
               field={field}
-              label="Password"
+              label={t('password')}
               icon={
                 <Lock className="h-4.5 w-4.5 text-slate-400 2xl:h-5 2xl:w-5" />
               }
@@ -68,7 +70,7 @@ export default function AdminLoginForm() {
               }
               inputProps={{
                 type: showPassword ? 'text' : 'password',
-                placeholder: 'Enter your password',
+                placeholder: t('passwordPlaceholder'),
                 autoComplete: 'current-password',
                 onChange: (e) => {
                   clearError();
@@ -91,7 +93,7 @@ export default function AdminLoginForm() {
 
       <form.Subscribe selector={(s) => s.isSubmitting}>
         {(isSubmitting) => (
-          <SubmitBtn label="Sign In" disabled={isSubmitting} />
+          <SubmitBtn label={t('signIn')} disabled={isSubmitting} />
         )}
       </form.Subscribe>
     </form>

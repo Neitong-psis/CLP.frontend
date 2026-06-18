@@ -22,10 +22,10 @@ export function CourseContentStep({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-zinc-900">
+          <h2 className="text-foreground text-base font-bold">
             Course Curriculum
           </h2>
-          <p className="text-xs text-zinc-400">
+          <p className="text-muted-foreground text-xs">
             Build a scalable Course / Module / Lesson / Content / Quiz /
             Assignment structure
           </p>
@@ -41,10 +41,12 @@ export function CourseContentStep({
       </div>
 
       {modules.length === 0 ? (
-        <div className="animate-fade-in rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 text-center">
-          <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-          <p className="text-sm font-semibold text-zinc-500">No modules yet</p>
-          <p className="mt-1 text-xs text-zinc-400">
+        <div className="animate-fade-in border-border bg-card rounded-2xl border-2 border-dashed py-16 text-center">
+          <BookOpen className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
+          <p className="text-muted-foreground text-sm font-semibold">
+            No modules yet
+          </p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
             Click &ldquo;Add Module&rdquo; to get started
           </p>
         </div>

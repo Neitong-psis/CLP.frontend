@@ -1,0 +1,86 @@
+{
+  "header": {
+    "login": "ចូលគណនី",
+    "register": "ចុះឈ្មោះ",
+    "learner": "សិស្ស",
+    "educator": "គ្រូបង្រៀន",
+    "openMenu": "បើកម៉ឺនុយ",
+    "closeMenu": "បិទម៉ឺនុយ"
+  },
+  "language": {
+    "label": "ភាសា",
+    "en": "English",
+    "km": "ខ្មែរ"
+  },
+  "theme": {
+    "toggle": "ប្តូររចនាប័ទ្ម",
+    "light": "ភ្លឺ",
+    "dark": "ងងឹត"
+  },
+  "notFound": {
+    "title": "រកមិនឃើញទំព័រ",
+    "back": "ត្រឡប់ក្រោយ",
+    "home": "ត្រឡប់ទៅទំព័រដើម"
+  },
+  "nav": {
+    "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+    "courses": "មេរៀន",
+    "programs": "កម្មវិធី",
+    "news": "ព័ត៌មាន",
+    "about": "អំពីយើង",
+    "explore": "រុករក",
+    "myLearning": "ការសិក្សារបស់ខ្ញុំ",
+    "progress": "វឌ្ឍនភាព",
+    "quizzes": "សំណួរ",
+    "certificates": "វិញ្ញាបនបត្រ",
+    "settings": "ការកំណត់",
+    "help": "ជំនួយ",
+    "logout": "ចាកចេញ",
+    "signingOut": "កំពុងចាកចេញ...",
+    "theme": "រូបរាង",
+    "language": "ភាសា",
+    "menu": "ម៉ឺនុយ"
+  },
+  "common": {
+    "loading": "កំពុងផ្ទុក...",
+    "error": "មានអ្វីមួយខុស",
+    "retry": "ព្យាយាមម្តងទៀត",
+    "save": "រក្សាទុក",
+    "cancel": "បោះបង់",
+    "delete": "លុប",
+    "edit": "កែសម្រួល",
+    "view": "មើល",
+    "search": "ស្វែងរក",
+    "filter": "តម្រង",
+    "noResults": "រកមិនឃើញលទ្ធផល",
+    "seeAll": "មើលទាំងអស់"
+  },
+  "course": {
+    "enroll": "ចុះឈ្មោះឥឡូវ",
+    "continue": "បន្ត",
+    "start": "ចាប់ផ្តើមសិក្សា",
+    "lessons": "មេរៀន",
+    "duration": "រយៈពេល",
+    "students": "សិស្ស",
+    "rating": "ការវាយតម្លៃ",
+    "free": "ឥតគិតថ្លៃ",
+    "level": {
+      "beginner": "កម្រិតដំបូង",
+      "intermediate": "កម្រិតមធ្យម",
+      "advanced": "កម្រិតខ្ពស់"
+    }
+  },
+  "learner": {
+    "dashboard": "ផ្ទាំងគ្រប់គ្រងរបស់ខ្ញុំ",
+    "continueLearning": "បន្តការសិក្សា",
+    "recommended": "ណែនាំសម្រាប់អ្នក",
+    "upcomingQuizzes": "សំណួរដែលនឹងមកដល់",
+    "weeklyStreak": "ស្ថិតិប្រចាំសប្តាហ៍",
+    "stats": {
+      "coursesEnrolled": "វគ្គដែលបានចុះឈ្មោះ",
+      "hoursLearned": "ម៉ោងសិក្សា",
+      "quizzesTaken": "សំណួរដែលបានធ្វើ",
+      "certificates": "វិញ្ញាបនបត្រ"
+    }
+  }
+}

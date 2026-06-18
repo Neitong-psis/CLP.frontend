@@ -1,4 +1,5 @@
 ﻿import { TrendingUp, Users, BookOpen, Award, ArrowUpRight } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import {
   WEEKLY_ENROLLMENTS,
   TOP_COURSES,
@@ -10,39 +11,6 @@ import {
 import AdminTopBar from '@/components/common/TopBar';
 
 const BAR_MAX = Math.max(...WEEKLY_ENROLLMENTS.map((d) => d.count));
-
-const METRICS = [
-  {
-    label: 'Total Learners',
-    value: ADMIN_USERS.filter((u) => u.role === 'Learner').length.toString(),
-    change: '+8%',
-    icon: Users,
-    color: 'bg-blue-500/20 text-blue-400',
-  },
-  {
-    label: 'Published Courses',
-    value: ADMIN_COURSES.filter((c) => c.status === 'Public').length.toString(),
-    change: '+2',
-    icon: BookOpen,
-    color: 'bg-brand-gold/20 text-brand-gold',
-  },
-  {
-    label: 'Avg. Rating',
-    value: `${(
-      ADMIN_COURSES.reduce((a, c) => a + c.rating, 0) / ADMIN_COURSES.length
-    ).toFixed(1)}`,
-    change: '+5%',
-    icon: TrendingUp,
-    color: 'bg-emerald-500/20 text-emerald-400',
-  },
-  {
-    label: 'Total Enrollments',
-    value: ADMIN_COURSES.reduce((a, c) => a + c.enrolled, 0).toLocaleString(),
-    change: '+28%',
-    icon: Award,
-    color: 'bg-purple-500/20 text-purple-400',
-  },
-];
 
 // Simple SVG line chart
 function LineChart() {
@@ -114,14 +82,47 @@ function LineChart() {
 
 const CAT_MAX = Math.max(...REVENUE_BY_CATEGORY.map((c) => c.pct));
 
-export default function AdminAnalyticsPage() {
+export default async function AdminAnalyticsPage() {
+  const t = await getTranslations('admin.analyticsPage');
+
+  const METRICS = [
+    {
+      label: t('metricTotalLearners'),
+      value: ADMIN_USERS.filter((u) => u.role === 'Learner').length.toString(),
+      change: '+8%',
+      icon: Users,
+      color: 'bg-blue-500/20 text-blue-400',
+    },
+    {
+      label: t('metricPublishedCourses'),
+      value: ADMIN_COURSES.filter(
+        (c) => c.status === 'Public',
+      ).length.toString(),
+      change: '+2',
+      icon: BookOpen,
+      color: 'bg-brand-gold/20 text-brand-gold',
+    },
+    {
+      label: t('metricAvgRating'),
+      value: `${(
+        ADMIN_COURSES.reduce((a, c) => a + c.rating, 0) / ADMIN_COURSES.length
+      ).toFixed(1)}`,
+      change: '+5%',
+      icon: TrendingUp,
+      color: 'bg-emerald-500/20 text-emerald-400',
+    },
+    {
+      label: t('metricTotalEnrollments'),
+      value: ADMIN_COURSES.reduce((a, c) => a + c.enrolled, 0).toLocaleString(),
+      change: '+28%',
+      icon: Award,
+      color: 'bg-purple-500/20 text-purple-400',
+    },
+  ];
+
   return (
     <div className="bg-brand-navy flex min-h-full flex-col">
-      <AdminTopBar
-        role="admin"
-        title="Analytics"
-        subtitle="Platform performance and learner insights"
-      />
+      <AdminTopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
 
       <div className="flex-2 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         {/* Metric cards */}
@@ -150,10 +151,10 @@ export default function AdminAnalyticsPage() {
           {/* Weekly enrollment chart */}
           <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
             <h3 className="mb-0.5 text-sm font-bold text-white">
-              Weekly Enrollments
+              {t('weeklyEnrollments')}
             </h3>
             <p className="mb-5 text-[11px] text-white/35">
-              New course enrollments per day
+              {t('weeklySubtitle')}
             </p>
             <div className="flex h-40 items-end gap-2">
               {WEEKLY_ENROLLMENTS.map(({ day, count }) => (
@@ -175,10 +176,10 @@ export default function AdminAnalyticsPage() {
           {/* Category breakdown */}
           <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
             <h3 className="mb-0.5 text-sm font-bold text-white">
-              Revenue by Category
+              {t('revenueByCategory')}
             </h3>
             <p className="mb-5 text-[11px] text-white/35">
-              Total revenue per category
+              {t('revenueCategorySubtitle')}
             </p>
             <ul className="space-y-3">
               {REVENUE_BY_CATEGORY.map((cat) => (
@@ -207,10 +208,10 @@ export default function AdminAnalyticsPage() {
         {/* Platform analytics line chart */}
         <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
           <h3 className="mb-0.5 text-sm font-bold text-white">
-            Platform Analytics
+            {t('platformAnalytics')}
           </h3>
           <p className="mb-4 text-[11px] text-white/35">
-            Enrollment growth across the last 12 months
+            {t('platformSubtitle')}
           </p>
           <div className="h-36 w-full overflow-hidden">
             <LineChart />
@@ -221,17 +222,22 @@ export default function AdminAnalyticsPage() {
         <div className="rounded-xl border border-white/[0.07] bg-white/3">
           <div className="border-b border-white/[0.07] px-5 py-4">
             <h3 className="text-sm font-bold text-white">
-              Top Performing Courses
+              {t('topPerformingCourses')}
             </h3>
             <p className="mt-0.5 text-[11px] text-white/35">
-              Ranked by enrollment count
+              {t('topCoursesSubtitle')}
             </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/[0.07]">
-                  {['#', 'Course', 'Enrolled', 'Completion Rate'].map((h) => (
+                  {[
+                    t('colRank'),
+                    t('colCourse'),
+                    t('colEnrolled'),
+                    t('colCompletionRate'),
+                  ].map((h) => (
                     <th
                       key={h}
                       className="px-5 py-3 text-left text-[11px] font-semibold tracking-wide text-white/35 uppercase"

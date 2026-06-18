@@ -50,18 +50,18 @@ export function ModuleItem({
   };
 
   return (
-    <div className="animate-fade-in overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-shadow hover:shadow-sm">
+    <div className="animate-fade-in border-border bg-card overflow-hidden rounded-2xl border transition-shadow hover:shadow-sm">
       {/* Module header */}
       <div
         className={cn(
           'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
-          mod.expanded ? 'bg-zinc-50' : 'hover:bg-zinc-50',
+          mod.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
         )}
         onClick={() => onUpdate({ ...mod, expanded: !mod.expanded })}
       >
         <ChevronDown
           className={cn(
-            'h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200',
+            'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
             mod.expanded && 'rotate-180',
           )}
         />
@@ -69,10 +69,10 @@ export function ModuleItem({
           {modIndex + 1}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-zinc-900">
+          <p className="text-foreground truncate text-sm font-bold">
             {mod.title || `Module ${modIndex + 1}`}
           </p>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-muted-foreground text-[11px]">
             {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -85,7 +85,7 @@ export function ModuleItem({
       </div>
 
       {mod.expanded && (
-        <div className="animate-fade-in space-y-4 border-t border-zinc-100 px-4 py-4">
+        <div className="animate-fade-in border-border/50 space-y-4 border-t px-4 py-4">
           <FormField label="Module title">
             <input
               type="text"
@@ -116,7 +116,7 @@ export function ModuleItem({
           <button
             type="button"
             onClick={addLesson}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-zinc-300 py-2.5 text-xs font-semibold text-zinc-500 transition hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-600 active:scale-[0.99]"
+            className="border-border text-muted-foreground flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-xs font-semibold transition hover:border-blue-400 hover:bg-blue-500/10 hover:text-blue-600 active:scale-[0.99]"
           >
             <Plus className="h-3.5 w-3.5" /> Add Lesson
           </button>

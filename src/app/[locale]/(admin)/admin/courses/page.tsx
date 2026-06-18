@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useToast } from '@/components/ui/toast';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useAdminCoursesT } from '@/i18n';
 import {
   Search,
   Star,
@@ -13,6 +16,8 @@ import {
   Pencil,
   Trash2,
   ClipboardCheck,
+  SlidersHorizontal,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { type CourseStatus, type AdminCourseRow } from '@/constants/admin';
@@ -27,16 +32,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TopBar from '@/components/common/TopBar';
-import { ViewModal } from './_components/ViewModal';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/Popover';
 import { EditModal } from './_components/EditModal';
 import { DeleteModal } from './_components/DeleteModal';
 import { RowContextMenu } from './_components/RowContextMenu';
-import { CourseReviewOverlay } from './_components/review/CourseReviewOverlay';
 import {
   PAGE_SIZE,
   STATUS_FILTERS,
   STATUS_STYLE,
   CATEGORY_STYLE,
+  ALL_CATEGORIES,
+  ALL_LEVELS,
 } from './_lib/constants';
 
 interface ContextMenuState {
@@ -45,20 +55,78 @@ interface ContextMenuState {
   y: number;
 }
 
+function FilterOption({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+        active
+          ? 'bg-brand-gold/8 text-brand-gold font-medium'
+          : 'text-foreground hover:bg-muted',
+      )}
+    >
+      <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center">
+        {active && <Check className="h-3 w-3" />}
+      </span>
+      {label}
+    </button>
+  );
+}
+
+function FilterSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-muted-foreground px-3 pt-2.5 pb-1 text-[10px] font-semibold tracking-widest uppercase">
+        {label}
+      </p>
+      <div className="space-y-0.5 px-1 pb-1">{children}</div>
+    </div>
+  );
+}
+
 export default function AdminCoursesPage() {
-  const { toast } = useToast();
-  const { courses, loading, saveEdit, remove, publish, approve } =
-    useCourseManagement();
+  const t = useAdminCoursesT();
+  const locale = useLocale();
+  const router = useRouter();
+  const { courses, loading, saveEdit, remove, publish } = useCourseManagement();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
+  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [levelFilter, setLevelFilter] = useState<string>('All');
   const [page, setPage] = useState(1);
-  const [viewCourse, setViewCourse] = useState<AdminCourseRow | null>(null);
   const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
-  const [reviewCourse, setReviewCourse] = useState<AdminCourseRow | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [localCourses] = useState<AdminCourseRow[]>([]);
+
+  function reviewUrl(course: AdminCourseRow) {
+    const p = new URLSearchParams({
+      title: course.title,
+      instructor: course.instructor,
+      category: course.category,
+      level: course.level,
+      status: course.status,
+    });
+    return `/${locale}/admin/courses/${course.id}?${p.toString()}`;
+  }
 
   // Close context menu on outside click / Escape
   useEffect(() => {
@@ -75,16 +143,6 @@ export default function AdminCoursesPage() {
     };
   }, [contextMenu]);
 
-  // ── Course table actions ────────────────────────────────────────────────────
-  function handleRejectCourse(course: AdminCourseRow, feedback: string) {
-    setReviewCourse(null);
-    toast(
-      `Feedback sent to ${course.instructor}. "${course.title}" stays pending.`,
-      'error',
-    );
-    void feedback;
-  }
-
   // ── Filtering / pagination ──────────────────────────────────────────────────
   function handleSearch(val: string) {
     setSearch(val);
@@ -94,9 +152,32 @@ export default function AdminCoursesPage() {
     setStatusFilter(val);
     setPage(1);
   }
+  function handleCategoryFilter(val: string) {
+    setCategoryFilter(val);
+    setPage(1);
+  }
+  function handleLevelFilter(val: string) {
+    setLevelFilter(val);
+    setPage(1);
+  }
+  function clearFilters() {
+    setStatusFilter('All');
+    setCategoryFilter('All');
+    setLevelFilter('All');
+    setPage(1);
+  }
 
-  const filtered = courses.filter((c) => {
+  const activeFilterCount =
+    (statusFilter !== 'All' ? 1 : 0) +
+    (categoryFilter !== 'All' ? 1 : 0) +
+    (levelFilter !== 'All' ? 1 : 0);
+
+  const allCourses = [...localCourses, ...courses];
+
+  const filtered = allCourses.filter((c) => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;
+    if (categoryFilter !== 'All' && c.category !== categoryFilter) return false;
+    if (levelFilter !== 'All' && c.level !== levelFilter) return false;
     if (search && !c.title.toLowerCase().includes(search.toLowerCase()))
       return false;
     return true;
@@ -112,23 +193,10 @@ export default function AdminCoursesPage() {
     filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const pageEnd = Math.min(currentPage * PAGE_SIZE, filtered.length);
 
-  const pendingCount = courses.filter((c) => c.status === 'Pending').length;
-  const firstPending = courses.find((c) => c.status === 'Pending') ?? null;
-
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
       {/* Modals */}
-      {viewCourse && (
-        <ViewModal
-          course={viewCourse}
-          onClose={() => setViewCourse(null)}
-          onEdit={() => {
-            setEditCourse(viewCourse);
-            setViewCourse(null);
-          }}
-        />
-      )}
       {editCourse && (
         <EditModal
           course={editCourse}
@@ -154,87 +222,113 @@ export default function AdminCoursesPage() {
           course={contextMenu.course}
           x={contextMenu.x}
           y={contextMenu.y}
-          onView={() => setViewCourse(contextMenu.course)}
+          onView={() => router.push(reviewUrl(contextMenu.course))}
           onEdit={() => setEditCourse(contextMenu.course)}
-          onReview={() => setReviewCourse(contextMenu.course)}
+          onReview={() => router.push(reviewUrl(contextMenu.course))}
           onPublish={() => void publish(contextMenu.course.id)}
           onDelete={() => setDeleteCourse(contextMenu.course)}
           onClose={() => setContextMenu(null)}
         />
       )}
 
-      {reviewCourse && (
-        <CourseReviewOverlay
-          course={reviewCourse}
-          onApprove={(course) => {
-            void approve(course);
-            setReviewCourse(null);
-          }}
-          onReject={handleRejectCourse}
-          onClose={() => setReviewCourse(null)}
-        />
-      )}
-
       <div className="flex min-h-full flex-col">
-        <TopBar
-          role="admin"
-          title="Course Management"
-          subtitle="Live workspace synced for admin@clp.com"
-        />
+        <TopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
 
         <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {/* Pending-review banner */}
-          {pendingCount > 0 && firstPending && (
-            <div className="border-brand-gold/30 bg-brand-gold/5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <span className="bg-brand-gold/15 flex size-8 shrink-0 items-center justify-center rounded-lg">
-                  <ClipboardCheck className="text-brand-gold h-4 w-4" />
-                </span>
-                <p className="text-muted-foreground text-sm">
-                  <span className="text-foreground font-semibold">
-                    {pendingCount} course{pendingCount !== 1 ? 's' : ''}
-                  </span>{' '}
-                  awaiting review. Preview the content before approving.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="rounded-lg"
-                onClick={() => setReviewCourse(firstPending)}
-              >
-                Review next
-              </Button>
-            </div>
-          )}
-
           {/* Toolbar */}
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <div className="relative min-w-24 flex-1">
+          <div className="mb-5 flex items-center justify-between gap-2 sm:gap-3">
+            <div className="relative w-full max-w-xs min-w-0 sm:max-w-72">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="search"
-                placeholder="Search courses..."
+                placeholder={t('searchPlaceholder')}
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="focus:border-brand-gold/50 focus:ring-brand-gold/10 border-border bg-card text-foreground placeholder:text-muted-foreground h-9 w-full rounded-lg border pr-3 pl-9 text-sm outline-none focus:ring-2"
               />
             </div>
-            <div className="border-border bg-card flex gap-0.5 rounded-full border p-1">
-              {STATUS_FILTERS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleStatusFilter(s)}
-                  className={cn(
-                    'rounded-full px-3.5 py-1 text-xs font-semibold transition-colors',
-                    statusFilter === s
-                      ? 'bg-brand-gold text-white shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
+
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              {/* Filter popover */}
+              <Popover>
+                <PopoverTrigger className="border-border hover:bg-muted text-foreground inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors sm:px-4">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('filterBtn')}</span>
+                  {activeFilterCount > 0 && (
+                    <span className="bg-brand-gold flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white">
+                      {activeFilterCount}
+                    </span>
                   )}
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  className="w-[calc(100vw-16px)] overflow-hidden p-0 sm:w-52"
                 >
-                  {s}
-                </button>
-              ))}
+                  <FilterSection label={t('filterStatus')}>
+                    {STATUS_FILTERS.map((s) => (
+                      <FilterOption
+                        key={s}
+                        active={statusFilter === s}
+                        label={s === 'All' ? t('filterAll') : s}
+                        onClick={() => handleStatusFilter(s)}
+                      />
+                    ))}
+                  </FilterSection>
+
+                  <div className="bg-border mx-1 h-px" />
+
+                  <FilterSection label={t('filterCategory')}>
+                    {['All', ...ALL_CATEGORIES].map((cat) => (
+                      <FilterOption
+                        key={cat}
+                        active={categoryFilter === cat}
+                        label={cat === 'All' ? t('filterAll') : cat}
+                        onClick={() => handleCategoryFilter(cat)}
+                      />
+                    ))}
+                  </FilterSection>
+
+                  <div className="bg-border mx-1 h-px" />
+
+                  <FilterSection label={t('filterLevel')}>
+                    {['All', ...ALL_LEVELS].map((lvl) => (
+                      <FilterOption
+                        key={lvl}
+                        active={levelFilter === lvl}
+                        label={lvl === 'All' ? t('filterAll') : lvl}
+                        onClick={() => handleLevelFilter(lvl)}
+                      />
+                    ))}
+                  </FilterSection>
+
+                  {activeFilterCount > 0 && (
+                    <>
+                      <div className="bg-border mx-1 h-px" />
+                      <div className="p-1">
+                        <button
+                          type="button"
+                          onClick={clearFilters}
+                          className="w-full rounded-md px-2 py-1.5 text-left text-xs text-rose-500 transition-colors hover:bg-rose-500/10"
+                        >
+                          {t('filterClearAll')}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
+
+              {/* Create Course */}
+              <Link href={`/${locale}/admin/courses/new`}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-9 gap-1.5 rounded-lg px-3 sm:px-4"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('createBtn')}</span>
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -249,24 +343,25 @@ export default function AdminCoursesPage() {
                     </th>
                     {(
                       [
-                        'COURSE',
-                        'EDUCATOR',
-                        'CATEGORY',
-                        'ENROLLMENTS',
-                        'RATING',
-                        'CREATED',
-                        'STATUS',
-                        'ACTIONS',
+                        ['colCourse', false, ''],
+                        ['colEducator', false, 'hidden sm:table-cell'],
+                        ['colCategory', false, 'hidden sm:table-cell'],
+                        ['colEnrollments', false, 'hidden lg:table-cell'],
+                        ['colRating', false, 'hidden lg:table-cell'],
+                        ['colCreated', false, 'hidden xl:table-cell'],
+                        ['colStatus', false, ''],
+                        ['colActions', true, ''],
                       ] as const
-                    ).map((label) => (
+                    ).map(([key, isRight, hide]) => (
                       <th
-                        key={label}
+                        key={key}
                         className={cn(
                           'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase',
-                          label === 'ACTIONS' ? 'text-right' : 'text-left',
+                          isRight ? 'text-right' : 'text-left',
+                          hide,
                         )}
                       >
-                        {label}
+                        {t(key)}
                       </th>
                     ))}
                   </tr>
@@ -286,23 +381,23 @@ export default function AdminCoursesPage() {
                           </div>
                         </td>
                         {/* EDUCATOR */}
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 sm:table-cell">
                           <div className="bg-muted h-3 w-24 rounded" />
                         </td>
                         {/* CATEGORY */}
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 sm:table-cell">
                           <div className="bg-muted h-5 w-20 rounded-full" />
                         </td>
                         {/* ENROLLMENTS */}
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 lg:table-cell">
                           <div className="bg-muted h-3 w-10 rounded" />
                         </td>
                         {/* RATING */}
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 lg:table-cell">
                           <div className="bg-muted h-3 w-8 rounded" />
                         </td>
                         {/* CREATED */}
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 xl:table-cell">
                           <div className="bg-muted h-3 w-20 rounded" />
                         </td>
                         {/* STATUS */}
@@ -338,9 +433,9 @@ export default function AdminCoursesPage() {
                           {pageStart + idx}
                         </td>
                         <td className="max-w-55 px-5 py-4">
-                          <button
-                            onClick={() => setViewCourse(course)}
-                            className="block w-full text-left"
+                          <Link
+                            href={reviewUrl(course)}
+                            className="block w-full"
                           >
                             <p className="truncate text-sm font-semibold text-teal-500 underline-offset-2 hover:underline">
                               {course.title}
@@ -348,12 +443,12 @@ export default function AdminCoursesPage() {
                             <p className="text-muted-foreground mt-0.5 text-[11px]">
                               {course.level}
                             </p>
-                          </button>
+                          </Link>
                         </td>
-                        <td className="text-muted-foreground px-5 py-4 text-sm">
+                        <td className="text-muted-foreground hidden px-5 py-4 text-sm sm:table-cell">
                           {course.instructor}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 sm:table-cell">
                           <span
                             className={cn(
                               'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
@@ -364,16 +459,16 @@ export default function AdminCoursesPage() {
                             {course.category}
                           </span>
                         </td>
-                        <td className="text-foreground px-5 py-4 text-sm">
+                        <td className="text-foreground hidden px-5 py-4 text-sm lg:table-cell">
                           {course.enrolled.toLocaleString()}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="hidden px-5 py-4 lg:table-cell">
                           <span className="text-foreground flex items-center gap-1 text-sm font-semibold">
                             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                             {course.rating.toFixed(1)}
                           </span>
                         </td>
-                        <td className="text-muted-foreground px-5 py-4 text-sm">
+                        <td className="text-muted-foreground hidden px-5 py-4 text-sm xl:table-cell">
                           {course.createdAt}
                         </td>
                         <td className="px-5 py-4">
@@ -404,27 +499,33 @@ export default function AdminCoursesPage() {
                                 className="border-border bg-card border shadow-md"
                               >
                                 <DropdownMenuLabel className="text-muted-foreground">
-                                  Actions
+                                  {t('colActions')}
                                 </DropdownMenuLabel>
                                 <DropdownMenuItem
                                   className="text-foreground focus:bg-muted"
-                                  onSelect={() => setViewCourse(course)}
+                                  onSelect={() =>
+                                    router.push(reviewUrl(course))
+                                  }
                                 >
-                                  <Eye className="h-3.5 w-3.5" /> View
+                                  <Eye className="h-3.5 w-3.5" />{' '}
+                                  {t('viewAction')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-foreground focus:bg-muted"
                                   onSelect={() => setEditCourse(course)}
                                 >
-                                  <Pencil className="h-3.5 w-3.5" /> Edit
+                                  <Pencil className="h-3.5 w-3.5" />{' '}
+                                  {t('editAction')}
                                 </DropdownMenuItem>
                                 {course.status === 'Pending' && (
                                   <DropdownMenuItem
                                     className="text-brand-gold focus:bg-brand-gold/10 focus:text-brand-gold-dark"
-                                    onSelect={() => setReviewCourse(course)}
+                                    onSelect={() =>
+                                      router.push(reviewUrl(course))
+                                    }
                                   >
                                     <ClipboardCheck className="h-3.5 w-3.5" />{' '}
-                                    Review
+                                    {t('reviewAction')}
                                   </DropdownMenuItem>
                                 )}
                                 {course.status === 'Archive' && (
@@ -432,7 +533,8 @@ export default function AdminCoursesPage() {
                                     className="text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-500"
                                     onSelect={() => void publish(course.id)}
                                   >
-                                    <Check className="h-3.5 w-3.5" /> Publish
+                                    <Check className="h-3.5 w-3.5" />{' '}
+                                    {t('publishAction')}
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator className="bg-border" />
@@ -440,7 +542,8 @@ export default function AdminCoursesPage() {
                                   className="text-rose-500 focus:bg-rose-500/10 focus:text-rose-500"
                                   onSelect={() => setDeleteCourse(course)}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                                  <Trash2 className="h-3.5 w-3.5" />{' '}
+                                  {t('deleteAction')}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -454,14 +557,18 @@ export default function AdminCoursesPage() {
 
             {!loading && filtered.length === 0 && (
               <p className="text-muted-foreground py-12 text-center text-sm">
-                No courses match your search.
+                {t('noMatch')}
               </p>
             )}
 
             {/* Pagination */}
             <div className="border-border flex items-center justify-between border-t px-5 py-3">
               <p className="text-muted-foreground text-xs">
-                Showing {pageStart}–{pageEnd} of {filtered.length} courses
+                {t('showingOf', {
+                  from: pageStart,
+                  to: pageEnd,
+                  total: filtered.length,
+                })}
               </p>
               <div className="flex items-center gap-1">
                 <Button
@@ -483,7 +590,7 @@ export default function AdminCoursesPage() {
                       className={cn(
                         'rounded-lg text-xs',
                         p === currentPage
-                          ? 'bg-foreground text-background hover:opacity-90'
+                          ? 'bg-brand-gold text-white hover:opacity-90'
                           : 'text-muted-foreground hover:bg-muted',
                       )}
                     >

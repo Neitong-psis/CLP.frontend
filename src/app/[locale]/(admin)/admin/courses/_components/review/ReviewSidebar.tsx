@@ -9,6 +9,7 @@ import {
   Layers,
   BookOpen,
 } from 'lucide-react';
+import { useAdminReviewOverlayT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import {
   REVIEW_STATUS_STYLE,
@@ -46,6 +47,7 @@ export function ReviewSidebar({
   onToggleModule,
   onSelect,
 }: ReviewSidebarProps) {
+  const t = useAdminReviewOverlayT();
   const moduleCount = modules.length;
   const lessons = modules.reduce((sum, m) => sum + lessonCount(m), 0);
   const progressPct =
@@ -56,7 +58,7 @@ export function ReviewSidebar({
       {/* Course summary */}
       <div className="border-b border-slate-100 px-5 py-4">
         <p className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
-          Course Content
+          {t('courseContent')}
         </p>
         <h2 className="mt-1 text-sm leading-snug font-bold text-slate-900">
           {courseTitle}
@@ -64,10 +66,11 @@ export function ReviewSidebar({
 
         <div className="mt-3 flex items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-            <Layers className="h-3 w-3" /> {moduleCount} Modules
+            <Layers className="h-3 w-3" />{' '}
+            {t('modules', { count: moduleCount })}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-            <BookOpen className="h-3 w-3" /> {lessons} Lessons
+            <BookOpen className="h-3 w-3" /> {t('lessons', { count: lessons })}
           </span>
         </div>
 
@@ -79,7 +82,7 @@ export function ReviewSidebar({
             />
           </div>
           <p className="mt-1.5 text-[11px] text-slate-400">
-            {reviewedCount} of {totalCount} items reviewed
+            {t('itemsReviewed', { reviewed: reviewedCount, total: totalCount })}
           </p>
         </div>
       </div>
@@ -100,7 +103,7 @@ export function ReviewSidebar({
                     {module.title}
                   </p>
                   <p className="mt-0.5 text-[11px] text-slate-400">
-                    {lessonCount(module)} lessons created by educator
+                    {lessonCount(module)} {t('lessonsCreatedBy')}
                   </p>
                 </div>
                 <ChevronDown
@@ -114,25 +117,25 @@ export function ReviewSidebar({
               {isOpen && (
                 <div className="pb-2">
                   <ItemGroup
-                    label="Text/Image Lessons"
+                    label={t('textImageLessons')}
                     items={module.documents}
                     activeItemId={activeItemId}
                     onSelect={onSelect}
                   />
                   <ItemGroup
-                    label="Video Lessons"
+                    label={t('videoLessons')}
                     items={module.videos}
                     activeItemId={activeItemId}
                     onSelect={onSelect}
                   />
                   <ItemGroup
-                    label="Quiz"
+                    label={t('quiz')}
                     items={module.quizzes}
                     activeItemId={activeItemId}
                     onSelect={onSelect}
                   />
                   <ItemGroup
-                    label="Assignment"
+                    label={t('assignment')}
                     items={module.assignments}
                     activeItemId={activeItemId}
                     onSelect={onSelect}

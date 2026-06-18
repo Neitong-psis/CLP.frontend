@@ -17,115 +17,9 @@ import {
   Globe,
   HelpCircle,
 } from 'lucide-react';
+import { useAdminLearnMoreT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
-
-// ─── Data ──────────────────────────────────────────────────────────────────────
-
-const GUIDES = [
-  {
-    icon: Zap,
-    iconCls: 'bg-amber-500/10 text-amber-500',
-    title: 'Getting Started',
-    desc: 'Set up your admin workspace, configure platform defaults, and invite your first users in under 10 minutes.',
-    badge: 'Start here',
-    badgeCls: 'bg-amber-500/10 text-amber-500',
-  },
-  {
-    icon: Users,
-    iconCls: 'bg-blue-500/10 text-blue-500',
-    title: 'Managing Users',
-    desc: 'Add, edit, suspend or remove learners and educators. Assign roles, reset passwords, and review activity logs.',
-    badge: 'Popular',
-    badgeCls: 'bg-blue-500/10 text-blue-500',
-  },
-  {
-    icon: BookOpen,
-    iconCls: 'bg-emerald-500/10 text-emerald-500',
-    title: 'Course Management',
-    desc: 'Review and publish educator submissions, set categories, manage enrollments, and track completion rates.',
-    badge: null,
-    badgeCls: '',
-  },
-  {
-    icon: Award,
-    iconCls: 'bg-violet-500/10 text-violet-500',
-    title: 'Certifications',
-    desc: 'Design certificate templates, set completion criteria, issue awards in bulk, and verify authenticity.',
-    badge: null,
-    badgeCls: '',
-  },
-  {
-    icon: DollarSign,
-    iconCls: 'bg-teal-500/10 text-teal-500',
-    title: 'Revenue & Analytics',
-    desc: 'Track monthly revenue, identify top-performing courses, and export reports for your finance team.',
-    badge: null,
-    badgeCls: '',
-  },
-  {
-    icon: Settings,
-    iconCls: 'bg-slate-500/10 text-muted-foreground',
-    title: 'Platform Settings',
-    desc: 'Customise branding, configure support email, set time zones, and manage system health diagnostics.',
-    badge: null,
-    badgeCls: '',
-  },
-];
-
-const FEATURES = [
-  {
-    icon: ShieldCheck,
-    iconCls: 'text-emerald-500',
-    title: 'Role-Based Access',
-    desc: 'Three distinct roles — Admin, Educator, Learner — each with scoped permissions and a tailored interface.',
-  },
-  {
-    icon: BarChart3,
-    iconCls: 'text-blue-500',
-    title: 'Live Analytics',
-    desc: 'Real-time dashboards for enrollments, revenue, user distribution, and quiz performance.',
-  },
-  {
-    icon: Globe,
-    iconCls: 'text-violet-500',
-    title: 'Multi-Language',
-    desc: 'Full i18n support. Switch language per-user or set a platform-wide default from Settings.',
-  },
-  {
-    icon: FileText,
-    iconCls: 'text-amber-500',
-    title: 'Certificate Engine',
-    desc: 'Customisable templates, automatic issuance on course completion, and shareable verification links.',
-  },
-];
-
-const FAQ: { q: string; a: string }[] = [
-  {
-    q: "How do I reset a user's password?",
-    a: 'Go to User Management → find the user → open the Actions menu → select "Reset Password". A new password is generated and you can share it securely with the user.',
-  },
-  {
-    q: 'Can I bulk-import learners?',
-    a: 'Bulk CSV import is on the roadmap for Q3. Today you can add users individually via User Management → Add User, or via the public registration flow.',
-  },
-  {
-    q: 'How are certificates verified?',
-    a: 'Each certificate has a unique ID embedded in a shareable URL. Anyone with the link can verify authenticity on the public verification page without logging in.',
-  },
-  {
-    q: 'What happens when I suspend a user?',
-    a: "The user's session is invalidated immediately. They cannot log in until you reactivate them. Their data and enrollment records are preserved.",
-  },
-  {
-    q: "How do I publish an educator's course?",
-    a: 'Open Course Management → find the pending course → click the row action menu → select "Edit" → change status to Public. The course becomes visible to learners instantly.',
-  },
-  {
-    q: 'Where can I change the platform name shown to learners?',
-    a: 'Settings → General → Platform Name. Changes take effect immediately across the UI.',
-  },
-];
 
 // ─── FAQ Item ─────────────────────────────────────────────────────────────────
 
@@ -158,9 +52,98 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminLearnMorePage() {
+  const t = useAdminLearnMoreT();
+
+  const GUIDES = [
+    {
+      icon: Zap,
+      iconCls: 'bg-amber-500/10 text-amber-500',
+      title: t('guide0Title'),
+      desc: t('guide0Desc'),
+      badge: t('guide0Badge'),
+      badgeCls: 'bg-amber-500/10 text-amber-500',
+    },
+    {
+      icon: Users,
+      iconCls: 'bg-blue-500/10 text-blue-500',
+      title: t('guide1Title'),
+      desc: t('guide1Desc'),
+      badge: t('guide1Badge'),
+      badgeCls: 'bg-blue-500/10 text-blue-500',
+    },
+    {
+      icon: BookOpen,
+      iconCls: 'bg-emerald-500/10 text-emerald-500',
+      title: t('guide2Title'),
+      desc: t('guide2Desc'),
+      badge: null,
+      badgeCls: '',
+    },
+    {
+      icon: Award,
+      iconCls: 'bg-violet-500/10 text-violet-500',
+      title: t('guide3Title'),
+      desc: t('guide3Desc'),
+      badge: null,
+      badgeCls: '',
+    },
+    {
+      icon: DollarSign,
+      iconCls: 'bg-teal-500/10 text-teal-500',
+      title: t('guide4Title'),
+      desc: t('guide4Desc'),
+      badge: null,
+      badgeCls: '',
+    },
+    {
+      icon: Settings,
+      iconCls: 'bg-slate-500/10 text-muted-foreground',
+      title: t('guide5Title'),
+      desc: t('guide5Desc'),
+      badge: null,
+      badgeCls: '',
+    },
+  ];
+
+  const FEATURES = [
+    {
+      icon: ShieldCheck,
+      iconCls: 'text-emerald-500',
+      title: t('feat0Title'),
+      desc: t('feat0Desc'),
+    },
+    {
+      icon: BarChart3,
+      iconCls: 'text-blue-500',
+      title: t('feat1Title'),
+      desc: t('feat1Desc'),
+    },
+    {
+      icon: Globe,
+      iconCls: 'text-violet-500',
+      title: t('feat2Title'),
+      desc: t('feat2Desc'),
+    },
+    {
+      icon: FileText,
+      iconCls: 'text-amber-500',
+      title: t('feat3Title'),
+      desc: t('feat3Desc'),
+    },
+  ];
+
+  const FAQ: { q: string; a: string }[] = [
+    { q: t('faq0Q'), a: t('faq0A') },
+    { q: t('faq1Q'), a: t('faq1A') },
+    { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') },
+    { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') },
+  ];
+
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar role="admin" title="Learn More" />
+      <TopBar role="admin" title={t('title')} />
 
       <div className="flex-1 space-y-10 px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero */}
@@ -174,15 +157,14 @@ export default function AdminLearnMorePage() {
               <div className="mb-3 flex items-center gap-2">
                 <HelpCircle className="text-brand-gold size-5" />
                 <span className="text-brand-gold text-sm font-semibold">
-                  Help Center
+                  {t('helpCenter')}
                 </span>
               </div>
               <h2 className="text-2xl font-bold sm:text-3xl">
-                How can we help you?
+                {t('heroTitle')}
               </h2>
               <p className="mt-2 text-base text-white/70">
-                Browse guides, feature explanations, and answers to the most
-                common admin questions.
+                {t('heroSubtitle')}
               </p>
             </div>
           </div>
@@ -191,7 +173,7 @@ export default function AdminLearnMorePage() {
         {/* Guide cards */}
         <section>
           <h3 className="text-foreground mb-4 text-[15px] font-bold">
-            Admin Guides
+            {t('adminGuides')}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {GUIDES.map(
@@ -235,7 +217,7 @@ export default function AdminLearnMorePage() {
         {/* Platform features */}
         <section>
           <h3 className="text-foreground mb-4 text-[15px] font-bold">
-            Platform Features
+            {t('platformFeatures')}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map(({ icon: Icon, iconCls, title, desc }) => (
@@ -258,11 +240,10 @@ export default function AdminLearnMorePage() {
           {/* FAQ */}
           <section className="border-border bg-card rounded-2xl border p-6 lg:col-span-2">
             <h3 className="text-foreground mb-1 text-[15px] font-bold">
-              Frequently Asked Questions
+              {t('faqTitle')}
             </h3>
             <p className="text-muted-foreground mb-5 text-sm">
-              Can&apos;t find what you&apos;re looking for? Reach out via the
-              contact panel.
+              {t('faqSubtitle')}
             </p>
             <div>
               {FAQ.map((item) => (
@@ -277,9 +258,11 @@ export default function AdminLearnMorePage() {
               <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-blue-500/10">
                 <Mail className="size-4 text-blue-500" />
               </div>
-              <p className="text-foreground text-sm font-bold">Email Support</p>
+              <p className="text-foreground text-sm font-bold">
+                {t('emailSupport')}
+              </p>
               <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                Our support team replies within 24 hours on business days.
+                {t('emailSupportDesc')}
               </p>
               <a
                 href="mailto:support@clp.io"
@@ -293,12 +276,14 @@ export default function AdminLearnMorePage() {
               <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-violet-500/10">
                 <MessageCircle className="size-4 text-violet-500" />
               </div>
-              <p className="text-foreground text-sm font-bold">Live Chat</p>
+              <p className="text-foreground text-sm font-bold">
+                {t('liveChat')}
+              </p>
               <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                Available Mon–Fri 09:00–18:00 (UTC+7). Average wait: &lt;3 min.
+                {t('liveChatDesc')}
               </p>
               <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-violet-500 hover:underline">
-                Start a conversation →
+                {t('startConversation')}
               </button>
             </div>
 
@@ -306,13 +291,14 @@ export default function AdminLearnMorePage() {
               <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-emerald-500/10">
                 <FileText className="size-4 text-emerald-500" />
               </div>
-              <p className="text-foreground text-sm font-bold">Release Notes</p>
+              <p className="text-foreground text-sm font-bold">
+                {t('releaseNotes')}
+              </p>
               <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                Stay up to date with platform changes, new features, and
-                deprecation notices.
+                {t('releaseNotesDesc')}
               </p>
               <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-500 hover:underline">
-                View changelog →
+                {t('viewChangelog')}
               </button>
             </div>
           </section>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { TrendingUp } from 'lucide-react';
+import { useEducatorAnalyticsWeeklyT } from '@/i18n';
 import { WEEKLY_ENROLLMENTS } from '@/constants/educator';
 import { useInView } from '@/hooks/useInView';
 import { cn } from '@/lib/utils/cn';
@@ -13,31 +14,29 @@ import {
 } from '../_lib/metrics';
 
 export function WeeklyEnrollmentChart() {
+  const t = useEducatorAnalyticsWeeklyT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.25 });
   const [hover, setHover] = useState<number | null>(null);
 
   return (
     <div
       ref={ref}
-      className="h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-6"
+      className="border-border bg-card h-full rounded-2xl border p-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-6"
     >
-      {/* Header */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-brand-navy text-sm font-bold">
-            Weekly Enrollments
-          </h3>
-          <p className="mt-0.5 text-[11px] text-slate-400">
-            New enrollments into your courses per day
+          <h3 className="text-foreground text-sm font-bold">{t('title')}</h3>
+          <p className="text-muted-foreground mt-0.5 text-[11px]">
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
-            {WEEKLY_TOTAL} total
+          <span className="bg-muted/40 text-muted-foreground rounded-lg px-2.5 py-1 text-[11px] font-semibold">
+            {t('total', { count: WEEKLY_TOTAL })}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-500">
             <TrendingUp className="h-3 w-3" />
-            Peak {WEEKLY_PEAK.day}
+            {t('peak', { day: WEEKLY_PEAK.day })}
           </span>
         </div>
       </div>
@@ -49,9 +48,9 @@ export function WeeklyEnrollmentChart() {
           className="pointer-events-none absolute inset-x-0 z-10 flex items-center"
           style={{ bottom: `${(WEEKLY_AVG / BAR_MAX) * 100}%` }}
         >
-          <div className="h-px flex-1 border-t border-dashed border-slate-300" />
-          <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">
-            avg {WEEKLY_AVG}
+          <div className="border-border h-px flex-1 border-t border-dashed" />
+          <span className="bg-muted text-muted-foreground ml-2 rounded px-1.5 py-0.5 text-[9px] font-semibold">
+            {t('avg', { avg: WEEKLY_AVG })}
           </span>
         </div>
 
@@ -77,7 +76,7 @@ export function WeeklyEnrollmentChart() {
                     {day}
                   </p>
                   <p className="text-xs font-bold text-white">
-                    {count} <span className="font-normal">enrolls</span>
+                    {count} <span className="font-normal">{t('enrolls')}</span>
                   </p>
                 </div>
                 <div className="border-t-brand-navy mx-auto h-0 w-0 border-x-4 border-t-4 border-x-transparent" />
@@ -87,7 +86,7 @@ export function WeeklyEnrollmentChart() {
               <span
                 className={cn(
                   'text-[10px] font-semibold transition-colors',
-                  isHovered ? 'text-brand-navy' : 'text-slate-400',
+                  isHovered ? 'text-foreground' : 'text-muted-foreground',
                 )}
               >
                 {count}
@@ -115,8 +114,8 @@ export function WeeklyEnrollmentChart() {
                 className={cn(
                   'text-[10px] transition-colors',
                   isHovered
-                    ? 'text-brand-navy font-semibold'
-                    : 'text-slate-400',
+                    ? 'text-foreground font-semibold'
+                    : 'text-muted-foreground',
                 )}
               >
                 {day}

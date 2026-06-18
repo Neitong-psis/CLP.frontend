@@ -22,7 +22,7 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'bg-brand-navy z-50 min-w-45 overflow-hidden rounded-xl py-1.5',
+          'bg-brand-navy z-50 min-w-45 overflow-hidden rounded-xl py-1.5 dark:bg-[#071225]',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',

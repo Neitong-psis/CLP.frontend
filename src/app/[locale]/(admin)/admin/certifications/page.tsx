@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BadgeCheck,
   Award,
@@ -13,7 +13,12 @@ import {
   Download,
   Link2,
   Clock,
+  X,
+  Printer,
+  Share2,
+  Copy,
 } from 'lucide-react';
+import { useAdminCertificationsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
@@ -22,23 +27,30 @@ type Tab = 'dashboard' | 'templates' | 'issuance';
 type IssuanceStatus = 'Verify' | 'Pending';
 type TemplateStatus = 'Active' | 'Draft';
 
-const CERT_STATS = [
+type CertRecord = {
+  id: string;
+  recipient: string;
+  course: string;
+  issued: string;
+};
+
+const CERT_STATS_DATA = [
   {
-    label: 'Total Issued Certificates',
+    labelKey: 'statTotalIssued' as const,
     value: '12,450',
     change: '+9%',
     icon: Award,
     color: 'bg-blue-500/10 text-blue-500',
   },
   {
-    label: 'Verified Claims',
+    labelKey: 'statVerifiedClaims' as const,
     value: '8,920',
     change: '+14%',
     icon: BadgeCheck,
     color: 'bg-emerald-500/10 text-emerald-500',
   },
   {
-    label: 'Active Templates',
+    labelKey: 'statActiveTemplates' as const,
     value: '14',
     change: '+2',
     icon: FileText,
@@ -137,7 +149,7 @@ const TEMPLATE_STATUS_STYLE: Record<TemplateStatus, string> = {
   Draft: 'text-amber-500',
 };
 
-const ISSUANCE_HISTORY = [
+const ISSUANCE_HISTORY: CertRecord[] = [
   {
     id: 'CERT-99A81B',
     recipient: 'Sarah Jenkins',
@@ -164,7 +176,287 @@ const ISSUANCE_HISTORY = [
   },
 ];
 
-function CertPreview({ name, category }: { name: string; category: string }) {
+// ─── QR code mockup ───────────────────────────────────────────────────────────
+
+function QRMockup() {
+  return (
+    <svg
+      width="52"
+      height="52"
+      viewBox="0 0 13 13"
+      className="rounded border border-gray-200"
+    >
+      {/* Finder TL */}
+      <rect x="0" y="0" width="4" height="4" fill="#0f2044" />
+      <rect x="1" y="1" width="2" height="2" fill="white" />
+      {/* Finder TR */}
+      <rect x="9" y="0" width="4" height="4" fill="#0f2044" />
+      <rect x="10" y="1" width="2" height="2" fill="white" />
+      {/* Finder BL */}
+      <rect x="0" y="9" width="4" height="4" fill="#0f2044" />
+      <rect x="1" y="10" width="2" height="2" fill="white" />
+      {/* Data modules */}
+      <rect x="5" y="0" width="1" height="1" fill="#0f2044" />
+      <rect x="7" y="1" width="1" height="1" fill="#0f2044" />
+      <rect x="5" y="2" width="2" height="1" fill="#0f2044" />
+      <rect x="5" y="4" width="3" height="1" fill="#0f2044" />
+      <rect x="0" y="5" width="1" height="2" fill="#0f2044" />
+      <rect x="3" y="5" width="1" height="1" fill="#0f2044" />
+      <rect x="5" y="5" width="1" height="1" fill="#0f2044" />
+      <rect x="8" y="5" width="1" height="1" fill="#0f2044" />
+      <rect x="10" y="5" width="2" height="1" fill="#0f2044" />
+      <rect x="4" y="7" width="2" height="1" fill="#0f2044" />
+      <rect x="8" y="7" width="1" height="2" fill="#0f2044" />
+      <rect x="5" y="9" width="1" height="2" fill="#0f2044" />
+      <rect x="7" y="9" width="2" height="1" fill="#0f2044" />
+      <rect x="11" y="9" width="2" height="2" fill="#0f2044" />
+      <rect x="9" y="11" width="1" height="2" fill="#0f2044" />
+    </svg>
+  );
+}
+
+// ─── Certificate modal ────────────────────────────────────────────────────────
+
+function CertificateModal({
+  cert,
+  onClose,
+  onDownload,
+  onCopyLink,
+}: {
+  cert: CertRecord;
+  onClose: () => void;
+  onDownload: () => void;
+  onCopyLink: (url: string) => void;
+}) {
+  const verifyUrl = `http://127.0.0.1:5173/verify/${cert.id}`;
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl shadow-2xl ring-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 pt-5 pb-4">
+          <div>
+            <h2 className="text-foreground text-sm font-bold">
+              Official certificate
+            </h2>
+            <p className="text-muted-foreground mt-0.5 text-xs">
+              Your verified credential is ready to download, print, or share.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted ml-4 shrink-0 rounded-lg p-1.5 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Certificate body — always white regardless of app theme */}
+        <div
+          className="mx-6 overflow-hidden rounded-xl"
+          style={{ border: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}
+        >
+          <div className="bg-white px-8 pt-7 pb-8">
+            {/* Logo + QR row */}
+            <div className="mb-8 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#dde3eb] bg-[#f0f4f8]">
+                  <Award className="h-6 w-6 text-[#0f2044]" />
+                </div>
+                <div>
+                  <p
+                    className="text-[10px] font-bold tracking-widest uppercase"
+                    style={{ color: '#0f2044' }}
+                  >
+                    Content Learning Platform
+                  </p>
+                  <p
+                    className="mt-0.5 text-[10px]"
+                    style={{ color: '#6b7280' }}
+                  >
+                    Excellence in Education
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <QRMockup />
+                <p
+                  className="text-[9px] font-semibold tracking-wider uppercase"
+                  style={{ color: '#6b7280' }}
+                >
+                  VERIFY: {cert.id.slice(-1)}
+                </p>
+              </div>
+            </div>
+
+            {/* Main text */}
+            <div className="text-center">
+              <h1
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: '2.25rem',
+                  fontWeight: 700,
+                  color: '#0f2044',
+                  lineHeight: 1.2,
+                }}
+              >
+                Certificate of Completion
+              </h1>
+
+              <p
+                className="mt-3 text-[11px] font-bold tracking-widest uppercase"
+                style={{ color: '#c9922b' }}
+              >
+                This Certifies That
+              </p>
+
+              <p
+                className="mx-10 mt-4 border-b pb-3"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  fontSize: '1.875rem',
+                  color: '#0f2044',
+                  borderColor: '#d1d5db',
+                }}
+              >
+                {cert.recipient}
+              </p>
+
+              <p
+                className="mt-4 text-[11px] font-semibold tracking-widest uppercase"
+                style={{ color: '#6b7280' }}
+              >
+                Has Completed The Course
+              </p>
+
+              <p
+                className="mt-2 text-lg font-bold"
+                style={{ color: '#0f2044' }}
+              >
+                {cert.course}
+              </p>
+            </div>
+
+            {/* Signature row */}
+            <div className="mt-9 grid grid-cols-2 gap-8 px-2">
+              <div
+                className="border-t pt-2"
+                style={{ borderColor: 'rgba(15, 32, 68, 0.2)' }}
+              >
+                <p className="text-sm" style={{ color: '#0f2044' }}>
+                  {cert.issued}
+                </p>
+                <p
+                  className="mt-0.5 text-[9px] font-semibold tracking-widest uppercase"
+                  style={{ color: '#9ca3af' }}
+                >
+                  Date of Issue
+                </p>
+              </div>
+              <div
+                className="border-t pt-2 text-right"
+                style={{ borderColor: 'rgba(15, 32, 68, 0.2)' }}
+              >
+                <p
+                  className="text-[11px] font-medium"
+                  style={{ color: '#0f2044' }}
+                >
+                  Dr. Angela Yu, Lead Instructor
+                </p>
+                <p
+                  className="mt-0.5 text-[9px] font-semibold tracking-widest uppercase"
+                  style={{ color: '#9ca3af' }}
+                >
+                  Lead Instructor
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Download / share section */}
+        <div className="px-6 pt-4 pb-6">
+          <p className="text-foreground text-sm font-bold">
+            Download or share your certificate
+          </p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            These actions unlock after verification is submitted successfully.
+          </p>
+
+          {/* URL strip */}
+          <div className="border-border bg-surface mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5">
+            <span className="text-muted-foreground flex-1 truncate font-mono text-xs">
+              {verifyUrl}
+            </span>
+            <button
+              onClick={() => onCopyLink(verifyUrl)}
+              className="text-foreground hover:text-brand-gold flex shrink-0 items-center gap-1.5 text-xs font-semibold transition-colors"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              Copy Link
+            </button>
+          </div>
+
+          {/* Action buttons */}
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <button
+              onClick={onDownload}
+              className="bg-brand-navy flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download Official PDF
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              Print Certificate
+            </button>
+            <button
+              onClick={() => onCopyLink(verifyUrl)}
+              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Share Certificate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Cert preview (templates tab) ────────────────────────────────────────────
+
+function CertPreview({
+  name,
+  category,
+  certOfCompletion,
+  learnerName,
+  courseTitle,
+}: {
+  name: string;
+  category: string;
+  certOfCompletion: string;
+  learnerName: string;
+  courseTitle: string;
+}) {
   return (
     <div className="border-border bg-card flex flex-col rounded-xl border p-4 shadow">
       <div className="text-muted-foreground flex items-start justify-between text-[10px] font-bold tracking-wider uppercase">
@@ -173,10 +465,12 @@ function CertPreview({ name, category }: { name: string; category: string }) {
       </div>
       <div className="mt-3 text-center">
         <p className="text-brand-gold text-[9px] font-bold tracking-widest uppercase">
-          Certificate of Completion
+          {certOfCompletion}
         </p>
-        <p className="text-foreground mt-2 text-sm font-bold">Learner Name</p>
-        <p className="text-muted-foreground mt-0.5 text-[11px]">Course Title</p>
+        <p className="text-foreground mt-2 text-sm font-bold">{learnerName}</p>
+        <p className="text-muted-foreground mt-0.5 text-[11px]">
+          {courseTitle}
+        </p>
       </div>
       <div className="mt-3 text-center">
         <p className="text-muted-foreground text-[10px] font-semibold">
@@ -191,12 +485,18 @@ function CertPreview({ name, category }: { name: string; category: string }) {
   );
 }
 
+// ─── Template card ────────────────────────────────────────────────────────────
+
 function TemplateCard({
   tpl,
   onEdit,
+  issuedTimesLabel,
+  editTemplateLabel,
 }: {
   tpl: (typeof CERT_TEMPLATES)[number];
   onEdit: (name: string) => void;
+  issuedTimesLabel: string;
+  editTemplateLabel: string;
 }) {
   return (
     <div className="border-border bg-card hover:border-border/80 overflow-hidden rounded-xl border shadow transition-colors">
@@ -230,36 +530,39 @@ function TemplateCard({
         </p>
         <p className="text-muted-foreground mt-1.5 flex items-center gap-1 text-[11px]">
           <FileText className="h-3 w-3" />
-          Issued {tpl.issued.toLocaleString()} times
+          {issuedTimesLabel}
         </p>
         <button
           onClick={() => onEdit(tpl.name)}
           className="border-border text-foreground hover:bg-muted mt-3 w-full rounded-lg border py-1.5 text-xs font-semibold transition-colors"
         >
-          Edit Template
+          {editTemplateLabel}
         </button>
       </div>
     </div>
   );
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function AdminCertificationsPage() {
+  const t = useAdminCertificationsT();
   const [tab, setTab] = useState<Tab>('dashboard');
   const [histSearch, setHistSearch] = useState('');
+  const [viewCert, setViewCert] = useState<CertRecord | null>(null);
   const { toast } = useToast();
 
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'dashboard', label: 'Dashboard' },
-    { key: 'templates', label: 'Templates' },
-    { key: 'issuance', label: 'Issuance History' },
+    { key: 'dashboard', label: t('tabDashboard') },
+    { key: 'templates', label: t('tabTemplates') },
+    { key: 'issuance', label: t('tabIssuance') },
   ];
 
   function handleDownload(id: string) {
     toast(`Certificate ${id} downloaded.`, 'success');
   }
 
-  function handleCopyLink(id: string) {
-    const url = `https://clp.app/verify/${id}`;
+  function handleCopyLink(url: string) {
     navigator.clipboard.writeText(url).then(
       () => toast(`Link copied: ${url}`, 'success'),
       () => toast('Could not copy link.', 'error'),
@@ -270,24 +573,39 @@ export default function AdminCertificationsPage() {
     toast(`Showing history for ${recipient}.`, 'info');
   }
 
+  function openCertFromRecent(cert: (typeof RECENT_ISSUANCES)[number]) {
+    const record = ISSUANCE_HISTORY.find((h) => h.recipient === cert.user) ?? {
+      id: cert.id.toUpperCase(),
+      recipient: cert.user,
+      course: cert.course,
+      issued: cert.issued,
+    };
+    setViewCert(record);
+  }
+
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar
-        role="admin"
-        title="Certification Center"
-        subtitle="Live workspace synced for admin@clp.com"
-      />
+      {viewCert && (
+        <CertificateModal
+          cert={viewCert}
+          onClose={() => setViewCert(null)}
+          onDownload={() => handleDownload(viewCert.id)}
+          onCopyLink={handleCopyLink}
+        />
+      )}
+
+      <TopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         {/* Tab bar + Create button */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="border-border bg-card flex gap-1 rounded-xl border p-1 shadow-sm">
+        <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="border-border bg-card flex gap-1 overflow-x-auto rounded-xl border p-1 shadow-sm">
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
                 className={cn(
-                  'rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+                  'shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
                   tab === key
                     ? 'border-brand-gold/40 bg-brand-gold/5 text-brand-gold border'
                     : 'text-muted-foreground hover:text-foreground',
@@ -302,7 +620,7 @@ export default function AdminCertificationsPage() {
             className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Create Template
+            {t('createTemplate')}
           </button>
         </div>
 
@@ -310,42 +628,44 @@ export default function AdminCertificationsPage() {
         {tab === 'dashboard' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {CERT_STATS.map(({ label, value, change, icon: Icon, color }) => {
-                const isNegative = change.startsWith('-');
-                const ChangeIcon = isNegative ? ArrowDownRight : ArrowUpRight;
-                return (
-                  <div
-                    key={label}
-                    className="border-border bg-card hover:border-border/60 rounded-xl border p-5 shadow-sm transition-colors"
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <div
-                        className={cn(
-                          'flex h-10 w-10 items-center justify-center rounded-full',
-                          color,
-                        )}
-                      >
-                        <Icon className="h-5 w-5" />
+              {CERT_STATS_DATA.map(
+                ({ labelKey, value, change, icon: Icon, color }) => {
+                  const isNegative = change.startsWith('-');
+                  const ChangeIcon = isNegative ? ArrowDownRight : ArrowUpRight;
+                  return (
+                    <div
+                      key={labelKey}
+                      className="border-border bg-card hover:border-border/60 rounded-xl border p-5 shadow-sm transition-colors"
+                    >
+                      <div className="mb-4 flex items-start justify-between">
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 items-center justify-center rounded-full',
+                            color,
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <span
+                          className={cn(
+                            'flex items-center gap-0.5 text-[11px] font-semibold',
+                            isNegative ? 'text-rose-500' : 'text-emerald-500',
+                          )}
+                        >
+                          <ChangeIcon className="h-3 w-3" />
+                          {change}
+                        </span>
                       </div>
-                      <span
-                        className={cn(
-                          'flex items-center gap-0.5 text-[11px] font-semibold',
-                          isNegative ? 'text-rose-500' : 'text-emerald-500',
-                        )}
-                      >
-                        <ChangeIcon className="h-3 w-3" />
-                        {change}
-                      </span>
+                      <p className="text-muted-foreground text-xs font-medium">
+                        {t(labelKey)}
+                      </p>
+                      <p className="text-foreground mt-1 text-2xl font-bold">
+                        {value}
+                      </p>
                     </div>
-                    <p className="text-muted-foreground text-xs font-medium">
-                      {label}
-                    </p>
-                    <p className="text-foreground mt-1 text-2xl font-bold">
-                      {value}
-                    </p>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
@@ -353,10 +673,10 @@ export default function AdminCertificationsPage() {
               <div className="border-border bg-card rounded-xl border shadow-sm">
                 <div className="border-border border-b px-5 py-4">
                   <h3 className="text-foreground text-sm font-bold">
-                    Recent Issuances
+                    {t('recentIssuances')}
                   </h3>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    Latest certificates generated for completed courses.
+                    {t('recentSubtitle')}
                   </p>
                 </div>
                 <ul className="divide-border divide-y">
@@ -369,9 +689,15 @@ export default function AdminCertificationsPage() {
                         <Award className="text-brand-gold h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-teal-500">
-                          {cert.user}
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() => openCertFromRecent(cert)}
+                          className="block w-full text-left"
+                        >
+                          <p className="truncate text-sm font-semibold text-teal-500 underline-offset-2 hover:underline">
+                            {cert.user}
+                          </p>
+                        </button>
                         <p className="text-muted-foreground truncate text-[11px]">
                           {cert.course}
                         </p>
@@ -397,10 +723,10 @@ export default function AdminCertificationsPage() {
               {/* Verification Operations */}
               <div className="border-border bg-card rounded-xl border p-5 shadow-sm">
                 <h3 className="text-foreground text-sm font-bold">
-                  Verification Operations
+                  {t('verificationOps')}
                 </h3>
                 <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                  Credential lifecycle totals from issuance history.
+                  {t('verificationSubtitle')}
                 </p>
                 <ul className="mt-5 space-y-3">
                   {VERIFICATION_OPS.map(({ label, count, style }) => (
@@ -426,7 +752,7 @@ export default function AdminCertificationsPage() {
                   onClick={() => setTab('issuance')}
                   className="border-border text-foreground hover:bg-muted mt-5 w-full rounded-lg border py-2 text-xs font-semibold transition-colors"
                 >
-                  Open Issuance History
+                  {t('openIssuanceHistory')}
                 </button>
               </div>
             </div>
@@ -438,15 +764,21 @@ export default function AdminCertificationsPage() {
           <div className="space-y-8">
             <div>
               <h3 className="text-foreground text-base font-bold">
-                Template Preview
+                {t('templatePreview')}
               </h3>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Preview each template design before publishing.
+                {t('templatePreviewSubtitle')}
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 {CERT_TEMPLATES.map((tpl) => (
                   <div key={tpl.name} className="flex flex-col gap-3">
-                    <CertPreview name={tpl.name} category={tpl.category} />
+                    <CertPreview
+                      name={tpl.name}
+                      category={tpl.category}
+                      certOfCompletion={t('certOfCompletion')}
+                      learnerName={t('learnerName')}
+                      courseTitle={t('courseTitle')}
+                    />
                     <button
                       onClick={() =>
                         toast(
@@ -456,7 +788,7 @@ export default function AdminCertificationsPage() {
                       }
                       className="bg-brand-gold w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
                     >
-                      Open Canva Editor
+                      {t('openCanva')}
                     </button>
                   </div>
                 ))}
@@ -465,10 +797,10 @@ export default function AdminCertificationsPage() {
 
             <div>
               <h3 className="text-foreground text-base font-bold">
-                Certificate Templates
+                {t('certTemplates')}
               </h3>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Preview, edit, and route templates to Canva.
+                {t('certTemplatesSubtitle')}
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 {CERT_TEMPLATES.map((tpl) => (
@@ -478,6 +810,10 @@ export default function AdminCertificationsPage() {
                     onEdit={(name) =>
                       toast(`Opening editor for "${name}"…`, 'info')
                     }
+                    issuedTimesLabel={t('issuedTimes', {
+                      count: tpl.issued.toLocaleString(),
+                    })}
+                    editTemplateLabel={t('editTemplate')}
                   />
                 ))}
               </div>
@@ -491,29 +827,29 @@ export default function AdminCertificationsPage() {
             <div className="border-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h3 className="text-foreground text-base font-bold">
-                  Issuance History
+                  {t('issuanceHistory')}
                 </h3>
                 <p className="text-muted-foreground mt-0.5 text-xs">
-                  Search and filter generated learner credentials.
+                  {t('issuanceSubtitle')}
                 </p>
               </div>
               <div className="flex gap-2">
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none">
                   <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                   <input
                     type="search"
-                    placeholder="Search student, course, or ID..."
+                    placeholder={t('searchPlaceholder')}
                     value={histSearch}
                     onChange={(e) => setHistSearch(e.target.value)}
-                    className="focus:border-brand-gold/50 focus:ring-brand-gold/10 border-border bg-surface text-foreground placeholder:text-muted-foreground h-9 w-64 rounded-lg border pr-3 pl-9 text-sm outline-none focus:ring-2"
+                    className="focus:border-brand-gold/50 focus:ring-brand-gold/10 border-border bg-surface text-foreground placeholder:text-muted-foreground h-9 w-full rounded-lg border pr-3 pl-9 text-sm outline-none focus:ring-2 sm:w-56"
                   />
                 </div>
                 <button
                   onClick={() => toast('Filters coming soon.', 'info')}
-                  className="border-border bg-surface text-foreground hover:bg-muted flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+                  className="border-border bg-surface text-foreground hover:bg-muted flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
                 >
                   <Filter className="h-3.5 w-3.5" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
@@ -524,21 +860,30 @@ export default function AdminCertificationsPage() {
                   <tr className="border-border bg-surface border-b">
                     {(
                       [
-                        'CERTIFICATE ID',
-                        'RECIPIENT',
-                        'COURSE/PROGRAM',
-                        'ISSUE DATE',
-                        'ACTIONS',
+                        { key: 'colCertId', isRight: false, hide: '' },
+                        { key: 'colRecipient', isRight: false, hide: '' },
+                        {
+                          key: 'colCourse',
+                          isRight: false,
+                          hide: 'hidden sm:table-cell',
+                        },
+                        {
+                          key: 'colIssueDate',
+                          isRight: false,
+                          hide: 'hidden md:table-cell',
+                        },
+                        { key: 'colActions', isRight: true, hide: '' },
                       ] as const
-                    ).map((h) => (
+                    ).map(({ key, isRight, hide }) => (
                       <th
-                        key={h}
+                        key={key}
                         className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase',
-                          h === 'ACTIONS' ? 'text-right' : 'text-left',
+                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
+                          isRight ? 'text-right' : 'text-left',
+                          hide,
                         )}
                       >
-                        {h}
+                        {t(key)}
                       </th>
                     ))}
                   </tr>
@@ -558,37 +903,47 @@ export default function AdminCertificationsPage() {
                       className="hover:bg-muted/50 transition-colors"
                     >
                       <td className="px-5 py-4">
-                        <span className="text-muted-foreground font-mono text-xs">
+                        <span className="text-muted-foreground font-mono text-xs whitespace-nowrap">
                           {row.id}
                         </span>
                       </td>
-                      <td className="text-foreground px-5 py-4 font-semibold">
-                        {row.recipient}
+                      <td className="px-5 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setViewCert(row)}
+                          className="text-foreground text-left text-sm font-semibold whitespace-nowrap underline-offset-2 hover:text-teal-500 hover:underline"
+                        >
+                          {row.recipient}
+                        </button>
                       </td>
-                      <td className="text-muted-foreground px-5 py-4">
+                      <td className="text-muted-foreground hidden px-5 py-4 sm:table-cell">
                         {row.course}
                       </td>
-                      <td className="text-muted-foreground px-5 py-4">
+                      <td className="text-muted-foreground hidden px-5 py-4 whitespace-nowrap md:table-cell">
                         {row.issued}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-1.5">
                           <button
-                            aria-label="Download"
+                            aria-label={t('downloadAriaLabel')}
                             onClick={() => handleDownload(row.id)}
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
                           >
                             <Download className="h-3.5 w-3.5" />
                           </button>
                           <button
-                            aria-label="Copy link"
-                            onClick={() => handleCopyLink(row.id)}
+                            aria-label={t('copyLinkAriaLabel')}
+                            onClick={() =>
+                              handleCopyLink(
+                                `http://127.0.0.1:5173/verify/${row.id}`,
+                              )
+                            }
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
                           >
                             <Link2 className="h-3.5 w-3.5" />
                           </button>
                           <button
-                            aria-label="History"
+                            aria-label={t('historyAriaLabel')}
                             onClick={() => handleHistory(row.recipient)}
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
                           >

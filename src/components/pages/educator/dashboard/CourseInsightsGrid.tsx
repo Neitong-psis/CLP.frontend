@@ -109,7 +109,7 @@ export function CourseInsightsGrid({
   return (
     <div className={cn('grid gap-6 lg:grid-cols-2', className)}>
       <InsightCard title="Top Courses">
-        <ul className="space-y-3">
+        <ul className="max-h-65 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {topCourses.map((course, i) => (
             <TopCourseRow key={course.title} course={course} rank={i} />
           ))}
@@ -117,7 +117,7 @@ export function CourseInsightsGrid({
       </InsightCard>
 
       <InsightCard title="Completion Rates">
-        <ul className="space-y-4">
+        <ul className="max-h-65 space-y-4 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {completionRates.map((item, i) => (
             <CompletionRateRow key={item.title} item={item} index={i} />
           ))}

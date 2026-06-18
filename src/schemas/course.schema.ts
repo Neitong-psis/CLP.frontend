@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
-/** Instructor sub-shape (email is group-gated; always rely on firstName/lastName). */
+/** Instructor sub-shape.
+ *  Production serializes User with ClassSerializerInterceptor and no groups,
+ *  which may omit id/firstName/lastName when excludeExtraneousValues is true.
+ *  All fields are therefore optional so a sparse/empty object doesn't throw. */
 const instructorSchema = z.object({
-  id: z.number(),
+  id: z.union([z.number(), z.string()]).optional(),
   firstName: z.string().nullable().optional(),
   lastName: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
@@ -27,7 +30,7 @@ export const backendCourseSchema = z.object({
   thumbnail: z.string().nullable().optional(),
   isPublished: z.boolean(),
   meta: z.record(z.string(), z.unknown()).nullable().optional(),
-  instructor: instructorSchema,
+  instructor: instructorSchema.nullable().optional(),
   category: categorySchema.nullable().optional(),
 });
 

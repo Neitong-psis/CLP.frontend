@@ -1,3 +1,4 @@
+import { useAdminTopCoursesT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -51,6 +52,7 @@ function rankStyle(i: number): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
+  const t = useAdminTopCoursesT();
   return (
     <section
       className={cn(
@@ -61,7 +63,7 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
     >
       <header className="border-border flex items-center justify-between border-b px-6 py-4">
         <h3 className="text-foreground text-[14px] font-medium">
-          Top Performing Courses
+          {t('title')}
         </h3>
         <span className="text-muted-foreground text-[12px]">
           {data.length} courses
@@ -70,7 +72,7 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
 
       {data.length === 0 ? (
         <p className="text-muted-foreground px-6 py-10 text-center text-[13px]">
-          No course data yet.
+          {t('noData')}
         </p>
       ) : (
         <ul className="divide-border divide-y">
@@ -127,7 +129,9 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
                 <p className="text-foreground text-[13px] font-medium tabular-nums">
                   {course.students}
                 </p>
-                <p className="text-muted-foreground text-[11px]">enrolled</p>
+                <p className="text-muted-foreground text-[11px]">
+                  {t('enrolled')}
+                </p>
               </div>
 
               {/* Completion pill */}

@@ -27,7 +27,7 @@ export function RowControls({
           onMove('up');
         }}
         disabled={index === 0}
-        className="flex h-6 w-6 items-center justify-center rounded text-zinc-300 transition hover:text-zinc-500 disabled:opacity-30"
+        className="text-muted-foreground/40 hover:text-muted-foreground flex h-6 w-6 items-center justify-center rounded transition disabled:opacity-30"
       >
         <ChevronUp className="h-3.5 w-3.5" />
       </button>
@@ -39,7 +39,7 @@ export function RowControls({
           onMove('down');
         }}
         disabled={index === total - 1}
-        className="flex h-6 w-6 items-center justify-center rounded text-zinc-300 transition hover:text-zinc-500 disabled:opacity-30"
+        className="text-muted-foreground/40 hover:text-muted-foreground flex h-6 w-6 items-center justify-center rounded transition disabled:opacity-30"
       >
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
@@ -50,7 +50,7 @@ export function RowControls({
           e.stopPropagation();
           onDelete();
         }}
-        className="flex h-6 w-6 items-center justify-center rounded text-zinc-300 transition hover:text-red-400"
+        className="text-muted-foreground/40 flex h-6 w-6 items-center justify-center rounded transition hover:text-red-400"
       >
         <Trash2 className="h-3.5 w-3.5" />
       </button>

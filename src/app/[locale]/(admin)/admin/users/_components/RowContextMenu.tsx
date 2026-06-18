@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAdminUsersContextMenuT } from '@/i18n';
 import { Eye, Pencil, ShieldCheck, ShieldOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { AdminUserRow } from '@/constants/admin';
@@ -37,6 +38,7 @@ export function RowContextMenu({
   onDelete,
   onClose,
 }: Props) {
+  const t = useAdminUsersContextMenuT();
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x, y });
 
@@ -87,7 +89,8 @@ export function RowContextMenu({
           'text-foreground hover:bg-muted focus-visible:bg-muted',
         )}
       >
-        <Eye className="text-muted-foreground h-3.5 w-3.5 shrink-0" /> View
+        <Eye className="text-muted-foreground h-3.5 w-3.5 shrink-0" />{' '}
+        {t('view')}
       </button>
       <button
         role="menuitem"
@@ -100,7 +103,8 @@ export function RowContextMenu({
           'text-foreground hover:bg-muted focus-visible:bg-muted',
         )}
       >
-        <Pencil className="text-muted-foreground h-3.5 w-3.5 shrink-0" /> Edit
+        <Pencil className="text-muted-foreground h-3.5 w-3.5 shrink-0" />{' '}
+        {t('edit')}
       </button>
 
       {user.status !== 'Suspended' ? (
@@ -115,7 +119,7 @@ export function RowContextMenu({
             'text-amber-500 hover:bg-amber-500/10 focus-visible:bg-amber-500/10',
           )}
         >
-          <ShieldOff className="h-3.5 w-3.5 shrink-0" /> Suspend
+          <ShieldOff className="h-3.5 w-3.5 shrink-0" /> {t('suspend')}
         </button>
       ) : (
         <button
@@ -129,7 +133,7 @@ export function RowContextMenu({
             'text-emerald-500 hover:bg-emerald-500/10 focus-visible:bg-emerald-500/10',
           )}
         >
-          <ShieldCheck className="h-3.5 w-3.5 shrink-0" /> Activate
+          <ShieldCheck className="h-3.5 w-3.5 shrink-0" /> {t('activate')}
         </button>
       )}
 
@@ -146,7 +150,7 @@ export function RowContextMenu({
           'text-rose-500 hover:bg-rose-500/10 focus-visible:bg-rose-500/10',
         )}
       >
-        <Trash2 className="h-3.5 w-3.5 shrink-0" /> Delete
+        <Trash2 className="h-3.5 w-3.5 shrink-0" /> {t('delete')}
       </button>
     </div>
   );

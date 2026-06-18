@@ -1,3 +1,6 @@
+'use client';
+
+import { useAdminCoursesViewModalT } from '@/i18n';
 import { Pencil, Star, Users, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { AdminCourseRow } from '@/constants/admin';
@@ -12,9 +15,10 @@ interface ViewModalProps {
 }
 
 export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
+  const t = useAdminCoursesViewModalT();
   return (
     <Modal
-      title="Course Details"
+      title={t('title')}
       onClose={onClose}
       footer={
         <>
@@ -23,7 +27,7 @@ export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
             className="border-border text-foreground hover:bg-muted rounded-xl border px-5"
             onClick={onClose}
           >
-            Close
+            {t('close')}
           </Button>
           <Button
             variant="secondary"
@@ -31,7 +35,7 @@ export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
             onClick={onEdit}
           >
             <Pencil className="h-3.5 w-3.5" />
-            Edit course
+            {t('editCourse')}
           </Button>
         </>
       }
@@ -66,17 +70,17 @@ export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
       <div className="mt-4 grid grid-cols-3 gap-2">
         {[
           {
-            label: 'Enrollments',
+            label: t('enrollments'),
             value: course.enrolled.toLocaleString(),
             icon: <Users className="text-muted-foreground h-4 w-4" />,
           },
           {
-            label: 'Rating',
+            label: t('rating'),
             value: course.rating > 0 ? course.rating.toFixed(1) : '—',
             icon: <Star className="h-4 w-4 fill-amber-400 text-amber-400" />,
           },
           {
-            label: 'Level',
+            label: t('level'),
             value: course.level,
             icon: <BarChart2 className="text-muted-foreground h-4 w-4" />,
           },
@@ -96,9 +100,9 @@ export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
 
       <div className="divide-border border-border mt-4 divide-y rounded-xl border">
         {[
-          ['Educator', course.instructor],
-          ['Category', course.category],
-          ['Created', course.createdAt],
+          [t('educator'), course.instructor],
+          [t('category'), course.category],
+          [t('created'), course.createdAt],
         ].map(([label, value]) => (
           <div
             key={label}

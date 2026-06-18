@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminUsersPasswordCellT } from '@/i18n';
 import { Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PasswordCell({ pwd }: Props) {
+  const t = useAdminUsersPasswordCellT();
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -42,7 +44,7 @@ export function PasswordCell({ pwd }: Props) {
       <button
         onClick={handleToggle}
         disabled={!hasPassword}
-        aria-label={visible ? 'Hide password' : 'Show password'}
+        aria-label={visible ? t('hide') : t('show')}
         className="shrink-0 text-slate-400 transition-colors hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-30"
       >
         {visible ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -52,7 +54,7 @@ export function PasswordCell({ pwd }: Props) {
       <button
         onClick={handleCopy}
         disabled={!hasPassword}
-        aria-label="Copy password"
+        aria-label={t('copy')}
         className={cn(
           'shrink-0 transition-colors disabled:cursor-not-allowed disabled:opacity-30',
           copied ? 'text-emerald-500' : 'text-slate-400 hover:text-slate-600',

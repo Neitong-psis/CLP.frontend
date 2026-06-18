@@ -5,6 +5,7 @@ import { normalizeError } from './errors';
 import { getAccessToken } from '@/lib/session/access-token-store';
 import { clearSession } from '@/lib/session/session';
 import { refreshSession } from '@/lib/session/refresh';
+import { getLocale } from '@/lib/i18n/locale-store';
 
 type RetriableConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -64,5 +65,11 @@ async function handleUnauthorized(error: AxiosError) {
     return Promise.reject(normalizeError(error));
   }
 }
+
+// Forward the active locale to the backend so nestjs-i18n uses the correct language
+http.interceptors.request.use((config) => {
+  config.headers.set('x-custom-lang', getLocale());
+  return config;
+});
 
 http.interceptors.response.use((response) => response, handleUnauthorized);

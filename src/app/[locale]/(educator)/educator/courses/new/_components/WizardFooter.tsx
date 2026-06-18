@@ -18,6 +18,7 @@ export function WizardFooter({
   onNext,
   onSaveDraft,
   onSubmit,
+  submitLabel = 'Submit to Admin',
 }: {
   step: number;
   canSubmit: boolean;
@@ -26,18 +27,19 @@ export function WizardFooter({
   onNext: () => void;
   onSaveDraft: () => void;
   onSubmit: () => void;
+  submitLabel?: string;
 }) {
   const isLast = step >= WIZARD_STEPS.length;
   const nextTitle = WIZARD_STEPS[step]?.title;
 
   return (
-    <div className="sticky bottom-0 border-t border-zinc-200 bg-white/85 px-6 py-3.5 backdrop-blur-md lg:px-8">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+    <div className="border-border bg-card/85 sticky bottom-0 border-t px-6 py-3.5 backdrop-blur-md lg:px-8">
+      <div className="flex items-center justify-between gap-4">
         {/* Left: back + live context */}
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
-            className="gap-2 border-zinc-200 text-zinc-700 hover:bg-zinc-50 focus-visible:ring-zinc-400"
+            className="border-border text-foreground/80 hover:bg-muted focus-visible:ring-border gap-2 dark:border-white/15 dark:hover:bg-white/[0.07]"
             onClick={onBack}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -47,10 +49,10 @@ export function WizardFooter({
           <div className="hidden leading-tight sm:block">
             {!isLast ? (
               <>
-                <p className="text-[11px] font-medium tracking-wide text-zinc-400 uppercase">
+                <p className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
                   Up next
                 </p>
-                <p className="text-sm font-semibold text-zinc-700">
+                <p className="text-foreground/80 text-sm font-semibold">
                   {nextTitle}
                 </p>
               </>
@@ -72,7 +74,7 @@ export function WizardFooter({
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
-            className="gap-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-zinc-400"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-border gap-2"
             onClick={onSaveDraft}
           >
             <Save className="h-4 w-4" />
@@ -97,7 +99,7 @@ export function WizardFooter({
                 canSubmit ? undefined : 'Complete required fields to submit'
               }
             >
-              Submit to Admin
+              {submitLabel}
               <ArrowRight className="h-4 w-4" />
             </Button>
           )}

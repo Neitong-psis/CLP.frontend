@@ -4,6 +4,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import { MobileMenuButton } from '@/components/common/sidebar/MobileMenuButton';
 import type { SidebarRole } from '@/components/common/sidebar/Sidebar';
 
 interface TopBarAction {
@@ -21,25 +22,23 @@ interface TopBarProps {
 const ROLE_BADGE: Record<SidebarRole, { label: string; className: string }> = {
   learner: {
     label: 'Learner',
-    className: 'border-blue-200 bg-blue-50 text-blue-600',
+    className: 'border-blue-400/30 bg-blue-500/10 text-blue-500',
   },
   educator: {
     label: 'Educator',
-    className: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+    className: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-500',
   },
   admin: {
     label: 'Admin',
-    className: 'border-violet-200 bg-violet-50 text-violet-600',
+    className: 'border-violet-400/30 bg-violet-500/10 text-violet-500',
   },
 };
-
-// iconBtn removed — not used
 
 export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
   const badge = ROLE_BADGE[role];
 
   return (
-    <header className="border-border bg-card sticky top-0 z-10 flex h-14 shrink-0 items-center gap-4 border-b px-4 sm:h-16 sm:px-6 lg:px-8">
+    <header className="border-border bg-card sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 sm:h-16 sm:gap-4 sm:px-6 lg:px-8">
       {/* Title */}
       <div className="min-w-0 flex-1">
         <h1 className="text-foreground truncate text-base font-bold sm:text-lg">
@@ -64,21 +63,25 @@ export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
           </Link>
         )}
 
-        {/* Role badge */}
+        {/* Role badge — desktop only */}
         <span
-          className={`hidden rounded-full border px-3 py-0.5 text-xs font-semibold sm:inline-flex ${badge.className}`}
+          className={`hidden rounded-full border px-3 py-0.5 text-xs font-semibold lg:inline-flex ${badge.className}`}
         >
           {badge.label}
         </span>
 
-        {/* Dark mode toggle */}
-        <ThemeToggle className="size-8" />
+        {/* Controls — desktop only; theme + language live in profile dropdown on mobile */}
+        <div className="hidden lg:flex lg:items-center lg:gap-1.5">
+          <ThemeToggle className="size-8" />
+          <NotificationBell />
+          <LanguageSwitcher />
+        </div>
 
-        {/* Notifications */}
-        <NotificationBell />
+        {/* Notifications — mobile/tablet only; opens a bottom sheet */}
+        <NotificationBell buttonClassName="size-9 lg:hidden" />
 
-        {/* Language picker */}
-        <LanguageSwitcher scrolled={false} />
+        {/* Profile avatar — mobile/tablet only; opens the nav dropdown */}
+        <MobileMenuButton />
       </div>
     </header>
   );

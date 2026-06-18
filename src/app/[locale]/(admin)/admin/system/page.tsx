@@ -1,4 +1,5 @@
-﻿import { Activity, Server, Database, Wifi, CheckCircle } from 'lucide-react';
+﻿import { getTranslations } from 'next-intl/server';
+import { Activity, Server, Database, Wifi, CheckCircle } from 'lucide-react';
 import AdminTopBar from '@/components/common/TopBar';
 
 const SERVICES = [
@@ -27,14 +28,11 @@ const SERVICES = [
 
 const SERVICE_ICONS = [Wifi, Database, Server, CheckCircle, Activity, Activity];
 
-export default function AdminSystemPage() {
+export default async function AdminSystemPage() {
+  const t = await getTranslations('admin.systemPage');
   return (
     <div className="flex min-h-full flex-col">
-      <AdminTopBar
-        role="admin"
-        title="System Health"
-        subtitle="Real-time service status and infrastructure monitoring"
-      />
+      <AdminTopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
 
       <div className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         {/* Overall status banner */}
@@ -44,10 +42,10 @@ export default function AdminSystemPage() {
           </div>
           <div>
             <p className="text-sm font-bold text-emerald-400">
-              All Core Systems Operational
+              {t('allOperational')}
             </p>
             <p className="text-[11px] text-white/40">
-              Last checked: just now Â· 4 of 6 services healthy
+              {t('lastChecked', { healthy: 4, total: 6 })}
             </p>
           </div>
         </div>
@@ -79,17 +77,17 @@ export default function AdminSystemPage() {
                         : 'bg-amber-500/15 text-amber-400'
                     }`}
                   >
-                    {svc.status}
+                    {healthy ? t('statusHealthy') : t('statusDegraded')}
                   </span>
                 </div>
                 <p className="font-semibold text-white">{svc.name}</p>
                 <div className="mt-2 flex items-center justify-between text-[11px] text-white/40">
                   <span>
-                    Uptime:{' '}
+                    {t('uptime')}{' '}
                     <strong className="text-white/60">{svc.uptime}</strong>
                   </span>
                   <span>
-                    Latency:{' '}
+                    {t('latency')}{' '}
                     <strong className="text-white/60">{svc.latency}</strong>
                   </span>
                 </div>

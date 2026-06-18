@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useNavT, useEducatorT, useAdminT } from '@/i18n';
 import {
   LayoutDashboard,
   BookOpen,
@@ -47,74 +48,90 @@ interface RoleConfig {
   logoutHref?: string;
 }
 
-const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
-  learner: {
-    navItems: [
-      { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      {
-        href: '/my-learning',
-        icon: BookOpen,
-        label: 'My Learning',
-        badge: 3,
-      },
-      { href: '/explore', icon: Compass, label: 'Explore' },
-      {
-        href: '/progress',
-        icon: TrendingUp,
-        label: 'Progress & Achievements',
-      },
-      { href: '/quizzes', icon: Brain, label: 'Quizzes', badge: 2 },
-      { href: '/certificates', icon: Award, label: 'Certificates' },
-    ],
-    rootHref: '/dashboard',
-    roleChip: { label: MOCK_USER.role },
-    user: {
-      name: MOCK_USER.name,
-      email: MOCK_USER.email,
-      initials: MOCK_USER.initials,
-      level: MOCK_USER.level,
-    },
-    settingsHref: '/settings',
-    profileHref: '/settings',
-  },
-  educator: {
-    navItems: [
-      { href: '/educator', icon: LayoutDashboard, label: 'Dashboard' },
-      {
-        href: '/educator/courses',
-        icon: BookOpen,
-        label: 'My Courses',
-        badge: 2,
-      },
-      { href: '/educator/students', icon: Users, label: 'Students' },
-      { href: '/educator/analytics', icon: BarChart3, label: 'Analytics' },
-    ],
-    rootHref: '/educator',
-    roleChip: { label: EDUCATOR_USER.role, icon: GraduationCap },
-    user: EDUCATOR_USER,
-  },
-  admin: {
-    navItems: [
-      { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
-      { href: '/admin/courses', icon: BookOpen, label: 'Courses', badge: 3 },
-      { href: '/admin/users', icon: Users, label: 'Users' },
-      { href: '/admin/certifications', icon: Award, label: 'Certificates' },
-      { href: '/admin/revenue', icon: DollarSign, label: 'Revenue' },
-    ],
-    rootHref: '/admin',
-    roleChip: { label: ADMIN_USER.role, icon: ShieldCheck },
-    user: ADMIN_USER,
-    learnMoreHref: '/admin/learn-more',
-    logoutHref: '/admin/login',
-  },
-};
-
-/** Two-character uppercase initials from a display name. */
-// initials helper removed — unused in current sidebar implementation
-
 export default function Sidebar({ role }: { role: SidebarRole }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+
+  const tNav = useNavT();
+  const tEducator = useEducatorT();
+  const tAdmin = useAdminT();
+
+  const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
+    learner: {
+      navItems: [
+        { href: '/dashboard', icon: LayoutDashboard, label: tNav('dashboard') },
+        {
+          href: '/my-learning',
+          icon: BookOpen,
+          label: tNav('myLearning'),
+          badge: 3,
+        },
+        { href: '/explore', icon: Compass, label: tNav('explore') },
+        { href: '/progress', icon: TrendingUp, label: tNav('progress') },
+        { href: '/quizzes', icon: Brain, label: tNav('quizzes'), badge: 2 },
+        { href: '/certificates', icon: Award, label: tNav('certificates') },
+      ],
+      rootHref: '/dashboard',
+      roleChip: { label: MOCK_USER.role },
+      user: {
+        name: MOCK_USER.name,
+        email: MOCK_USER.email,
+        initials: MOCK_USER.initials,
+        level: MOCK_USER.level,
+      },
+      settingsHref: '/settings',
+      profileHref: '/settings',
+    },
+    educator: {
+      navItems: [
+        { href: '/educator', icon: LayoutDashboard, label: tNav('dashboard') },
+        {
+          href: '/educator/courses',
+          icon: BookOpen,
+          label: tEducator('myCourses'),
+          badge: 2,
+        },
+        {
+          href: '/educator/students',
+          icon: Users,
+          label: tEducator('students'),
+        },
+        {
+          href: '/educator/analytics',
+          icon: BarChart3,
+          label: tEducator('analytics'),
+        },
+      ],
+      rootHref: '/educator',
+      roleChip: { label: EDUCATOR_USER.role, icon: GraduationCap },
+      user: EDUCATOR_USER,
+      learnMoreHref: '/educator/learn-more',
+    },
+    admin: {
+      navItems: [
+        { href: '/admin', icon: LayoutDashboard, label: tAdmin('overview') },
+        {
+          href: '/admin/courses',
+          icon: BookOpen,
+          label: tAdmin('courses'),
+          badge: 3,
+        },
+        { href: '/admin/users', icon: Users, label: tAdmin('users') },
+        {
+          href: '/admin/certifications',
+          icon: Award,
+          label: tAdmin('certifications'),
+        },
+        { href: '/admin/revenue', icon: DollarSign, label: tAdmin('revenue') },
+      ],
+      rootHref: '/admin',
+      roleChip: { label: ADMIN_USER.role, icon: ShieldCheck },
+      user: ADMIN_USER,
+      learnMoreHref: '/admin/learn-more',
+      logoutHref: '/admin/login',
+    },
+  };
+
   const { navItems, rootHref, roleChip, user, learnMoreHref, logoutHref } =
     ROLE_CONFIG[role];
   const settingsHref = `${rootHref}/settings`;
@@ -123,7 +140,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
   return (
     <aside
       className={cn(
-        'bg-brand-navy flex flex-col overflow-hidden transition-[width] duration-300 ease-in-out',
+        'bg-brand-navy flex flex-col overflow-hidden transition-[width] duration-300 ease-in-out dark:bg-[#071225]',
         collapsed ? 'w-18' : 'w-64',
       )}
     >

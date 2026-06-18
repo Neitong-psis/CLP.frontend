@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Mail } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import LogInForm from './LogInForm';
 import SignUpForm from './SignUpForm';
 import OAuthButtons from './OAuthButtons';
@@ -100,18 +99,18 @@ export default function AuthCard() {
       {/* Tab switcher */}
       <div className="mb-4 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 2xl:mb-5 2xl:rounded-2xl">
         {(['login', 'signup'] as Tab[]).map((t) => (
-          <Button
+          <button
             key={t}
-            variant="ghost"
+            type="button"
             onClick={() => handleTabChange(t)}
-            className={`3xl:text-lg w-full rounded-[10px] py-2.5 font-semibold 2xl:rounded-xl 2xl:py-3 2xl:text-base ${
+            className={`3xl:text-lg w-full rounded-[10px] py-2.5 text-sm font-semibold transition-all duration-200 outline-none 2xl:rounded-xl 2xl:py-3 2xl:text-base ${
               tab === t
-                ? 'text-brand-gold hover:text-brand-gold bg-white shadow-sm ring-1 ring-slate-200/60 hover:bg-white'
-                : 'text-brand-navy/45 hover:text-brand-navy/70 hover:bg-transparent'
+                ? 'text-brand-gold bg-white shadow-sm'
+                : 'text-brand-navy/50 hover:text-brand-navy/75'
             }`}
           >
             {t === 'login' ? 'Log In' : 'Sign Up'}
-          </Button>
+          </button>
         ))}
       </div>
 

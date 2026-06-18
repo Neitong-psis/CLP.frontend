@@ -167,7 +167,7 @@ export default function TrustedBy() {
   }, []);
 
   return (
-    <section className="bg-[#f8f9fc] py-8">
+    <section className="bg-[#f8f9fc] py-8 text-slate-500 dark:text-slate-500">
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2">
           <span className="bg-brand-gold h-px w-6 sm:w-8" />

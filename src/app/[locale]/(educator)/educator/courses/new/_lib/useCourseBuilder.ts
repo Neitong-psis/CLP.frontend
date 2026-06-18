@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/toast';
+import { useCourseTasks } from '@/context/CourseTasksContext';
+import { EDUCATOR_USER } from '@/constants/educator';
 import type { CourseInfo, CourseModule } from './types';
 import { makeModule, moveItem } from './builder';
 
@@ -22,6 +24,7 @@ const INITIAL_INFO: CourseInfo = {
 export function useCourseBuilder() {
   const router = useRouter();
   const { toast } = useToast();
+  const { addTask } = useCourseTasks();
 
   const [step, setStep] = useState(1);
   /** Furthest step the user has reached — every step up to here stays revisitable. */
@@ -80,6 +83,27 @@ export function useCourseBuilder() {
       toast('Fix the missing fields before submitting.', 'error');
       return;
     }
+    addTask({
+      id: `ct-${Date.now()}`,
+      title: info.title,
+      description:
+        info.description || info.subtitle || 'New course submission.',
+      category: info.category || 'General',
+      price:
+        info.pricingType === 'free'
+          ? 'Free'
+          : info.price
+            ? `$${info.price}`
+            : 'Paid',
+      assignedBy: EDUCATOR_USER.name,
+      status: 'Under Review',
+      priority: 'Medium',
+      dueDate: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    });
     toast('Course submitted to admin for review.', 'success');
     router.push('/educator/courses');
   }

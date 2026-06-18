@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { AdminUserRow } from '@/constants/admin';
-import { generateUserPassword } from '@/features/users';
 import { Button } from '@/components/ui/button/Button';
 import {
   DropdownMenu,
@@ -28,12 +27,19 @@ import {
   STATUS_COLOR,
   userInitials,
 } from '@/components/pages/admin/components/users/constants';
-import { PasswordCell } from './PasswordCell';
+import type { InviteStatus } from '@/constants/admin';
+
+const INVITE_STYLE: Record<InviteStatus, string> = {
+  Approved:
+    'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400',
+  Pending:
+    'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-500/10 dark:text-amber-400',
+};
 
 export interface UserRowActions {
   onView: () => void;
   onEdit: () => void;
-  onResetPassword: (generatedPwd: string) => void;
+  onResetPassword: () => void;
   onSuspend: () => void;
   onActivate: () => void;
   onDelete: () => void;
@@ -43,8 +49,6 @@ interface UserTableRowProps {
   user: AdminUserRow;
   index: number;
   isHighlighted: boolean;
-  pwd: string | null;
-  onPwdChange: (pwd: string) => void;
   actions: UserRowActions;
   onContextMenu: (e: React.MouseEvent<HTMLTableRowElement>) => void;
 }
@@ -52,11 +56,9 @@ interface UserTableRowProps {
 function UserActionsDropdown({
   user,
   actions,
-  onResetPasswordClick,
 }: {
   user: AdminUserRow;
   actions: UserRowActions;
-  onResetPasswordClick: () => void;
 }) {
   return (
     <DropdownMenu>
@@ -94,7 +96,7 @@ function UserActionsDropdown({
 
         <DropdownMenuItem
           className="text-foreground focus:bg-muted"
-          onSelect={onResetPasswordClick}
+          onSelect={actions.onResetPassword}
         >
           <KeyRound className="h-3.5 w-3.5" aria-hidden="true" /> Reset Password
         </DropdownMenuItem>
@@ -132,17 +134,9 @@ export function UserTableRow({
   user,
   index,
   isHighlighted,
-  pwd,
-  onPwdChange,
   actions,
   onContextMenu,
 }: UserTableRowProps) {
-  function handleResetPasswordClick() {
-    const generated = generateUserPassword();
-    onPwdChange(generated);
-    actions.onResetPassword(generated);
-  }
-
   return (
     <tr
       className={cn(
@@ -187,16 +181,19 @@ export function UserTableRow({
       </td>
 
       <td className="px-5 py-4">
-        <PasswordCell pwd={pwd} />
+        <span
+          className={cn(
+            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
+            INVITE_STYLE[user.inviteStatus],
+          )}
+        >
+          {user.inviteStatus}
+        </span>
       </td>
 
       <td className="px-5 py-4">
         <div className="flex justify-end">
-          <UserActionsDropdown
-            user={user}
-            actions={actions}
-            onResetPasswordClick={handleResetPasswordClick}
-          />
+          <UserActionsDropdown user={user} actions={actions} />
         </div>
       </td>
     </tr>
@@ -231,7 +228,7 @@ export function SkeletonRow() {
         <div className="bg-muted h-5 w-16 rounded-full" />
       </td>
       <td className="px-5 py-4">
-        <div className="bg-muted h-6 w-20 rounded-lg" />
+        <div className="bg-muted h-5 w-18 rounded-full" />
       </td>
       <td className="px-5 py-4">
         <div className="flex justify-end">

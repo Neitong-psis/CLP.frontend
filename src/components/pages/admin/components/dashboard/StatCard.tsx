@@ -1,3 +1,6 @@
+'use client';
+
+import { useAdminStatCardT } from '@/i18n';
 import { ArrowUpRight, ArrowDownRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
@@ -84,6 +87,7 @@ export function StatCard({
   spark,
   href,
 }: StatCardProps) {
+  const t = useAdminStatCardT();
   const accentCard = (
     <div className="from-accent-blue to-accent-indigo group flex flex-col rounded-2xl bg-linear-to-br p-5 text-white transition-transform duration-200 hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-2">
@@ -99,8 +103,8 @@ export function StatCard({
         {value}
       </p>
       <p className="mt-2 text-[11px] text-white/70">
-        <span className="font-medium text-white/90">{change}</span> vs last
-        month
+        <span className="font-medium text-white/90">{change}</span>{' '}
+        {t('vsLastMonth')}
       </p>
     </div>
   );
@@ -140,7 +144,7 @@ export function StatCard({
             {change}{' '}
           </span>
         )}
-        vs last month
+        {t('vsLastMonth')}
       </p>
     </div>
   );

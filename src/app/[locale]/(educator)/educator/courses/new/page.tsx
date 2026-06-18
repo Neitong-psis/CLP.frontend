@@ -1,5 +1,6 @@
 'use client';
 
+import TopBar from '@/components/common/TopBar';
 import { useCourseBuilder } from './_lib/useCourseBuilder';
 import { StepBar, WIZARD_STEPS } from './_components/StepBar';
 import { CourseInfoStep } from './_components/CourseInfoStep';
@@ -9,29 +10,17 @@ import { WizardFooter } from './_components/WizardFooter';
 
 export default function NewCoursePage() {
   const builder = useCourseBuilder();
+  const stepName = WIZARD_STEPS[builder.step - 1]?.title ?? '';
 
   return (
-    <div className="flex min-h-full flex-col bg-[#f5f5f7]">
-      <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium tracking-wide text-zinc-400 uppercase">
-              New course
-            </p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-[-0.01em] text-zinc-900">
-              Create a Course
-            </h1>
-          </div>
-          <div className="hidden text-right sm:block">
-            <p className="text-sm font-bold text-zinc-900">
-              Step {builder.step} of {WIZARD_STEPS.length}
-            </p>
-            <p className="text-xs text-zinc-400">
-              {WIZARD_STEPS[builder.step - 1]?.title}
-            </p>
-          </div>
-        </div>
+    <div className="bg-background flex min-h-full flex-col">
+      <TopBar
+        role="educator"
+        title="Create a Course"
+        subtitle={`Step ${builder.step} of ${WIZARD_STEPS.length} · ${stepName}`}
+      />
 
+      <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <StepBar
           current={builder.step}
           maxStep={builder.maxStep}

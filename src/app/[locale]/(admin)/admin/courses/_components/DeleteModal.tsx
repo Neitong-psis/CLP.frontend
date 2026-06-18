@@ -1,3 +1,6 @@
+'use client';
+
+import { useAdminCoursesDeleteModalT } from '@/i18n';
 import { Button } from '@/components/ui/button/Button';
 import { Modal } from './Modal';
 
@@ -8,9 +11,10 @@ interface DeleteModalProps {
 }
 
 export function DeleteModal({ title, onConfirm, onClose }: DeleteModalProps) {
+  const t = useAdminCoursesDeleteModalT();
   return (
     <Modal
-      title="Delete course?"
+      title={t('title')}
       onClose={onClose}
       maxWidth="max-w-sm"
       footer={
@@ -20,14 +24,14 @@ export function DeleteModal({ title, onConfirm, onClose }: DeleteModalProps) {
             className="border-border text-foreground hover:bg-muted rounded-xl border px-5"
             onClick={onClose}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="ghost"
             className="rounded-xl bg-rose-500 px-5 text-white hover:bg-rose-600"
             onClick={onConfirm}
           >
-            Delete
+            {t('delete')}
           </Button>
         </>
       }
@@ -36,7 +40,7 @@ export function DeleteModal({ title, onConfirm, onClose }: DeleteModalProps) {
         <span className="text-foreground font-semibold">
           &ldquo;{title}&rdquo;
         </span>{' '}
-        will be permanently removed. This action cannot be undone.
+        {t('message')}
       </p>
     </Modal>
   );

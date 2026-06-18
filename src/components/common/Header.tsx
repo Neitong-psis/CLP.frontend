@@ -21,7 +21,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { useTranslations } from 'next-intl';
+import { useHeaderT } from '@/i18n';
 import Logo from '@/components/common/Logo';
 import { HeaderSearch } from '@/components/common/HeaderSearch';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
@@ -141,7 +141,7 @@ function DesktopNavItem({
 // ─── Mobile nav menu ──────────────────────────────────────────────────────────
 
 function MobileNavMenu({ onClose }: { onClose: () => void }) {
-  const t = useTranslations('header');
+  const t = useHeaderT();
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const itemBase =
@@ -322,7 +322,7 @@ function MobileNavMenu({ onClose }: { onClose: () => void }) {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 export default function Header() {
-  const t = useTranslations('header');
+  const t = useHeaderT();
   const headerRef = useRef<HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -453,11 +453,11 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg"
+              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg dark:border-white/10 dark:bg-[#071225]"
             >
               <DropdownMenuItem
                 asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
               >
                 <Link href="/auth?tab=login&role=learner">
                   <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
@@ -466,7 +466,7 @@ export default function Header() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
               >
                 <Link href="/auth?tab=login&role=educator">
                   <BookOpen aria-hidden className="h-4 w-4 opacity-60" />
@@ -493,11 +493,11 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg"
+              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg dark:border-white/10 dark:bg-[#071225]"
             >
               <DropdownMenuItem
                 asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
               >
                 <Link href="/auth?tab=signup&role=learner">
                   <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
@@ -506,7 +506,7 @@ export default function Header() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50"
+                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
               >
                 <Link href="/auth?tab=signup&role=educator">
                   <BookOpen aria-hidden className="h-4 w-4 opacity-60" />

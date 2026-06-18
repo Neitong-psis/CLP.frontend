@@ -1,5 +1,6 @@
 'use client';
 
+import { useAdminUsersT, useAdminCommonT } from '@/i18n';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button/Button';
@@ -25,16 +26,18 @@ export function TablePagination({
   onNext,
   onGoTo,
 }: Props) {
+  const t = useAdminUsersT();
+  const tCommon = useAdminCommonT();
   return (
     <div className="border-border flex items-center justify-between border-t px-5 py-3">
       <p className="text-muted-foreground text-xs">
-        Showing {pageStart}–{pageEnd} of {totalCount} users
+        {t('showingOf', { from: pageStart, to: pageEnd, total: totalCount })}
       </p>
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Previous page"
+          aria-label={tCommon('previousPage')}
           onClick={onPrev}
           disabled={currentPage === 1}
           className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg disabled:opacity-30"
@@ -46,7 +49,7 @@ export function TablePagination({
             key={p}
             variant="ghost"
             size="icon-xs"
-            aria-label={`Page ${p}`}
+            aria-label={tCommon('page', { n: p })}
             aria-current={p === currentPage ? 'page' : undefined}
             onClick={() => onGoTo(p)}
             className={cn(
@@ -62,7 +65,7 @@ export function TablePagination({
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Next page"
+          aria-label={tCommon('nextPage')}
           onClick={onNext}
           disabled={currentPage === totalPages}
           className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg disabled:opacity-30"

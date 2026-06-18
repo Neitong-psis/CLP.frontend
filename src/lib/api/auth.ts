@@ -4,6 +4,20 @@ import type { LoginResponse } from '@/schemas/auth.schema';
 
 const PREFIX = '/v1/auth';
 
+export enum UserRole {
+  Admin = 'admin',
+  Educator = 'educator',
+  Learner = 'learner',
+  User = 'user',
+}
+
+const ROLE_REDIRECTS: Partial<Record<UserRole, string>> = {
+  [UserRole.Admin]: '/admin',
+  [UserRole.Educator]: '/educator',
+};
+
+const DEFAULT_REDIRECT = '/dashboard';
+
 export async function apiLogin(
   email: string,
   password: string,
@@ -44,16 +58,8 @@ export async function apiLogout(): Promise<void> {
 }
 
 export function getRedirectPath(roleName: string): string {
-  switch (roleName.toLowerCase()) {
-    case 'admin':
-      return '/admin';
-    case 'educator':
-      return '/educator';
-    case 'learner':
-    case 'user':
-    default:
-      return '/dashboard';
-  }
+  const role = roleName.toLowerCase() as UserRole;
+  return ROLE_REDIRECTS[role] ?? DEFAULT_REDIRECT;
 }
 
 export function parseApiError(error: unknown): string {

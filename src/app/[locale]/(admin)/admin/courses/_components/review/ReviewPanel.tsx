@@ -12,6 +12,7 @@ import {
   FileUp,
   Lock,
 } from 'lucide-react';
+import { useAdminReviewOverlayT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import {
   REVIEW_STATUS_STYLE,
@@ -47,13 +48,11 @@ function KindBadge({ label }: { label: string }) {
 }
 
 function LockedNotice() {
+  const t = useAdminReviewOverlayT();
   return (
     <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
       <Lock className="h-4 w-4 shrink-0 text-slate-400" />
-      <p className="text-xs text-slate-500">
-        Locked for learners until earlier lessons are complete. Shown here for
-        review only.
-      </p>
+      <p className="text-xs text-slate-500">{t('lockedNotice')}</p>
     </div>
   );
 }
@@ -61,12 +60,11 @@ function LockedNotice() {
 // ── Video ────────────────────────────────────────────────────────────────────
 
 function VideoPanel({ item }: { item: VideoItem }) {
+  const t = useAdminReviewOverlayT();
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-5 py-4">
-        <h3 className="text-sm font-bold text-slate-900">
-          Lesson Introduction
-        </h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('lessonIntro')}</h3>
         <p className="mt-1 text-sm text-slate-500">{item.intro}</p>
       </div>
 
@@ -86,11 +84,12 @@ function VideoPanel({ item }: { item: VideoItem }) {
 // ── Document ─────────────────────────────────────────────────────────────────
 
 function DocumentPanel({ item }: { item: DocumentItem }) {
+  const t = useAdminReviewOverlayT();
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-slate-200 bg-white p-5">
         <div className="mb-3 flex items-center justify-between">
-          <KindBadge label="Document Lesson" />
+          <KindBadge label={t('documentLesson')} />
           <span
             className={cn(
               'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
@@ -105,9 +104,7 @@ function DocumentPanel({ item }: { item: DocumentItem }) {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-5 py-4">
-        <h3 className="text-sm font-bold text-slate-900">
-          Lesson Introduction
-        </h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('lessonIntro')}</h3>
         <p className="mt-1 text-sm text-slate-500">{item.intro}</p>
       </div>
 
@@ -129,30 +126,31 @@ function DocumentPanel({ item }: { item: DocumentItem }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <h3 className="text-sm font-bold text-slate-900">
-            Lesson Information
+            {t('lessonInfo')}
           </h3>
           <dl className="mt-2 space-y-1 text-sm text-slate-500">
             <div className="flex gap-1">
-              <dt className="text-slate-400">Duration:</dt>
+              <dt className="text-slate-400">{t('duration')}</dt>
               <dd>{item.duration}</dd>
             </div>
             <div className="flex gap-1">
-              <dt className="text-slate-400">Quiz:</dt>
+              <dt className="text-slate-400">{t('quizLabel')}</dt>
               <dd>{item.linkedQuiz}</dd>
             </div>
           </dl>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-bold text-slate-900">Next Action</h3>
-          <p className="mt-2 text-sm text-slate-500">
-            Admin preview only. Learners can start the connected quiz after
-            completion.
-          </p>
+          <h3 className="text-sm font-bold text-slate-900">
+            {t('nextAction')}
+          </h3>
+          <p className="mt-2 text-sm text-slate-500">{t('adminPreviewOnly')}</p>
         </div>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 className="text-sm font-bold text-slate-900">Learning Resources</h3>
+        <h3 className="text-sm font-bold text-slate-900">
+          {t('learningResources')}
+        </h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {item.resources.map((resource) => (
             <span
@@ -171,6 +169,7 @@ function DocumentPanel({ item }: { item: DocumentItem }) {
 // ── Quiz ─────────────────────────────────────────────────────────────────────
 
 function QuizPanel({ item }: { item: QuizItem }) {
+  const t = useAdminReviewOverlayT();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
@@ -189,15 +188,18 @@ function QuizPanel({ item }: { item: QuizItem }) {
           isLocked && 'opacity-90',
         )}
       >
-        <p className="text-xs text-slate-400">Quiz for: {item.forLesson}</p>
+        <p className="text-xs text-slate-400">
+          {t('quizFor')} {item.forLesson}
+        </p>
         <h2 className="mt-1 text-xl font-bold text-slate-900">{item.title}</h2>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <KindBadge label={`Question ${index + 1} of ${total}`} />
+          <KindBadge label={t('questionOf', { index: index + 1, total })} />
           <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-            <Clock className="h-3 w-3" /> {item.minutes} Minutes
+            <Clock className="h-3 w-3" />{' '}
+            {t('minutes', { count: item.minutes })}
           </span>
-          <KindBadge label="Single Choice" />
+          <KindBadge label={t('singleChoice')} />
         </div>
 
         <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
@@ -210,7 +212,7 @@ function QuizPanel({ item }: { item: QuizItem }) {
         <h3 className="mt-6 text-lg font-bold text-slate-900">
           {question.prompt}
         </h3>
-        <p className="mt-0.5 text-sm text-slate-400">Choose one answer.</p>
+        <p className="mt-0.5 text-sm text-slate-400">{t('chooseOne')}</p>
 
         <div className="mt-4 space-y-3">
           {question.choices.map((choice, choiceIndex) => {
@@ -255,14 +257,14 @@ function QuizPanel({ item }: { item: QuizItem }) {
             disabled={index === 0}
             className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40"
           >
-            <ChevronLeft className="h-4 w-4" /> Back
+            <ChevronLeft className="h-4 w-4" /> {t('back')}
           </button>
           <button
             onClick={() => setIndex((i) => Math.min(total - 1, i + 1))}
             disabled={index === total - 1}
             className="bg-brand-gold hover:bg-brand-gold-dark inline-flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-40"
           >
-            Next <ChevronRight className="h-4 w-4" />
+            {t('next')} <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -273,6 +275,7 @@ function QuizPanel({ item }: { item: QuizItem }) {
 // ── Assignment ───────────────────────────────────────────────────────────────
 
 function AssignmentPanel({ item }: { item: AssignmentItem }) {
+  const t = useAdminReviewOverlayT();
   const isLocked = item.status === 'Locked';
 
   return (
@@ -291,7 +294,7 @@ function AssignmentPanel({ item }: { item: AssignmentItem }) {
         </div>
         <h2 className="text-xl font-bold text-slate-900">{item.title}</h2>
         <p className="mt-0.5 text-sm text-slate-400">
-          Assigned after {item.assignedAfter}
+          {t('assignedAfter', { lesson: item.assignedAfter })}
         </p>
       </div>
 
@@ -314,29 +317,27 @@ function AssignmentPanel({ item }: { item: AssignmentItem }) {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 className="text-sm font-bold text-slate-900">Instructions</h3>
+        <h3 className="text-sm font-bold text-slate-900">
+          {t('instructions')}
+        </h3>
         <p className="mt-1 text-sm text-slate-500">{item.instructions}</p>
       </div>
 
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 px-5 py-10 text-center">
         <UploadCloud className="mx-auto h-7 w-7 text-slate-400" />
         <p className="mt-2 text-sm font-semibold text-slate-700">
-          Learner upload area
+          {t('learnerUpload')}
         </p>
-        <p className="mt-0.5 text-xs text-slate-400">
-          PDF, document, or shareable link accepted
-        </p>
+        <p className="mt-0.5 text-xs text-slate-400">{t('uploadFormats')}</p>
         <button
           disabled
           className="bg-brand-gold/60 mt-4 cursor-not-allowed rounded-lg px-4 py-2 text-sm font-semibold text-white"
-          title="Disabled in admin preview"
+          title={t('disabledPreview')}
         >
-          Submit Assignment
+          {t('submitAssignment')}
         </button>
         <p className="mt-2 text-[11px] text-slate-400">
-          {isLocked
-            ? 'Locked until earlier lessons are complete.'
-            : 'Disabled in admin preview.'}
+          {isLocked ? t('lockedUntil') : t('disabledPreview')}
         </p>
       </div>
     </div>

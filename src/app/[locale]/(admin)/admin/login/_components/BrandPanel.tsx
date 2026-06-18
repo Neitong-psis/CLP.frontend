@@ -1,6 +1,8 @@
+import { getTranslations } from 'next-intl/server';
 import Logo from '@/components/common/Logo';
 
-export default function BrandPanel() {
+export default async function BrandPanel() {
+  const t = await getTranslations('admin.login');
   return (
     <div className="bg-brand-navy 3xl:w-[38%] 3xl:px-28 3xl:py-28 relative hidden flex-col items-center overflow-hidden lg:flex lg:w-[44%] lg:flex-none lg:px-10 lg:py-12 xl:w-[42%] xl:px-14 xl:py-16 2xl:w-[40%] 2xl:px-20 2xl:py-20">
       <div
@@ -23,24 +25,29 @@ export default function BrandPanel() {
           <div className="inline-flex items-center justify-center gap-2">
             <span className="bg-brand-gold h-px w-8" />
             <span className="text-brand-gold text-[10px] font-bold tracking-[0.2em] uppercase 2xl:text-xs">
-              Admin Portal
+              {t('adminPortal')}
             </span>
             <span className="bg-brand-gold h-px w-8" />
           </div>
           <h1 className="3xl:text-6xl text-[1.75rem] leading-[1.1] font-bold tracking-tight text-white xl:text-4xl 2xl:text-5xl">
-            Platform
-            <br />
-            Administration
+            {t('platformAdministration')
+              .split('\n')
+              .map((line, i, arr) => (
+                <span key={i}>
+                  {line}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
           </h1>
           <p className="mx-auto max-w-[26ch] text-sm leading-relaxed text-white/55 xl:text-base 2xl:text-lg">
-            Manage courses, users, and platform settings from one place.
+            {t('brandDesc')}
           </p>
         </div>
       </div>
 
       {/* Copyright sits in flex flow — can never overlap the content above */}
       <p className="relative mt-6 text-xs text-white/25 2xl:text-sm">
-        © {new Date().getFullYear()} QBTech. All rights reserved.
+        {t('copyright', { year: new Date().getFullYear() })}
       </p>
     </div>
   );

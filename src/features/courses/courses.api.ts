@@ -49,11 +49,11 @@ const MAX_PAGES = 100;
 export function toAdminCourseRow(course: BackendCourse): AdminCourseRow {
   const meta = (course.meta ?? {}) as Record<string, unknown>;
 
-  const firstName = course.instructor.firstName ?? '';
-  const lastName = course.instructor.lastName ?? '';
+  const firstName = course.instructor?.firstName ?? '';
+  const lastName = course.instructor?.lastName ?? '';
   const instructorName =
     [firstName, lastName].filter(Boolean).join(' ') ||
-    course.instructor.email ||
+    course.instructor?.email ||
     '—';
 
   const status: CourseStatus = course.isPublished

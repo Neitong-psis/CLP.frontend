@@ -45,10 +45,10 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-6">
+    <section className="border-border bg-card rounded-2xl border p-6">
       <div className="mb-5">
-        <h2 className="text-sm font-bold text-zinc-900">{title}</h2>
-        {desc && <p className="text-xs text-zinc-400">{desc}</p>}
+        <h2 className="text-foreground text-sm font-bold">{title}</h2>
+        {desc && <p className="text-muted-foreground text-xs">{desc}</p>}
       </div>
       {children}
     </section>
@@ -66,11 +66,13 @@ function CountedLabel({
 }) {
   return (
     <div className="mb-1.5 flex items-center justify-between">
-      <label className="text-sm font-semibold text-zinc-700">{label}</label>
+      <label className="text-foreground/80 text-sm font-semibold">
+        {label}
+      </label>
       <span
         className={cn(
           'text-[11px] tabular-nums',
-          value.length > max ? 'text-rose-500' : 'text-zinc-400',
+          value.length > max ? 'text-rose-500' : 'text-muted-foreground',
         )}
       >
         {value.length}/{max}
@@ -103,7 +105,7 @@ function InlineAddButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center gap-1 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50"
+        className="border-border text-muted-foreground hover:bg-muted/40 flex shrink-0 items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold transition"
       >
         <Plus className="h-3 w-3" /> Add
       </button>
@@ -128,13 +130,13 @@ function InlineAddButton({
             setOpen(false);
           }
         }}
-        className="w-24 rounded-lg border border-blue-500 px-2 py-1.75 text-xs text-zinc-700 ring-1 ring-blue-500/20 outline-none"
+        className="text-foreground/80 w-24 rounded-lg border border-blue-500 px-2 py-1.75 text-xs ring-1 ring-blue-500/20 outline-none"
       />
       <button
         type="button"
         onClick={confirm}
         disabled={!draft.trim()}
-        className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-blue-600 transition hover:bg-blue-50 disabled:opacity-30"
+        className="border-border flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border text-blue-600 transition hover:bg-blue-500/10 disabled:opacity-30"
       >
         <Check className="h-3.5 w-3.5" />
       </button>
@@ -144,7 +146,7 @@ function InlineAddButton({
           setDraft('');
           setOpen(false);
         }}
-        className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 transition hover:bg-zinc-50"
+        className="border-border text-muted-foreground hover:bg-muted flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border transition"
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -175,18 +177,20 @@ function LivePreviewCard({
     <div className="lg:sticky lg:top-6">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h2 className="text-[13px] font-semibold text-zinc-800">
+          <h2 className="text-foreground/90 text-[13px] font-semibold">
             Live preview
           </h2>
-          <p className="text-xs text-zinc-400">How learners see your course.</p>
+          <p className="text-muted-foreground text-xs">
+            How learners see your course.
+          </p>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-medium tracking-wide text-zinc-500 uppercase">
+        <span className="bg-muted text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium tracking-wide uppercase">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
           Live
         </span>
       </div>
 
-      <div className="group overflow-hidden rounded-3xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.06] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)]">
+      <div className="group bg-card overflow-hidden rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.06] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] dark:ring-white/8 dark:hover:shadow-none">
         {/* Cover = drag-and-drop uploader */}
         <div
           role="button"
@@ -209,7 +213,7 @@ function LivePreviewCard({
             readImage(e.dataTransfer.files?.[0]);
           }}
           className={cn(
-            'group/thumb relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden bg-[#f5f5f7] transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
+            'group/thumb bg-muted/50 relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
             dragging && 'ring-2 ring-blue-500 ring-inset',
           )}
         >
@@ -240,13 +244,13 @@ function LivePreviewCard({
             </>
           ) : (
             <div className="flex flex-col items-center gap-2 px-6 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.04]">
-                <ImageIcon className="h-5 w-5 text-zinc-400" />
+              <div className="bg-card flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ring-1 ring-black/[0.04]">
+                <ImageIcon className="text-muted-foreground h-5 w-5" />
               </div>
-              <span className="text-[13px] font-medium text-zinc-600">
+              <span className="text-foreground/80 text-[13px] font-medium">
                 {dragging ? 'Drop to upload' : 'Add a cover image'}
               </span>
-              <span className="text-[11px] text-zinc-400">
+              <span className="text-muted-foreground text-[11px]">
                 Drag &amp; drop or click · 16:9
               </span>
             </div>
@@ -263,36 +267,40 @@ function LivePreviewCard({
         {/* Body */}
         <div className="p-5">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium tracking-[0.14em] text-zinc-400 uppercase">
+            <span className="text-muted-foreground text-[11px] font-medium tracking-[0.14em] uppercase">
               {info.category || 'Category'}
             </span>
-            <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-zinc-500 uppercase">
+            <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
               New
             </span>
           </div>
 
-          <h3 className="mt-2 line-clamp-2 text-[17px] leading-snug font-semibold tracking-[-0.01em] text-zinc-900">
+          <h3 className="text-foreground mt-2 line-clamp-2 text-[17px] leading-snug font-semibold tracking-[-0.01em]">
             {info.title || 'Your course title'}
           </h3>
 
           {info.subtitle && (
-            <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-zinc-500">
+            <p className="text-muted-foreground mt-1.5 line-clamp-2 text-[13px] leading-relaxed">
               {info.subtitle}
             </p>
           )}
 
           {/* Instructor */}
           <div className="mt-4 flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
+            <span className="bg-muted text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full">
               <User className="h-3.5 w-3.5" />
             </span>
-            <span className="text-[12px] font-medium text-zinc-600">You</span>
-            <span className="text-zinc-300">·</span>
-            <span className="text-[12px] text-zinc-400">Instructor</span>
+            <span className="text-foreground/80 text-[12px] font-medium">
+              You
+            </span>
+            <span className="text-muted-foreground/30">·</span>
+            <span className="text-muted-foreground text-[12px]">
+              Instructor
+            </span>
           </div>
 
           {/* Meta */}
-          <div className="mt-4 flex items-center gap-4 text-[11px] text-zinc-400">
+          <div className="text-muted-foreground mt-4 flex items-center gap-4 text-[11px]">
             <span className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5" /> New
             </span>
@@ -305,8 +313,8 @@ function LivePreviewCard({
           </div>
 
           {/* Footer — price + CTA mirroring the learner card */}
-          <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-4">
-            <span className="text-[19px] font-semibold tracking-[-0.01em] text-zinc-900">
+          <div className="border-border/50 mt-5 flex items-center justify-between border-t pt-4">
+            <span className="text-foreground text-[19px] font-semibold tracking-[-0.01em]">
               {priceLabel(info)}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-[12px] font-medium text-white transition-colors group-hover:bg-blue-700">
@@ -324,7 +332,7 @@ function LivePreviewCard({
         className="hidden"
         onChange={(e) => readImage(e.target.files?.[0])}
       />
-      <p className="mt-2.5 text-center text-[11px] text-zinc-400">
+      <p className="text-muted-foreground mt-2.5 text-center text-[11px]">
         Click the cover to upload · Ratings appear after launch
       </p>
     </div>
@@ -458,7 +466,7 @@ export function CourseInfoStep({
           desc="Set how learners pay for this course."
         >
           {/* Segmented Free / Paid toggle */}
-          <div className="grid max-w-xs grid-cols-2 gap-1 rounded-lg bg-zinc-100 p-1">
+          <div className="bg-muted/60 grid max-w-xs grid-cols-2 gap-1 rounded-lg p-1">
             {(
               [
                 { key: 'free', label: 'Free' },
@@ -472,8 +480,8 @@ export function CourseInfoStep({
                 className={cn(
                   'rounded-md py-2 text-sm font-semibold transition',
                   info.pricingType === opt.key
-                    ? 'bg-white text-zinc-900 shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-700',
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {opt.label}
@@ -482,16 +490,16 @@ export function CourseInfoStep({
           </div>
 
           {isFree ? (
-            <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">
+            <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
               This course will be free for all learners.
             </p>
           ) : (
             <div className="mt-4 max-w-xs">
-              <label className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">
                 Price
               </label>
-              <div className="flex overflow-hidden rounded-lg border border-zinc-200 bg-white transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20">
-                <span className="border-r border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-500">
+              <div className="border-border bg-card flex overflow-hidden rounded-lg border transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20">
+                <span className="border-border bg-muted/40 text-muted-foreground border-r px-3 py-2 text-sm">
                   $
                 </span>
                 <input
@@ -500,10 +508,10 @@ export function CourseInfoStep({
                   min={0}
                   value={info.price}
                   onChange={(e) => onChange('price', e.target.value)}
-                  className="flex-1 bg-transparent px-3 py-2 text-sm text-zinc-700 outline-none"
+                  className="text-foreground flex-1 bg-transparent px-3 py-2 text-sm outline-none"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="text-muted-foreground mt-1 text-[11px]">
                 Price shown in USD ($).
               </p>
             </div>

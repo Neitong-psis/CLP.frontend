@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { useAdminReviewOverlayT } from '@/i18n';
 
 interface CenterDialogProps {
   icon: React.ReactNode;
@@ -22,7 +23,7 @@ function CenterDialog({
 }: CenterDialogProps) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -48,7 +49,7 @@ function CenterDialog({
   );
 }
 
-// ── Approve ──────────────────────────────────────────────────────────────────
+// -- Approve ------------------------------------------------------------------
 
 export function ApproveDialog({
   courseTitle,
@@ -59,6 +60,7 @@ export function ApproveDialog({
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const t = useAdminReviewOverlayT();
   return (
     <CenterDialog
       icon={
@@ -66,21 +68,21 @@ export function ApproveDialog({
           <CheckCircle2 className="h-6 w-6 text-emerald-500" />
         </span>
       }
-      title="Approve this course?"
-      description={`“${courseTitle}” will be published and visible to learners. You can archive it later from the course list.`}
+      title={t('approveDialog.title')}
+      description={t('approveDialog.description', { title: courseTitle })}
       footer={
         <>
           <button
             onClick={onClose}
             className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
           >
-            Cancel
+            {t('approveDialog.cancel')}
           </button>
           <button
             onClick={onConfirm}
             className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
           >
-            Approve &amp; publish
+            {t('approveDialog.confirm')}
           </button>
         </>
       }
@@ -89,7 +91,7 @@ export function ApproveDialog({
   );
 }
 
-// ── Reject ───────────────────────────────────────────────────────────────────
+// -- Reject -------------------------------------------------------------------
 
 export function RejectDialog({
   courseTitle,
@@ -100,6 +102,7 @@ export function RejectDialog({
   onConfirm: (feedback: string) => void;
   onClose: () => void;
 }) {
+  const t = useAdminReviewOverlayT();
   const [feedback, setFeedback] = useState('');
   const trimmed = feedback.trim();
 
@@ -110,22 +113,22 @@ export function RejectDialog({
           <XCircle className="h-6 w-6 text-rose-500" />
         </span>
       }
-      title="Reject this course?"
-      description={`Tell the educator what to change before resubmitting “${courseTitle}”.`}
+      title={t('rejectDialog.title')}
+      description={t('rejectDialog.description', { title: courseTitle })}
       footer={
         <>
           <button
             onClick={onClose}
             className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
           >
-            Back
+            {t('rejectDialog.back')}
           </button>
           <button
             onClick={() => onConfirm(trimmed)}
             disabled={trimmed.length === 0}
             className="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Send feedback
+            {t('rejectDialog.sendFeedback')}
           </button>
         </>
       }
@@ -136,7 +139,7 @@ export function RejectDialog({
           htmlFor="reject-feedback"
           className="text-xs font-semibold text-slate-700"
         >
-          Feedback for educator
+          {t('rejectDialog.feedbackLabel')}
         </label>
         <textarea
           id="reject-feedback"
@@ -144,11 +147,11 @@ export function RejectDialog({
           onChange={(e) => setFeedback(e.target.value)}
           rows={3}
           autoFocus
-          placeholder="Explain what should be changed before resubmitting…"
+          placeholder={t('rejectDialog.feedbackPlaceholder')}
           className="focus:border-brand-gold/50 focus:ring-brand-gold/10 mt-1.5 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
         />
         <p className="mt-1.5 text-[11px] text-slate-400">
-          This feedback is attached to the course submission.
+          {t('rejectDialog.feedbackNote')}
         </p>
       </div>
     </CenterDialog>

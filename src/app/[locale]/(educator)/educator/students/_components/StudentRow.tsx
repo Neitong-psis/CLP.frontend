@@ -1,4 +1,5 @@
 import { Mail } from 'lucide-react';
+import { useEducatorStudentsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import type { StudentRow as StudentRowData } from '@/constants/educator';
 import {
@@ -13,48 +14,56 @@ import {
 export function StudentRow({
   student,
   index,
+  onView,
 }: {
   student: StudentRowData;
   index: number;
+  onView?: () => void;
 }) {
+  const t = useEducatorStudentsT();
+
   return (
     <tr
-      className="group animate-fade-in transition-colors hover:bg-slate-50/70"
+      className="group animate-fade-in hover:bg-muted/40 transition-colors"
       style={{ animationDelay: `${Math.min(index, 10) * 40}ms` }}
     >
       <td className="px-5 py-4">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onView}
+          className="flex items-center gap-3 text-left"
+        >
           <div
             className={cn(
-              'flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white',
+              'flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white transition-transform group-hover/name:scale-105',
               avatarColor(student.name),
             )}
           >
             {initials(student.name)}
           </div>
           <div className="min-w-0">
-            <p className="text-brand-navy truncate font-semibold">
+            <p className="text-foreground hover:text-brand-gold truncate font-semibold underline-offset-2 transition-colors hover:underline">
               {student.name}
             </p>
-            <p className="truncate text-[11px] text-slate-400">
+            <p className="text-muted-foreground truncate text-[11px]">
               {student.email}
             </p>
           </div>
-        </div>
+        </button>
       </td>
 
       <td className="max-w-52 px-5 py-4">
-        <p className="text-brand-navy truncate text-[13px] font-medium">
+        <p className="text-foreground truncate text-[13px] font-medium">
           {student.course}
         </p>
-        <p className="text-[11px] text-slate-400">
-          Enrolled {student.enrolled}
+        <p className="text-muted-foreground text-[11px]">
+          {t('enrolled', { date: student.enrolled })}
         </p>
       </td>
 
       <td className="px-5 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+          <div className="bg-muted h-1.5 w-24 overflow-hidden rounded-full">
             <div
               className={cn(
                 'animate-highlight-in h-full rounded-full',
@@ -66,7 +75,7 @@ export function StudentRow({
               }}
             />
           </div>
-          <span className="text-xs font-semibold text-slate-600 tabular-nums">
+          <span className="text-foreground text-xs font-semibold tabular-nums">
             {student.progress}%
           </span>
         </div>
@@ -95,11 +104,11 @@ export function StudentRow({
         </span>
       </td>
 
-      <td className="px-5 py-4 text-[13px] text-slate-500">
+      <td className="text-muted-foreground px-5 py-4 text-[13px]">
         {student.lastSeen}
       </td>
 
-      <td className="text-brand-navy px-5 py-4 text-right text-[13px] font-bold tabular-nums">
+      <td className="text-foreground px-5 py-4 text-right text-[13px] font-bold tabular-nums">
         {student.earnings}
       </td>
 
@@ -107,7 +116,7 @@ export function StudentRow({
         <a
           href={`mailto:${student.email}`}
           title={`Email ${student.name}`}
-          className="hover:text-brand-gold flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-amber-50 focus-visible:opacity-100"
+          className="hover:text-brand-gold text-muted-foreground/40 flex h-8 w-8 items-center justify-center rounded-lg opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-amber-500/10 focus-visible:opacity-100"
         >
           <Mail className="h-4 w-4" />
         </a>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useAdminMonthlyRevenueT } from '@/i18n';
 import { MONTHLY_REVENUE } from '@/constants/admin';
 import { cn } from '@/lib/utils/cn';
 
@@ -199,6 +200,7 @@ export function MonthlyRevenueCard({
   highlightIndex,
   className,
 }: MonthlyRevenueCardProps) {
+  const t = useAdminMonthlyRevenueT();
   const hi = highlightIndex ?? data.length - 1;
   const current = data[hi];
   const prev = data[hi - 1];
@@ -220,10 +222,10 @@ export function MonthlyRevenueCard({
       <div className="border-border flex items-start justify-between gap-4 border-b px-6 py-5">
         <div>
           <h3 className="text-foreground text-[14px] font-medium">
-            Monthly Revenue
+            {t('title')}
           </h3>
           <p className="text-muted-foreground mt-0.5 text-[13px]">
-            Last 12 months
+            {t('last12')}
           </p>
         </div>
         {current && (
@@ -239,7 +241,7 @@ export function MonthlyRevenueCard({
                 )}
               >
                 <ChangeIcon className="size-3.5" aria-hidden="true" />
-                {Math.abs(pctChange).toFixed(1)}% vs prev month
+                {Math.abs(pctChange).toFixed(1)}% {t('vsPrevMonth')}
               </span>
             )}
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminSettingsT } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/TextArea';
 import { ComboField } from '@/components/ui/ComboField';
@@ -10,6 +11,7 @@ import { SettingsField } from './SettingsField';
 import { SettingsSection } from './SettingsSection';
 
 export function PersonalInfoSection() {
+  const t = useAdminSettingsT();
   const [name, setName] = useState(ADMIN_USER.name);
   const [username, setUsername] = useState('admin');
   const [email, setEmail] = useState(ADMIN_USER.email);
@@ -19,14 +21,11 @@ export function PersonalInfoSection() {
   const [bio, setBio] = useState('');
 
   return (
-    <SettingsSection
-      title="Personal Information"
-      subtitle="Manage the profile details used across your CLP workspace."
-    >
+    <SettingsSection title={t('personalInfo')} subtitle={t('personalInfoDesc')}>
       <AvatarCard name={name} email={email} />
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-        <SettingsField label="Full Name">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
+        <SettingsField label={t('fullName')}>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -35,7 +34,7 @@ export function PersonalInfoSection() {
           />
         </SettingsField>
 
-        <SettingsField label="Username">
+        <SettingsField label={t('username')}>
           <Input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -44,7 +43,7 @@ export function PersonalInfoSection() {
           />
         </SettingsField>
 
-        <SettingsField label="Email">
+        <SettingsField label={t('email')}>
           <Input
             type="email"
             value={email}
@@ -54,7 +53,7 @@ export function PersonalInfoSection() {
           />
         </SettingsField>
 
-        <SettingsField label="Phone Number">
+        <SettingsField label={t('phoneNumber')}>
           <Input
             type="tel"
             value={phone}
@@ -64,13 +63,13 @@ export function PersonalInfoSection() {
           />
         </SettingsField>
 
-        <ComboField label="Gender" items={['Male', 'Female', 'Other']} />
+        <ComboField label={t('gender')} items={['Male', 'Female', 'Other']} />
 
-        <SettingsField label="Date of Birth">
+        <SettingsField label={t('dateOfBirth')}>
           <Input type="date" className="h-9" />
         </SettingsField>
 
-        <SettingsField label="Nationality">
+        <SettingsField label={t('nationality')}>
           <Input
             value={nationality}
             onChange={(e) => setNationality(e.target.value)}
@@ -80,11 +79,11 @@ export function PersonalInfoSection() {
         </SettingsField>
 
         <ComboField
-          label="User Role"
+          label={t('userRole')}
           items={['Admin', 'Educator', 'Learner']}
         />
 
-        <SettingsField label="Address" className="col-span-2">
+        <SettingsField label={t('address')} className="sm:col-span-2">
           <Input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -93,11 +92,11 @@ export function PersonalInfoSection() {
           />
         </SettingsField>
 
-        <SettingsField label="Bio / About Me" className="col-span-2">
+        <SettingsField label={t('bioAboutMe')} className="sm:col-span-2">
           <Textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Add a short profile note..."
+            placeholder={t('bioPlaceholder')}
             className="min-h-20 resize-none"
           />
         </SettingsField>

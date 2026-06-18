@@ -1,4 +1,7 @@
+'use client';
+
 import { useState } from 'react';
+import { useAdminCoursesEditModalT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import type { AdminCourseRow, CourseStatus } from '@/constants/admin';
 import { Button } from '@/components/ui/button/Button';
@@ -17,6 +20,7 @@ const inputCls =
 const labelCls = 'text-xs font-semibold text-muted-foreground';
 
 export function EditModal({ course, onSave, onClose }: EditModalProps) {
+  const t = useAdminCoursesEditModalT();
   const [title, setTitle] = useState(course.title);
   const [category, setCategory] = useState(course.category);
   const [level, setLevel] = useState(course.level);
@@ -24,7 +28,7 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
 
   return (
     <Modal
-      title="Edit Course"
+      title={t('title')}
       onClose={onClose}
       footer={
         <>
@@ -34,7 +38,7 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
             className="border-border text-foreground hover:bg-muted rounded-xl border px-5"
             onClick={onClose}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             type="submit"
@@ -42,7 +46,7 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
             variant="secondary"
             className="rounded-xl px-5"
           >
-            Save changes
+            {t('save')}
           </Button>
         </>
       }
@@ -56,7 +60,7 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
         className="space-y-4"
       >
         <div className="flex flex-col gap-1.5">
-          <label className={labelCls}>Title</label>
+          <label className={labelCls}>{t('titleLabel')}</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -67,11 +71,11 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className={labelCls}>Category</label>
+            <label className={labelCls}>{t('category')}</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className={inputCls + ' cursor-pointer'}
+              className={cn(inputCls, 'cursor-pointer')}
             >
               {ALL_CATEGORIES.map((c) => (
                 <option key={c}>{c}</option>
@@ -79,11 +83,11 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className={labelCls}>Level</label>
+            <label className={labelCls}>{t('level')}</label>
             <select
               value={level}
               onChange={(e) => setLevel(e.target.value)}
-              className={inputCls + ' cursor-pointer'}
+              className={cn(inputCls, 'cursor-pointer')}
             >
               {ALL_LEVELS.map((l) => (
                 <option key={l}>{l}</option>
@@ -93,7 +97,7 @@ export function EditModal({ course, onSave, onClose }: EditModalProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className={labelCls}>Status</label>
+          <label className={labelCls}>{t('status')}</label>
           <div className="flex gap-2">
             {(['Public', 'Pending', 'Archive'] as CourseStatus[]).map((s) => (
               <button

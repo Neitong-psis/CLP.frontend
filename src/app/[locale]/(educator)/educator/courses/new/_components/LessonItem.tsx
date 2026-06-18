@@ -33,26 +33,26 @@ export function LessonItem({
   onAddSection: (type: ContentSection['type']) => void;
 }) {
   return (
-    <div className="animate-fade-in overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50/70">
+    <div className="animate-fade-in border-border bg-muted/20 overflow-hidden rounded-xl border">
       {/* Header */}
       <div
-        className="flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 transition-colors hover:bg-zinc-100/60"
+        className="hover:bg-muted/40 flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 transition-colors"
         onClick={() => onUpdate({ ...lesson, expanded: !lesson.expanded })}
       >
         <ChevronDown
           className={cn(
-            'h-3.5 w-3.5 shrink-0 text-zinc-400 transition-transform duration-200',
+            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
             lesson.expanded && 'rotate-180',
           )}
         />
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-white text-[10px] font-bold text-zinc-500 ring-1 ring-zinc-200">
+        <span className="bg-card text-muted-foreground ring-border flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold ring-1">
           {lessonIndex + 1}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-zinc-900">
+          <p className="text-foreground truncate text-[13px] font-semibold">
             {lesson.title || `Lesson ${lessonIndex + 1}`}
           </p>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-muted-foreground text-[11px]">
             {lesson.sections.length} section
             {lesson.sections.length !== 1 ? 's' : ''}
           </p>
@@ -66,7 +66,7 @@ export function LessonItem({
       </div>
 
       {lesson.expanded && (
-        <div className="animate-fade-in space-y-4 border-t border-zinc-200 bg-white px-4 py-4">
+        <div className="animate-fade-in border-border bg-card space-y-4 border-t px-4 py-4">
           <FormField label="Lesson title">
             <input
               type="text"
@@ -79,7 +79,7 @@ export function LessonItem({
 
           {/* Add content buttons */}
           <div>
-            <p className="mb-2 text-[11px] font-semibold text-zinc-500">
+            <p className="text-muted-foreground mb-2 text-[11px] font-semibold">
               Add content
             </p>
             <div className="flex flex-wrap gap-2">
@@ -90,7 +90,7 @@ export function LessonItem({
                     key={type}
                     type="button"
                     onClick={() => onAddSection(type)}
-                    className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition hover:border-blue-400 hover:text-blue-600 active:scale-95"
+                    className="border-border bg-card text-muted-foreground flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:border-blue-400 hover:text-blue-600 active:scale-95"
                   >
                     <Icon className="h-3 w-3" />
                     {SECTION_LABELS[type]}
@@ -124,7 +124,7 @@ export function LessonItem({
               ))}
             </div>
           ) : (
-            <p className="rounded-lg border border-dashed border-zinc-200 py-4 text-center text-[11px] text-zinc-400">
+            <p className="border-border text-muted-foreground rounded-lg border border-dashed py-4 text-center text-[11px]">
               No content yet — add a block above to build this lesson.
             </p>
           )}

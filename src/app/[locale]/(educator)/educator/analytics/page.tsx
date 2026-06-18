@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import EducatorTopBar from '@/components/common/TopBar';
 import { AnalyticsHeader } from './_components/AnalyticsHeader';
 import { MetricCards } from './_components/MetricCards';
@@ -5,13 +6,15 @@ import { WeeklyEnrollmentChart } from './_components/WeeklyEnrollmentChart';
 import { CompletionRanges } from './_components/CompletionRanges';
 import { CoursePerformanceTable } from './_components/CoursePerformanceTable';
 
-export default function EducatorAnalyticsPage() {
+export default async function EducatorAnalyticsPage() {
+  const t = await getTranslations('educator.analyticsPage');
+
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
+    <div className="bg-background flex min-h-full flex-col">
       <EducatorTopBar
         role="educator"
-        title="Analytics"
-        subtitle="Your course performance and learner insights"
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
 
       <div className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -21,7 +24,7 @@ export default function EducatorAnalyticsPage() {
 
         <MetricCards />
 
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
           <div className="animate-fade-in-up delay-200 lg:col-span-3">
             <WeeklyEnrollmentChart />
           </div>

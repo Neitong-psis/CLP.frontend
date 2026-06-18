@@ -1,0 +1,86 @@
+{
+  "header": {
+    "login": "Login",
+    "register": "Register",
+    "learner": "Learner",
+    "educator": "Educator",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "km": "ខ្មែរ"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Go back",
+    "home": "Back to home"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "programs": "Programs",
+    "news": "News",
+    "about": "About",
+    "explore": "Explore",
+    "myLearning": "My Learning",
+    "progress": "Progress",
+    "quizzes": "Quizzes",
+    "certificates": "Certificates",
+    "settings": "Settings",
+    "help": "Help",
+    "logout": "Log out",
+    "signingOut": "Signing out…",
+    "theme": "Theme",
+    "language": "Language",
+    "menu": "Menu"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "noResults": "No results found",
+    "seeAll": "See all"
+  },
+  "course": {
+    "enroll": "Enroll now",
+    "continue": "Continue",
+    "start": "Start learning",
+    "lessons": "Lessons",
+    "duration": "Duration",
+    "students": "Students",
+    "rating": "Rating",
+    "free": "Free",
+    "level": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
+  },
+  "learner": {
+    "dashboard": "My Dashboard",
+    "continueLearning": "Continue Learning",
+    "recommended": "Recommended for you",
+    "upcomingQuizzes": "Upcoming Quizzes",
+    "weeklyStreak": "Weekly Streak",
+    "stats": {
+      "coursesEnrolled": "Courses Enrolled",
+      "hoursLearned": "Hours Learned",
+      "quizzesTaken": "Quizzes Taken",
+      "certificates": "Certificates"
+    }
+  }
+}

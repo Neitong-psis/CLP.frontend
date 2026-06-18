@@ -1,25 +1,37 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEducatorReviewT } from '@/i18n';
 import {
   ArrowLeft,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Play,
   ClipboardList,
   ClipboardCheck,
   Layers,
   BookOpen,
+  MoreVertical,
   PencilLine,
   Send,
-  CalendarDays,
   FileUp,
   CheckCircle2,
+  Clock,
+  Lightbulb,
+  PanelLeftClose,
+  PanelLeftOpen,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { NotificationBell } from '@/components/common/NotificationBell';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import Logo from '@/components/common/Logo';
 import { EDUCATOR_USER, type CourseTask } from '@/constants/educator';
 import {
   REVIEW_MODULES,
@@ -32,6 +44,7 @@ import {
   type DocumentItem,
   type VideoItem,
   type QuizItem,
+  type QuizQuestion,
   type AssignmentItem,
 } from '../_lib/content';
 
@@ -42,8 +55,11 @@ const KIND_ICON: Record<ReviewItemKind, typeof Play> = {
   assignment: ClipboardCheck,
 };
 
+type TFn = ReturnType<typeof useEducatorReviewT>;
+
 export function CourseReview({ task }: { task: CourseTask }) {
   const router = useRouter();
+  const t = useEducatorReviewT();
   const { toast } = useToast();
   const modules = REVIEW_MODULES;
   const items = useMemo(() => flattenItems(modules), [modules]);
@@ -57,12 +73,42 @@ export function CourseReview({ task }: { task: CourseTask }) {
     () => new Set([firstVideo?.id]),
   );
   const [showResubmit, setShowResubmit] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showContents, setShowContents] = useState(false);
+  const [mobileModuleId, setMobileModuleId] = useState<string>(
+    () =>
+      modules.find((m) =>
+        [...m.documents, ...m.videos, ...m.quizzes, ...m.assignments].some(
+          (item) => item.id === (firstVideo?.id ?? ''),
+        ),
+      )?.id ??
+      modules[0]?.id ??
+      '',
+  );
+  const [showMobileActions, setShowMobileActions] = useState(false);
+
+  const mobileModule = useMemo(
+    () => modules.find((m) => m.id === mobileModuleId) ?? modules[0],
+    [modules, mobileModuleId],
+  );
+  const mobileItems = useMemo(
+    () => (mobileModule ? flattenItems([mobileModule]) : []),
+    [mobileModule],
+  );
 
   const active = items.find((i) => i.id === activeId) ?? items[0];
+  const currentIndex = items.findIndex((i) => i.id === activeId);
+  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
+  const nextItem =
+    currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
 
   function select(id: string) {
     setActiveId(id);
     setViewed((prev) => new Set(prev).add(id));
+    const newMod = modules.find((m) =>
+      flattenItems([m]).some((item) => item.id === id),
+    );
+    if (newMod) setMobileModuleId(newMod.id);
   }
 
   function toggleModule(id: string) {
@@ -76,36 +122,15 @@ export function CourseReview({ task }: { task: CourseTask }) {
 
   function handleResubmit() {
     setShowResubmit(false);
-    toast(`"${task.title}" was resubmitted for review.`, 'success');
+    toast(t('resubmittedToast', { title: task.title }), 'success');
     router.push('/educator/courses');
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
-      {/* Header */}
-      <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-4 sm:px-6">
-        <button
-          onClick={() => router.push('/educator/courses')}
-          aria-label="Back to My Courses"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
-        >
-          <ArrowLeft className="size-4" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-brand-navy truncate text-base font-bold sm:text-lg">
-            Course Review
-          </h1>
-          <p className="truncate text-[11px] text-slate-400">
-            Live workspace synced for {EDUCATOR_USER.email}
-          </p>
-        </div>
-        <span className="hidden shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-semibold text-emerald-600 sm:inline-flex">
-          {EDUCATOR_USER.role}
-        </span>
-      </header>
-
-      {/* Body */}
-      <div className="flex flex-1 flex-col lg:flex-row">
+    <div className="bg-background fixed inset-0 z-50 flex overflow-hidden">
+      {/* ── Body: sidebar | main column ────────────────────────────────────── */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Review sidebar (owns its brand header) */}
         <ReviewSidebar
           courseTitle={task.title}
           modules={modules}
@@ -113,42 +138,214 @@ export function CourseReview({ task }: { task: CourseTask }) {
           reviewedCount={viewed.size}
           totalCount={items.length}
           expanded={expanded}
+          collapsed={sidebarCollapsed}
+          onCollapse={() => setSidebarCollapsed((v) => !v)}
           onToggleModule={toggleModule}
           onSelect={select}
+          t={t}
         />
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-            {active && <PreviewPanel item={active} />}
-          </div>
-        </main>
-      </div>
+        {/* Main column: header + content + footer nav */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Header */}
+          <header className="border-border bg-card relative flex h-14 shrink-0 items-center border-b px-3 sm:h-16 sm:px-4">
+            {/* ── Mobile: back arrow | course title | actions menu ── */}
+            <div className="flex w-full items-center gap-2 lg:hidden">
+              <button
+                type="button"
+                onClick={() => router.push('/educator/courses')}
+                aria-label={t('backToCourses')}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-bold sm:text-base">
+                {task.title}
+              </h1>
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowMobileActions((v) => !v)}
+                  aria-label="More actions"
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-9 items-center justify-center rounded-lg transition-colors"
+                >
+                  <MoreVertical className="h-5 w-5" />
+                </button>
+                {showMobileActions && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[55]"
+                      onClick={() => setShowMobileActions(false)}
+                      aria-hidden
+                    />
+                    <div className="bg-card ring-border absolute top-full right-0 z-[56] mt-1 min-w-48 overflow-hidden rounded-xl shadow-xl ring-1 dark:ring-white/10">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          toast(t('openingEditor'), 'info');
+                          router.push('/educator/courses/new');
+                        }}
+                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                      >
+                        <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
+                        {t('editCourse')}
+                      </button>
+                      <div className="border-border/60 border-t" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowResubmit(true);
+                        }}
+                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                      >
+                        <Send className="text-muted-foreground h-4 w-4 shrink-0" />
+                        {t('resubmitBtn')}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
 
-      {/* Footer */}
-      <footer className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
-        <Button
-          variant="outline"
-          className="gap-1.5"
-          onClick={() => router.push('/educator/courses')}
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to My Courses
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="gap-1.5"
-            onClick={() => {
-              toast('Opening the course editor…', 'info');
-              router.push('/educator/courses/new');
-            }}
-          >
-            <PencilLine className="h-4 w-4" /> Edit Course
-          </Button>
-          <Button className="gap-1.5" onClick={() => setShowResubmit(true)}>
-            <Send className="h-4 w-4" /> Resubmit for Review
-          </Button>
+            {/* ── Desktop: review title | role badge + controls ── */}
+            <div className="hidden min-w-0 flex-1 lg:block">
+              <h1 className="text-foreground truncate text-lg font-bold">
+                {t('heading')}
+              </h1>
+              <p className="text-muted-foreground truncate text-[11px]">
+                Live workspace synced for {EDUCATOR_USER.email}
+              </p>
+            </div>
+            <div className="hidden items-center gap-1.5 lg:flex">
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-0.5 text-xs font-semibold text-emerald-500">
+                {EDUCATOR_USER.role}
+              </span>
+              <ThemeToggle className="size-8" />
+              <NotificationBell />
+              <LanguageSwitcher />
+            </div>
+          </header>
+
+          {/* ── Mobile: module tabs + lesson chips (KOMPLEX-style nav) ── */}
+          <div className="border-border/60 shrink-0 border-b lg:hidden">
+            {/* Module tabs — horizontal scroll */}
+            <div className="flex gap-1.5 overflow-x-auto px-3 pt-2.5 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {modules.map((mod) => (
+                <button
+                  key={mod.id}
+                  type="button"
+                  onClick={() => setMobileModuleId(mod.id)}
+                  className={cn(
+                    'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
+                    mod.id === mobileModuleId
+                      ? 'bg-brand-navy dark:bg-brand-gold dark:text-brand-navy text-white'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  {mod.title}
+                </button>
+              ))}
+            </div>
+            {/* Lesson chips — horizontal scroll for selected module */}
+            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {mobileItems.map((item) => {
+                const Icon = KIND_ICON[item.kind];
+                const isActive = item.id === activeId;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => select(item.id)}
+                    className={cn(
+                      'border-border flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
+                      isActive
+                        ? 'bg-brand-gold border-brand-gold text-brand-navy'
+                        : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
+                    )}
+                  >
+                    <Icon className="h-3 w-3 shrink-0" />
+                    <span>{item.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Content */}
+          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+            {active && <PreviewPanel item={active} />}
+          </main>
+
+          {/* Footer nav */}
+          <footer className="border-border bg-card/90 shrink-0 border-t backdrop-blur-md">
+            {/* Mobile: prev / next lesson — KOMPLEX-style bottom nav */}
+            <div className="flex items-center gap-2 px-3 py-3 lg:hidden">
+              <button
+                type="button"
+                disabled={!prevItem}
+                onClick={() => prevItem && select(prevItem.id)}
+                className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-25"
+              >
+                <ChevronLeft className="h-4 w-4 shrink-0" />
+                {prevItem && (
+                  <span className="truncate text-[11px] font-medium">
+                    {prevItem.title}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                disabled={!nextItem}
+                onClick={() => nextItem && select(nextItem.id)}
+                className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 flex min-w-0 flex-1 items-center justify-end gap-1.5 rounded-xl px-3 py-2.5 text-right font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-25"
+              >
+                {nextItem && (
+                  <span className="truncate text-[11px]">{nextItem.title}</span>
+                )}
+                <ChevronRight className="h-4 w-4 shrink-0" />
+              </button>
+            </div>
+
+            {/* Desktop: back | edit | resubmit */}
+            <div className="hidden items-center justify-between gap-2 px-6 py-3 lg:flex">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => router.push('/educator/courses')}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t('backToCourses')}
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    toast(t('openingEditor'), 'info');
+                    router.push('/educator/courses/new');
+                  }}
+                >
+                  <PencilLine className="h-4 w-4" />
+                  {t('editCourse')}
+                </Button>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setShowResubmit(true)}
+                >
+                  <Send className="h-4 w-4" />
+                  {t('resubmitBtn')}
+                </Button>
+              </div>
+            </div>
+          </footer>
         </div>
-      </footer>
+      </div>
 
       {showResubmit && (
         <ResubmitDialog
@@ -157,11 +354,187 @@ export function CourseReview({ task }: { task: CourseTask }) {
           onClose={() => setShowResubmit(false)}
         />
       )}
+
+      {showContents && (
+        <MobileContentsSheet
+          modules={modules}
+          activeId={activeId}
+          expanded={expanded}
+          reviewedCount={viewed.size}
+          totalCount={items.length}
+          onSelect={(id) => {
+            select(id);
+            setShowContents(false);
+          }}
+          onToggleModule={toggleModule}
+          onClose={() => setShowContents(false)}
+          t={t}
+        />
+      )}
     </div>
   );
 }
 
-// ── Sidebar ──────────────────────────────────────────────────────────────────
+// ── Mobile contents sheet ─────────────────────────────────────────────────────
+
+function MobileContentsSheet({
+  modules,
+  activeId,
+  expanded,
+  reviewedCount,
+  totalCount,
+  onSelect,
+  onToggleModule,
+  onClose,
+  t,
+}: {
+  modules: ReviewModule[];
+  activeId: string;
+  expanded: Set<string>;
+  reviewedCount: number;
+  totalCount: number;
+  onSelect: (id: string) => void;
+  onToggleModule: (id: string) => void;
+  onClose: () => void;
+  t: TFn;
+}) {
+  const pct =
+    totalCount === 0 ? 0 : Math.round((reviewedCount / totalCount) * 100);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handler);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[60] sm:hidden">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      {/* Sheet panel */}
+      <div className="bg-card absolute inset-x-0 bottom-0 flex max-h-[82vh] flex-col rounded-t-2xl shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+        {/* Drag handle */}
+        <div className="flex shrink-0 justify-center pt-3 pb-1">
+          <div className="bg-muted-foreground/25 h-1 w-10 rounded-full" />
+        </div>
+
+        {/* Sheet header */}
+        <div className="flex shrink-0 items-center justify-between px-4 pt-1 pb-3">
+          <div>
+            <h3 className="text-foreground text-sm font-bold">
+              {t('courseContent')}
+            </h3>
+            <p className="text-muted-foreground mt-0.5 text-[11px]">
+              {t('itemsReviewed', {
+                reviewed: reviewedCount,
+                total: totalCount,
+              })}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-8 items-center justify-center rounded-lg transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="shrink-0 px-4 pb-3">
+          <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+            <div
+              className="bg-brand-gold h-full rounded-full transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-1 flex justify-end">
+            <span className="text-brand-gold text-[11px] font-bold">
+              {pct}%
+            </span>
+          </div>
+        </div>
+
+        {/* Scrollable module/lesson list */}
+        <div className="flex-1 overflow-y-auto pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {modules.map((module) => {
+            const isOpen = expanded.has(module.id);
+            return (
+              <div
+                key={module.id}
+                className="border-border/50 border-b last:border-0"
+              >
+                <button
+                  type="button"
+                  onClick={() => onToggleModule(module.id)}
+                  aria-expanded={isOpen}
+                  className="hover:bg-muted/50 flex w-full items-center justify-between gap-2 px-5 py-3.5 text-left transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-foreground text-sm font-bold">
+                      {module.title}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-[11px]">
+                      {lessonCount(module)} {t('lessonsCreatedBy')}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className={cn(
+                      'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
+                      isOpen && 'rotate-180',
+                    )}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="pb-2">
+                    <Group
+                      label={t('textImageLessons')}
+                      items={module.documents}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('videoLessons')}
+                      items={module.videos}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('quiz')}
+                      items={module.quizzes}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('assignment')}
+                      items={module.assignments}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 
 function ReviewSidebar({
   courseTitle,
@@ -170,8 +543,11 @@ function ReviewSidebar({
   reviewedCount,
   totalCount,
   expanded,
+  collapsed,
   onToggleModule,
+  onCollapse,
   onSelect,
+  t,
 }: {
   courseTitle: string;
   modules: ReviewModule[];
@@ -179,100 +555,223 @@ function ReviewSidebar({
   reviewedCount: number;
   totalCount: number;
   expanded: Set<string>;
+  collapsed: boolean;
+  onCollapse: () => void;
   onToggleModule: (id: string) => void;
   onSelect: (id: string) => void;
+  t: TFn;
 }) {
   const lessons = modules.reduce((sum, m) => sum + lessonCount(m), 0);
   const pct =
     totalCount === 0 ? 0 : Math.round((reviewedCount / totalCount) * 100);
 
   return (
-    <aside className="shrink-0 border-b border-slate-200 bg-white lg:w-72 lg:border-r lg:border-b-0 xl:w-80">
-      <div className="border-b border-slate-100 px-5 py-4">
-        <p className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
-          Course Content
-        </p>
-        <h2 className="text-brand-navy mt-1 text-sm leading-snug font-bold">
-          {courseTitle}
-        </h2>
-        <div className="mt-3 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-            <Layers className="h-3 w-3" /> {modules.length} Modules
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-            <BookOpen className="h-3 w-3" /> {lessons} Lessons
-          </span>
+    <aside
+      className={cn(
+        'border-border bg-card relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex dark:bg-[#071225]',
+        collapsed ? 'lg:w-16' : 'lg:w-72 xl:w-80',
+      )}
+    >
+      {/* ── EXPANDED layout ─────────────────────────────────────────────────── */}
+      <div
+        className={cn(
+          'absolute inset-0 flex flex-col transition-opacity duration-200',
+          collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
+        )}
+      >
+        {/* Brand header */}
+        <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-4 sm:h-16">
+          {/* Light mode logo */}
+          <Logo
+            size="xl"
+            variant="default"
+            className="min-w-0 flex-1 dark:hidden"
+          />
+          {/* Dark mode logo (white/light variant) */}
+          <Logo
+            size="xl"
+            variant="light"
+            className="hidden min-w-0 flex-1 dark:block"
+          />
+          <button
+            onClick={onCollapse}
+            aria-label="Collapse sidebar"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+          >
+            <PanelLeftClose className="size-4" />
+          </button>
         </div>
-        <div className="mt-3">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="bg-brand-gold h-full rounded-full transition-all"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <p className="mt-1.5 text-[11px] text-slate-400">
-            {reviewedCount} of {totalCount} items reviewed
+
+        {/* Course info + progress */}
+        <div className="border-border/60 shrink-0 border-b px-5 py-4">
+          <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
+            {t('courseContent')}
           </p>
+          <h2 className="text-foreground mt-1.5 text-sm leading-snug font-bold">
+            {courseTitle}
+          </h2>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
+              <Layers className="h-3 w-3" />
+              {t('modules', { count: modules.length })}
+            </span>
+            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
+              <BookOpen className="h-3 w-3" />
+              {t('lessons', { count: lessons })}
+            </span>
+          </div>
+          <div className="mt-3">
+            <div className="flex items-center justify-between">
+              <p className="text-muted-foreground text-[11px]">
+                {t('itemsReviewed', {
+                  reviewed: reviewedCount,
+                  total: totalCount,
+                })}
+              </p>
+              <span className="text-brand-gold text-[11px] font-bold">
+                {pct}%
+              </span>
+            </div>
+            <div className="bg-muted mt-1.5 h-1.5 w-full overflow-hidden rounded-full">
+              <div
+                className="bg-brand-gold h-full rounded-full transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Module list — scrollable, no visible scrollbar */}
+        <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {modules.map((module) => {
+            const isOpen = expanded.has(module.id);
+            return (
+              <div key={module.id} className="border-border/50 border-b">
+                <button
+                  onClick={() => onToggleModule(module.id)}
+                  aria-expanded={isOpen}
+                  className="hover:bg-muted/50 flex w-full items-start justify-between gap-2 px-5 py-3.5 text-left transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-foreground text-sm font-bold">
+                      {module.title}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-[11px]">
+                      {lessonCount(module)} {t('lessonsCreatedBy')}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className={cn(
+                      'text-muted-foreground mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200',
+                      isOpen && 'rotate-180',
+                    )}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="pb-2">
+                    <Group
+                      label={t('textImageLessons')}
+                      items={module.documents}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('videoLessons')}
+                      items={module.videos}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('quiz')}
+                      items={module.quizzes}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                    <Group
+                      label={t('assignment')}
+                      items={module.assignments}
+                      activeId={activeId}
+                      onSelect={onSelect}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="max-h-[40vh] overflow-y-auto lg:max-h-none">
-        {modules.map((module) => {
-          const isOpen = expanded.has(module.id);
-          return (
-            <div key={module.id} className="border-b border-slate-100">
-              <button
-                onClick={() => onToggleModule(module.id)}
-                aria-expanded={isOpen}
-                className="flex w-full items-start justify-between gap-2 px-5 py-3.5 text-left transition-colors hover:bg-slate-50"
-              >
-                <div className="min-w-0">
-                  <p className="text-brand-navy text-sm font-bold">
-                    {module.title}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {lessonCount(module)} lessons created by educator
-                  </p>
-                </div>
-                <ChevronDown
-                  className={cn(
-                    'mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200',
-                    isOpen && 'rotate-180',
-                  )}
-                />
-              </button>
+      {/* ── COLLAPSED icon layout ────────────────────────────────────────────── */}
+      <div
+        className={cn(
+          'absolute inset-0 flex w-16 flex-col transition-opacity duration-200',
+          collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
+        )}
+      >
+        {/* Logo icon — crossfades to expand button on hover */}
+        <div className="group/mini border-border/60 relative flex h-14 shrink-0 items-center justify-center border-b sm:h-16">
+          <button
+            onClick={onCollapse}
+            aria-label="Expand sidebar"
+            className="hover:bg-muted/60 relative flex size-10 items-center justify-center rounded-lg transition-colors"
+          >
+            <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover/mini:opacity-0">
+              <Logo size="lg" variant="dark" className="w-9!" />
+            </span>
+            <span className="text-muted-foreground absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100">
+              <PanelLeftOpen className="size-4" />
+            </span>
+          </button>
+        </div>
 
-              {isOpen && (
-                <div className="pb-2">
-                  <Group
-                    label="Text/Image Lessons"
-                    items={module.documents}
-                    activeId={activeId}
-                    onSelect={onSelect}
-                  />
-                  <Group
-                    label="Video Lessons"
-                    items={module.videos}
-                    activeId={activeId}
-                    onSelect={onSelect}
-                  />
-                  <Group
-                    label="Quiz"
-                    items={module.quizzes}
-                    activeId={activeId}
-                    onSelect={onSelect}
-                  />
-                  <Group
-                    label="Assignment"
-                    items={module.assignments}
-                    activeId={activeId}
-                    onSelect={onSelect}
-                  />
+        {/* Item icons */}
+        <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {modules.map((module, mIdx) => {
+            const moduleItems = [
+              ...module.documents,
+              ...module.videos,
+              ...module.quizzes,
+              ...module.assignments,
+            ];
+            return (
+              <div
+                key={module.id}
+                className="flex w-full flex-col items-center gap-1"
+              >
+                {mIdx > 0 && <div className="bg-border/60 my-1 h-px w-8" />}
+                {/* Module indicator */}
+                <div
+                  title={module.title}
+                  className="text-muted-foreground/50 flex size-10 items-center justify-center"
+                >
+                  <Layers className="size-3.5" />
                 </div>
-              )}
-            </div>
-          );
-        })}
+                {/* Item icons */}
+                {moduleItems.map((item) => {
+                  const Icon = KIND_ICON[item.kind];
+                  const isActive = item.id === activeId;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onSelect(item.id)}
+                      title={item.title}
+                      className={cn(
+                        'flex size-10 items-center justify-center rounded-xl transition-colors',
+                        isActive
+                          ? 'bg-brand-gold shadow-sm'
+                          : 'text-muted-foreground hover:bg-muted/60',
+                      )}
+                    >
+                      <Icon
+                        className={cn('size-4', isActive ? 'text-white' : '')}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </aside>
   );
@@ -292,7 +791,7 @@ function Group({
   if (items.length === 0) return null;
   return (
     <div className="mt-1">
-      <p className="px-5 py-1.5 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
+      <p className="text-muted-foreground px-5 py-1.5 text-[10px] font-semibold tracking-widest uppercase">
         {label}
       </p>
       <ul>
@@ -311,19 +810,21 @@ function Group({
                   'flex w-full items-center gap-2.5 border-l-2 px-5 py-2 text-left transition-colors',
                   isActive
                     ? 'border-brand-gold bg-brand-gold/10'
-                    : 'border-transparent hover:bg-slate-50',
+                    : 'hover:bg-muted/50 border-transparent',
                 )}
               >
                 <Icon
                   className={cn(
                     'h-3.5 w-3.5 shrink-0',
-                    isActive ? 'text-brand-gold' : 'text-slate-400',
+                    isActive ? 'text-brand-gold' : 'text-muted-foreground',
                   )}
                 />
                 <span
                   className={cn(
                     'min-w-0 flex-1 truncate text-xs font-medium',
-                    isActive ? 'text-brand-navy' : 'text-slate-600',
+                    isActive
+                      ? 'text-foreground font-semibold'
+                      : 'text-muted-foreground',
                   )}
                 >
                   {item.title}
@@ -347,7 +848,7 @@ function Group({
   );
 }
 
-// ── Preview panels ───────────────────────────────────────────────────────────
+// ── Preview panels ────────────────────────────────────────────────────────────
 
 function PreviewPanel({ item }: { item: ReviewItem }) {
   switch (item.kind) {
@@ -362,26 +863,76 @@ function PreviewPanel({ item }: { item: ReviewItem }) {
   }
 }
 
-function IntroCard({ text }: { text: string }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-5 py-4">
-      <h3 className="text-sm font-bold text-slate-900">Lesson Introduction</h3>
-      <p className="mt-1 text-sm text-slate-500">{text}</p>
-    </div>
-  );
-}
-
 function VideoPanel({ item }: { item: VideoItem }) {
   return (
     <div className="space-y-4">
-      <IntroCard text={item.intro} />
-      <div className="bg-brand-navy relative aspect-video w-full overflow-hidden rounded-xl">
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <span className="bg-brand-gold flex h-14 w-14 items-center justify-center rounded-full">
-            <Play className="ml-0.5 h-6 w-6 fill-current text-white" />
+      {/* Header */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <div className="flex items-center justify-between">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+            Video Lesson
           </span>
-          <p className="text-base font-bold text-white">{item.title}</p>
-          <p className="text-xs text-slate-300">{item.caption}</p>
+          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <Clock className="h-3.5 w-3.5" />
+            {item.duration}
+          </span>
+        </div>
+        <h2 className="text-foreground mt-3 text-2xl font-bold">
+          {item.title}
+        </h2>
+        <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
+          {item.intro}
+        </p>
+      </div>
+
+      {/* Player */}
+      <div className="bg-brand-navy relative aspect-video w-full overflow-hidden rounded-2xl ring-1 ring-white/6 dark:bg-[#071225]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,163,0,0.08)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+          <div className="bg-brand-gold group relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full shadow-[0_0_32px_rgba(244,163,0,0.4)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_48px_rgba(244,163,0,0.5)]">
+            <Play className="text-brand-navy ml-1 h-7 w-7 fill-current" />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-bold text-white">{item.title}</p>
+            <p className="mt-1 text-xs text-white/50">
+              Educator preview — learners watch the full video
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Topics */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <h3 className="text-foreground text-sm font-bold">In This Video</h3>
+        <ul className="mt-3 space-y-2">
+          {item.topics.map((topic, i) => (
+            <li
+              key={i}
+              className="text-muted-foreground flex items-start gap-2.5 text-sm"
+            >
+              <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
+                ▸
+              </span>
+              {topic}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Chapter markers */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <h3 className="text-foreground text-sm font-bold">Key Moments</h3>
+        <div className="mt-3 space-y-2">
+          {item.moments.map((moment, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="bg-brand-gold/10 text-brand-gold shrink-0 rounded-md px-2 py-0.5 font-mono text-xs">
+                {moment.time}
+              </span>
+              <span className="text-muted-foreground text-sm">
+                {moment.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -391,118 +942,363 @@ function VideoPanel({ item }: { item: VideoItem }) {
 function DocumentPanel({ item }: { item: DocumentItem }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-          Document Lesson
-        </span>
-        <h2 className="mt-3 text-xl font-bold text-slate-900">{item.title}</h2>
-      </div>
-      <IntroCard text={item.intro} />
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="space-y-3 text-sm leading-relaxed text-slate-600">
-          {item.body.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
+      {/* Header */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <div className="flex items-center justify-between">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+            Document Lesson
+          </span>
+          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <Clock className="h-3.5 w-3.5" />
+            {item.readTime}
+          </span>
         </div>
+        <h2 className="text-foreground mt-3 text-2xl font-bold">
+          {item.title}
+        </h2>
+        <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
+          {item.intro}
+        </p>
+      </div>
+
+      {/* Objectives */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <h3 className="text-foreground mb-3 text-sm font-bold">
+          What You&apos;ll Learn
+        </h3>
+        <ul className="space-y-2">
+          {item.objectives.map((obj, i) => (
+            <li
+              key={i}
+              className="text-muted-foreground flex items-start gap-2.5 text-sm"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+              {obj}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Content sections */}
+      {item.sections.map((section, i) => (
+        <div key={i} className="border-border bg-card rounded-2xl border p-5">
+          <h3 className="text-foreground text-base font-bold">
+            {section.heading}
+          </h3>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            {section.text}
+          </p>
+          {section.tip && (
+            <div className="border-brand-gold/20 bg-brand-gold/[0.06] mt-4 flex items-start gap-2.5 rounded-xl border px-4 py-3">
+              <Lightbulb className="text-brand-gold mt-0.5 h-4 w-4 shrink-0" />
+              <p className="text-brand-gold/90 text-sm">{section.tip}</p>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Takeaways */}
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <h3 className="text-foreground mb-3 text-sm font-bold">
+          Key Takeaways
+        </h3>
+        <ul className="space-y-2">
+          {item.takeaways.map((point, i) => (
+            <li
+              key={i}
+              className="text-foreground/75 flex items-start gap-2.5 text-sm"
+            >
+              <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
+                ✓
+              </span>
+              {point}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
 }
 
-function QuizPanel({ item }: { item: QuizItem }) {
+// ── Interactive quiz preview ──────────────────────────────────────────────────
+
+function QuizOption({
+  option,
+  index,
+  selected,
+  revealed,
+  correctIndex,
+  onSelect,
+}: {
+  option: string;
+  index: number;
+  selected: number | null;
+  revealed: boolean;
+  correctIndex: number;
+  onSelect: (i: number) => void;
+}) {
+  const isSelected = selected === index;
+  const isCorrect = index === correctIndex;
+
+  let ring = 'border-border hover:border-brand-gold/40 hover:bg-muted/40';
+  let dot = 'border-border';
+  let text = 'text-foreground/80';
+
+  if (revealed) {
+    if (isCorrect) {
+      ring = 'border-emerald-400/60 bg-emerald-50 dark:bg-emerald-500/10';
+      dot = 'border-emerald-500 bg-emerald-500';
+      text = 'text-emerald-700 dark:text-emerald-400 font-semibold';
+    } else if (isSelected) {
+      ring = 'border-rose-400/60 bg-rose-50 dark:bg-rose-500/10';
+      dot = 'border-rose-500 bg-rose-500';
+      text = 'text-rose-600 dark:text-rose-400';
+    }
+  } else if (isSelected) {
+    ring = 'border-brand-gold bg-brand-gold/8';
+    dot = 'border-brand-gold bg-brand-gold';
+    text = 'text-foreground font-semibold';
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-            Quiz
+    <button
+      type="button"
+      onClick={() => onSelect(index)}
+      disabled={revealed}
+      className={cn(
+        'flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all duration-150',
+        ring,
+      )}
+    >
+      <span
+        className={cn(
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
+          dot,
+        )}
+      >
+        {isSelected && !revealed && (
+          <span className="h-2 w-2 rounded-full bg-white" />
+        )}
+        {revealed && isCorrect && (
+          <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+        )}
+      </span>
+      <span className={cn('text-sm', text)}>{option}</span>
+    </button>
+  );
+}
+
+function QuizPanel({ item }: { item: QuizItem }) {
+  const t = useEducatorReviewT();
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const question: QuizQuestion = item.questions[currentQ];
+  const pct = Math.round(((currentQ + 1) / item.totalQuestions) * 100);
+  const isLast = currentQ === item.questions.length - 1;
+
+  function goNext() {
+    if (!isLast) {
+      setCurrentQ((q) => q + 1);
+      setSelected(null);
+      setRevealed(false);
+    }
+  }
+
+  function goBack() {
+    if (currentQ > 0) {
+      setCurrentQ((q) => q - 1);
+      setSelected(null);
+      setRevealed(false);
+    }
+  }
+
+  return (
+    <div className="border-border bg-card overflow-hidden rounded-2xl border">
+      {/* Header */}
+      <div className="border-border/60 border-b px-6 pt-6 pb-4">
+        <p className="text-muted-foreground text-sm">
+          {t('quizFor')} {item.forLesson}
+        </p>
+        <h2 className="text-foreground mt-1 text-2xl font-bold">
+          {item.title}
+        </h2>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+            Question {currentQ + 1} of {item.totalQuestions}
           </span>
-          <span
-            className={cn(
-              'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-              ITEM_STATUS_STYLE[item.status],
-            )}
-          >
-            {item.status}
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+            {item.estimatedMinutes} Minutes
+          </span>
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+            Single Choice
           </span>
         </div>
-        <h2 className="mt-3 text-xl font-bold text-slate-900">{item.title}</h2>
-        <p className="mt-0.5 text-xs text-slate-400">
-          Quiz for: {item.forLesson}
+      </div>
+
+      {/* Progress bar */}
+      <div className="bg-muted/40 h-1.5 w-full">
+        <div
+          className="bg-brand-gold h-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {/* Question */}
+      <div className="px-6 pt-6 pb-4">
+        <h3 className="text-foreground text-xl font-bold">
+          {question.question}
+        </h3>
+        <p className="text-muted-foreground mt-1 text-sm">Choose one answer.</p>
+
+        <div className="mt-5 space-y-3">
+          {question.options.map((opt, i) => (
+            <QuizOption
+              key={i}
+              option={opt}
+              index={i}
+              selected={selected}
+              revealed={revealed}
+              correctIndex={question.correctIndex}
+              onSelect={(idx) => {
+                setSelected(idx);
+                setRevealed(true);
+              }}
+            />
+          ))}
+        </div>
+
+        {revealed && (
+          <p
+            className={cn(
+              'mt-4 text-xs font-semibold',
+              selected === question.correctIndex
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-rose-600 dark:text-rose-400',
+            )}
+          >
+            {selected === question.correctIndex
+              ? '✓ Correct!'
+              : `✗ Correct answer: ${question.options[question.correctIndex]}`}
+          </p>
+        )}
+      </div>
+
+      {/* Nav footer */}
+      <div className="border-border/60 flex items-center justify-between border-t px-6 py-4">
+        <button
+          type="button"
+          onClick={goBack}
+          disabled={currentQ === 0}
+          className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground rounded-xl border px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={goNext}
+          disabled={isLast}
+          className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {isLast ? 'End of Preview' : 'Next'}
+        </button>
+      </div>
+
+      {isLast && (
+        <p className="text-muted-foreground border-border/40 border-t px-6 py-3 text-center text-[11px]">
+          Previewing {item.questions.length} of {item.totalQuestions} questions
+          · Educator preview only
         </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <InfoCard
-          icon={<ClipboardList className="h-4 w-4" />}
-          label="Questions"
-          value={`${item.questions} questions`}
-        />
-        <InfoCard
-          icon={<CheckCircle2 className="h-4 w-4" />}
-          label="Connected lesson"
-          value={item.forLesson}
-        />
-      </div>
+      )}
     </div>
   );
 }
 
 function AssignmentPanel({ item }: { item: AssignmentItem }) {
+  const t = useEducatorReviewT();
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-            Assignment
-          </span>
-          <span
-            className={cn(
-              'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-              ITEM_STATUS_STYLE[item.status],
-            )}
-          >
-            {item.status}
-          </span>
+    <div className="border-border bg-card overflow-hidden rounded-2xl border">
+      {/* Header */}
+      <div className="border-border/60 border-b px-6 pt-6 pb-5">
+        <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+          {t('assignment')}
+        </span>
+        <h2 className="text-foreground mt-3 text-2xl font-bold">
+          {item.title}
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Assigned after {item.forLesson}
+        </p>
+      </div>
+
+      <div className="space-y-5 px-6 py-5">
+        {/* Meta row */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { label: 'Lesson', value: item.forLesson },
+            { label: 'Due date', value: `Due ${item.dueDate}` },
+            { label: 'Submission', value: item.submission },
+          ].map(({ label, value }) => (
+            <div key={label} className="border-border rounded-xl border p-4">
+              <p className="text-muted-foreground text-xs">{label}</p>
+              <p className="text-foreground mt-1 text-sm font-semibold">
+                {value}
+              </p>
+            </div>
+          ))}
         </div>
-        <h2 className="mt-3 text-xl font-bold text-slate-900">{item.title}</h2>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <InfoCard
-          icon={<CalendarDays className="h-4 w-4" />}
-          label="Due date"
-          value={`Due ${item.dueDate}`}
-        />
-        <InfoCard
-          icon={<FileUp className="h-4 w-4" />}
-          label="Submission"
-          value={item.submission}
-        />
+
+        {/* Instructions */}
+        <div className="border-border rounded-xl border p-4">
+          <h3 className="text-foreground text-sm font-semibold">
+            Instructions
+          </h3>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            {item.instructions}
+          </p>
+        </div>
+
+        {/* Requirements */}
+        <div className="border-border rounded-xl border p-4">
+          <h3 className="text-foreground mb-3 text-sm font-semibold">
+            Requirements
+          </h3>
+          <ul className="space-y-2">
+            {item.requirements.map((req, i) => (
+              <li
+                key={i}
+                className="text-muted-foreground flex items-start gap-2.5 text-sm"
+              >
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                {req}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Upload zone */}
+        <div className="border-border rounded-xl border-2 border-dashed p-8 text-center">
+          <FileUp className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
+          <p className="text-foreground text-sm font-semibold">
+            Upload your assignment
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            PDF, document, or shareable link accepted
+          </p>
+          <button
+            type="button"
+            className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 mt-4 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors"
+          >
+            Submit Assignment
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function InfoCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
-        <span className="text-slate-400">{icon}</span>
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-bold text-slate-800">{value}</p>
-    </div>
-  );
-}
-
-// ── Resubmit dialog ──────────────────────────────────────────────────────────
+// ── Resubmit dialog ───────────────────────────────────────────────────────────
 
 function ResubmitDialog({
   courseTitle,
@@ -513,33 +1309,33 @@ function ResubmitDialog({
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const t = useEducatorReviewT();
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Resubmit for review"
+      aria-label={t('dialogTitle')}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl"
+        className="bg-card w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl ring-1 ring-black/10 dark:ring-white/6"
         onClick={(e) => e.stopPropagation()}
       >
         <span className="bg-brand-gold/15 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
           <Send className="text-brand-gold h-6 w-6" />
         </span>
-        <h2 className="mt-3 text-lg font-bold text-slate-900">
-          Resubmit for review?
+        <h2 className="text-foreground mt-4 text-lg font-bold">
+          {t('dialogTitle')}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-          “{courseTitle}” will be sent to an admin for approval. You can keep
-          editing until it is approved.
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          {t('dialogDesc', { title: courseTitle })}
         </p>
-        <div className="mt-5 flex items-center justify-center gap-3">
+        <div className="mt-6 flex items-center justify-center gap-3">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('dialogCancel')}
           </Button>
-          <Button onClick={onConfirm}>Resubmit</Button>
+          <Button onClick={onConfirm}>{t('dialogConfirm')}</Button>
         </div>
       </div>
     </div>

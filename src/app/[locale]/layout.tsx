@@ -1,14 +1,15 @@
-import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import '../globals.css';
-import { rootMetadata } from '@/config/metadata';
-import { AppProviders } from '@/providers/app-providers';
 import { routing } from '@/i18n/routing';
+import { LocaleProvider } from '@/providers/locale-provider';
 
-export const metadata: Metadata = rootMetadata;
-
-export default async function RootLayout({
+/**
+ * Locale-scoped layout. Wraps children with the next-intl providers that
+ * depend on the [locale] dynamic segment. Auth and theme are intentionally
+ * excluded — they live in the root layout above this segment so they survive
+ * locale switches without remounting.
+ */
+export default async function LocaleLayout({
   children,
   params,
 }: Readonly<{
@@ -16,19 +17,14 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col">
-        <NextIntlClientProvider>
-          <AppProviders>
-            <main className="flex-1">{children}</main>
-          </AppProviders>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider>
+      <LocaleProvider>{children}</LocaleProvider>
+    </NextIntlClientProvider>
   );
 }

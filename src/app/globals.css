@@ -3,6 +3,34 @@
 /* Class-based dark mode — add/remove .dark on <html> */
 @variant dark (&:where(.dark, .dark *));
 
+/* ── KantumruyPro — local variable font for Khmer (km locale) ────────────────
+   Both axes (normal + italic) in a single weight range.
+   Files live in /public/font/ and are served as static assets.
+   ─────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'KantumruyPro';
+  src: url('/font/KantumruyPro-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KantumruyPro';
+  src: url('/font/KantumruyPro-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Override both font tokens when the page language is Khmer.
+   The <html lang="km"> attribute is set server-side by the root layout,
+   so this selector fires on the very first paint — no flash of wrong font. */
+:root:lang(km) {
+  --font-sans: 'KantumruyPro', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'KantumruyPro', ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -282,6 +310,69 @@
   animation-duration: 1.4s;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Living "aurora" background — slow organic drift for decorative gradient
+   blobs, plus a gentle pan of the base gradient. Used by the educator
+   GreetingHero so the card surface feels alive rather than static.
+   ─────────────────────────────────────────────────────────────────────────── */
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(22px, 18px) scale(1.18);
+    opacity: 1;
+  }
+}
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-26px, 12px) scale(0.88);
+    opacity: 1;
+  }
+}
+@keyframes aurora-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(16px, -20px) scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@utility animate-aurora-a {
+  animation: aurora-a 9s ease-in-out infinite;
+}
+@utility animate-aurora-b {
+  animation: aurora-b 11s ease-in-out infinite;
+}
+@utility animate-aurora-c {
+  animation: aurora-c 13s ease-in-out infinite;
+}
+@utility animate-gradient-pan {
+  background-size: 200% 200%;
+  animation: gradient-pan 16s ease infinite;
 }
 
 /* Animation-delay utilities. Tailwind's built-in delay-* targets

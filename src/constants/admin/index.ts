@@ -7,6 +7,7 @@ export const ADMIN_USER = {
 
 export type UserStatus = 'Active' | 'Inactive' | 'Suspended' | 'Achieved';
 export type UserRole = 'Learner' | 'Educator' | 'Admin';
+export type InviteStatus = 'Approved' | 'Pending';
 
 export interface AdminUserRow {
   id: string;
@@ -14,6 +15,7 @@ export interface AdminUserRow {
   email: string;
   role: UserRole;
   status: UserStatus;
+  inviteStatus: InviteStatus;
   enrolled: number;
   joined: string;
   lastActive: string;
@@ -26,6 +28,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'john@example.com',
     role: 'Learner',
     status: 'Active',
+    inviteStatus: 'Approved',
     enrolled: 5,
     joined: 'Jan 15, 2024',
     lastActive: '2h ago',
@@ -36,6 +39,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'angela@example.com',
     role: 'Educator',
     status: 'Active',
+    inviteStatus: 'Approved',
     enrolled: 0,
     joined: 'Jun 20, 2023',
     lastActive: '3h ago',
@@ -46,6 +50,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'sarah@example.com',
     role: 'Admin',
     status: 'Active',
+    inviteStatus: 'Approved',
     enrolled: 0,
     joined: 'Mar 10, 2023',
     lastActive: '1d ago',
@@ -56,6 +61,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'mike@example.com',
     role: 'Learner',
     status: 'Achieved',
+    inviteStatus: 'Approved',
     enrolled: 12,
     joined: 'Feb 28, 2024',
     lastActive: '5d ago',
@@ -66,6 +72,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'kirill@example.com',
     role: 'Educator',
     status: 'Active',
+    inviteStatus: 'Approved',
     enrolled: 0,
     joined: 'Aug 12, 2023',
     lastActive: '5d ago',
@@ -76,6 +83,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'priya@example.com',
     role: 'Learner',
     status: 'Inactive',
+    inviteStatus: 'Pending',
     enrolled: 3,
     joined: 'Mar 5, 2025',
     lastActive: '2w ago',
@@ -86,6 +94,7 @@ export const ADMIN_USERS: AdminUserRow[] = [
     email: 'tom@example.com',
     role: 'Learner',
     status: 'Active',
+    inviteStatus: 'Pending',
     enrolled: 8,
     joined: 'Apr 1, 2025',
     lastActive: '30m ago',

@@ -1,5 +1,7 @@
 'use client';
 
+import { UserCircle } from 'lucide-react';
+import { useEducatorSettingsT } from '@/i18n';
 import EducatorTopBar from '@/components/common/TopBar';
 import { Button } from '@/components/ui/button';
 import { useProfileForm } from './_lib/useProfileForm';
@@ -7,27 +9,32 @@ import { ProfileHeader } from './_components/ProfileHeader';
 import { ProfileFields } from './_components/ProfileFields';
 
 export default function EducatorSettingsPage() {
+  const t = useEducatorSettingsT();
   const { form, setField, setAvatar, avatarUrl, dirty, save, reset } =
     useProfileForm();
 
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
+    <div className="bg-background flex min-h-full flex-col">
       <EducatorTopBar
         role="educator"
-        title="Settings"
-        subtitle="Live workspace synced from your account"
+        title={t('title')}
+        subtitle={t('subtitle')}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6">
-          {/* Heading */}
-          <div className="mb-6">
-            <h2 className="text-brand-navy text-base font-bold">
-              Personal Information
-            </h2>
-            <p className="mt-0.5 text-sm text-slate-500">
-              Manage the profile details used across your CLP workspace.
-            </p>
+        <section className="border-border bg-card rounded-2xl border p-6">
+          <div className="mb-6 flex items-start gap-3">
+            <div className="bg-brand-gold/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+              <UserCircle className="text-brand-gold h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-foreground text-base font-bold">
+                {t('personalInfo')}
+              </h2>
+              <p className="text-muted-foreground mt-0.5 text-sm">
+                {t('personalInfoDesc')}
+              </p>
+            </div>
           </div>
 
           <ProfileHeader
@@ -39,18 +46,17 @@ export default function EducatorSettingsPage() {
 
           <ProfileFields form={form} onChange={setField} />
 
-          {/* Actions */}
-          <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-5">
+          <div className="border-border/50 mt-6 flex items-center justify-end gap-2 border-t pt-5">
             <Button
               variant="outline"
               onClick={reset}
               disabled={!dirty}
               className="disabled:opacity-40"
             >
-              Reset
+              {t('reset')}
             </Button>
             <Button onClick={save} disabled={!dirty}>
-              Save changes
+              {t('save')}
             </Button>
           </div>
         </section>

@@ -32,11 +32,6 @@ function errorMessage(error: unknown, fallback: string): string {
   return isApiError(error) ? error.message : fallback;
 }
 
-/**
- * Manages the admin users list against the backend `/api/v1/users` endpoints.
- * Loads the full list on mount; each mutation awaits the API call and only
- * then updates local state (pessimistic), firing a toast either way.
- */
 export function useUserManagement(): UserManagement {
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +80,7 @@ export function useUserManagement(): UserManagement {
       try {
         await deleteUser(id);
         setUsers((prev) => prev.filter((u) => u.id !== id));
-        toast(`"${target?.name ?? 'User'}" was removed.`, 'error');
+        toast(`"${target?.name ?? 'User'}" was removed.`, 'success');
       } catch (error) {
         toast(errorMessage(error, 'Failed to remove user.'), 'error');
       }
