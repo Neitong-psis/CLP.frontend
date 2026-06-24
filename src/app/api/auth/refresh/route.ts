@@ -7,9 +7,9 @@ import { NextResponse } from 'next/server';
 import { apiUrl, AUTH_ENDPOINTS } from '@/lib/api/config';
 import { refreshResponseSchema } from '@/schemas/auth.schema';
 import {
+  applyRefreshTokenRotation,
   clearAuthCookies,
   readRefreshToken,
-  rotateRefreshToken,
 } from '@/lib/session/server-cookies';
 
 export async function POST(): Promise<NextResponse> {
@@ -32,17 +32,22 @@ export async function POST(): Promise<NextResponse> {
   }
 
   if (!backendResponse.ok) {
-    await clearAuthCookies();
-    return NextResponse.json({ message: 'Session expired.' }, { status: 401 });
+    const errRes = NextResponse.json(
+      { message: 'Session expired.' },
+      { status: 401 },
+    );
+    clearAuthCookies(errRes);
+    return errRes;
   }
 
   const data = refreshResponseSchema.parse(
     await backendResponse.json().catch(() => null),
   );
-  await rotateRefreshToken(data.refreshToken);
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     accessToken: data.token,
     tokenExpires: data.tokenExpires,
   });
+  applyRefreshTokenRotation(res, data.refreshToken);
+  return res;
 }

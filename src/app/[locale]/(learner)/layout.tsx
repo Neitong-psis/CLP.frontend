@@ -1,4 +1,8 @@
 import Sidebar from '@/components/common/sidebar/Sidebar';
+import { ToastProvider } from '@/components/ui/toast';
+import { MobileSidebarProvider } from '@/context/MobileSidebarContext';
+import { MobileSidebarDrawer } from '@/components/common/sidebar/MobileSidebarDrawer';
+import { MOCK_USER } from '@/constants/learner';
 
 export default function LearnerLayout({
   children,
@@ -6,16 +10,25 @@ export default function LearnerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:h-full lg:shrink-0">
-        <Sidebar role="learner" />
-      </div>
+    <ToastProvider>
+      <MobileSidebarProvider userInitials={MOCK_USER.initials}>
+        <div className="bg-background flex h-screen overflow-hidden">
+          {/* Desktop sidebar — hidden below lg */}
+          <div className="hidden lg:flex lg:h-full lg:shrink-0">
+            <Sidebar role="learner" />
+          </div>
 
-      {/* Main content */}
-      <main className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">{children}</div>
-      </main>
-    </div>
+          {/* Profile dropdown menu — triggered from TopBar avatar on mobile/tablet */}
+          <MobileSidebarDrawer role="learner" />
+
+          {/* Main content */}
+          <main className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+              {children}
+            </div>
+          </main>
+        </div>
+      </MobileSidebarProvider>
+    </ToastProvider>
   );
 }

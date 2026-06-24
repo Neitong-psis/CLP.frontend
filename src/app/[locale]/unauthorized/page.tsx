@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 
 export default function UnauthorizedPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
+    <main className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
       <div className="space-y-2">
-        <p className="text-sm font-semibold tracking-widest text-slate-400 uppercase">
+        <p className="text-muted-foreground text-sm font-semibold tracking-widest uppercase">
           403
         </p>
-        <h1 className="text-2xl font-bold text-slate-900">Access denied</h1>
-        <p className="max-w-md text-sm text-slate-600">
+        <h1 className="text-foreground text-2xl font-bold">Access denied</h1>
+        <p className="text-muted-foreground max-w-md text-sm">
           Your account does not have permission to view this page. If you think
           this is a mistake, contact an administrator.
         </p>

@@ -15,18 +15,25 @@ import { userSchema, type User } from '@/schemas/user.schema';
 
 export interface LoginOptions {
   /**
-   * `'admin'` routes the login through the admin-only BFF endpoint, which
-   * rejects non-admin accounts server-side before any session is established.
+   * Routes the login through a portal-specific BFF endpoint that enforces
+   * the required role server-side before any session cookies are set.
    */
-  portal?: 'admin';
+  role?: 'admin' | 'educator' | 'learner';
 }
+
+const PORTAL_ENDPOINT: Record<NonNullable<LoginOptions['role']>, string> = {
+  admin: BFF_ENDPOINTS.adminLogin,
+  educator: BFF_ENDPOINTS.educatorLogin,
+  learner: BFF_ENDPOINTS.learnerLogin,
+};
 
 export async function login(
   input: LoginRequest,
   options: LoginOptions = {},
 ): Promise<LoginResult> {
-  const endpoint =
-    options.portal === 'admin' ? BFF_ENDPOINTS.adminLogin : BFF_ENDPOINTS.login;
+  const endpoint = options.role
+    ? PORTAL_ENDPOINT[options.role]
+    : BFF_ENDPOINTS.login;
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -135,6 +142,40 @@ export async function getMe(): Promise<User> {
   try {
     const { data } = await http.get<unknown>(`/${AUTH_ENDPOINTS.me}`);
     return userSchema.parse(data);
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+/**
+ * Requests a password reset email for the given address.
+ *
+ * Always resolves — the backend returns a generic message whether or not the
+ * email is registered (security by design). Only throws on network failure.
+ *
+ * @param email - The account email to send the reset link to.
+ */
+export async function forgotPassword(email: string): Promise<void> {
+  try {
+    await http.post(`/${AUTH_ENDPOINTS.forgotPassword}`, { email });
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+/**
+ * Resets the account password using the one-time hash from the reset email.
+ *
+ * @param hash - The JWT hash from the reset link's query string.
+ * @param password - The new plaintext password (must meet the policy).
+ * @throws {@link ApiError} if the hash is invalid/expired (422) or already used.
+ */
+export async function resetPassword(
+  hash: string,
+  password: string,
+): Promise<void> {
+  try {
+    await http.post(`/${AUTH_ENDPOINTS.resetPassword}`, { hash, password });
   } catch (error) {
     throw normalizeError(error);
   }

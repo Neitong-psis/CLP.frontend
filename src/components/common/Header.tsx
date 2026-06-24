@@ -14,7 +14,6 @@ import {
   Info,
   type LucideIcon,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -55,19 +54,23 @@ function DesktopNavItem({
     [],
   );
 
-  const base =
-    'text-sm font-semibold transition-colors duration-200 focus:outline-none';
-  const color = scrolled
-    ? 'text-brand-navy/70 hover:text-brand-navy'
-    : 'text-white/70 hover:text-white';
+  // Use a single explicit class per state to avoid tailwind-merge failing to
+  // resolve conflicts between custom-color utilities (e.g. text-brand-navy vs
+  // text-white/90 are both unknown to twMerge's default config).
+  const textClass = scrolled ? 'text-brand-navy' : 'text-white/90';
+  const hoverTextClass = scrolled
+    ? 'hover:text-brand-navy'
+    : 'hover:text-white';
+  const hoverBgClass = scrolled ? 'hover:bg-brand-navy/6' : 'hover:bg-white/8';
 
   if (!link.children?.length) {
     return (
       <Link
         href={link.href}
         className={cn(
-          base,
-          color,
+          'text-sm font-semibold transition-colors duration-200 focus:outline-none',
+          textClass,
+          hoverTextClass,
           'after:bg-brand-gold relative rounded py-1',
           'after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full',
           'after:origin-left after:scale-x-0 after:rounded-full',
@@ -90,17 +93,18 @@ function DesktopNavItem({
         closeTimer.current = setTimeout(() => setOpen(false), 15);
       }}
     >
-      <Button
-        variant="ghost"
-        size="sm"
+      {/* Plain <button> avoids buttonVariants ghost adding its own text-brand-navy
+          that tailwind-merge can't detect as conflicting with text-white/90. */}
+      <button
+        type="button"
         aria-expanded={open}
         aria-haspopup="true"
         className={cn(
-          'gap-1 px-2 font-semibold',
-          scrolled
-            ? 'text-brand-navy/70 hover:bg-brand-navy/6 hover:text-brand-navy'
-            : 'text-white/70 hover:bg-white/8 hover:text-white',
-          open && (scrolled ? 'text-brand-navy!' : 'text-white!'),
+          'inline-flex h-9 items-center gap-1 rounded px-2 text-sm font-semibold',
+          'transition-colors duration-200 focus:outline-none',
+          open ? (scrolled ? 'text-brand-navy' : 'text-white') : textClass,
+          hoverBgClass,
+          hoverTextClass,
         )}
       >
         {link.label}
@@ -111,7 +115,7 @@ function DesktopNavItem({
             open && 'rotate-180',
           )}
         />
-      </Button>
+      </button>
 
       {/* Dropdown — always dark navy */}
       <div
@@ -434,7 +438,7 @@ export default function Header() {
                   'group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 hover:-translate-y-px focus:outline-none',
                   scrolled
                     ? 'border-brand-navy/20 text-brand-navy hover:border-brand-navy hover:text-white'
-                    : 'border-white/25 text-white/80 hover:border-white/50 hover:text-white hover:shadow-[0_0_0_3px_rgba(255,255,255,0.08)]',
+                    : 'border-white/40 text-white/90 hover:border-white/60 hover:text-white hover:shadow-[0_0_0_3px_rgba(255,255,255,0.08)]',
                 )}
               >
                 <span
@@ -453,21 +457,16 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg dark:border-white/10 dark:bg-[#071225]"
+              theme="light"
+              className="min-w-36 py-1.5"
             >
-              <DropdownMenuItem
-                asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
-              >
+              <DropdownMenuItem asChild theme="light">
                 <Link href="/auth?tab=login&role=learner">
                   <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
                   {t('learner')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
-              >
+              <DropdownMenuItem asChild theme="light">
                 <Link href="/auth?tab=login&role=educator">
                   <BookOpen aria-hidden className="h-4 w-4 opacity-60" />
                   {t('educator')}
@@ -493,21 +492,16 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg dark:border-white/10 dark:bg-[#071225]"
+              theme="light"
+              className="min-w-36 py-1.5"
             >
-              <DropdownMenuItem
-                asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
-              >
+              <DropdownMenuItem asChild theme="light">
                 <Link href="/auth?tab=signup&role=learner">
                   <GraduationCap aria-hidden className="h-4 w-4 opacity-60" />
                   {t('learner')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                asChild
-                className="text-brand-navy/70 focus:text-brand-navy focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
-              >
+              <DropdownMenuItem asChild theme="light">
                 <Link href="/auth?tab=signup&role=educator">
                   <BookOpen aria-hidden className="h-4 w-4 opacity-60" />
                   {t('educator')}
@@ -520,33 +514,39 @@ export default function Header() {
         </div>
 
         {/* Mobile hamburger */}
-        <DropdownMenu open={mobileOpen} onOpenChange={setMobileOpen}>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
-              className={cn(
-                'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none md:hidden',
-                scrolled
-                  ? 'text-brand-navy hover:bg-brand-navy/8'
-                  : 'text-white/80 hover:bg-white/10',
-              )}
-            >
-              {mobileOpen ? (
-                <X aria-hidden className="h-5 w-5" />
-              ) : (
-                <Menu aria-hidden className="h-5 w-5" />
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            sideOffset={8}
-            className="border-brand-navy/8 w-64 overflow-hidden rounded-xl border bg-white p-0 shadow-lg"
-          >
-            <MobileNavMenu onClose={() => setMobileOpen(false)} />
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <button
+          type="button"
+          aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none md:hidden',
+            scrolled
+              ? 'text-brand-navy hover:bg-brand-navy/8'
+              : 'text-white/90 hover:bg-white/10',
+          )}
+        >
+          {mobileOpen ? (
+            <X aria-hidden className="h-5 w-5" />
+          ) : (
+            <Menu aria-hidden className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile slide-down panel — sits outside the header row so it doesn't affect header height */}
+      <div
+        aria-hidden={!mobileOpen}
+        className={cn(
+          'border-brand-navy/8 absolute inset-x-0 top-full border-t bg-white shadow-xl transition-[opacity,transform] duration-200 ease-out md:hidden',
+          mobileOpen
+            ? 'pointer-events-auto translate-y-0 opacity-100'
+            : 'pointer-events-none -translate-y-1 opacity-0',
+        )}
+      >
+        <div className="max-h-[calc(100svh-3.75rem)] overflow-y-auto">
+          <MobileNavMenu onClose={() => setMobileOpen(false)} />
+        </div>
       </div>
     </header>
   );

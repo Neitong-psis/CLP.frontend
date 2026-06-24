@@ -1,8 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, Settings, Languages, HelpCircle } from 'lucide-react';
+import {
+  LogOut,
+  Settings,
+  Languages,
+  HelpCircle,
+  Check,
+  ChevronRight,
+} from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { useNavT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import {
   DropdownMenu,
@@ -13,12 +23,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/hooks/use-auth';
+import { routing, type Locale } from '@/i18n/routing';
+import { useLocalePreference } from '@/providers/locale-provider';
+
+const LOCALE_LABELS: Record<Locale, string> = { en: 'English', km: 'ខ្មែរ' };
 
 interface ProfileMenuProps {
   user: { name: string; email: string; initials: string; level?: number };
   roleLabel: string;
   settingsHref: string;
-  profileHref: string;
+  profileHref?: string;
   collapsed: boolean;
   learnMoreHref?: string;
   /** Where to land after a successful logout (e.g. `/admin/login`). */
@@ -29,13 +43,16 @@ export default function ProfileMenu({
   user,
   roleLabel,
   settingsHref,
-  profileHref,
   collapsed,
   learnMoreHref,
   logoutHref = '/auth',
 }: ProfileMenuProps) {
   const router = useRouter();
   const { logout, isLoggingOut } = useAuth();
+  const locale = useLocale() as Locale;
+  const { switchLocale } = useLocalePreference();
+  const tNav = useNavT();
+  const [langOpen, setLangOpen] = useState(false);
 
   async function handleLogout(): Promise<void> {
     try {
@@ -110,26 +127,53 @@ export default function ProfileMenu({
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
                 <Settings className="size-3.5 text-amber-500" />
               </span>
-              <span className="text-sm font-medium">Settings</span>
+              <span className="text-sm font-medium">{tNav('settings')}</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="bg-border my-1" />
 
           <DropdownMenuItem
-            asChild
             className="text-foreground focus:bg-muted focus:text-foreground rounded-lg"
+            onSelect={(e) => {
+              e.preventDefault();
+              setLangOpen((v) => !v);
+            }}
           >
-            <Link
-              href={profileHref}
-              className="flex items-center gap-3 px-2 py-2"
-            >
+            <div className="flex w-full items-center gap-3 px-2 py-2">
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
                 <Languages className="size-3.5 text-blue-500" />
               </span>
-              <span className="text-sm font-medium">Language</span>
-            </Link>
+              <span className="flex-1 text-sm font-medium">
+                {tNav('language')}
+              </span>
+              <ChevronRight
+                className={cn(
+                  'text-muted-foreground size-3.5 transition-transform duration-200',
+                  langOpen && 'rotate-90',
+                )}
+              />
+            </div>
           </DropdownMenuItem>
+
+          {langOpen && (
+            <div className="mb-1 ml-4 space-y-0.5 pl-5">
+              {routing.locales.map((option) => (
+                <DropdownMenuItem
+                  key={option}
+                  className="text-foreground focus:bg-muted focus:text-foreground rounded-lg"
+                  onSelect={() => switchLocale(option)}
+                >
+                  <div className="flex w-full items-center justify-between px-2 py-1.5">
+                    <span className="text-sm">{LOCALE_LABELS[option]}</span>
+                    {option === locale && (
+                      <Check className="text-brand-gold size-3.5" />
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          )}
 
           <DropdownMenuSeparator className="bg-border my-1" />
 
@@ -144,7 +188,7 @@ export default function ProfileMenu({
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
                 <HelpCircle className="size-3.5 text-emerald-500" />
               </span>
-              <span className="text-sm font-medium">Learn More</span>
+              <span className="text-sm font-medium">{tNav('learnMore')}</span>
             </Link>
           </DropdownMenuItem>
 
@@ -164,7 +208,7 @@ export default function ProfileMenu({
                 <LogOut className="size-3.5 text-rose-500" />
               </span>
               <span className="text-sm font-medium">
-                {isLoggingOut ? 'Signing out…' : 'Logout'}
+                {isLoggingOut ? tNav('signingOut') : tNav('logout')}
               </span>
             </button>
           </DropdownMenuItem>

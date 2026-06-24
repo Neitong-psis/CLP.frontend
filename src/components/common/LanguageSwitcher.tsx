@@ -47,13 +47,15 @@ export function LanguageSwitcher({ scrolled }: LanguageSwitcherProps) {
 
       <DropdownMenuContent
         align="end"
-        className="min-w-36 border border-slate-200/80 bg-white py-1.5 shadow-lg dark:border-white/10"
+        theme="light"
+        className="min-w-36 py-1.5"
       >
         {routing.locales.map((option) => (
           <DropdownMenuItem
             key={option}
+            theme="light"
             onClick={() => switchLocale(option)}
-            className="text-brand-navy/70 focus:text-brand-navy flex items-center justify-between focus:bg-slate-50 dark:text-white/70 dark:focus:bg-white/[0.07] dark:focus:text-white"
+            className="flex items-center justify-between"
           >
             {LOCALE_LABELS[option]}
             {option === locale && (

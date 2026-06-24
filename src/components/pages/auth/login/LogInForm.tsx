@@ -19,6 +19,10 @@ export default function LogInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isMounted = useRef(true);
+
+  const rawRole = searchParams.get('role');
+  const portal =
+    rawRole === 'educator' ? ('educator' as const) : ('learner' as const);
   useEffect(() => {
     // StrictMode unmounts/remounts in dev — re-arm the flag on every mount,
     // not just the first, or it stays false forever after the simulated unmount.
@@ -37,10 +41,10 @@ export default function LogInForm() {
     onSubmit: async ({ value }) => {
       setFormError(null);
       try {
-        const user = await login({
-          email: value.email,
-          password: value.password,
-        });
+        const user = await login(
+          { email: value.email, password: value.password },
+          { portal },
+        );
         const from = searchParams.get('from');
         router.replace(from ?? resolveHome(user));
       } catch (error) {
@@ -59,7 +63,17 @@ export default function LogInForm() {
       onSubmit={(e) => {
         e.preventDefault();
         if (form.state.isSubmitting) return;
-        form.handleSubmit();
+        void form.handleSubmit();
+      }}
+      onKeyDown={(e) => {
+        if (
+          e.key === 'Enter' &&
+          (e.target as HTMLElement).tagName === 'INPUT' &&
+          !form.state.isSubmitting
+        ) {
+          e.preventDefault();
+          void form.handleSubmit();
+        }
       }}
     >
       <FieldGroup>
@@ -128,7 +142,7 @@ export default function LogInForm() {
           )}
         </form.Field>
         <Link
-          href="/auth/forgot-password"
+          href={`/auth/forgot-password?role=${portal}`}
           className="3xl:text-lg text-brand-gold text-sm font-semibold transition-opacity hover:opacity-75 2xl:text-base"
         >
           Forgot password?

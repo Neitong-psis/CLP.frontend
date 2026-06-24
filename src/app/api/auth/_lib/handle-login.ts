@@ -1,18 +1,13 @@
-/**
- * Shared BFF login handler. Validates the payload, exchanges credentials with
- * the backend, optionally enforces a required role (server-side, BEFORE any
- * session cookies are set), then persists the session and returns the access
- * token + user to the browser.
- *
- * Used by both `/api/auth/login` (learner/educator portal) and
- * `/api/auth/admin/login` (admin portal, `requiredRole: ROLE.ADMIN`).
- */
 import { NextRequest, NextResponse } from 'next/server';
 import { apiUrl, AUTH_ENDPOINTS } from '@/lib/api/config';
 import { loginRequestSchema, loginResponseSchema } from '@/schemas/auth.schema';
 import { fromResponseData } from '@/lib/api/errors';
 import { getUserRoleIds, hasRole } from '@/lib/rbac/has-role';
-import { setAuthCookies } from '@/lib/session/server-cookies';
+import {
+  baseCookieOptions,
+  COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+} from '@/lib/session/cookie-names';
 import { ROLE_LABEL, type RoleId } from '@/constants/roles';
 
 export const BACKEND_TIMEOUT_MS = 8_000;
@@ -25,24 +20,19 @@ export interface LoginHandlerOptions {
   requiredRole?: RoleId;
 }
 
-/**
- * Shared tail of every login flow (email + OAuth): validates the backend
- * login response, optionally enforces a role, persists the session cookies,
- * and strips the refresh token before anything reaches the browser.
- */
 export async function establishSessionResponse(
-  backendResponse: Response,
+  response: Response,
   options: LoginHandlerOptions = {},
 ): Promise<NextResponse> {
-  const data: unknown = await backendResponse.json().catch(() => null);
+  const data: unknown = await response.json().catch(() => null);
 
-  if (!backendResponse.ok) {
-    const error = fromResponseData(backendResponse.status, data);
+  if (!response.ok) {
+    const error = fromResponseData(response.status, data);
     return NextResponse.json(error, { status: error.status });
   }
 
-  const loginResult = loginResponseSchema.safeParse(data);
-  if (!loginResult.success) {
+  const loginResponse = loginResponseSchema.safeParse(data);
+  if (!loginResponse.success) {
     return NextResponse.json(
       {
         status: 502,
@@ -52,7 +42,7 @@ export async function establishSessionResponse(
     );
   }
 
-  const login = loginResult.data;
+  const login = loginResponse.data;
 
   if (options.requiredRole && !hasRole(login.user, options.requiredRole)) {
     return NextResponse.json(
@@ -64,23 +54,34 @@ export async function establishSessionResponse(
     );
   }
 
-  try {
-    await setAuthCookies({
-      refreshToken: login.refreshToken,
-      roleIds: getUserRoleIds(login.user),
-    });
-  } catch {
-    return NextResponse.json(
-      { status: 500, message: 'Failed to establish session.' },
-      { status: 500 },
-    );
-  }
+  const roleIds = getUserRoleIds(login.user);
+  const base = baseCookieOptions();
 
-  return NextResponse.json({
+  // Set cookies directly on the NextResponse — cookies() from next/headers is
+  // unreliable in Route Handlers for httpOnly cookies in Next.js App Router.
+  const res = NextResponse.json({
     accessToken: login.token,
     tokenExpires: login.tokenExpires,
     user: login.user,
   });
+
+  res.cookies.set(COOKIE.REFRESH_TOKEN, login.refreshToken, {
+    ...base,
+    httpOnly: true,
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+  res.cookies.set(COOKIE.SESSION, JSON.stringify({ roleIds }), {
+    ...base,
+    httpOnly: true,
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+  res.cookies.set(COOKIE.AUTH_FLAG, '1', {
+    ...base,
+    httpOnly: false,
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+
+  return res;
 }
 
 export async function handleLogin(
@@ -101,9 +102,9 @@ export async function handleLogin(
     );
   }
 
-  let backendResponse: Response;
+  let response: Response;
   try {
-    backendResponse = await fetch(apiUrl(AUTH_ENDPOINTS.login), {
+    response = await fetch(apiUrl(AUTH_ENDPOINTS.login), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(parsed.data),
@@ -117,5 +118,5 @@ export async function handleLogin(
     );
   }
 
-  return establishSessionResponse(backendResponse, options);
+  return establishSessionResponse(response, options);
 }

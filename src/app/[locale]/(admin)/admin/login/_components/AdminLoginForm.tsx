@@ -23,7 +23,17 @@ export default function AdminLoginForm() {
       className="3xl:space-y-7 space-y-5 2xl:space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!form.state.isSubmitting) form.handleSubmit();
+        if (!form.state.isSubmitting) void form.handleSubmit();
+      }}
+      onKeyDown={(e) => {
+        if (
+          e.key === 'Enter' &&
+          (e.target as HTMLElement).tagName === 'INPUT' &&
+          !form.state.isSubmitting
+        ) {
+          e.preventDefault();
+          void form.handleSubmit();
+        }
       }}
     >
       <FieldGroup>

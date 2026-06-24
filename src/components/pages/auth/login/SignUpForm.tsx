@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Lock, Mail, User } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
 import {
@@ -17,7 +18,6 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { isApiError } from '@/lib/api/errors';
 import { InputWrapper, PasswordToggle, SubmitBtn, inputCls } from './shared';
-// auth API is handled via `useAuth()` in this form; remove direct api imports
 
 const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
 const STRENGTH_COLORS = [
@@ -36,11 +36,8 @@ function getPasswordStrength(password: string): number {
   return score;
 }
 
-interface Props {
-  onSuccess?: () => void;
-}
-
-export default function SignUpForm({ onSuccess }: Props) {
+export default function SignUpForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const { register } = useAuth();
@@ -64,7 +61,9 @@ export default function SignUpForm({ onSuccess }: Props) {
           email: value.email,
           password: value.password,
         });
-        onSuccess?.();
+        router.push(
+          `/auth/verify-email?email=${encodeURIComponent(value.email)}`,
+        );
       } catch (error) {
         setFormError(
           isApiError(error)
@@ -81,7 +80,17 @@ export default function SignUpForm({ onSuccess }: Props) {
       onSubmit={(e) => {
         e.preventDefault();
         if (form.state.isSubmitting) return;
-        form.handleSubmit();
+        void form.handleSubmit();
+      }}
+      onKeyDown={(e) => {
+        if (
+          e.key === 'Enter' &&
+          (e.target as HTMLElement).tagName === 'INPUT' &&
+          !form.state.isSubmitting
+        ) {
+          e.preventDefault();
+          void form.handleSubmit();
+        }
       }}
     >
       <FieldGroup className="3xl:gap-5 gap-3 2xl:gap-4">

@@ -22,6 +22,8 @@ export const AUTH_ENDPOINTS = {
   me: 'auth/me',
   refresh: 'auth/refresh',
   logout: 'auth/logout',
+  forgotPassword: 'auth/password/forgot',
+  resetPassword: 'auth/password/reset',
   /** Append `/:provider` (google | facebook | apple). */
   oauth: 'auth/oauth',
 } as const;
@@ -29,6 +31,8 @@ export const AUTH_ENDPOINTS = {
 export const BFF_ENDPOINTS = {
   login: '/api/auth/login',
   adminLogin: '/api/auth/admin/login',
+  educatorLogin: '/api/auth/educator/login',
+  learnerLogin: '/api/auth/learner/login',
   oauth: '/api/auth/oauth',
   refresh: '/api/auth/refresh',
   logout: '/api/auth/logout',

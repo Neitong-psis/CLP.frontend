@@ -2,9 +2,15 @@ import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
 import { routing } from './routing';
 
-type LocaleFile = 'common' | 'auth' | 'admin' | 'educator';
+type LocaleFile = 'common' | 'auth' | 'admin' | 'educator' | 'learner';
 
-const LOCALE_FILES: LocaleFile[] = ['common', 'auth', 'admin', 'educator'];
+const LOCALE_FILES: LocaleFile[] = [
+  'common',
+  'auth',
+  'admin',
+  'educator',
+  'learner',
+];
 
 async function loadMessages(locale: string): Promise<Record<string, unknown>> {
   const chunks = await Promise.all(

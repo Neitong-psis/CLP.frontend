@@ -48,7 +48,7 @@ export function AdminDashboardContent() {
         <div className="flex-1 space-y-8 px-4 py-6 sm:px-6 lg:px-8">
           <DashboardStatGrid firstVisit={isFirstVisit} />
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-[1fr_260px] lg:grid-cols-3">
             <MonthlyRevenueCard className="lg:col-span-2" />
             <UserDistributionContainer firstVisit={isFirstVisit} />
           </div>

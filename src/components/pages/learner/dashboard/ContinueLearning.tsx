@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight, Play } from 'lucide-react';
 import { ENROLLED_COURSES } from '@/config/learner';
+import { slugify } from '@/lib/utils/slugify';
 
 export default function ContinueLearning() {
   const inProgress = ENROLLED_COURSES.filter((c) => !c.completed).slice(0, 3);
@@ -53,7 +54,7 @@ export default function ContinueLearning() {
                 />
               </div>
               <Link
-                href={`/learn/${course.id}`}
+                href={`/learn/${slugify(course.title)}?mode=resume`}
                 className="bg-brand-gold hover:bg-brand-gold-dark flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-white transition-colors"
               >
                 <Play className="h-3 w-3" /> Continue

@@ -1,14 +1,18 @@
 /**
- * Server-only cookie management for the BFF Route Handlers.
+ * Server-only cookie management for BFF Route Handlers.
  *
- * Manages three auth cookies via the `next/headers` API:
- * - `qb_rt`   — httpOnly refresh token (never accessible to client JavaScript).
- * - `qb_sess` — httpOnly session payload containing role IDs for server-side RBAC.
- * - `qb_auth` — non-httpOnly presence flag, readable by client JS as a session hint.
+ * Three auth cookies:
+ * - `qb_rt`   — httpOnly refresh token (never accessible to client JS).
+ * - `qb_sess` — httpOnly session payload `{ roleIds }` for server-side RBAC.
+ * - `qb_auth` — non-httpOnly presence flag readable by client JS.
  *
- * **Only import from Route Handlers or Server Actions.** This module uses
- * `next/headers`, which is unavailable in Client Components and will throw at runtime.
+ * IMPORTANT: In Next.js App Router, setting cookies via `cookies()` from
+ * `next/headers` is only reliable inside Server Actions. Inside Route Handlers
+ * the write operations are silently dropped for httpOnly cookies. Always use
+ * the `applyAuthCookies`, `applyRefreshTokenRotation`, and `clearAuthCookies`
+ * helpers which mutate the `NextResponse` directly instead.
  */
+import type { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import {
   baseCookieOptions,
@@ -17,36 +21,28 @@ import {
   SESSION_MAX_AGE_SECONDS,
 } from './cookie-names';
 
-/**
- * Persists all three auth cookies after a successful login or initial token issuance.
- *
- * Sets:
- * - `qb_rt`   — httpOnly; the backend refresh token. Never readable by client JS.
- * - `qb_sess` — httpOnly; JSON payload `{ roleIds }` for server-side RBAC decisions.
- * - `qb_auth` — non-httpOnly; a boolean presence flag so the client can detect an
- *               active session without accessing the token itself.
- *
- * @param params.refreshToken - Opaque refresh token received from the backend.
- * @param params.roleIds       - Role ID strings to embed in the session cookie.
- */
-export async function setAuthCookies(params: {
-  refreshToken: string;
-  roleIds: string[];
-}): Promise<void> {
-  const store = await cookies();
-  const base = baseCookieOptions();
+// ── Write helpers (mutate NextResponse) ──────────────────────────────────────
 
-  store.set(COOKIE.REFRESH_TOKEN, params.refreshToken, {
+/**
+ * Attaches all three auth cookies to `res` after a successful login.
+ * Call this instead of `setAuthCookies` inside Route Handlers.
+ */
+export function applyAuthCookies(
+  res: NextResponse,
+  params: { refreshToken: string; roleIds: string[] },
+): void {
+  const base = baseCookieOptions();
+  res.cookies.set(COOKIE.REFRESH_TOKEN, params.refreshToken, {
     ...base,
     httpOnly: true,
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
-  store.set(COOKIE.SESSION, JSON.stringify({ roleIds: params.roleIds }), {
+  res.cookies.set(COOKIE.SESSION, JSON.stringify({ roleIds: params.roleIds }), {
     ...base,
     httpOnly: true,
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
-  store.set(COOKIE.AUTH_FLAG, '1', {
+  res.cookies.set(COOKIE.AUTH_FLAG, '1', {
     ...base,
     httpOnly: false,
     maxAge: SESSION_MAX_AGE_SECONDS,
@@ -54,16 +50,14 @@ export async function setAuthCookies(params: {
 }
 
 /**
- * Replaces the stored refresh token after a successful silent refresh.
- *
- * Only updates the `qb_rt` cookie; the session payload and auth flag are left
- * unchanged, as the user's identity and roles have not changed.
- *
- * @param refreshToken - The new opaque refresh token returned by the backend.
+ * Rotates the refresh-token cookie on `res` after a successful silent refresh.
+ * Leaves `qb_sess` and `qb_auth` unchanged.
  */
-export async function rotateRefreshToken(refreshToken: string): Promise<void> {
-  const store = await cookies();
-  store.set(COOKIE.REFRESH_TOKEN, refreshToken, {
+export function applyRefreshTokenRotation(
+  res: NextResponse,
+  refreshToken: string,
+): void {
+  res.cookies.set(COOKIE.REFRESH_TOKEN, refreshToken, {
     ...baseCookieOptions(),
     httpOnly: true,
     maxAge: SESSION_MAX_AGE_SECONDS,
@@ -71,25 +65,19 @@ export async function rotateRefreshToken(refreshToken: string): Promise<void> {
 }
 
 /**
- * Deletes all three auth cookies, effectively terminating the session.
- *
- * Called on explicit logout or when a token refresh attempt fails.
- * Safe to invoke even when some cookies are already absent.
+ * Clears all three auth cookies on `res`, terminating the session.
+ * Safe to call even when some cookies are already absent.
  */
-export async function clearAuthCookies(): Promise<void> {
-  const store = await cookies();
-  store.delete(COOKIE.REFRESH_TOKEN);
-  store.delete(COOKIE.SESSION);
-  store.delete(COOKIE.AUTH_FLAG);
+export function clearAuthCookies(res: NextResponse): void {
+  res.cookies.delete(COOKIE.REFRESH_TOKEN);
+  res.cookies.delete(COOKIE.SESSION);
+  res.cookies.delete(COOKIE.AUTH_FLAG);
 }
+
+// ── Read helpers (use next/headers — safe for reading in Route Handlers) ─────
 
 /**
  * Reads the httpOnly refresh token from the incoming request cookies.
- *
- * Used exclusively by the BFF refresh Route Handler to forward the token to
- * the backend without it ever being accessible to client JavaScript.
- *
- * @returns The raw refresh token string, or `null` if no session cookie is present.
  */
 export async function readRefreshToken(): Promise<string | null> {
   const store = await cookies();
@@ -98,11 +86,6 @@ export async function readRefreshToken(): Promise<string | null> {
 
 /**
  * Reads the role IDs from the httpOnly session cookie.
- *
- * Used by Route Handlers and middleware to make RBAC decisions server-side,
- * without needing a round-trip to the backend.
- *
- * @returns Array of role ID strings, or an empty array if the cookie is absent or malformed.
  */
 export async function readSessionRoleIds(): Promise<string[]> {
   const store = await cookies();

@@ -20,6 +20,14 @@ export default function OAuthButtons() {
   const searchParams = useSearchParams();
   const googleEnabled = isGoogleLoginEnabled();
 
+  const rawRole = searchParams.get('role');
+  const portal =
+    rawRole === 'educator'
+      ? ('educator' as const)
+      : rawRole === 'admin'
+        ? ('admin' as const)
+        : ('learner' as const);
+
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3 2xl:gap-4">
       <button
@@ -27,7 +35,7 @@ export default function OAuthButtons() {
         aria-label="Continue with Google"
         disabled={!googleEnabled}
         title={googleEnabled ? undefined : 'Google login is not configured.'}
-        onClick={() => startGoogleLogin(searchParams.get('from'))}
+        onClick={() => startGoogleLogin(searchParams.get('from'), portal)}
         className={btnCls}
       >
         <GoogleIcon className={iconCls} />

@@ -103,7 +103,12 @@ export function CourseWidgetsContainer({
 
   if (loading) {
     return (
-      <div className={cn('grid gap-6 lg:grid-cols-3', className)}>
+      <div
+        className={cn(
+          'grid gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-3',
+          className,
+        )}
+      >
         <TopCoursesSkeleton className="lg:col-span-2" />
         <RevenueCategorySkeleton />
       </div>
@@ -113,7 +118,7 @@ export function CourseWidgetsContainer({
   return (
     <div
       className={cn(
-        'grid gap-6 lg:grid-cols-3',
+        'grid gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-3',
         !firstVisit && 'animate-in fade-in slide-in-from-bottom-2 duration-500',
         className,
       )}

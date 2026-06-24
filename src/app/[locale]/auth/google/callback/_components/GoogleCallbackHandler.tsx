@@ -7,6 +7,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { resolveHome } from '@/lib/rbac/has-role';
 import { isApiError } from '@/lib/api/errors';
 import { consumeGoogleCallback } from '@/features/auth/google-oauth';
+import { ROLE, ROLE_HOME, type RoleId } from '@/constants/roles';
+
+const PORTAL_ROLE: Record<'admin' | 'educator' | 'learner', RoleId> = {
+  admin: ROLE.ADMIN,
+  educator: ROLE.EDUCATOR,
+  learner: ROLE.LEARNER,
+};
 
 type Phase = 'loading' | 'success' | 'error';
 
@@ -45,31 +52,21 @@ export function GoogleCallbackHandler() {
 
     void (async () => {
       try {
-        const { idToken, from } = consumeGoogleCallback();
-
-        // Debug: decode and log token payload for troubleshooting
-        if (process.env.NODE_ENV === 'development') {
-          try {
-            const segment = idToken.split('.')[1] ?? '';
-            const base64 = segment.replace(/-/g, '+').replace(/_/g, '/');
-            const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
-            const payload = JSON.parse(atob(padded));
-            console.log('[Google OAuth] Token payload:', {
-              aud: payload.aud,
-              iss: payload.iss,
-              sub: payload.sub,
-              email: payload.email,
-            });
-          } catch {
-            // Silently fail debug logging
-          }
-        }
-
+        const { idToken, from, portal } = consumeGoogleCallback();
         const user = await loginWithOAuth({ provider: 'google', idToken });
+
         setPhase('success');
         // Brief success flash, then full-page redirect (no App Router dependency).
         await new Promise((r) => setTimeout(r, 800));
-        window.location.replace(from ?? resolveHome(user));
+
+        // Prefer an explicit deep-link redirect, then the user's actual role home
+        // (authoritative), then the portal that launched the OAuth as a fallback
+        // for brand-new accounts whose role may not yet be resolved.
+        const roleHome = resolveHome(user);
+        const portalHome = portal ? ROLE_HOME[PORTAL_ROLE[portal]] : null;
+        window.location.replace(
+          from ?? (roleHome !== '/' ? roleHome : portalHome) ?? '/',
+        );
       } catch (err) {
         setErrorMsg(
           isApiError(err)

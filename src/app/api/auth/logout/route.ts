@@ -12,6 +12,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }).catch(() => {});
   }
 
-  await clearAuthCookies();
-  return new NextResponse(null, { status: 204 });
+  const res = new NextResponse(null, { status: 204 });
+  clearAuthCookies(res);
+  return res;
 }

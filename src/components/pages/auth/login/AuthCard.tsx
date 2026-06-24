@@ -120,7 +120,7 @@ export default function AuthCard() {
       ) : tab === 'login' ? (
         <LogInForm />
       ) : (
-        <SignUpForm onSuccess={() => handleTabChange('login')} />
+        <SignUpForm />
       )}
 
       {/* OAuth — hidden for educator sign-up */}

@@ -125,7 +125,7 @@ export function StatCard({
         <p className="text-muted-foreground text-[13px]">{label}</p>
         {Icon && (
           <span
-            className="bg-accent-blue-soft text-accent-blue flex size-7 shrink-0 items-center justify-center rounded-full"
+            className="bg-accent-blue/10 text-accent-blue dark:bg-accent-blue/20 flex size-7 shrink-0 items-center justify-center rounded-full"
             aria-hidden="true"
           >
             <Icon className="size-3.5" />

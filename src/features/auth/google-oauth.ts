@@ -18,6 +18,11 @@ interface PendingAuth {
   nonce: string;
   /** Post-login redirect target captured from `?from=` on the login page. */
   from: string | null;
+  /**
+   * Portal the user was on when they clicked "Sign in with Google".
+   * Drives role enforcement and the fallback redirect in the callback handler.
+   */
+  portal: 'admin' | 'educator' | 'learner' | null;
 }
 
 function randomToken(): string {
@@ -31,13 +36,17 @@ export function isGoogleLoginEnabled(): boolean {
 }
 
 /** Redirects the browser to Google's sign-in screen. No-op if unconfigured. */
-export function startGoogleLogin(from: string | null = null): void {
+export function startGoogleLogin(
+  from: string | null = null,
+  portal: PendingAuth['portal'] = null,
+): void {
   if (!GOOGLE_CLIENT_ID) return;
 
   const pending: PendingAuth = {
     state: randomToken(),
     nonce: randomToken(),
     from,
+    portal,
   };
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
 
@@ -57,6 +66,7 @@ export function startGoogleLogin(from: string | null = null): void {
 export interface GoogleCallbackResult {
   idToken: string;
   from: string | null;
+  portal: PendingAuth['portal'];
 }
 
 /**
@@ -88,7 +98,7 @@ export function consumeGoogleCallback(): GoogleCallbackResult {
     throw new Error('Google sign-in response failed validation.');
   }
 
-  return { idToken, from: pending.from };
+  return { idToken, from: pending.from, portal: pending.portal };
 }
 
 /** Decodes a JWT payload (base64url, not plain base64 — atob needs the swap). */

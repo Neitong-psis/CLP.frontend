@@ -8,8 +8,6 @@ import {
   LayoutDashboard,
   BookOpen,
   Compass,
-  Brain,
-  TrendingUp,
   Award,
   Users,
   BarChart3,
@@ -59,17 +57,15 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
   const ROLE_CONFIG: Record<SidebarRole, RoleConfig> = {
     learner: {
       navItems: [
-        { href: '/dashboard', icon: LayoutDashboard, label: tNav('dashboard') },
+        { href: '/dashboard', icon: LayoutDashboard, label: tNav('overview') },
         {
           href: '/my-learning',
           icon: BookOpen,
           label: tNav('myLearning'),
           badge: 3,
         },
-        { href: '/explore', icon: Compass, label: tNav('explore') },
-        { href: '/progress', icon: TrendingUp, label: tNav('progress') },
-        { href: '/quizzes', icon: Brain, label: tNav('quizzes'), badge: 2 },
         { href: '/certificates', icon: Award, label: tNav('certificates') },
+        { href: '/explore', icon: Compass, label: tNav('exploreCourses') },
       ],
       rootHref: '/dashboard',
       roleChip: { label: MOCK_USER.role },

@@ -67,6 +67,9 @@ export const NS = {
   // ── Learner ───────────────────────────────────────────────────────────────
   learner: {
     root: 'learner',
+    myLearning: 'learner.myLearning',
+    certificates: 'learner.certificates',
+    explore: 'learner.explore',
   },
 } as const;
 

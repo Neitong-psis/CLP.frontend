@@ -87,3 +87,8 @@ export const useEducatorReviewT = () => useTranslations(NS.educator.review);
 
 // ── Learner ────────────────────────────────────────────────────────────────
 export const useLearnerT = () => useTranslations(NS.learner.root);
+export const useLearnerMyLearningT = () =>
+  useTranslations(NS.learner.myLearning);
+export const useLearnerCertificatesT = () =>
+  useTranslations(NS.learner.certificates);
+export const useLearnerExploreT = () => useTranslations(NS.learner.explore);

@@ -15,14 +15,20 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 function DropdownMenuContent({
   className,
   sideOffset = 8,
+  theme = 'dark',
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
+  theme?: 'dark' | 'light';
+}) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'bg-brand-navy z-50 min-w-45 overflow-hidden rounded-xl py-1.5 dark:bg-[#071225]',
+          'z-50 min-w-45 overflow-hidden rounded-xl py-1.5 shadow-lg',
+          theme === 'dark'
+            ? 'bg-brand-navy dark:bg-[#071225]'
+            : 'border border-slate-200/80 bg-white',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -52,14 +58,19 @@ function DropdownMenuLabel({
 
 function DropdownMenuItem({
   className,
+  theme = 'dark',
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+  theme?: 'dark' | 'light';
+}) {
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        'relative flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-white/60 outline-none select-none',
+        'relative flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium outline-none select-none',
         'transition-colors duration-100',
-        'focus:bg-white/[0.07] focus:text-white',
+        theme === 'dark'
+          ? 'text-white/60 focus:bg-white/[0.07] focus:text-white'
+          : 'text-brand-navy/70 focus:text-brand-navy focus:bg-slate-100',
         'data-disabled:pointer-events-none data-disabled:opacity-30',
         className,
       )}

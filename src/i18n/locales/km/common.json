@@ -24,6 +24,8 @@
   },
   "nav": {
     "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+    "overview": "ទិដ្ឋភាពទូទៅ",
+    "exploreCourses": "រុករកវគ្គសិក្សា",
     "courses": "មេរៀន",
     "programs": "កម្មវិធី",
     "news": "ព័ត៌មាន",
@@ -39,6 +41,7 @@
     "signingOut": "កំពុងចាកចេញ...",
     "theme": "រូបរាង",
     "language": "ភាសា",
+    "learnMore": "ស្វែងយល់បន្ថែម",
     "menu": "ម៉ឺនុយ"
   },
   "common": {
@@ -68,19 +71,6 @@
       "beginner": "កម្រិតដំបូង",
       "intermediate": "កម្រិតមធ្យម",
       "advanced": "កម្រិតខ្ពស់"
-    }
-  },
-  "learner": {
-    "dashboard": "ផ្ទាំងគ្រប់គ្រងរបស់ខ្ញុំ",
-    "continueLearning": "បន្តការសិក្សា",
-    "recommended": "ណែនាំសម្រាប់អ្នក",
-    "upcomingQuizzes": "សំណួរដែលនឹងមកដល់",
-    "weeklyStreak": "ស្ថិតិប្រចាំសប្តាហ៍",
-    "stats": {
-      "coursesEnrolled": "វគ្គដែលបានចុះឈ្មោះ",
-      "hoursLearned": "ម៉ោងសិក្សា",
-      "quizzesTaken": "សំណួរដែលបានធ្វើ",
-      "certificates": "វិញ្ញាបនបត្រ"
     }
   }
 }

@@ -1,108 +1,118 @@
-import { Download, Share2, Copy, ShieldCheck } from 'lucide-react';
-import { CERTIFICATES, MOCK_USER } from '@/config/learner';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
+import { useLearnerCertificatesT } from '@/i18n';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
+import { CERTIFICATES, MOCK_USER } from '@/config/learner';
+import { cn } from '@/lib/utils/cn';
+import {
+  readVerifiedCerts,
+  readVerifiedCertName,
+} from '@/lib/utils/certStorage';
+import { CertificateCard } from './_components/CertificateCard';
 
 export default function CertificatesPage() {
+  const t = useLearnerCertificatesT();
+  const [search, setSearch] = useState('');
+  const [mounted, setMounted] = useState(false);
+  // IDs verified in this session or a previous session (persisted in localStorage).
+  // Starts empty; populated on mount so SSR/hydration is always consistent.
+  const [verifiedIds, setVerifiedIds] = useState<string[]>([]);
+  const [verifiedNames, setVerifiedNames] = useState<Record<string, string>>(
+    {},
+  );
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const ids = readVerifiedCerts();
+      const names: Record<string, string> = {};
+      ids.forEach((certId) => {
+        const n = readVerifiedCertName(certId);
+        if (n) names[certId] = n;
+      });
+      setVerifiedIds(ids);
+      setVerifiedNames(names);
+      setMounted(true);
+    }, 60);
+    return () => clearTimeout(id);
+  }, []);
+
+  const filtered = CERTIFICATES.filter(
+    (c) =>
+      c.fullTitle.toLowerCase().includes(search.toLowerCase()) ||
+      c.certificateId.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
+    <div className="bg-background flex min-h-dvh flex-col">
       <TopBar
         role="learner"
-        title="My Certificates"
-        subtitle={`Live workspace synced for ${MOCK_USER.email}`}
+        title={t('title')}
+        subtitle={t('subtitle', { email: MOCK_USER.email })}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        {/* Stat cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-white p-5">
-            <p className="mb-2 text-sm text-slate-400">
-              Available Certificates
-            </p>
-            <p className="text-brand-navy text-3xl font-bold">
-              {CERTIFICATES.length}
-            </p>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-5">
-            <p className="mb-2 text-sm text-slate-400">Verification Status</p>
-            <span className="bg-brand-gold/15 text-brand-gold inline-block rounded-full px-3 py-1 text-sm font-bold">
-              Pending
-            </span>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-5">
-            <p className="mb-2 text-sm text-slate-400">Certificate History</p>
-            <p className="text-brand-navy text-3xl font-bold">
-              {CERTIFICATES.length}
-            </p>
-          </div>
-        </div>
-
-        {/* Preview cards */}
-        <div className="mb-4 grid gap-4 sm:grid-cols-2">
-          {CERTIFICATES.map((cert) => (
-            <div
-              key={cert.id}
-              className="bg-brand-navy rounded-lg px-8 py-10 text-center"
-            >
-              <div>
-                <p className="mb-2 text-[11px] font-semibold tracking-widest text-white/50 uppercase">
-                  Certificate of Completion
-                </p>
-                <p className="text-lg font-bold text-white">{cert.fullTitle}</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/70">
-                  <ShieldCheck className="h-3 w-3" />
-                  Verification Required
-                </span>
-              </div>
+        <div className="space-y-6">
+          {/* Search + stats row */}
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-4 transition-all duration-500 ease-out',
+              mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+            )}
+          >
+            <div className="border-border bg-card focus-within:border-brand-gold/50 relative w-full max-w-xs rounded-2xl border shadow-sm transition-colors duration-150">
+              <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('search')}
+                className="text-foreground placeholder:text-muted-foreground w-full rounded-2xl bg-transparent py-2.5 pr-4 pl-10 text-sm outline-none"
+              />
             </div>
-          ))}
-        </div>
 
-        {/* Detail cards */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {CERTIFICATES.map((cert) => (
-            <div
-              key={cert.id}
-              className="rounded-lg border border-slate-200 bg-white p-5"
-            >
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-brand-navy font-bold">{cert.fullTitle}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Completed: {cert.completedDate}
-                  </p>
-                </div>
-                <ShieldCheck className="text-brand-gold mt-0.5 h-5 w-5 shrink-0" />
-              </div>
+            <div className="ml-auto" />
 
-              <div className="mb-4 flex items-center justify-between text-xs text-slate-400">
-                <span>Certificate ID: {cert.certificateId}</span>
-                <span>Progress: 100%</span>
-              </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                <button className="flex items-center justify-center rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
-                  Preview
-                </button>
-                <button className="bg-brand-gold hover:bg-brand-gold-dark flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold text-white transition-colors">
-                  <Download className="h-3.5 w-3.5" />
-                  Download
-                </button>
-                <button className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
-                  <Share2 className="h-3.5 w-3.5" />
-                  Share
-                </button>
-                <button className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
-                  <Copy className="h-3.5 w-3.5" />
-                  Copy
-                </button>
-              </div>
+            <div className="border-border bg-card flex items-center gap-4 rounded-2xl border px-6 py-3 shadow-sm">
+              <p className="text-muted-foreground text-sm font-medium">
+                {t('available')}
+              </p>
+              <p className="text-brand-navy dark:text-foreground text-3xl font-black">
+                {CERTIFICATES.length}
+              </p>
             </div>
-          ))}
+          </div>
+
+          {/* Certificate grid */}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((cert, i) => (
+              <CertificateCard
+                key={cert.id}
+                cert={cert}
+                t={t}
+                isVerified={cert.verified || verifiedIds.includes(cert.id)}
+                verifiedName={verifiedNames[cert.id]}
+                active={mounted}
+                delay={160 + i * 80}
+              />
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <p
+              className={cn(
+                'text-muted-foreground py-12 text-center text-sm transition-all duration-500 ease-out',
+                mounted ? 'opacity-100' : 'opacity-0',
+              )}
+            >
+              No certificates match your search.
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Footer */}
       <FooterBottomBar theme="light" />
     </div>
   );

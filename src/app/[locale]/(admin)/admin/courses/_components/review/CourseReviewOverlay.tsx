@@ -37,6 +37,7 @@ import {
   lessonCount,
   type ReviewItem,
   type ReviewItemKind,
+  type ReviewLesson,
   type ReviewModule,
   type DocumentItem,
   type VideoItem,
@@ -86,9 +87,7 @@ export function CourseReviewOverlay({
   const [mobileModuleId, setMobileModuleId] = useState<string>(
     () =>
       modules.find((m) =>
-        [...m.documents, ...m.videos, ...m.quizzes, ...m.assignments].some(
-          (item) => item.id === (firstVideo?.id ?? ''),
-        ),
+        flattenItems([m]).some((item) => item.id === (firstVideo?.id ?? '')),
       )?.id ??
       modules[0]?.id ??
       '',
@@ -378,6 +377,219 @@ export function CourseReviewOverlay({
   );
 }
 
+// ── ModuleCard ────────────────────────────────────────────────────────────────
+
+function ModuleCard({
+  module,
+  isOpen,
+  activeId,
+  onToggle,
+  onSelect,
+  t,
+}: {
+  module: ReviewModule;
+  isOpen: boolean;
+  activeId: string;
+  onToggle: () => void;
+  onSelect: (id: string) => void;
+  t: TFn;
+}) {
+  const count = lessonCount(module);
+  return (
+    <div className="border-border bg-card overflow-hidden rounded-2xl border shadow-sm">
+      <button
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="hover:bg-muted/40 flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors"
+      >
+        <span className="bg-brand-gold/15 text-brand-gold flex size-8 shrink-0 items-center justify-center rounded-xl">
+          <Layers className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground truncate text-sm font-bold">
+            {module.title}
+          </p>
+          <p className="text-muted-foreground mt-0.5 text-[11px]">
+            {count} {t('lessonsCreatedBy')}
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="border-border/60 border-t px-2 pb-2">
+          {module.lessons.map((lesson, idx) => (
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              index={idx}
+              activeId={activeId}
+              onSelect={onSelect}
+              t={t}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── LessonCard ────────────────────────────────────────────────────────────────
+
+function LessonCard({
+  lesson,
+  index,
+  activeId,
+  onSelect,
+  t,
+}: {
+  lesson: ReviewLesson;
+  index: number;
+  activeId: string;
+  onSelect: (id: string) => void;
+  t: TFn;
+}) {
+  const [open, setOpen] = useState(true);
+  const hasVideo = lesson.videos.length > 0;
+  const LessonIcon = hasVideo ? Play : FileText;
+  const totalItems =
+    lesson.documents.length +
+    lesson.videos.length +
+    lesson.quizzes.length +
+    lesson.assignments.length;
+
+  return (
+    <div className="mt-1.5">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="hover:bg-muted/50 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
+      >
+        <span className="bg-muted text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold">
+          {index + 1}
+        </span>
+        <LessonIcon className="text-muted-foreground h-3 w-3 shrink-0" />
+        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
+          {lesson.title}
+        </span>
+        <span className="text-muted-foreground shrink-0 text-[10px]">
+          {totalItems}
+        </span>
+        <ChevronDown
+          className={cn(
+            'text-muted-foreground h-3 w-3 shrink-0 transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="border-border/60 ml-4 border-l pl-2">
+          <GroupInCard
+            label={t('textImageLessons')}
+            items={lesson.documents}
+            activeId={activeId}
+            onSelect={onSelect}
+          />
+          <GroupInCard
+            label={t('videoLessons')}
+            items={lesson.videos}
+            activeId={activeId}
+            onSelect={onSelect}
+          />
+          <GroupInCard
+            label={t('quiz')}
+            items={lesson.quizzes}
+            activeId={activeId}
+            onSelect={onSelect}
+          />
+          <GroupInCard
+            label={t('assignment')}
+            items={lesson.assignments}
+            activeId={activeId}
+            onSelect={onSelect}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── GroupInCard ───────────────────────────────────────────────────────────────
+
+function GroupInCard({
+  label,
+  items,
+  activeId,
+  onSelect,
+}: {
+  label: string;
+  items: ReviewItem[];
+  activeId: string;
+  onSelect: (id: string) => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-2 px-2">
+      <p className="text-muted-foreground px-2 py-1 text-[10px] font-semibold tracking-widest uppercase">
+        {label}
+      </p>
+      <ul className="space-y-0.5">
+        {items.map((item) => {
+          const Icon = KIND_ICON[item.kind];
+          const isActive = item.id === activeId;
+          const status =
+            item.kind === 'quiz' || item.kind === 'assignment'
+              ? item.status
+              : null;
+          return (
+            <li key={item.id}>
+              <button
+                onClick={() => onSelect(item.id)}
+                className={cn(
+                  'flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
+                  isActive
+                    ? 'bg-brand-gold/15 text-foreground'
+                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-3.5 w-3.5 shrink-0',
+                    isActive ? 'text-brand-gold' : '',
+                  )}
+                />
+                <span
+                  className={cn(
+                    'min-w-0 flex-1 truncate text-xs',
+                    isActive ? 'text-foreground font-semibold' : 'font-medium',
+                  )}
+                >
+                  {item.title}
+                </span>
+                {status && (
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
+                      ITEM_STATUS_STYLE[status],
+                    )}
+                  >
+                    {status}
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 
 function ReviewSidebar({
@@ -409,10 +621,31 @@ function ReviewSidebar({
   const pct =
     totalCount === 0 ? 0 : Math.round((reviewedCount / totalCount) * 100);
 
+  const [manualExpanded, setManualExpanded] = useState<Set<string>>(() => {
+    const active = modules.find((m) =>
+      flattenItems([m]).some((i) => i.id === activeId),
+    );
+    return active ? new Set([active.id]) : new Set();
+  });
+
+  const activeModuleId = useMemo(
+    () =>
+      modules.find((m) => flattenItems([m]).some((i) => i.id === activeId))?.id,
+    [activeId, modules],
+  );
+
+  const expandedMini = useMemo(
+    () =>
+      activeModuleId
+        ? new Set([...manualExpanded, activeModuleId])
+        : manualExpanded,
+    [manualExpanded, activeModuleId],
+  );
+
   return (
     <aside
       className={cn(
-        'border-border bg-card relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex dark:bg-[#071225]',
+        'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
         collapsed ? 'lg:w-16' : 'lg:w-72 xl:w-80',
       )}
     >
@@ -423,7 +656,6 @@ function ReviewSidebar({
           collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
         )}
       >
-        {/* Brand header */}
         <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-4 sm:h-16">
           <Logo
             size="xl"
@@ -444,15 +676,14 @@ function ReviewSidebar({
           </button>
         </div>
 
-        {/* Course info + progress */}
-        <div className="border-border/60 shrink-0 border-b px-5 py-4">
+        <div className="border-border/60 shrink-0 border-b px-4 py-4">
           <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
             {t('courseContent')}
           </p>
           <h2 className="text-foreground mt-1.5 text-sm leading-snug font-bold">
             {courseTitle}
           </h2>
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
               <Layers className="h-3 w-3" />
               {t('modules', { count: modules.length })}
@@ -463,7 +694,13 @@ function ReviewSidebar({
             </span>
           </div>
           <div className="mt-3">
-            <div className="flex items-center justify-between">
+            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+              <div
+                className="bg-brand-gold h-full rounded-full transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="mt-1 flex items-center justify-between">
               <p className="text-muted-foreground text-[11px]">
                 {t('itemsReviewed', {
                   reviewed: reviewedCount,
@@ -474,70 +711,23 @@ function ReviewSidebar({
                 {pct}%
               </span>
             </div>
-            <div className="bg-muted mt-1.5 h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-brand-gold h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
           </div>
         </div>
 
-        {/* Module list */}
-        <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Module cards */}
+        <div className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {modules.map((module) => {
             const isOpen = expanded.has(module.id);
             return (
-              <div key={module.id} className="border-border/50 border-b">
-                <button
-                  onClick={() => onToggleModule(module.id)}
-                  aria-expanded={isOpen}
-                  className="hover:bg-muted/50 flex w-full items-start justify-between gap-2 px-5 py-3.5 text-left transition-colors"
-                >
-                  <div className="min-w-0">
-                    <p className="text-foreground text-sm font-bold">
-                      {module.title}
-                    </p>
-                    <p className="text-muted-foreground mt-0.5 text-[11px]">
-                      {lessonCount(module)} {t('lessonsCreatedBy')}
-                    </p>
-                  </div>
-                  <ChevronDown
-                    className={cn(
-                      'text-muted-foreground mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200',
-                      isOpen && 'rotate-180',
-                    )}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="pb-2">
-                    <Group
-                      label={t('textImageLessons')}
-                      items={module.documents}
-                      activeId={activeId}
-                      onSelect={onSelect}
-                    />
-                    <Group
-                      label={t('videoLessons')}
-                      items={module.videos}
-                      activeId={activeId}
-                      onSelect={onSelect}
-                    />
-                    <Group
-                      label={t('quiz')}
-                      items={module.quizzes}
-                      activeId={activeId}
-                      onSelect={onSelect}
-                    />
-                    <Group
-                      label={t('assignment')}
-                      items={module.assignments}
-                      activeId={activeId}
-                      onSelect={onSelect}
-                    />
-                  </div>
-                )}
-              </div>
+              <ModuleCard
+                key={module.id}
+                module={module}
+                isOpen={isOpen}
+                activeId={activeId}
+                onToggle={() => onToggleModule(module.id)}
+                onSelect={onSelect}
+                t={t}
+              />
             );
           })}
         </div>
@@ -566,124 +756,62 @@ function ReviewSidebar({
         </div>
         <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {modules.map((module, mIdx) => {
-            const moduleItems = [
-              ...module.documents,
-              ...module.videos,
-              ...module.quizzes,
-              ...module.assignments,
-            ];
+            const moduleItems = flattenItems([module]);
+            const hasActive = moduleItems.some((item) => item.id === activeId);
+            const isMiniOpen = expandedMini.has(module.id);
             return (
               <div
                 key={module.id}
                 className="flex w-full flex-col items-center gap-1"
               >
                 {mIdx > 0 && <div className="bg-border/60 my-1 h-px w-8" />}
-                <div
+                <button
+                  onClick={() =>
+                    setManualExpanded((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(module.id)) next.delete(module.id);
+                      else next.add(module.id);
+                      return next;
+                    })
+                  }
                   title={module.title}
-                  className="text-muted-foreground/50 flex size-10 items-center justify-center"
+                  className={cn(
+                    'flex size-10 items-center justify-center rounded-xl transition-colors',
+                    hasActive
+                      ? 'bg-brand-gold/15 text-brand-gold'
+                      : 'text-muted-foreground hover:bg-muted/60',
+                  )}
                 >
-                  <Layers className="size-3.5" />
-                </div>
-                {moduleItems.map((item) => {
-                  const Icon = KIND_ICON[item.kind];
-                  const isActive = item.id === activeId;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => onSelect(item.id)}
-                      title={item.title}
-                      className={cn(
-                        'flex size-10 items-center justify-center rounded-xl transition-colors',
-                        isActive
-                          ? 'bg-brand-gold shadow-sm'
-                          : 'text-muted-foreground hover:bg-muted/60',
-                      )}
-                    >
-                      <Icon
-                        className={cn('size-4', isActive ? 'text-white' : '')}
-                      />
-                    </button>
-                  );
-                })}
+                  <Layers className="size-4" />
+                </button>
+                {isMiniOpen &&
+                  moduleItems.map((item) => {
+                    const Icon = KIND_ICON[item.kind];
+                    const isActive = item.id === activeId;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => onSelect(item.id)}
+                        title={item.title}
+                        className={cn(
+                          'flex size-10 items-center justify-center rounded-xl transition-colors',
+                          isActive
+                            ? 'bg-brand-gold shadow-sm'
+                            : 'text-muted-foreground hover:bg-muted/60',
+                        )}
+                      >
+                        <Icon
+                          className={cn('size-4', isActive ? 'text-white' : '')}
+                        />
+                      </button>
+                    );
+                  })}
               </div>
             );
           })}
         </div>
       </div>
     </aside>
-  );
-}
-
-// ── Sidebar group ─────────────────────────────────────────────────────────────
-
-function Group({
-  label,
-  items,
-  activeId,
-  onSelect,
-}: {
-  label: string;
-  items: ReviewItem[];
-  activeId: string;
-  onSelect: (id: string) => void;
-}) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mt-1">
-      <p className="text-muted-foreground px-5 py-1.5 text-[10px] font-semibold tracking-widest uppercase">
-        {label}
-      </p>
-      <ul>
-        {items.map((item) => {
-          const Icon = KIND_ICON[item.kind];
-          const isActive = item.id === activeId;
-          const status =
-            item.kind === 'quiz' || item.kind === 'assignment'
-              ? item.status
-              : null;
-          return (
-            <li key={item.id}>
-              <button
-                onClick={() => onSelect(item.id)}
-                className={cn(
-                  'flex w-full items-center gap-2.5 border-l-2 px-5 py-2 text-left transition-colors',
-                  isActive
-                    ? 'border-brand-gold bg-brand-gold/10'
-                    : 'hover:bg-muted/50 border-transparent',
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-3.5 w-3.5 shrink-0',
-                    isActive ? 'text-brand-gold' : 'text-muted-foreground',
-                  )}
-                />
-                <span
-                  className={cn(
-                    'min-w-0 flex-1 truncate text-xs font-medium',
-                    isActive
-                      ? 'text-foreground font-semibold'
-                      : 'text-muted-foreground',
-                  )}
-                >
-                  {item.title}
-                </span>
-                {status && (
-                  <span
-                    className={cn(
-                      'shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
-                      ITEM_STATUS_STYLE[status],
-                    )}
-                  >
-                    {status}
-                  </span>
-                )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
   );
 }
 

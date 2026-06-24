@@ -7,6 +7,7 @@ import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import Logo from '@/components/common/Logo';
 import { confirmEmail } from '@/features/auth/auth.api';
 import { isApiError } from '@/lib/api/errors';
+import { EMAIL_CONFIRMED_CHANNEL } from '@/lib/auth/constants';
 
 type Status = 'pending' | 'success' | 'error';
 
@@ -26,7 +27,15 @@ function ConfirmEmailCard() {
     requested.current = true;
 
     confirmEmail(hash)
-      .then(() => setStatus('success'))
+      .then(() => {
+        setStatus('success');
+        // Signal any open verify-email tab in the same browser.
+        if ('BroadcastChannel' in window) {
+          const ch = new BroadcastChannel(EMAIL_CONFIRMED_CHANNEL);
+          ch.postMessage({ type: 'email-confirmed' });
+          ch.close();
+        }
+      })
       .catch((err: unknown) => {
         setStatus('error');
         setErrorMessage(

@@ -24,6 +24,8 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "overview": "Overview",
+    "exploreCourses": "Explore Courses",
     "courses": "Courses",
     "programs": "Programs",
     "news": "News",
@@ -39,6 +41,7 @@
     "signingOut": "Signing out…",
     "theme": "Theme",
     "language": "Language",
+    "learnMore": "Learn More",
     "menu": "Menu"
   },
   "common": {
@@ -68,19 +71,6 @@
       "beginner": "Beginner",
       "intermediate": "Intermediate",
       "advanced": "Advanced"
-    }
-  },
-  "learner": {
-    "dashboard": "My Dashboard",
-    "continueLearning": "Continue Learning",
-    "recommended": "Recommended for you",
-    "upcomingQuizzes": "Upcoming Quizzes",
-    "weeklyStreak": "Weekly Streak",
-    "stats": {
-      "coursesEnrolled": "Courses Enrolled",
-      "hoursLearned": "Hours Learned",
-      "quizzesTaken": "Quizzes Taken",
-      "certificates": "Certificates"
     }
   }
 }

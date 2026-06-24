@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Play, Award } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { Course } from '@/constants/learner';
+import { slugify } from '@/lib/utils/slugify';
 
 type Tab = 'in-progress' | 'completed' | 'all';
 
@@ -118,7 +119,7 @@ function CourseCard({ course }: { course: Course }) {
           </Link>
         ) : (
           <Link
-            href={`/learn/${course.id}`}
+            href={`/learn/${slugify(course.title)}?mode=resume`}
             className="bg-brand-gold hover:bg-brand-gold-dark flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-bold text-white transition-colors"
           >
             <Play className="h-4 w-4" />

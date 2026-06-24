@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { readStoredNotifs, type StoredNotif } from '@/lib/utils/notifStorage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -275,6 +276,32 @@ export function NotificationBell({
 } = {}) {
   const [notifs, setNotifs] = useState<Notification[]>(INITIAL);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Merge localStorage notifications on mount
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const stored = readStoredNotifs();
+      if (stored.length === 0) return;
+      setNotifs((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const incoming = stored.filter((n) => !existingIds.has(n.id));
+        return incoming.length > 0 ? [...incoming, ...prev] : prev;
+      });
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
+
+  // Listen for real-time notifications dispatched by the course player
+  useEffect(() => {
+    function handler(e: Event) {
+      const notif = (e as CustomEvent<StoredNotif>).detail;
+      setNotifs((prev) =>
+        prev.some((n) => n.id === notif.id) ? prev : [notif, ...prev],
+      );
+    }
+    window.addEventListener('qb:notification', handler);
+    return () => window.removeEventListener('qb:notification', handler);
+  }, []);
   // Below `lg` (1024px) the bell lives inside the profile drawer — present it as
   // a full bottom sheet so it never overlaps that dropdown. At `lg`+ it sits in
   // the TopBar and uses the anchored dropdown.

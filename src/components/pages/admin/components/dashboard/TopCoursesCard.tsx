@@ -27,8 +27,8 @@ function initials(title: string): string {
 }
 
 const AVATAR_TONES = [
-  'bg-accent-blue-soft text-accent-blue',
-  'bg-accent-indigo-soft text-accent-indigo',
+  'bg-accent-blue/10 dark:bg-accent-blue/20 text-accent-blue',
+  'bg-accent-indigo/10 dark:bg-accent-indigo/20 text-accent-indigo',
 ];
 
 function completionColor(pct: number): string {

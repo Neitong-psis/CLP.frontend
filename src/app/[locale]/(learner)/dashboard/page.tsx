@@ -1,48 +1,56 @@
-﻿import { MOCK_USER } from '@/config/learner';
+import { MOCK_USER } from '@/config/learner';
 import TopBar from '@/components/pages/learner/TopBar';
-import StatCards from '@/components/pages/learner/dashboard/StatCards';
-import LearningProgress from '@/components/pages/learner/dashboard/LearningProgress';
-import RecommendedCourses from '@/components/pages/learner/dashboard/RecommendedCourses';
-import UpcomingQuizzes from '@/components/pages/learner/dashboard/UpcomingQuizzes';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { Spacer } from '@/components/ui/Spacer';
+import ContinueLearningCard from '@/components/pages/learner/dashboard/ContinueLearningCard';
+import OverviewStats from '@/components/pages/learner/dashboard/OverviewStats';
+import ActivityChart from '@/components/pages/learner/dashboard/ActivityChart';
+import RecommendedSection from '@/components/pages/learner/dashboard/RecommendedSection';
+import TodaysPlan from '@/components/pages/learner/dashboard/TodaysPlan';
+import UpNextPanel from '@/components/pages/learner/dashboard/UpNextPanel';
+import RecentAchievements from '@/components/pages/learner/dashboard/RecentAchievements';
+
+function greeting(hour: number): string {
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function DashboardPage() {
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const now = new Date();
   const firstName = MOCK_USER.name.split(' ')[0];
-  const dateLabel = new Date().toLocaleDateString('en-US', {
+  const dateLabel = now.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
 
   return (
-    <div className="min-h-full bg-slate-50">
+    <div className="bg-background min-h-full">
       <TopBar
         role="learner"
-        title={`${greeting}, ${firstName}!`}
+        title={`${greeting(now.getHours())}, ${firstName}!`}
         subtitle={dateLabel}
       />
 
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
-        {/* Row 1 — stat cards */}
-        <StatCards />
-
-        {/* Row 2 — Continue Learning (2/3) + Quizzes (1/3) */}
-        <div className="mb-4 grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <LearningProgress />
-            <Spacer height={24} />
-            <RecommendedCourses />
+      <main className="px-4 py-6 sm:px-6 lg:px-8">
+        {/* Two-column layout: main content + right panel */}
+        <div className="grid gap-6 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_308px]">
+          {/* ── Main column ── */}
+          <div className="min-w-0 space-y-5">
+            <ContinueLearningCard />
+            <OverviewStats />
+            <ActivityChart />
+            <RecommendedSection />
           </div>
-          <UpcomingQuizzes />
-        </div>
 
-        {/* Row 3 — Recommended full width */}
-        {/* <RecommendedCourses /> */}
-      </div>
+          {/* ── Right panel — sticky on desktop ── */}
+          <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+            <TodaysPlan />
+            <UpNextPanel />
+            <RecentAchievements />
+          </div>
+        </div>
+      </main>
 
       <FooterBottomBar theme="light" />
     </div>
