@@ -1,9 +1,10 @@
 'use client';
 
 import TopBar from '@/components/common/TopBar';
+import { useCreateCourseT } from '@/i18n';
 import {
   StepBar,
-  WIZARD_STEPS,
+  STEP_COUNT,
 } from '@/app/[locale]/(educator)/educator/courses/new/_components/StepBar';
 import { CourseContentStep } from '@/app/[locale]/(educator)/educator/courses/new/_components/CourseContentStep';
 import { PreviewPublishStep } from '@/app/[locale]/(educator)/educator/courses/new/_components/PreviewPublishStep';
@@ -12,15 +13,16 @@ import { useAdminCourseBuilder } from './_lib/useAdminCourseBuilder';
 import { AdminCourseInfoStep } from './_components/AdminCourseInfoStep';
 
 export default function AdminNewCoursePage() {
+  const t = useCreateCourseT();
   const builder = useAdminCourseBuilder();
-  const stepName = WIZARD_STEPS[builder.step - 1]?.title ?? '';
+  const stepName = t(`steps.${builder.step}.title`);
 
   return (
     <div className="bg-background flex min-h-full flex-col">
       <TopBar
         role="admin"
-        title="Create a Course"
-        subtitle={`Step ${builder.step} of ${WIZARD_STEPS.length} · ${stepName}`}
+        title={t('pageTitle')}
+        subtitle={`${t('stepOf', { current: builder.step, total: STEP_COUNT })} · ${stepName}`}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -30,7 +32,6 @@ export default function AdminNewCoursePage() {
           onStepClick={builder.goToStep}
         />
 
-        {/* key remounts the step so each one fades in on navigation */}
         <div key={builder.step} className="animate-fade-in mt-6">
           {builder.step === 1 && (
             <AdminCourseInfoStep
@@ -68,7 +69,7 @@ export default function AdminNewCoursePage() {
         onNext={builder.goNext}
         onSaveDraft={builder.saveDraft}
         onSubmit={builder.submit}
-        submitLabel="Create Course"
+        submitLabel={t('footer.createCourse')}
       />
     </div>
   );

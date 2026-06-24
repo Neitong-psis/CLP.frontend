@@ -17,7 +17,12 @@ import {
 } from '@/components/ui/Field';
 import { useAuth } from '@/hooks/use-auth';
 import { isApiError } from '@/lib/api/errors';
-import { InputWrapper, PasswordToggle, SubmitBtn, inputCls } from './shared';
+import {
+  InputWrapper,
+  PasswordToggle,
+  SubmitBtn,
+  inputCls,
+} from '@/components/pages/auth/login/shared';
 
 const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
 const STRENGTH_COLORS = [

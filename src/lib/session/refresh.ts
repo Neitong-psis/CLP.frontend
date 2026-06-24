@@ -1,13 +1,3 @@
-/**
- * Single-flight access-token refresh.
- *
- * Guarantees the BFF `/api/auth/refresh` endpoint is called at most once per
- * refresh cycle, regardless of how many concurrent callers trigger it.
- * All callers share the same in-flight `Promise` via a module-level latch.
- *
- * On success, the new access token is persisted via {@link setSession}.
- * On failure, the session is cleared via {@link clearSession}.
- */
 import { BFF_ENDPOINTS } from '@/lib/api/config';
 import { refreshResultSchema } from '@/schemas/auth.schema';
 import { clearSession, setSession, type ClientSession } from './session';

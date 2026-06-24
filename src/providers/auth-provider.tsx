@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import * as authApi from '@/features/auth/auth.api';
+import * as authApi from '@/services/auth/auth.api';
 import { isApiError, type ApiError } from '@/lib/api/errors';
 import { getUserRoleIds } from '@/lib/rbac/has-role';
 import { clearSession, hasAuthHint, setSession } from '@/lib/session/session';

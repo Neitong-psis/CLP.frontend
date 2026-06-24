@@ -62,6 +62,7 @@ export const NS = {
     analyticsWeekly: 'educator.analyticsPage.weekly',
     settings: 'educator.settingsPage',
     review: 'educator.review',
+    createCourse: 'educator.createCourse',
   },
 
   // ── Learner ───────────────────────────────────────────────────────────────

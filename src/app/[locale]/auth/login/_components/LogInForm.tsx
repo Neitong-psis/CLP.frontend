@@ -10,7 +10,11 @@ import { FieldGroup } from '@/components/ui/Field';
 import { useAuth } from '@/hooks/use-auth';
 import { resolveHome } from '@/lib/rbac/has-role';
 import { isApiError } from '@/lib/api/errors';
-import { FormField, PasswordToggle, SubmitBtn } from './shared';
+import {
+  FormField,
+  PasswordToggle,
+  SubmitBtn,
+} from '@/components/pages/auth/login/shared';
 
 export default function LogInForm() {
   const [showPassword, setShowPassword] = useState(false);

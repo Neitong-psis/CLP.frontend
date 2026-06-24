@@ -9,7 +9,7 @@ import {
 import {
   isGoogleLoginEnabled,
   startGoogleLogin,
-} from '@/features/auth/google-oauth';
+} from '@/services/auth/google-oauth';
 
 const btnCls =
   '3xl:py-4 3xl:text-lg flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-xs font-semibold text-[#00003e] transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:shadow-none disabled:active:scale-100 sm:gap-2 sm:px-3 sm:py-3 sm:text-sm 2xl:rounded-2xl 2xl:py-3.5 2xl:text-base';

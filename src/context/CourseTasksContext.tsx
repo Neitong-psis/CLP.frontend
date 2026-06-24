@@ -47,8 +47,8 @@ export function CourseTasksProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCourseTasks(): CourseTasksCtxValue {
-  const ctx = useContext(CourseTasksContext);
-  if (!ctx)
+  const context = useContext(CourseTasksContext);
+  if (!context)
     throw new Error('useCourseTasks must be used inside CourseTasksProvider');
-  return ctx;
+  return context;
 }

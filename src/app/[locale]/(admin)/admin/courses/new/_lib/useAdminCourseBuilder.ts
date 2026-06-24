@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
 import type {
   CourseInfo,
@@ -24,6 +25,7 @@ const INITIAL_INFO: CourseInfo = {
 export function useAdminCourseBuilder() {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('educator.createCourse');
 
   const [step, setStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
@@ -33,10 +35,10 @@ export function useAdminCourseBuilder() {
 
   const missing = useMemo(() => {
     const list: string[] = [];
-    if (!info.title.trim()) list.push('Course title is required.');
-    if (!info.description.trim()) list.push('Course description is required.');
-    if (!assignedEducator) list.push('Assign an educator.');
-    if (modules.length === 0) list.push('Add at least one module.');
+    if (!info.title.trim()) list.push('titleRequired');
+    if (!info.description.trim()) list.push('descriptionRequired');
+    if (!assignedEducator) list.push('educatorRequired');
+    if (modules.length === 0) list.push('moduleRequired');
     return list;
   }, [info.title, info.description, assignedEducator, modules.length]);
 
@@ -73,17 +75,17 @@ export function useAdminCourseBuilder() {
   };
 
   function saveDraft() {
-    toast('Draft saved. You can finish it anytime.', 'success');
+    toast(t('toast.draftSaved'), 'success');
   }
 
   function submit() {
     if (!canSubmit) {
       setStep(3);
-      toast('Fix the missing fields before creating.', 'error');
+      toast(t('toast.fixMissingAdmin'), 'error');
       return;
     }
     toast(
-      `"${info.title}" created and assigned to ${assignedEducator}.`,
+      t('toast.created', { title: info.title, educator: assignedEducator }),
       'success',
     );
     router.push('/admin/courses');

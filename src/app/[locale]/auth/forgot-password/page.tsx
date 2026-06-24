@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
 import { validateEmail } from '@/config/auth';
-import { forgotPassword } from '@/features/auth/auth.api';
+import { forgotPassword } from '@/services/auth/auth.api';
 import { isApiError } from '@/lib/api/errors';
 import { FormField, SubmitBtn } from '@/components/pages/auth/login/shared';
 import { FieldGroup } from '@/components/ui/Field';

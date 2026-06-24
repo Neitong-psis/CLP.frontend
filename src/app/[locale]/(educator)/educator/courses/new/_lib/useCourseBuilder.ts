@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
 import { useCourseTasks } from '@/context/CourseTasksContext';
 import { EDUCATOR_USER } from '@/constants/educator';
@@ -17,14 +18,11 @@ const INITIAL_INFO: CourseInfo = {
   thumbnail: '',
 };
 
-/**
- * All state and actions for the 3-step course creation wizard.
- * The page component stays a pure composition of step views.
- */
 export function useCourseBuilder() {
   const router = useRouter();
   const { toast } = useToast();
   const { addTask } = useCourseTasks();
+  const t = useTranslations('educator.createCourse');
 
   const [step, setStep] = useState(1);
   /** Furthest step the user has reached — every step up to here stays revisitable. */
@@ -34,9 +32,9 @@ export function useCourseBuilder() {
 
   const missing = useMemo(() => {
     const list: string[] = [];
-    if (!info.title.trim()) list.push('Course title is required.');
-    if (!info.description.trim()) list.push('Course description is required.');
-    if (modules.length === 0) list.push('Add at least one module.');
+    if (!info.title.trim()) list.push('titleRequired');
+    if (!info.description.trim()) list.push('descriptionRequired');
+    if (modules.length === 0) list.push('moduleRequired');
     return list;
   }, [info.title, info.description, modules.length]);
 
@@ -74,13 +72,13 @@ export function useCourseBuilder() {
   };
 
   function saveDraft() {
-    toast('Draft saved. You can finish it anytime.', 'success');
+    toast(t('toast.draftSaved'), 'success');
   }
 
   function submit() {
     if (!canSubmit) {
       setStep(3);
-      toast('Fix the missing fields before submitting.', 'error');
+      toast(t('toast.fixMissing'), 'error');
       return;
     }
     addTask({
@@ -104,7 +102,7 @@ export function useCourseBuilder() {
         year: 'numeric',
       }),
     });
-    toast('Course submitted to admin for review.', 'success');
+    toast(t('toast.submitted'), 'success');
     router.push('/educator/courses');
   }
 

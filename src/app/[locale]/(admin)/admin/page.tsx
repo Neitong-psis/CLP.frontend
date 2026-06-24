@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+
 import { RoleGate } from '@/components/auth/RoleGate';
 import { ROLE } from '@/constants/roles';
 import { AdminDashboardContent } from './_components/AdminDashboardContent';

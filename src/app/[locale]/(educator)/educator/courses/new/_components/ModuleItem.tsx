@@ -2,6 +2,7 @@
 
 import { ChevronDown, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCreateCourseT } from '@/i18n';
 import type { ContentSection, CourseModule, Lesson } from '../_lib/types';
 import { makeLesson, makeSection, moveItem } from '../_lib/builder';
 import { FormField, inputCls } from './form';
@@ -23,6 +24,8 @@ export function ModuleItem({
   onDelete: () => void;
   onMove: (dir: 'up' | 'down') => void;
 }) {
+  const t = useCreateCourseT();
+
   const addLesson = () =>
     onUpdate({
       ...mod,
@@ -49,9 +52,14 @@ export function ModuleItem({
     });
   };
 
+  const lessonCount = mod.lessons.length;
+  const lessonCountLabel =
+    lessonCount === 1
+      ? t('content.module.lessonCountOne', { count: lessonCount })
+      : t('content.module.lessonCountOther', { count: lessonCount });
+
   return (
     <div className="animate-fade-in border-border bg-card overflow-hidden rounded-2xl border transition-shadow hover:shadow-sm">
-      {/* Module header */}
       <div
         className={cn(
           'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
@@ -70,10 +78,10 @@ export function ModuleItem({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-foreground truncate text-sm font-bold">
-            {mod.title || `Module ${modIndex + 1}`}
+            {mod.title || t('content.module.defaultTitle', { n: modIndex + 1 })}
           </p>
           <p className="text-muted-foreground text-[11px]">
-            {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
+            {lessonCountLabel}
           </p>
         </div>
         <RowControls
@@ -86,12 +94,12 @@ export function ModuleItem({
 
       {mod.expanded && (
         <div className="animate-fade-in border-border/50 space-y-4 border-t px-4 py-4">
-          <FormField label="Module title">
+          <FormField label={t('content.module.titleLabel')}>
             <input
               type="text"
               value={mod.title}
               onChange={(e) => onUpdate({ ...mod, title: e.target.value })}
-              placeholder="e.g. Getting Started"
+              placeholder={t('content.module.titlePlaceholder')}
               className={inputCls}
             />
           </FormField>
@@ -118,7 +126,7 @@ export function ModuleItem({
             onClick={addLesson}
             className="border-border text-muted-foreground flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-xs font-semibold transition hover:border-blue-400 hover:bg-blue-500/10 hover:text-blue-600 active:scale-[0.99]"
           >
-            <Plus className="h-3.5 w-3.5" /> Add Lesson
+            <Plus className="h-3.5 w-3.5" /> {t('content.module.addLesson')}
           </button>
         </div>
       )}

@@ -84,6 +84,7 @@ export const useEducatorAnalyticsWeeklyT = () =>
   useTranslations(NS.educator.analyticsWeekly);
 export const useEducatorSettingsT = () => useTranslations(NS.educator.settings);
 export const useEducatorReviewT = () => useTranslations(NS.educator.review);
+export const useCreateCourseT = () => useTranslations(NS.educator.createCourse);
 
 // ── Learner ────────────────────────────────────────────────────────────────
 export const useLearnerT = () => useTranslations(NS.learner.root);

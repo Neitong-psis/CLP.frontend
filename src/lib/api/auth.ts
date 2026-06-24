@@ -8,7 +8,6 @@ export enum UserRole {
   Admin = 'admin',
   Educator = 'educator',
   Learner = 'learner',
-  User = 'user',
 }
 
 const ROLE_REDIRECTS: Partial<Record<UserRole, string>> = {

@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { resolveHome } from '@/lib/rbac/has-role';
 import { isApiError } from '@/lib/api/errors';
-import { consumeGoogleCallback } from '@/features/auth/google-oauth';
+import { consumeGoogleCallback } from '@/services/auth/google-oauth';
 import { ROLE, ROLE_HOME, type RoleId } from '@/constants/roles';
 
 const PORTAL_ROLE: Record<'admin' | 'educator' | 'learner', RoleId> = {

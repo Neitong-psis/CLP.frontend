@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { BookOpen, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCreateCourseT } from '@/i18n';
 import type { CourseInfo, CourseModule } from '../_lib/types';
 import { priceLabel } from '../_lib/builder';
 import { FormField, SelectField } from './form';
@@ -66,24 +67,30 @@ export function PreviewPublishStep({
   missing: string[];
   instructor?: string;
 }) {
+  const t = useCreateCourseT();
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
   const ready = missing.length === 0;
+
+  const mWord =
+    modules.length !== 1 ? t('publish.modules') : t('publish.module');
+  const lWord = totalLessons !== 1 ? t('publish.lessons') : t('publish.lesson');
+  const curriculumDesc = `${modules.length} ${mWord} ${t('publish.and')} ${totalLessons} ${lWord}.`;
 
   return (
     <div className="border-border bg-card rounded-2xl border p-6">
       <div className="mb-5">
         <h2 className="text-foreground text-base font-bold">
-          Step 3. Preview &amp; Publish
+          {t('publish.heading')}
         </h2>
         <p className="text-muted-foreground text-sm">
-          Review each section, fix missing details, then save or publish.
+          {t('publish.headingDesc')}
         </p>
       </div>
 
       <div className="space-y-4">
         <AccordionSection
-          title="1. Course Preview"
-          desc="Thumbnail, title, badges, and description."
+          title={t('publish.coursePreview')}
+          desc={t('publish.coursePreviewDesc')}
           defaultOpen
         >
           <div className="flex flex-col gap-5 sm:flex-row">
@@ -96,26 +103,26 @@ export function PreviewPublishStep({
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
-                'No thumbnail uploaded'
+                t('publish.noThumbnail')
               )}
             </div>
             <div className="flex-1 space-y-1">
               <p className="text-foreground text-base font-bold">
-                {info.title || 'Untitled Course'}
+                {info.title || t('publish.untitledCourse')}
               </p>
               {info.subtitle && (
                 <p className="text-muted-foreground text-sm">{info.subtitle}</p>
               )}
               {instructor && (
                 <p className="text-muted-foreground text-xs">
-                  Instructor:{' '}
+                  {t('publish.instructorLabel')}{' '}
                   <span className="text-foreground font-medium">
                     {instructor}
                   </span>
                 </p>
               )}
               <p className="text-muted-foreground text-sm">
-                {info.description || 'No course description added yet.'}
+                {info.description || t('publish.noDescription')}
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
                 {info.category && (
@@ -130,31 +137,32 @@ export function PreviewPublishStep({
                 )}
                 <span className="rounded-md bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
                   {info.pricingType === 'free'
-                    ? 'Free'
-                    : `Paid ${priceLabel(info)}`}
+                    ? t('publish.freeBadge')
+                    : `${t('publish.paidBadge')} ${priceLabel(info)}`}
                 </span>
               </div>
             </div>
           </div>
         </AccordionSection>
 
-        <AccordionSection
-          title="2. Curriculum Preview"
-          desc={`${modules.length} module${modules.length !== 1 ? 's' : ''} and ${totalLessons} lesson${totalLessons !== 1 ? 's' : ''}.`}
-        >
+        <AccordionSection title={t('publish.curriculum')} desc={curriculumDesc}>
           {modules.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No modules added.</p>
+            <p className="text-muted-foreground text-sm">
+              {t('publish.noModules')}
+            </p>
           ) : (
             <div className="space-y-2">
               {modules.map((mod, i) => (
                 <div key={mod.id} className="flex items-center gap-2 text-sm">
                   <BookOpen className="text-muted-foreground h-4 w-4" />
                   <span className="text-foreground font-medium">
-                    Module {i + 1}: {mod.title}
+                    {t('publish.modulePrefix', { n: i + 1 })} {mod.title}
                   </span>
                   <span className="text-muted-foreground">
-                    — {mod.lessons.length} lesson
-                    {mod.lessons.length !== 1 ? 's' : ''}
+                    — {mod.lessons.length}{' '}
+                    {mod.lessons.length !== 1
+                      ? t('publish.lessons')
+                      : t('publish.lesson')}
                   </span>
                 </div>
               ))}
@@ -163,24 +171,24 @@ export function PreviewPublishStep({
         </AccordionSection>
 
         <AccordionSection
-          title="3. Publish Settings"
-          desc="Visibility, draft behavior, and final action."
+          title={t('publish.publishSettings')}
+          desc={t('publish.publishSettingsDesc')}
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField label="Visibility">
+            <FormField label={t('publish.visibility')}>
               <SelectField>
-                <option>Public</option>
-                <option>Private</option>
-                <option>Unlisted</option>
+                <option>{t('publish.public')}</option>
+                <option>{t('publish.private')}</option>
+                <option>{t('publish.unlisted')}</option>
               </SelectField>
             </FormField>
-            <FormField label="Draft behavior">
+            <FormField label={t('publish.draftBehavior')}>
               <div className="flex items-center gap-3 pt-1.5">
                 <span className="relative inline-flex h-5 w-9 items-center rounded-full bg-blue-600">
                   <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  Keep as draft until submitted
+                  {t('publish.keepAsDraft')}
                 </span>
               </div>
             </FormField>
@@ -188,15 +196,27 @@ export function PreviewPublishStep({
         </AccordionSection>
 
         <AccordionSection
-          title="4. Final Review Summary"
-          desc="Module count, level, price, status, and warnings."
+          title={t('publish.reviewSummary')}
+          desc={t('publish.reviewSummaryDesc')}
           defaultOpen
         >
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SummaryStat label="Modules" value={String(modules.length)} />
-            <SummaryStat label="Level" value={info.level || '—'} />
-            <SummaryStat label="Price" value={priceLabel(info)} />
-            <SummaryStat label="Status" value="To Do" />
+            <SummaryStat
+              label={t('publish.modulesLabel')}
+              value={String(modules.length)}
+            />
+            <SummaryStat
+              label={t('publish.levelLabel')}
+              value={info.level || '—'}
+            />
+            <SummaryStat
+              label={t('publish.priceLabel')}
+              value={priceLabel(info)}
+            />
+            <SummaryStat
+              label={t('publish.statusLabel')}
+              value={t('publish.toDo')}
+            />
           </div>
 
           <div
@@ -209,20 +229,20 @@ export function PreviewPublishStep({
           >
             {ready ? (
               <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                Course is ready for the selected publish action.
+                {t('publish.readyMessage')}
               </p>
             ) : (
               <>
                 <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
-                  Missing required fields
+                  {t('publish.missingFields')}
                 </p>
                 <ul className="mt-2 space-y-1">
-                  {missing.map((m) => (
+                  {missing.map((key) => (
                     <li
-                      key={m}
+                      key={key}
                       className="text-sm text-amber-700 dark:text-amber-400"
                     >
-                      {m}
+                      {t(`validation.${key}`)}
                     </li>
                   ))}
                 </ul>

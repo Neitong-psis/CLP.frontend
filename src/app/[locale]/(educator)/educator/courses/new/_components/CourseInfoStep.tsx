@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCreateCourseT } from '@/i18n';
 import type { CourseInfo } from '../_lib/types';
 import { priceLabel } from '../_lib/builder';
 import { FormField, SelectField, inputCls } from './form';
@@ -32,8 +33,6 @@ const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 const TITLE_MAX = 60;
 const SUBTITLE_MAX = 80;
 const DESC_MAX = 500;
-
-// ─── Small building blocks ──────────────────────────────────────────────────
 
 function SectionCard({
   title,
@@ -88,6 +87,7 @@ function InlineAddButton({
   placeholder: string;
   onAdd: (val: string) => void;
 }) {
+  const t = useCreateCourseT();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
 
@@ -107,7 +107,7 @@ function InlineAddButton({
         onClick={() => setOpen(true)}
         className="border-border text-muted-foreground hover:bg-muted/40 flex shrink-0 items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold transition"
       >
-        <Plus className="h-3 w-3" /> Add
+        <Plus className="h-3 w-3" /> {t('info.add')}
       </button>
     );
   }
@@ -154,8 +154,6 @@ function InlineAddButton({
   );
 }
 
-// ─── Live preview card (mirrors the learner-facing course card) ──────────────
-
 function LivePreviewCard({
   info,
   onThumbnail,
@@ -163,6 +161,7 @@ function LivePreviewCard({
   info: CourseInfo;
   onThumbnail: (dataUrl: string) => void;
 }) {
+  const t = useCreateCourseT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -178,20 +177,19 @@ function LivePreviewCard({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="text-foreground/90 text-[13px] font-semibold">
-            Live preview
+            {t('info.livePreview')}
           </h2>
           <p className="text-muted-foreground text-xs">
-            How learners see your course.
+            {t('info.livePreviewDesc')}
           </p>
         </div>
         <span className="bg-muted text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium tracking-wide uppercase">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-          Live
+          {t('info.live')}
         </span>
       </div>
 
       <div className="group bg-card overflow-hidden rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.06] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(0,0,0,0.10)] dark:ring-white/8 dark:hover:shadow-none">
-        {/* Cover = drag-and-drop uploader */}
         <div
           role="button"
           tabIndex={0}
@@ -227,12 +225,12 @@ function LivePreviewCard({
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition group-hover/thumb:opacity-100">
                 <span className="flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[12px] font-medium text-zinc-800 shadow-sm">
-                  <Upload className="h-3.5 w-3.5" /> Change
+                  <Upload className="h-3.5 w-3.5" /> {t('info.change')}
                 </span>
               </div>
               <button
                 type="button"
-                aria-label="Remove thumbnail"
+                aria-label={t('info.removeThumbnail')}
                 onClick={(e) => {
                   e.stopPropagation();
                   onThumbnail('');
@@ -248,15 +246,14 @@ function LivePreviewCard({
                 <ImageIcon className="text-muted-foreground h-5 w-5" />
               </div>
               <span className="text-foreground/80 text-[13px] font-medium">
-                {dragging ? 'Drop to upload' : 'Add a cover image'}
+                {dragging ? t('info.dropToUpload') : t('info.addCoverImage')}
               </span>
               <span className="text-muted-foreground text-[11px]">
-                Drag &amp; drop or click · 16:9
+                {t('info.dragDropHint')}
               </span>
             </div>
           )}
 
-          {/* Level badge — frosted neutral material */}
           {info.level && (
             <span className="absolute top-3 left-3 rounded-full bg-white/75 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-zinc-700 ring-1 ring-black/[0.06] backdrop-blur-md">
               {info.level}
@@ -264,19 +261,18 @@ function LivePreviewCard({
           )}
         </div>
 
-        {/* Body */}
         <div className="p-5">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-[11px] font-medium tracking-[0.14em] uppercase">
-              {info.category || 'Category'}
+              {info.category || t('info.categoryPlaceholder')}
             </span>
             <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
-              New
+              {t('info.newBadge')}
             </span>
           </div>
 
           <h3 className="text-foreground mt-2 line-clamp-2 text-[17px] leading-snug font-semibold tracking-[-0.01em]">
-            {info.title || 'Your course title'}
+            {info.title || t('info.courseTitlePreview')}
           </h3>
 
           {info.subtitle && (
@@ -285,40 +281,37 @@ function LivePreviewCard({
             </p>
           )}
 
-          {/* Instructor */}
           <div className="mt-4 flex items-center gap-2">
             <span className="bg-muted text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full">
               <User className="h-3.5 w-3.5" />
             </span>
             <span className="text-foreground/80 text-[12px] font-medium">
-              You
+              {t('info.you')}
             </span>
             <span className="text-muted-foreground/30">·</span>
             <span className="text-muted-foreground text-[12px]">
-              Instructor
+              {t('info.instructor')}
             </span>
           </div>
 
-          {/* Meta */}
           <div className="text-muted-foreground mt-4 flex items-center gap-4 text-[11px]">
             <span className="flex items-center gap-1">
-              <Star className="h-3.5 w-3.5" /> New
+              <Star className="h-3.5 w-3.5" /> {t('info.newBadge')}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-3.5 w-3.5" /> 0
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" /> Self-paced
+              <Clock className="h-3.5 w-3.5" /> {t('info.selfPaced')}
             </span>
           </div>
 
-          {/* Footer — price + CTA mirroring the learner card */}
           <div className="border-border/50 mt-5 flex items-center justify-between border-t pt-4">
             <span className="text-foreground text-[19px] font-semibold tracking-[-0.01em]">
               {priceLabel(info)}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-[12px] font-medium text-white transition-colors group-hover:bg-blue-700">
-              Enroll
+              {t('info.enroll')}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
@@ -333,13 +326,11 @@ function LivePreviewCard({
         onChange={(e) => readImage(e.target.files?.[0])}
       />
       <p className="text-muted-foreground mt-2.5 text-center text-[11px]">
-        Click the cover to upload · Ratings appear after launch
+        {t('info.uploadHint')}
       </p>
     </div>
   );
 }
-
-// ─── Step ────────────────────────────────────────────────────────────────────
 
 export function CourseInfoStep({
   info,
@@ -348,6 +339,7 @@ export function CourseInfoStep({
   info: CourseInfo;
   onChange: (key: keyof CourseInfo, val: string) => void;
 }) {
+  const t = useCreateCourseT();
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
   const [extraLevels, setExtraLevels] = useState<string[]>([]);
 
@@ -355,22 +347,18 @@ export function CourseInfoStep({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
-      {/* ── Form ───────────────────────────────────────────────── */}
       <div className="space-y-5">
-        <SectionCard
-          title="Basic Information"
-          desc="Title and summary learners will see first."
-        >
+        <SectionCard title={t('info.basicInfo')} desc={t('info.basicInfoDesc')}>
           <div className="space-y-5">
             <div>
               <CountedLabel
-                label="Course title"
+                label={t('info.courseTitle')}
                 value={info.title}
                 max={TITLE_MAX}
               />
               <input
                 type="text"
-                placeholder="e.g. Modern Web Development with React"
+                placeholder={t('info.courseTitlePlaceholder')}
                 value={info.title}
                 maxLength={TITLE_MAX}
                 onChange={(e) => onChange('title', e.target.value)}
@@ -380,13 +368,13 @@ export function CourseInfoStep({
 
             <div>
               <CountedLabel
-                label="Subtitle"
+                label={t('info.subtitle')}
                 value={info.subtitle}
                 max={SUBTITLE_MAX}
               />
               <input
                 type="text"
-                placeholder="A short, punchy one-liner"
+                placeholder={t('info.subtitlePlaceholder')}
                 value={info.subtitle}
                 maxLength={SUBTITLE_MAX}
                 onChange={(e) => onChange('subtitle', e.target.value)}
@@ -396,13 +384,13 @@ export function CourseInfoStep({
 
             <div>
               <CountedLabel
-                label="Description"
+                label={t('info.description')}
                 value={info.description}
                 max={DESC_MAX}
               />
               <textarea
                 rows={4}
-                placeholder="What will learners be able to do after this course?"
+                placeholder={t('info.descriptionPlaceholder')}
                 value={info.description}
                 maxLength={DESC_MAX}
                 onChange={(e) => onChange('description', e.target.value)}
@@ -413,11 +401,11 @@ export function CourseInfoStep({
         </SectionCard>
 
         <SectionCard
-          title="Category & Level"
-          desc="Help the right learners discover your course."
+          title={t('info.categoryLevel')}
+          desc={t('info.categoryLevelDesc')}
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField label="Category">
+            <FormField label={t('info.category')}>
               <div className="flex gap-2">
                 <SelectField
                   value={info.category}
@@ -429,7 +417,7 @@ export function CourseInfoStep({
                   ))}
                 </SelectField>
                 <InlineAddButton
-                  placeholder="New category"
+                  placeholder={t('info.newCategory')}
                   onAdd={(val) => {
                     setExtraCategories((prev) => [...prev, val]);
                     onChange('category', val);
@@ -438,7 +426,7 @@ export function CourseInfoStep({
               </div>
             </FormField>
 
-            <FormField label="Level">
+            <FormField label={t('info.level')}>
               <div className="flex gap-2">
                 <SelectField
                   value={info.level}
@@ -450,7 +438,7 @@ export function CourseInfoStep({
                   ))}
                 </SelectField>
                 <InlineAddButton
-                  placeholder="New level"
+                  placeholder={t('info.newLevel')}
                   onAdd={(val) => {
                     setExtraLevels((prev) => [...prev, val]);
                     onChange('level', val);
@@ -461,16 +449,12 @@ export function CourseInfoStep({
           </div>
         </SectionCard>
 
-        <SectionCard
-          title="Pricing"
-          desc="Set how learners pay for this course."
-        >
-          {/* Segmented Free / Paid toggle */}
+        <SectionCard title={t('info.pricing')} desc={t('info.pricingDesc')}>
           <div className="bg-muted/60 grid max-w-xs grid-cols-2 gap-1 rounded-lg p-1">
             {(
               [
-                { key: 'free', label: 'Free' },
-                { key: 'paid', label: 'Paid' },
+                { key: 'free', label: t('info.free') },
+                { key: 'paid', label: t('info.paid') },
               ] as const
             ).map((opt) => (
               <button
@@ -491,12 +475,12 @@ export function CourseInfoStep({
 
           {isFree ? (
             <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-              This course will be free for all learners.
+              {t('info.freeCourseNote')}
             </p>
           ) : (
             <div className="mt-4 max-w-xs">
               <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">
-                Price
+                {t('info.price')}
               </label>
               <div className="border-border bg-card flex overflow-hidden rounded-lg border transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20">
                 <span className="border-border bg-muted/40 text-muted-foreground border-r px-3 py-2 text-sm">
@@ -512,14 +496,13 @@ export function CourseInfoStep({
                 />
               </div>
               <p className="text-muted-foreground mt-1 text-[11px]">
-                Price shown in USD ($).
+                {t('info.priceNote')}
               </p>
             </div>
           )}
         </SectionCard>
       </div>
 
-      {/* ── Live preview ───────────────────────────────────────── */}
       <LivePreviewCard
         info={info}
         onThumbnail={(dataUrl) => onChange('thumbnail', dataUrl)}

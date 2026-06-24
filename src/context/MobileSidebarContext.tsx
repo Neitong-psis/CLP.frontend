@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState } from 'react';
 
-interface MobileSidebarCtx {
+interface MobileSidebarContext {
   open: boolean;
   provided: boolean;
   userInitials: string;
@@ -10,7 +10,7 @@ interface MobileSidebarCtx {
   close: () => void;
 }
 
-const MobileSidebarCtx = createContext<MobileSidebarCtx>({
+const MobileSidebarContext = createContext<MobileSidebarContext>({
   open: false,
   provided: false,
   userInitials: '?',
@@ -18,7 +18,7 @@ const MobileSidebarCtx = createContext<MobileSidebarCtx>({
   close: () => {},
 });
 
-export const useMobileSidebar = () => useContext(MobileSidebarCtx);
+export const useMobileSidebar = () => useContext(MobileSidebarContext);
 
 export function MobileSidebarProvider({
   children,
@@ -29,7 +29,7 @@ export function MobileSidebarProvider({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <MobileSidebarCtx.Provider
+    <MobileSidebarContext.Provider
       value={{
         open,
         provided: true,
@@ -39,6 +39,6 @@ export function MobileSidebarProvider({
       }}
     >
       {children}
-    </MobileSidebarCtx.Provider>
+    </MobileSidebarContext.Provider>
   );
 }

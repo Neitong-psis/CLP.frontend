@@ -2,10 +2,11 @@
 
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCreateCourseT } from '@/i18n';
 import type { ContentSection, Lesson, SectionType } from '../_lib/types';
 import { FormField, inputCls } from './form';
 import { RowControls } from './RowControls';
-import { SECTION_ICONS, SECTION_LABELS, SectionItem } from './SectionItem';
+import { SECTION_ICONS, SectionItem } from './SectionItem';
 
 const SECTION_TYPES: SectionType[] = [
   'text',
@@ -32,9 +33,16 @@ export function LessonItem({
   onMove: (dir: 'up' | 'down') => void;
   onAddSection: (type: ContentSection['type']) => void;
 }) {
+  const t = useCreateCourseT();
+
+  const sectionCount = lesson.sections.length;
+  const sectionCountLabel =
+    sectionCount === 1
+      ? t('content.lesson.sectionCountOne', { count: sectionCount })
+      : t('content.lesson.sectionCountOther', { count: sectionCount });
+
   return (
     <div className="animate-fade-in border-border bg-muted/20 overflow-hidden rounded-xl border">
-      {/* Header */}
       <div
         className="hover:bg-muted/40 flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 transition-colors"
         onClick={() => onUpdate({ ...lesson, expanded: !lesson.expanded })}
@@ -50,11 +58,11 @@ export function LessonItem({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-foreground truncate text-[13px] font-semibold">
-            {lesson.title || `Lesson ${lessonIndex + 1}`}
+            {lesson.title ||
+              t('content.lesson.defaultTitle', { n: lessonIndex + 1 })}
           </p>
           <p className="text-muted-foreground text-[11px]">
-            {lesson.sections.length} section
-            {lesson.sections.length !== 1 ? 's' : ''}
+            {sectionCountLabel}
           </p>
         </div>
         <RowControls
@@ -67,20 +75,19 @@ export function LessonItem({
 
       {lesson.expanded && (
         <div className="animate-fade-in border-border bg-card space-y-4 border-t px-4 py-4">
-          <FormField label="Lesson title">
+          <FormField label={t('content.lesson.titleLabel')}>
             <input
               type="text"
               value={lesson.title}
               onChange={(e) => onUpdate({ ...lesson, title: e.target.value })}
-              placeholder="e.g. Setting up your environment"
+              placeholder={t('content.lesson.titlePlaceholder')}
               className={inputCls}
             />
           </FormField>
 
-          {/* Add content buttons */}
           <div>
             <p className="text-muted-foreground mb-2 text-[11px] font-semibold">
-              Add content
+              {t('content.lesson.addContent')}
             </p>
             <div className="flex flex-wrap gap-2">
               {SECTION_TYPES.map((type) => {
@@ -93,7 +100,7 @@ export function LessonItem({
                     className="border-border bg-card text-muted-foreground flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:border-blue-400 hover:text-blue-600 active:scale-95"
                   >
                     <Icon className="h-3 w-3" />
-                    {SECTION_LABELS[type]}
+                    {t(`content.section.${type}`)}
                   </button>
                 );
               })}
@@ -125,7 +132,7 @@ export function LessonItem({
             </div>
           ) : (
             <p className="border-border text-muted-foreground rounded-lg border border-dashed py-4 text-center text-[11px]">
-              No content yet — add a block above to build this lesson.
+              {t('content.lesson.noContent')}
             </p>
           )}
         </div>

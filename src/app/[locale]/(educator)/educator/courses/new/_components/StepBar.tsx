@@ -3,12 +3,9 @@
 import { Fragment } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useCreateCourseT } from '@/i18n';
 
-export const WIZARD_STEPS = [
-  { title: 'Course Info', desc: 'Details, thumbnail & pricing' },
-  { title: 'Course Content', desc: 'Modules & lessons' },
-  { title: 'Preview & Publish', desc: 'Review final summary' },
-];
+export const STEP_COUNT = 3;
 
 export function StepBar({
   current,
@@ -16,27 +13,29 @@ export function StepBar({
   onStepClick,
 }: {
   current: number;
-  /** Furthest step reached; every step up to here is navigable. */
   maxStep: number;
-  /** Called with a step number; reached steps are navigable in either direction. */
   onStepClick: (step: number) => void;
 }) {
-  const progress = ((current - 1) / (WIZARD_STEPS.length - 1)) * 100;
+  const t = useCreateCourseT();
+  const steps = ([1, 2, 3] as const).map((n) => ({
+    title: t(`steps.${n}.title`),
+    desc: t(`steps.${n}.desc`),
+  }));
+  const progress = ((current - 1) / (STEP_COUNT - 1)) * 100;
 
   return (
     <div className="border-border bg-card rounded-2xl border p-4 shadow-sm sm:p-5">
-      {/* Compact progress meta */}
       <div className="mb-4 flex items-center justify-between sm:hidden">
         <span className="text-foreground text-sm font-bold">
-          {WIZARD_STEPS[current - 1]?.title}
+          {steps[current - 1]?.title}
         </span>
         <span className="text-muted-foreground text-xs font-medium">
-          Step {current} of {WIZARD_STEPS.length}
+          {t('stepOf', { current, total: STEP_COUNT })}
         </span>
       </div>
 
       <div className="flex items-center">
-        {WIZARD_STEPS.map((step, i) => {
+        {steps.map((step, i) => {
           const n = i + 1;
           const isActive = current === n;
           const isComplete = n < current;
@@ -55,7 +54,6 @@ export function StepBar({
                   navigable ? 'cursor-pointer' : 'cursor-default',
                 )}
               >
-                {/* Step circle */}
                 <span
                   className={cn(
                     'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300',
@@ -78,7 +76,6 @@ export function StepBar({
                   )}
                 </span>
 
-                {/* Label */}
                 <span className="hidden min-w-0 sm:block">
                   <span
                     className={cn(
@@ -94,8 +91,7 @@ export function StepBar({
                 </span>
               </button>
 
-              {/* Connector rail that fills as steps complete */}
-              {i < WIZARD_STEPS.length - 1 && (
+              {i < STEP_COUNT - 1 && (
                 <div className="bg-border mx-2 h-0.5 flex-1 overflow-hidden rounded-full sm:mx-4">
                   <div
                     className={cn(
@@ -110,7 +106,6 @@ export function StepBar({
         })}
       </div>
 
-      {/* Slim overall progress bar (desktop) */}
       <div className="bg-muted mt-4 hidden h-1 overflow-hidden rounded-full sm:block">
         <div
           className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"

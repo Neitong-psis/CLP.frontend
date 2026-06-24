@@ -8,18 +8,11 @@ import { ThemeProvider } from '@/providers/theme-provider';
 
 export const metadata: Metadata = rootMetadata;
 
-/**
- * True root layout — sits ABOVE the [locale] segment so AuthProvider and
- * ThemeProvider are never remounted when the locale changes. Remounting
- * AuthProvider would reset loading → true and flash the dashboard skeleton
- * on every language switch.
- */
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const cookieStore = await cookies();
   const isDark = cookieStore.get(THEME_COOKIE)?.value === 'dark';
-  // NEXT_LOCALE cookie is set by next-intl; fall back to 'en' when absent.
   const locale = cookieStore.get('NEXT_LOCALE')?.value ?? 'en';
 
   return (

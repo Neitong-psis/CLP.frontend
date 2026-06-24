@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import Logo from '@/components/common/Logo';
-import { confirmEmail } from '@/features/auth/auth.api';
+import { confirmEmail } from '@/services/auth/auth.api';
 import { isApiError } from '@/lib/api/errors';
 import { EMAIL_CONFIRMED_CHANNEL } from '@/lib/auth/constants';
 

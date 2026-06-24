@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, Lock, XCircle } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
 import { validateNewPassword } from '@/config/auth';
-import { resetPassword } from '@/features/auth/auth.api';
+import { resetPassword } from '@/services/auth/auth.api';
 import { isApiError } from '@/lib/api/errors';
 import {
   Field,

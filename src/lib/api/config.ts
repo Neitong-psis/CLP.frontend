@@ -1,20 +1,35 @@
-const DEFAULT_BASE_URL = 'http://localhost:4000';
+// ─── Base URL ─────────────────────────────────────────────────────────────────
+const DEFAULT_API_BASE_URL = 'http://localhost:4000';
 
 export const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_BASE_URL
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL
 ).replace(/\/+$/, '');
 
-export const API_PREFIX = 'api';
-
-export const API_VERSION = 'v1';
-
-export const VERSIONED_API_URL = `${API_BASE_URL}/${API_PREFIX}/${API_VERSION}`;
-
-export function apiUrl(path: string): string {
-  return `${VERSIONED_API_URL}/${path.replace(/^\/+/, '')}`;
+if (
+  !process.env.NEXT_PUBLIC_API_BASE_URL &&
+  process.env.NODE_ENV === 'production'
+) {
+  throw new Error(
+    '[config] NEXT_PUBLIC_API_BASE_URL must be set in production',
+  );
 }
 
-/** Backend auth endpoints */
+// ─── API config ───────────────────────────────────────────────────────────────
+export const API_CONFIG = {
+  baseUrl: API_BASE_URL,
+  prefix: 'api',
+  version: 'v1',
+} as const;
+
+export const VERSIONED_API_URL = `${API_CONFIG.baseUrl}/${API_CONFIG.prefix}/${API_CONFIG.version}`;
+
+export function apiUrl<const P extends string>(
+  path: P,
+): `${string}/api/v1/${P}` {
+  return `${VERSIONED_API_URL}/${path.replace(/^\/+/, '')}` as `${string}/api/v1/${P}`;
+}
+
+// ─── Backend endpoints ────────────────────────────────────────────────────────
 export const AUTH_ENDPOINTS = {
   login: 'auth/email/login',
   register: 'auth/email/register',
@@ -24,10 +39,25 @@ export const AUTH_ENDPOINTS = {
   logout: 'auth/logout',
   forgotPassword: 'auth/password/forgot',
   resetPassword: 'auth/password/reset',
-  /** Append `/:provider` (google | facebook | apple). */
   oauth: 'auth/oauth',
 } as const;
 
+export type OAuthProvider = 'google' | 'facebook' | 'apple';
+
+export const AuthApi = {
+  login: () => apiUrl(AUTH_ENDPOINTS.login),
+  register: () => apiUrl(AUTH_ENDPOINTS.register),
+  confirmEmail: () => apiUrl(AUTH_ENDPOINTS.confirmEmail),
+  me: () => apiUrl(AUTH_ENDPOINTS.me),
+  refresh: () => apiUrl(AUTH_ENDPOINTS.refresh),
+  logout: () => apiUrl(AUTH_ENDPOINTS.logout),
+  forgotPassword: () => apiUrl(AUTH_ENDPOINTS.forgotPassword),
+  resetPassword: () => apiUrl(AUTH_ENDPOINTS.resetPassword),
+  oauth: (provider: OAuthProvider) =>
+    apiUrl(`${AUTH_ENDPOINTS.oauth}/${provider}` as const),
+} as const;
+
+// ─── BFF endpoints (Next.js route handlers) ───────────────────────────────────
 export const BFF_ENDPOINTS = {
   login: '/api/auth/login',
   adminLogin: '/api/auth/admin/login',

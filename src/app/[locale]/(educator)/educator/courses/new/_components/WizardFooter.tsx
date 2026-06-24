@@ -8,7 +8,8 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { WIZARD_STEPS } from './StepBar';
+import { useCreateCourseT } from '@/i18n';
+import { STEP_COUNT } from './StepBar';
 
 export function WizardFooter({
   step,
@@ -18,7 +19,7 @@ export function WizardFooter({
   onNext,
   onSaveDraft,
   onSubmit,
-  submitLabel = 'Submit to Admin',
+  submitLabel,
 }: {
   step: number;
   canSubmit: boolean;
@@ -29,13 +30,16 @@ export function WizardFooter({
   onSubmit: () => void;
   submitLabel?: string;
 }) {
-  const isLast = step >= WIZARD_STEPS.length;
-  const nextTitle = WIZARD_STEPS[step]?.title;
+  const t = useCreateCourseT();
+  const isLast = step >= STEP_COUNT;
+  const nextStepNum = step + 1;
+  const nextTitle =
+    !isLast && nextStepNum <= STEP_COUNT ? t(`steps.${nextStepNum}.title`) : '';
+  const resolvedSubmitLabel = submitLabel ?? t('footer.submitToAdmin');
 
   return (
     <div className="border-border bg-card/85 sticky bottom-0 border-t px-6 py-3.5 backdrop-blur-md lg:px-8">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: back + live context */}
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
@@ -43,14 +47,14 @@ export function WizardFooter({
             onClick={onBack}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            {t('footer.back')}
           </Button>
 
           <div className="hidden leading-tight sm:block">
             {!isLast ? (
               <>
                 <p className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
-                  Up next
+                  {t('footer.upNext')}
                 </p>
                 <p className="text-foreground/80 text-sm font-semibold">
                   {nextTitle}
@@ -59,18 +63,19 @@ export function WizardFooter({
             ) : canSubmit ? (
               <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
                 <Check className="h-4 w-4" />
-                Ready to submit
+                {t('footer.readyToSubmit')}
               </p>
             ) : (
               <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
                 <TriangleAlert className="h-4 w-4" />
-                {missingCount} field{missingCount !== 1 ? 's' : ''} to complete
+                {missingCount === 1
+                  ? t('footer.fieldToComplete', { count: missingCount })
+                  : t('footer.fieldsToComplete', { count: missingCount })}
               </p>
             )}
           </div>
         </div>
 
-        {/* Right: secondary + primary */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -78,7 +83,7 @@ export function WizardFooter({
             onClick={onSaveDraft}
           >
             <Save className="h-4 w-4" />
-            Save draft
+            {t('footer.saveDraft')}
           </Button>
           {!isLast ? (
             <Button
@@ -86,7 +91,7 @@ export function WizardFooter({
               className="gap-2 bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500"
               onClick={onNext}
             >
-              Continue
+              {t('footer.continue')}
               <ArrowRight className="h-4 w-4" />
             </Button>
           ) : (
@@ -95,11 +100,9 @@ export function WizardFooter({
               className="gap-2 bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500 disabled:opacity-50"
               onClick={onSubmit}
               disabled={!canSubmit}
-              title={
-                canSubmit ? undefined : 'Complete required fields to submit'
-              }
+              title={canSubmit ? undefined : t('footer.completeRequired')}
             >
-              {submitLabel}
+              {resolvedSubmitLabel}
               <ArrowRight className="h-4 w-4" />
             </Button>
           )}

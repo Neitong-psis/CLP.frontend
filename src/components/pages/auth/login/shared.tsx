@@ -44,7 +44,7 @@ export function InputWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="3xl:py-4 flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 transition focus-within:border-[#f4a300] focus-within:ring-2 focus-within:ring-[#f4a300]/20 2xl:rounded-2xl 2xl:px-4 2xl:py-3.5">
+    <div className="3xl:py-4 focus-within:border-brand-gold focus-within:ring-brand-gold/20 flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 transition focus-within:ring-2 2xl:rounded-2xl 2xl:px-4 2xl:py-3.5">
       <span className="shrink-0">{icon}</span>
       {children}
       {suffix && <span className="ml-auto shrink-0">{suffix}</span>}
