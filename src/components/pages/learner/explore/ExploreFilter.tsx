@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Search, Star, Clock, FileText, Bookmark } from 'lucide-react';
+import {
+  Search,
+  Star,
+  Clock,
+  FileText,
+  Bookmark,
+  ChevronDown,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useLearnerExploreT } from '@/i18n';
 import {
@@ -294,27 +301,47 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
 
   return (
     <>
-      {/* Search bar */}
+      {/* Search + mobile category dropdown */}
       <div
         className={cn(
-          'border-border bg-card focus-within:border-brand-gold/50 mb-5 flex items-center gap-2 rounded-2xl border px-4 py-2.5 shadow-sm transition-all duration-500 ease-out',
+          'mb-5 flex items-stretch gap-2 transition-all duration-500 ease-out',
           mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         )}
       >
-        <Search className="text-muted-foreground size-4 shrink-0" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('searchPlaceholder')}
-          className="text-foreground placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
-        />
+        {/* Search field */}
+        <div className="border-border bg-card focus-within:border-brand-gold/50 flex min-w-0 flex-1 items-center gap-2 rounded-2xl border px-4 py-2.5 shadow-sm transition-colors">
+          <Search className="text-muted-foreground size-4 shrink-0" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            className="text-foreground placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
+          />
+        </div>
+
+        {/* Category dropdown — mobile only */}
+        <div className="relative shrink-0 sm:hidden">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            aria-label={t('all')}
+            className="border-border bg-card text-foreground focus:border-brand-gold/50 h-full appearance-none rounded-2xl border py-2.5 pr-9 pl-4 text-sm font-semibold shadow-sm transition-colors outline-none"
+          >
+            {EXPLORE_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat === 'All' ? t('all') : cat}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
+        </div>
       </div>
 
-      {/* Category filter */}
+      {/* Category filter chips — desktop only */}
       <div
         className={cn(
-          'mb-6 flex flex-wrap gap-2 transition-all duration-500 ease-out',
+          'mb-6 hidden flex-wrap gap-2 transition-all duration-500 ease-out sm:flex',
           mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         )}
         style={{ transitionDelay: mounted ? '80ms' : '0ms' }}

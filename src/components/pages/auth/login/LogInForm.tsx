@@ -21,7 +21,7 @@ export default function LogInForm() {
   const isMounted = useRef(true);
 
   const rawRole = searchParams.get('role');
-  const portal =
+  const role =
     rawRole === 'educator' ? ('educator' as const) : ('learner' as const);
   useEffect(() => {
     // StrictMode unmounts/remounts in dev — re-arm the flag on every mount,
@@ -43,7 +43,7 @@ export default function LogInForm() {
       try {
         const user = await login(
           { email: value.email, password: value.password },
-          { portal },
+          { role: role },
         );
         const from = searchParams.get('from');
         router.replace(from ?? resolveHome(user));
@@ -142,7 +142,7 @@ export default function LogInForm() {
           )}
         </form.Field>
         <Link
-          href={`/auth/forgot-password?role=${portal}`}
+          href={`/auth/forgot-password?role=${role}`}
           className="3xl:text-lg text-brand-gold text-sm font-semibold transition-opacity hover:opacity-75 2xl:text-base"
         >
           Forgot password?

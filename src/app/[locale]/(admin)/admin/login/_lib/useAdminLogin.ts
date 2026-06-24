@@ -18,7 +18,7 @@ export function useAdminLogin() {
       try {
         await login(
           { email: value.email, password: value.password },
-          { portal: 'admin' },
+          { role: 'admin' },
         );
         router.replace('/admin');
       } catch (error) {
