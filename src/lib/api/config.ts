@@ -1,18 +1,26 @@
 // ─── Base URL ─────────────────────────────────────────────────────────────────
 const DEFAULT_API_BASE_URL = 'http://localhost:4000';
 
-export const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL
-).replace(/\/+$/, '');
+const publicBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// A missing public base URL is a hard error in production — but only at *runtime*.
+// Throwing at module-evaluation would also abort `next build` (which evaluates this
+// module while collecting page data, with NODE_ENV==='production'), so the build
+// phase is excluded. Set NEXT_PUBLIC_API_BASE_URL in your deploy env to silence this.
 if (
-  !process.env.NEXT_PUBLIC_API_BASE_URL &&
-  process.env.NODE_ENV === 'production'
+  !publicBaseUrl &&
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PHASE !== 'phase-production-build'
 ) {
   throw new Error(
     '[config] NEXT_PUBLIC_API_BASE_URL must be set in production',
   );
 }
+
+export const API_BASE_URL = (publicBaseUrl ?? DEFAULT_API_BASE_URL).replace(
+  /\/+$/,
+  '',
+);
 
 // ─── API config ───────────────────────────────────────────────────────────────
 export const API_CONFIG = {
