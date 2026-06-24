@@ -128,10 +128,18 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
     },
   };
 
-  const { navItems, rootHref, roleChip, user, learnMoreHref, logoutHref } =
-    ROLE_CONFIG[role];
-  const settingsHref = `${rootHref}/settings`;
-  const profileHref = `${rootHref}/profile`;
+  const {
+    navItems,
+    rootHref,
+    roleChip,
+    user,
+    learnMoreHref,
+    logoutHref,
+    settingsHref: settingsHrefOverride,
+    profileHref: profileHrefOverride,
+  } = ROLE_CONFIG[role];
+  const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
+  const profileHref = profileHrefOverride ?? `${rootHref}/profile`;
 
   return (
     <aside

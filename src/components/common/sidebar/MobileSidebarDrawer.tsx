@@ -11,8 +11,6 @@ import {
   Award,
   DollarSign,
   Compass,
-  TrendingUp,
-  Brain,
   Settings,
   HelpCircle,
   LogOut,
@@ -48,6 +46,7 @@ interface MobileRoleConfig {
   user: { name: string; email: string; initials: string };
   learnMoreHref?: string;
   logoutHref: string;
+  settingsHref?: string;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -65,23 +64,22 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
   const MOBILE_CONFIG: Record<SidebarRole, MobileRoleConfig> = {
     learner: {
       navItems: [
-        { href: '/dashboard', icon: LayoutDashboard, label: tNav('dashboard') },
+        { href: '/dashboard', icon: LayoutDashboard, label: tNav('overview') },
         {
           href: '/my-learning',
           icon: BookOpen,
           label: tNav('myLearning'),
           badge: 3,
         },
-        { href: '/explore', icon: Compass, label: tNav('explore') },
-        { href: '/progress', icon: TrendingUp, label: tNav('progress') },
-        { href: '/quizzes', icon: Brain, label: tNav('quizzes'), badge: 2 },
         { href: '/certificates', icon: Award, label: tNav('certificates') },
+        { href: '/explore', icon: Compass, label: tNav('exploreCourses') },
       ],
       rootHref: '/dashboard',
       roleLabel: MOCK_USER.role,
       roleIcon: BookOpen,
       user: MOCK_USER,
       logoutHref: '/auth',
+      settingsHref: '/settings',
     },
     educator: {
       navItems: [
@@ -144,9 +142,10 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
     user,
     learnMoreHref,
     logoutHref,
+    settingsHref: settingsHrefOverride,
   } = MOBILE_CONFIG[role];
 
-  const settingsHref = `${rootHref}/settings`;
+  const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
 
   // Close on Escape
   useEffect(() => {
