@@ -1227,7 +1227,7 @@ function QuizOption({
       onClick={() => onSelect(index)}
       disabled={revealed}
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all duration-150',
+        'flex w-full items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all duration-150 sm:gap-3 sm:px-4 sm:py-3.5',
         ring,
       )}
     >
@@ -1362,44 +1362,46 @@ function QuizPanel({ item }: { item: QuizItem }) {
 
   // ── Question screen ─────────────────────────────────────────────────────────
   return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border">
-      {/* Header */}
-      <div className="border-border/60 border-b px-6 pt-6 pb-4">
-        <p className="text-muted-foreground text-sm">
+    <div className="border-border bg-card flex max-h-full flex-col overflow-hidden rounded-2xl border">
+      {/* Header (pinned) */}
+      <div className="border-border/60 shrink-0 border-b px-5 pt-4 pb-2.5 sm:px-6 sm:pt-6 sm:pb-4">
+        <p className="text-muted-foreground text-xs sm:text-sm">
           Quiz for {item.forLesson}
         </p>
-        <h2 className="text-foreground mt-1 text-2xl font-bold">
+        <h2 className="text-foreground mt-0.5 text-lg font-bold sm:mt-1 sm:text-2xl">
           {item.title}
         </h2>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:mt-3 sm:gap-2">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs">
             Question {currentQ + 1} of {item.totalQuestions}
           </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs">
             {item.estimatedMinutes} Minutes
           </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
+          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs">
             Single Choice
           </span>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="bg-muted/40 h-1.5 w-full">
+      {/* Progress bar (pinned) */}
+      <div className="bg-muted/40 h-1.5 w-full shrink-0">
         <div
           className="bg-brand-gold h-full transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      {/* Question */}
-      <div className="px-6 pt-6 pb-4">
-        <h3 className="text-foreground text-xl font-bold">
+      {/* Question + options — the only scrolling region */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-4 sm:px-6 sm:pt-6">
+        <h3 className="text-foreground text-base font-bold sm:text-xl">
           {question.question}
         </h3>
-        <p className="text-muted-foreground mt-1 text-sm">Choose one answer.</p>
+        <p className="text-muted-foreground mt-0.5 text-xs sm:mt-1 sm:text-sm">
+          Choose one answer.
+        </p>
 
-        <div className="mt-5 space-y-3">
+        <div className="mt-3 space-y-2 sm:mt-5 sm:space-y-3">
           {question.options.map((opt: string, i: number) => (
             <QuizOption
               key={i}
@@ -1437,8 +1439,8 @@ function QuizPanel({ item }: { item: QuizItem }) {
         )}
       </div>
 
-      {/* Nav footer */}
-      <div className="border-border/60 flex items-center justify-between border-t px-6 py-4">
+      {/* Nav footer (pinned — always reachable without scrolling) */}
+      <div className="border-border/60 bg-card flex shrink-0 items-center justify-between border-t px-5 py-3.5 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={goBack}
@@ -1542,11 +1544,11 @@ function AssignmentPanel({ item }: { item: AssignmentItem }) {
   return (
     <div className="border-border bg-card overflow-hidden rounded-2xl border">
       {/* Header */}
-      <div className="border-border/60 border-b px-6 pt-6 pb-5">
+      <div className="border-border/60 border-b px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
         <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
           Assignment
         </span>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
+        <h2 className="text-foreground mt-3 text-xl font-bold sm:text-2xl">
           {item.title}
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
@@ -1554,17 +1556,20 @@ function AssignmentPanel({ item }: { item: AssignmentItem }) {
         </p>
       </div>
 
-      <div className="space-y-5 px-6 py-5">
-        {/* Meta row */}
-        <div className="grid gap-3 sm:grid-cols-3">
+      <div className="space-y-4 px-5 py-4 sm:space-y-5 sm:px-6 sm:py-5">
+        {/* Meta row — compact rows on mobile, cards on desktop */}
+        <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
           {[
             { label: 'Lesson', value: item.forLesson },
             { label: 'Due date', value: `Due ${item.dueDate}` },
             { label: 'Submission', value: item.submission },
           ].map(({ label, value }) => (
-            <div key={label} className="border-border rounded-xl border p-4">
-              <p className="text-muted-foreground text-xs">{label}</p>
-              <p className="text-foreground mt-1 text-sm font-semibold">
+            <div
+              key={label}
+              className="border-border flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5 sm:flex-col sm:items-start sm:py-4"
+            >
+              <p className="text-muted-foreground shrink-0 text-xs">{label}</p>
+              <p className="text-foreground text-right text-sm font-semibold sm:mt-1 sm:text-left">
                 {value}
               </p>
             </div>

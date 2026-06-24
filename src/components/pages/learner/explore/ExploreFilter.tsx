@@ -100,11 +100,11 @@ function CourseCard({
       style={{ transitionDelay: active ? `${delay}ms` : '0ms' }}
     >
       {/* Thumbnail */}
-      <div className="relative flex h-44 shrink-0 flex-col items-center justify-center overflow-hidden">
+      <div className="relative flex h-28 shrink-0 flex-col items-center justify-center overflow-hidden sm:h-44">
         {/* Scaleable bg gradient */}
         <div
           className={cn(
-            'absolute inset-0 bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-[1.04]',
+            'absolute inset-0 bg-linear-to-br transition-transform duration-500 ease-out group-hover:scale-[1.04]',
             isMixed ? MIXED_BG : TEXT_BG,
           )}
         />
@@ -127,7 +127,7 @@ function CourseCard({
           <div className="relative z-10 text-slate-300 transition-transform duration-300 group-hover:scale-110 dark:text-slate-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="size-12"
+              className="size-9 sm:size-12"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -142,7 +142,7 @@ function CourseCard({
           </div>
         ) : (
           <FileText
-            className="relative z-10 size-12 text-emerald-400 transition-transform duration-300 group-hover:scale-110 dark:text-emerald-500"
+            className="relative z-10 size-9 text-emerald-400 transition-transform duration-300 group-hover:scale-110 sm:size-12 dark:text-emerald-500"
             strokeWidth={1}
           />
         )}
@@ -170,40 +170,42 @@ function CourseCard({
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-3 sm:p-5">
         {/* Meta row */}
         <div className="mb-2 flex items-center gap-2 text-xs">
-          <span className="border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
+          <span className="border-border text-muted-foreground hidden rounded-full border px-2.5 py-0.5 text-[11px] font-medium sm:inline-block">
             {course.category}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex shrink-0 items-center gap-1">
             <Star className="size-3.5 fill-amber-400 text-amber-400" />
             <span className="text-foreground font-semibold">
               {course.rating}
             </span>
           </span>
-          <span className="text-muted-foreground flex items-center gap-1">
-            <Clock className="size-3.5" />
-            {course.courseType === 'text-image' && course.documents
-              ? t('documents', { count: String(course.documents) })
-              : t('hours', { count: String(course.hours) })}
+          <span className="text-muted-foreground flex min-w-0 items-center gap-1">
+            <Clock className="size-3.5 shrink-0" />
+            <span className="truncate">
+              {course.courseType === 'text-image' && course.documents
+                ? t('documents', { count: String(course.documents) })
+                : t('hours', { count: String(course.hours) })}
+            </span>
           </span>
         </div>
 
         {/* Title */}
-        <p className="text-foreground group-hover:text-brand-gold mb-1 text-sm leading-snug font-bold transition-colors duration-200">
+        <p className="text-foreground group-hover:text-brand-gold mb-1 line-clamp-2 text-sm leading-snug font-bold transition-colors duration-200">
           {course.title}
         </p>
 
         {/* Description */}
         {course.description && (
-          <p className="text-muted-foreground mb-2 line-clamp-2 text-xs leading-relaxed">
+          <p className="text-muted-foreground mb-2 hidden text-xs leading-relaxed sm:line-clamp-2">
             {course.description}
           </p>
         )}
 
         {/* Author */}
-        <p className="text-muted-foreground mb-4 text-xs">
+        <p className="text-muted-foreground mb-4 truncate text-xs">
           {t('writtenBy', { name: course.author })}
         </p>
 
@@ -212,7 +214,7 @@ function CourseCard({
           <span className="text-muted-foreground text-xs line-through">
             ${originalPrice}
           </span>
-          <span className="bg-brand-gold/15 text-brand-gold rounded-full px-2 py-0.5 text-[11px] font-semibold">
+          <span className="bg-brand-gold/15 text-brand-gold hidden rounded-full px-2 py-0.5 text-[11px] font-semibold sm:inline-block">
             {t('save', { amount: String(savings) })}
           </span>
           <span className="text-foreground ml-auto text-base font-black">
@@ -221,18 +223,18 @@ function CourseCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {isEnrolled ? (
             <button
               onClick={() => (window.location.href = '/my-learning')}
-              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-navy flex-1 rounded-xl py-2.5 text-sm font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95"
+              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-navy flex-1 rounded-xl py-2 text-sm font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95 sm:py-2.5"
             >
               {t('continueCourse')}
             </button>
           ) : (
             <button
               onClick={() => onEnroll(course)}
-              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-navy flex-1 rounded-xl py-2.5 text-sm font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95"
+              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-navy flex-1 rounded-xl py-2 text-sm font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95 sm:py-2.5"
             >
               {t('enroll')}
             </button>
@@ -241,7 +243,7 @@ function CourseCard({
             onClick={() => onSave(course.id)}
             aria-label={isSaved ? 'Remove bookmark' : 'Save course'}
             className={cn(
-              'flex size-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-150 hover:scale-110 active:scale-95',
+              'flex size-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-150 hover:scale-110 active:scale-95 sm:size-10',
               isSaved
                 ? 'border-brand-gold bg-brand-gold/10 text-brand-gold'
                 : 'border-border text-muted-foreground hover:border-brand-gold/50 hover:text-brand-gold',
@@ -262,12 +264,16 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
 
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const [showSaved, setShowSaved] = useState(false);
   const [enrolled, setEnrolled] = useState<string[]>(() =>
     readList(LS_ENROLLED),
   );
   const [saved, setSaved] = useState<string[]>(() => readList(LS_SAVED));
   const [enrollingCourse, setEnrollingCourse] = useState<Course | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Avoid SSR/CSR mismatch: the saved count is only known after mount.
+  const savedCount = mounted ? saved.length : 0;
 
   useEffect(() => {
     const id = setTimeout(() => setMounted(true), 60);
@@ -289,14 +295,16 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
   }, []);
 
   const filtered = courses.filter((c) => {
-    const matchCat = category === 'All' || c.category === category;
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
       c.title.toLowerCase().includes(q) ||
       c.author.toLowerCase().includes(q) ||
       c.category.toLowerCase().includes(q);
-    return matchCat && matchSearch;
+    if (!matchSearch) return false;
+    // Saved view is a cross-category collection, so it ignores the category filter.
+    if (showSaved) return saved.includes(c.id);
+    return category === 'All' || c.category === category;
   });
 
   return (
@@ -365,20 +373,51 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
       {/* Section header */}
       <div
         className={cn(
-          'mb-4 transition-all duration-500 ease-out',
+          'mb-4 flex items-end justify-between gap-3 transition-all duration-500 ease-out',
           mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         )}
         style={{ transitionDelay: mounted ? '140ms' : '0ms' }}
       >
-        <h2 className="text-foreground text-base font-bold">
-          {t('availableTitle')}
-        </h2>
-        <p className="text-muted-foreground text-sm">{t('availableDesc')}</p>
+        <div className="min-w-0">
+          <h2 className="text-foreground text-base font-bold">
+            {showSaved ? t('savedTitle') : t('availableTitle')}
+          </h2>
+          <p className="text-muted-foreground truncate text-sm">
+            {showSaved ? t('savedDesc') : t('availableDesc')}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowSaved((v) => !v)}
+          aria-pressed={showSaved}
+          className={cn(
+            'flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-150',
+            showSaved
+              ? 'border-brand-gold text-brand-gold bg-brand-gold/5'
+              : 'border-border text-muted-foreground hover:border-brand-gold/50 hover:text-foreground',
+          )}
+        >
+          <Bookmark className={cn('size-4', showSaved && 'fill-brand-gold')} />
+          <span className="hidden sm:inline">{t('saved')}</span>
+          {savedCount > 0 && (
+            <span
+              className={cn(
+                'rounded-full px-1.5 text-xs font-bold tabular-nums',
+                showSaved
+                  ? 'bg-brand-gold/15 text-brand-gold'
+                  : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {savedCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Grid */}
       {filtered.length > 0 ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {filtered.map((course, i) => (
             <CourseCard
               key={course.id}
@@ -394,8 +433,8 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground py-16 text-center text-sm">
-          {t('noResults')}
+        <p className="text-muted-foreground mx-auto max-w-md py-16 text-center text-sm">
+          {showSaved && !search.trim() ? t('noSaved') : t('noResults')}
         </p>
       )}
 
