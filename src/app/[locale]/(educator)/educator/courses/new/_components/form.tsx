@@ -2,7 +2,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 export const inputCls =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20';
+  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-blue-900 dark:focus:border-amber-400 focus:ring-1 focus:ring-blue-900/20 dark:focus:ring-amber-400/20';
 
 export const selectCls = cn(inputCls, 'appearance-none cursor-pointer pr-8');
 

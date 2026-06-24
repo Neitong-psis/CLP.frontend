@@ -168,7 +168,7 @@ function ImageBlock({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="border-border text-muted-foreground flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-xs transition hover:border-blue-400 hover:text-blue-600"
+          className="border-border text-muted-foreground flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-xs transition hover:border-blue-900 hover:text-blue-950 dark:hover:border-amber-400 dark:hover:text-amber-400"
         >
           <ImageIcon className="h-5 w-5" />
           {t('content.section.imageClickUpload')}
@@ -243,7 +243,7 @@ function QuizEditor({
                   'px-3 py-1.5 transition-colors',
                   i > 0 && 'border-border border-l',
                   section.answerFormat === fmt
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-950 text-white dark:bg-amber-400 dark:text-gray-900'
                     : 'text-muted-foreground hover:bg-muted/40',
                 )}
               >
@@ -269,7 +269,7 @@ function QuizEditor({
               className={cn(
                 'animate-fade-in flex items-center gap-2.5 rounded-lg border px-3 py-2 transition-colors',
                 opt.correct
-                  ? 'border-blue-200 bg-blue-50/50'
+                  ? 'border-blue-900/40 bg-blue-950/10 dark:border-amber-400/40 dark:bg-amber-400/10'
                   : 'border-border/50 focus-within:border-border',
               )}
             >
@@ -278,7 +278,7 @@ function QuizEditor({
                 name={isSingle ? `correct-${section.id}` : undefined}
                 checked={opt.correct}
                 onChange={(e) => setCorrect(i, e.target.checked)}
-                className="h-3.5 w-3.5 accent-blue-600"
+                className="h-3.5 w-3.5 accent-blue-950 dark:accent-amber-400"
               />
               <input
                 type="text"
@@ -325,7 +325,7 @@ function QuizEditor({
               ],
             })
           }
-          className="mt-2 flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:opacity-75"
+          className="mt-2 flex items-center gap-1 text-xs font-semibold text-blue-950 transition hover:opacity-75 dark:text-amber-400"
         >
           <Plus className="h-3 w-3" /> {t('content.section.quizAddOption')}
         </button>

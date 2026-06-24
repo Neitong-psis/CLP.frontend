@@ -135,7 +135,7 @@ export function PreviewPublishStep({
                     {info.level}
                   </span>
                 )}
-                <span className="rounded-md bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                <span className="rounded-md bg-blue-950 px-2.5 py-0.5 text-xs font-semibold text-white dark:bg-amber-400">
                   {info.pricingType === 'free'
                     ? t('publish.freeBadge')
                     : `${t('publish.paidBadge')} ${priceLabel(info)}`}
@@ -184,7 +184,7 @@ export function PreviewPublishStep({
             </FormField>
             <FormField label={t('publish.draftBehavior')}>
               <div className="flex items-center gap-3 pt-1.5">
-                <span className="relative inline-flex h-5 w-9 items-center rounded-full bg-blue-600">
+                <span className="relative inline-flex h-5 w-9 items-center rounded-full bg-blue-950 dark:bg-amber-400">
                   <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
                 </span>
                 <span className="text-muted-foreground text-xs">

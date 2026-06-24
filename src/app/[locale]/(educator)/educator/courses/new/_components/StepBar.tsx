@@ -58,13 +58,13 @@ export function StepBar({
                   className={cn(
                     'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300',
                     isActive &&
-                      'bg-blue-600 text-white ring-4 ring-blue-600/20',
+                      'bg-blue-950 text-white ring-4 ring-blue-950/20 dark:bg-amber-400 dark:text-gray-900 dark:ring-amber-400/30',
                     isComplete &&
-                      'bg-blue-600 text-white group-hover:bg-blue-700',
+                      'bg-blue-950 text-white group-hover:bg-blue-900 dark:bg-amber-400 dark:text-gray-900 dark:group-hover:bg-amber-300',
                     reached &&
                       !isActive &&
                       !isComplete &&
-                      'bg-blue-50 text-blue-600 ring-1 ring-blue-200 group-hover:bg-blue-100 dark:bg-blue-500/10 dark:ring-blue-500/30 dark:group-hover:bg-blue-500/20',
+                      'bg-blue-950/10 text-blue-950 ring-1 ring-blue-900/40 group-hover:bg-blue-950/15 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/40 dark:group-hover:bg-amber-400/20',
                     !reached &&
                       'bg-muted text-muted-foreground ring-border ring-1',
                   )}
@@ -95,7 +95,7 @@ export function StepBar({
                 <div className="bg-border mx-2 h-0.5 flex-1 overflow-hidden rounded-full sm:mx-4">
                   <div
                     className={cn(
-                      'h-full rounded-full bg-blue-600 transition-all duration-500 ease-out',
+                      'h-full rounded-full bg-blue-950 transition-all duration-500 ease-out dark:bg-amber-400',
                       current > n ? 'w-full' : 'w-0',
                     )}
                   />
@@ -108,7 +108,7 @@ export function StepBar({
 
       <div className="bg-muted mt-4 hidden h-1 overflow-hidden rounded-full sm:block">
         <div
-          className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"
+          className="h-full rounded-full bg-blue-950 transition-all duration-500 ease-out dark:bg-amber-400"
           style={{ width: `${progress}%` }}
         />
       </div>

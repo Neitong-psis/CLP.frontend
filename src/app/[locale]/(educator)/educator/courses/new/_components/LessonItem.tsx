@@ -97,7 +97,7 @@ export function LessonItem({
                     key={type}
                     type="button"
                     onClick={() => onAddSection(type)}
-                    className="border-border bg-card text-muted-foreground flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:border-blue-400 hover:text-blue-600 active:scale-95"
+                    className="border-border bg-card text-muted-foreground flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:border-blue-900 hover:text-blue-950 active:scale-95 dark:hover:border-amber-400 dark:hover:text-amber-400"
                   >
                     <Icon className="h-3 w-3" />
                     {t(`content.section.${type}`)}

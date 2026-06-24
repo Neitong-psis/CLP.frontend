@@ -35,7 +35,7 @@ export function CourseContentStep({
         <Button
           variant="default"
           size="sm"
-          className="shrink-0 gap-1.5 bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500"
+          className="shrink-0 gap-1.5 bg-blue-950 hover:bg-blue-900 focus-visible:ring-blue-950 dark:bg-amber-400 dark:text-gray-900 dark:hover:bg-amber-300 dark:focus-visible:ring-amber-400"
           onClick={onAddModule}
         >
           <Plus className="h-3.5 w-3.5" /> {t('content.addModule')}

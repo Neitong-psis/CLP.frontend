@@ -88,7 +88,7 @@ export function WizardFooter({
           {!isLast ? (
             <Button
               variant="default"
-              className="gap-2 bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500"
+              className="gap-2 bg-blue-950 hover:bg-blue-900 focus-visible:ring-blue-950 dark:bg-amber-400 dark:text-gray-900 dark:hover:bg-amber-300 dark:focus-visible:ring-amber-400"
               onClick={onNext}
             >
               {t('footer.continue')}
@@ -97,7 +97,7 @@ export function WizardFooter({
           ) : (
             <Button
               variant="default"
-              className="gap-2 bg-blue-600 hover:bg-blue-700 focus-visible:ring-blue-500 disabled:opacity-50"
+              className="gap-2 bg-blue-950 hover:bg-blue-900 focus-visible:ring-blue-950 disabled:opacity-50 dark:bg-amber-400 dark:text-gray-900 dark:hover:bg-amber-300 dark:focus-visible:ring-amber-400"
               onClick={onSubmit}
               disabled={!canSubmit}
               title={canSubmit ? undefined : t('footer.completeRequired')}

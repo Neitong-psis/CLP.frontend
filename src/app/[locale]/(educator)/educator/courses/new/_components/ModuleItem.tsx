@@ -73,7 +73,7 @@ export function ModuleItem({
             mod.expanded && 'rotate-180',
           )}
         />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-600">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/10 text-xs font-bold text-blue-950 dark:bg-amber-400/10 dark:text-amber-400">
           {modIndex + 1}
         </span>
         <div className="min-w-0 flex-1">
@@ -124,7 +124,7 @@ export function ModuleItem({
           <button
             type="button"
             onClick={addLesson}
-            className="border-border text-muted-foreground flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-xs font-semibold transition hover:border-blue-400 hover:bg-blue-500/10 hover:text-blue-600 active:scale-[0.99]"
+            className="border-border text-muted-foreground flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-xs font-semibold transition hover:border-blue-900 hover:bg-blue-950/10 hover:text-blue-950 active:scale-[0.99] dark:hover:border-amber-400 dark:hover:bg-amber-400/10 dark:hover:text-amber-400"
           >
             <Plus className="h-3.5 w-3.5" /> {t('content.module.addLesson')}
           </button>

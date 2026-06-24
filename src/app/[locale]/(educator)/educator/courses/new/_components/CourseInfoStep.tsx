@@ -130,13 +130,13 @@ function InlineAddButton({
             setOpen(false);
           }
         }}
-        className="text-foreground/80 w-24 rounded-lg border border-blue-500 px-2 py-1.75 text-xs ring-1 ring-blue-500/20 outline-none"
+        className="text-foreground/80 w-24 rounded-lg border border-blue-900 px-2 py-1.75 text-xs ring-1 ring-blue-900/20 outline-none dark:border-amber-400 dark:ring-amber-400/20"
       />
       <button
         type="button"
         onClick={confirm}
         disabled={!draft.trim()}
-        className="border-border flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border text-blue-600 transition hover:bg-blue-500/10 disabled:opacity-30"
+        className="border-border flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border text-blue-950 transition hover:bg-blue-950/10 disabled:opacity-30 dark:text-amber-400 dark:hover:bg-amber-400/10"
       >
         <Check className="h-3.5 w-3.5" />
       </button>
@@ -211,8 +211,8 @@ function LivePreviewCard({
             readImage(e.dataTransfer.files?.[0]);
           }}
           className={cn(
-            'group/thumb bg-muted/50 relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset',
-            dragging && 'ring-2 ring-blue-500 ring-inset',
+            'group/thumb bg-muted/50 relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden transition outline-none focus-visible:ring-2 focus-visible:ring-blue-950 focus-visible:ring-inset dark:focus-visible:ring-amber-400',
+            dragging && 'ring-2 ring-blue-950 ring-inset dark:ring-amber-400',
           )}
         >
           {info.thumbnail ? (
@@ -310,7 +310,7 @@ function LivePreviewCard({
             <span className="text-foreground text-[19px] font-semibold tracking-[-0.01em]">
               {priceLabel(info)}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-[12px] font-medium text-white transition-colors group-hover:bg-blue-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-950 px-4 py-2 text-[12px] font-medium text-white transition-colors group-hover:bg-blue-900 dark:bg-amber-400 dark:text-gray-900 dark:group-hover:bg-amber-300">
               {t('info.enroll')}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
@@ -482,7 +482,7 @@ export function CourseInfoStep({
               <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">
                 {t('info.price')}
               </label>
-              <div className="border-border bg-card flex overflow-hidden rounded-lg border transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20">
+              <div className="border-border bg-card flex overflow-hidden rounded-lg border transition focus-within:border-blue-900 focus-within:ring-1 focus-within:ring-blue-900/20 dark:focus-within:border-amber-400 dark:focus-within:ring-amber-400/20">
                 <span className="border-border bg-muted/40 text-muted-foreground border-r px-3 py-2 text-sm">
                   $
                 </span>
