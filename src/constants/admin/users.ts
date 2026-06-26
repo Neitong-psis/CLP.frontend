@@ -1,4 +1,4 @@
-import type { UserRole, UserStatus } from '@/constants/admin';
+import type { InviteStatus, UserRole, UserStatus } from '@/constants/admin';
 
 export const PAGE_SIZE = 10;
 
@@ -31,6 +31,33 @@ export const STATUS_COLOR = {
   Inactive: 'border-orange-500/20 bg-orange-500/10 text-orange-500',
   Suspended: 'border-rose-500/20 bg-rose-500/10 text-rose-500',
 } satisfies Record<UserStatus, string>;
+
+/** Invitation badge colors — alpha-based, theme-compatible. */
+export const INVITE_COLOR = {
+  Approved: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
+  Pending: 'border-amber-500/20 bg-amber-500/10 text-amber-500',
+} satisfies Record<InviteStatus, string>;
+
+/** Solid dot colors for the filter facets (role / status / invitation). */
+export const ROLE_DOT = {
+  Learner: 'bg-blue-500',
+  Educator: 'bg-emerald-500',
+  Admin: 'bg-violet-500',
+} satisfies Record<UserRole, string>;
+
+export const STATUS_DOT = {
+  Active: 'bg-emerald-500',
+  Achieved: 'bg-amber-500',
+  Inactive: 'bg-orange-500',
+  Suspended: 'bg-rose-500',
+} satisfies Record<UserStatus, string>;
+
+export const INVITE_DOT = {
+  Approved: 'bg-emerald-500',
+  Pending: 'bg-amber-500',
+} satisfies Record<InviteStatus, string>;
+
+export const INVITE_STATUSES: InviteStatus[] = ['Approved', 'Pending'];
 
 /** Shared cancel-button className used in every modal footer. */
 export const CANCEL_BTN_CLS =

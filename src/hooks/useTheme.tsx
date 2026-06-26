@@ -9,9 +9,7 @@ import {
 } from 'react';
 
 const THEME_KEY = 'theme';
-// Also stored as a non-httpOnly cookie so the server can read it during SSR
-// and set the initial `dark` class on <html> — eliminating theme FOUC without
-// any inline <script> (which React 19 warns about).
+
 export const THEME_COOKIE = 'qb_theme';
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
@@ -43,7 +41,6 @@ function getInitialTheme(): Theme {
 
 function persistTheme(theme: Theme): void {
   localStorage.setItem(THEME_KEY, theme);
-  // Write to cookie so Next.js server components can read it on next request
   document.cookie = `${THEME_COOKIE}=${theme};path=/;max-age=${THEME_COOKIE_MAX_AGE};samesite=lax`;
 }
 

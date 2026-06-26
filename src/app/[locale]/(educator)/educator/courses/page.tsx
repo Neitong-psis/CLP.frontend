@@ -7,11 +7,7 @@ export default async function EducatorCoursesPage() {
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <EducatorTopBar
-        role="educator"
-        title={t('title')}
-        subtitle={t('subtitle')}
-      />
+      <EducatorTopBar role="educator" title={t('title')} />
 
       <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8">
         <CourseWorkspace />

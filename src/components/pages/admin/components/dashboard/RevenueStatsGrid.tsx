@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -7,7 +9,16 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useAdminRevenueT } from '@/i18n';
 import { REVENUE_STATS } from '@/constants/admin';
+
+/** Translation keys aligned to REVENUE_STATS order. */
+const STAT_LABEL_KEYS = [
+  'statAnnualRevenue',
+  'statThisMonth',
+  'statMRR',
+  'statAOV',
+] as const;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,12 +78,13 @@ function RevenueStatCard({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function RevenueStatsGrid() {
+  const t = useAdminRevenueT();
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {REVENUE_STATS.map(({ label, value, change }, i) => (
         <RevenueStatCard
           key={label}
-          label={label}
+          label={t(STAT_LABEL_KEYS[i]!)}
           value={value}
           change={change}
           {...ICON_CONFIG[i]}

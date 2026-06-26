@@ -12,6 +12,8 @@ import {
   Play,
   ClipboardList,
   ClipboardCheck,
+  Folder,
+  Check,
   Layers,
   BookOpen,
   MoreVertical,
@@ -35,7 +37,6 @@ import Logo from '@/components/common/Logo';
 import { EDUCATOR_USER, type CourseTask } from '@/constants/educator';
 import {
   REVIEW_MODULES,
-  ITEM_STATUS_STYLE,
   flattenItems,
   lessonCount,
   type ReviewItem,
@@ -382,56 +383,55 @@ function ModuleCard({
   activeId,
   onToggle,
   onSelect,
-  t,
 }: {
   module: ReviewModule;
   isOpen: boolean;
   activeId: string;
   onToggle: () => void;
   onSelect: (id: string) => void;
-  t: TFn;
 }) {
-  const count = lessonCount(module);
   return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border shadow-sm">
+    <div className="py-0.5">
+      {/* Module row */}
       <button
         onClick={onToggle}
         aria-expanded={isOpen}
-        className="hover:bg-muted/40 flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors"
+        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
       >
-        <span className="bg-brand-gold/15 text-brand-gold flex size-8 shrink-0 items-center justify-center rounded-xl">
-          <Layers className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-foreground truncate text-sm font-bold">
-            {module.title}
-          </p>
-          <p className="text-muted-foreground mt-0.5 text-[11px]">
-            {count} {t('lessonsCreatedBy')}
-          </p>
-        </div>
         <ChevronDown
           className={cn(
-            'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
+            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
             isOpen && 'rotate-180',
           )}
         />
+        <span className="bg-brand-gold/20 flex size-7 shrink-0 items-center justify-center rounded-full">
+          <Layers className="text-brand-gold size-3.5" />
+        </span>
+        <span className="text-foreground min-w-0 flex-1 truncate text-sm font-bold">
+          {module.title}
+        </span>
       </button>
 
-      {isOpen && (
-        <div className="border-border/60 border-t px-2 pb-2">
-          {module.lessons.map((lesson, idx) => (
-            <LessonCard
-              key={lesson.id}
-              lesson={lesson}
-              index={idx}
-              activeId={activeId}
-              onSelect={onSelect}
-              t={t}
-            />
-          ))}
+      {/* Lessons — animated tree */}
+      <div
+        className={cn(
+          'grid transition-[grid-template-rows] duration-200 ease-in-out',
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="border-muted-foreground/20 relative ml-[18px] border-l pb-1 pl-5">
+            {module.lessons.map((lesson) => (
+              <LessonCard
+                key={lesson.id}
+                lesson={lesson}
+                activeId={activeId}
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -440,149 +440,129 @@ function ModuleCard({
 
 function LessonCard({
   lesson,
-  index,
   activeId,
   onSelect,
-  t,
 }: {
   lesson: ReviewLesson;
-  index: number;
   activeId: string;
   onSelect: (id: string) => void;
-  t: TFn;
 }) {
   const [open, setOpen] = useState(true);
-  const hasVideo = lesson.videos.length > 0;
-  const LessonIcon = hasVideo ? Play : FileText;
-  const totalItems =
-    lesson.documents.length +
-    lesson.videos.length +
-    lesson.quizzes.length +
-    lesson.assignments.length;
+  const allItems: ReviewItem[] = [
+    ...lesson.documents,
+    ...lesson.videos,
+    ...lesson.quizzes,
+    ...lesson.assignments,
+  ];
 
   return (
-    <div className="mt-1.5">
+    <div className="relative py-0.5">
+      {/* Horizontal branch connector */}
+      <div className="bg-muted-foreground/20 absolute top-[18px] -left-5 h-px w-4" />
+
+      {/* Lesson row */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="hover:bg-muted/50 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
+        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
       >
-        <span className="bg-muted text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold">
-          {index + 1}
-        </span>
-        <LessonIcon className="text-muted-foreground h-3 w-3 shrink-0" />
-        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
-          {lesson.title}
-        </span>
-        <span className="text-muted-foreground shrink-0 text-[10px]">
-          {totalItems}
-        </span>
         <ChevronDown
           className={cn(
             'text-muted-foreground h-3 w-3 shrink-0 transition-transform duration-200',
             open && 'rotate-180',
           )}
         />
+        <span className="bg-brand-gold/20 flex size-6 shrink-0 items-center justify-center rounded-full">
+          <Folder className="text-brand-gold size-3" />
+        </span>
+        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
+          {lesson.title}
+        </span>
       </button>
 
-      {open && (
-        <div className="border-border/60 ml-4 border-l pl-2">
-          <GroupInCard
-            label={t('textImageLessons')}
-            items={lesson.documents}
-            activeId={activeId}
-            onSelect={onSelect}
-          />
-          <GroupInCard
-            label={t('videoLessons')}
-            items={lesson.videos}
-            activeId={activeId}
-            onSelect={onSelect}
-          />
-          <GroupInCard
-            label={t('quiz')}
-            items={lesson.quizzes}
-            activeId={activeId}
-            onSelect={onSelect}
-          />
-          <GroupInCard
-            label={t('assignment')}
-            items={lesson.assignments}
-            activeId={activeId}
-            onSelect={onSelect}
-          />
+      {/* Items — animated tree */}
+      {allItems.length > 0 && (
+        <div
+          className={cn(
+            'grid transition-[grid-template-rows] duration-200 ease-in-out',
+            open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="border-muted-foreground/20 relative ml-[14px] border-l pb-1 pl-4">
+              {allItems.map((item) => (
+                <TreeItemRow
+                  key={item.id}
+                  item={item}
+                  isActive={item.id === activeId}
+                  onSelect={onSelect}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// ── GroupInCard ───────────────────────────────────────────────────────────────
+// ── TreeItemRow — icon + status overlay ───────────────────────────────────────
 
-function GroupInCard({
-  label,
-  items,
-  activeId,
+function TreeItemRow({
+  item,
+  isActive,
   onSelect,
 }: {
-  label: string;
-  items: ReviewItem[];
-  activeId: string;
+  item: ReviewItem;
+  isActive: boolean;
   onSelect: (id: string) => void;
 }) {
-  if (items.length === 0) return null;
+  const Icon = KIND_ICON[item.kind];
+  const status =
+    item.kind === 'quiz' || item.kind === 'assignment' ? item.status : null;
+
   return (
-    <div className="mt-2 px-2">
-      <p className="text-muted-foreground px-2 py-1 text-[10px] font-semibold tracking-widest uppercase">
-        {label}
-      </p>
-      <ul className="space-y-0.5">
-        {items.map((item) => {
-          const Icon = KIND_ICON[item.kind];
-          const isActive = item.id === activeId;
-          const status =
-            item.kind === 'quiz' || item.kind === 'assignment'
-              ? item.status
-              : null;
-          return (
-            <li key={item.id}>
-              <button
-                onClick={() => onSelect(item.id)}
-                className={cn(
-                  'flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
-                  isActive
-                    ? 'bg-brand-gold/15 text-foreground'
-                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-3.5 w-3.5 shrink-0',
-                    isActive ? 'text-brand-gold' : '',
-                  )}
-                />
-                <span
-                  className={cn(
-                    'min-w-0 flex-1 truncate text-xs',
-                    isActive ? 'text-foreground font-semibold' : 'font-medium',
-                  )}
-                >
-                  {item.title}
-                </span>
-                {status && (
-                  <span
-                    className={cn(
-                      'shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
-                      ITEM_STATUS_STYLE[status],
-                    )}
-                  >
-                    {status}
-                  </span>
-                )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="relative py-0.5">
+      {/* Horizontal branch connector */}
+      <div className="bg-muted-foreground/20 absolute top-[14px] -left-4 h-px w-3" />
+
+      <button
+        onClick={() => onSelect(item.id)}
+        className={cn(
+          'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
+          isActive ? 'bg-brand-gold/10' : 'hover:bg-muted/40',
+        )}
+      >
+        {/* Icon with status overlay */}
+        <div className="relative shrink-0">
+          <Icon
+            className={cn(
+              'size-4',
+              isActive ? 'text-brand-gold' : 'text-brand-gold/70',
+            )}
+          />
+          {status && (
+            <span className="absolute -top-1.5 -right-1.5">
+              {status === 'Ready' && (
+                <Check className="size-2.5 text-green-500" strokeWidth={3} />
+              )}
+              {status === 'Draft' && (
+                <Clock className="size-2.5 text-amber-500" />
+              )}
+            </span>
+          )}
+        </div>
+
+        <span
+          className={cn(
+            'min-w-0 flex-1 truncate text-xs font-medium',
+            isActive
+              ? 'text-foreground font-semibold'
+              : 'text-muted-foreground',
+          )}
+        >
+          {item.title}
+        </span>
+      </button>
     </div>
   );
 }
@@ -682,21 +662,17 @@ function MobileContentsSheet({
             </span>
           </div>
         </div>
-        <div className="flex-1 space-y-2.5 overflow-y-auto px-3 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => {
-            const isOpen = expanded.has(module.id);
-            return (
-              <ModuleCard
-                key={module.id}
-                module={module}
-                isOpen={isOpen}
-                activeId={activeId}
-                onToggle={() => onToggleModule(module.id)}
-                onSelect={onSelect}
-                t={t}
-              />
-            );
-          })}
+        <div className="flex-1 overflow-y-auto px-3 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {modules.map((module) => (
+            <ModuleCard
+              key={module.id}
+              module={module}
+              isOpen={expanded.has(module.id)}
+              activeId={activeId}
+              onToggle={() => onToggleModule(module.id)}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       </div>
     </div>
@@ -741,6 +717,11 @@ function ReviewSidebar({
     return active ? new Set([active.id]) : new Set();
   });
 
+  // all lessons open by default in mini view
+  const [miniLessonExpanded, setMiniLessonExpanded] = useState<Set<string>>(
+    () => new Set(modules.flatMap((m) => m.lessons.map((l) => l.id))),
+  );
+
   const activeModuleId = useMemo(
     () =>
       modules.find((m) => flattenItems([m]).some((i) => i.id === activeId))?.id,
@@ -759,7 +740,7 @@ function ReviewSidebar({
     <aside
       className={cn(
         'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
-        collapsed ? 'lg:w-16' : 'lg:w-72 xl:w-80',
+        collapsed ? 'lg:w-24' : 'lg:w-72 xl:w-80',
       )}
     >
       {/* ── EXPANDED layout ─────────────────────────────────────────────────── */}
@@ -769,21 +750,12 @@ function ReviewSidebar({
           collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
         )}
       >
-        <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-4 sm:h-16">
-          <Logo
-            size="xl"
-            variant="default"
-            className="min-w-0 flex-1 dark:hidden"
-          />
-          <Logo
-            size="xl"
-            variant="light"
-            className="hidden min-w-0 flex-1 dark:block"
-          />
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 sm:h-16 dark:border-white/10 dark:bg-transparent">
+          <Logo size="md" variant="default" showText />
           <button
             onClick={onCollapse}
             aria-label="Collapse sidebar"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+            className="ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white/70"
           >
             <PanelLeftClose className="size-4" />
           </button>
@@ -827,57 +799,57 @@ function ReviewSidebar({
           </div>
         </div>
 
-        {/* Module cards */}
-        <div className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => {
-            const isOpen = expanded.has(module.id);
-            return (
-              <ModuleCard
-                key={module.id}
-                module={module}
-                isOpen={isOpen}
-                activeId={activeId}
-                onToggle={() => onToggleModule(module.id)}
-                onSelect={onSelect}
-                t={t}
-              />
-            );
-          })}
+        {/* Tree — scrollable */}
+        <div className="flex-1 overflow-y-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {modules.map((module) => (
+            <ModuleCard
+              key={module.id}
+              module={module}
+              isOpen={expanded.has(module.id)}
+              activeId={activeId}
+              onToggle={() => onToggleModule(module.id)}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       </div>
 
-      {/* ── COLLAPSED icon layout ────────────────────────────────────────────── */}
+      {/* ── COLLAPSED — icon tree ────────────────────────────────────────────── */}
       <div
         className={cn(
-          'absolute inset-0 flex w-16 flex-col transition-opacity duration-200',
+          'absolute inset-0 flex w-24 flex-col transition-opacity duration-200',
           collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >
-        <div className="group/mini border-border/60 relative flex h-14 shrink-0 items-center justify-center border-b sm:h-16">
+        <div className="group/mini relative flex h-14 shrink-0 items-center justify-center border-b border-black/10 bg-white sm:h-16 dark:border-white/10 dark:bg-transparent">
           <button
             onClick={onCollapse}
             aria-label="Expand sidebar"
-            className="hover:bg-muted/60 relative flex size-10 items-center justify-center rounded-lg transition-colors"
+            className="relative flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover/mini:opacity-0">
-              <Logo size="lg" variant="dark" className="w-9!" />
+              <Logo size="sm" variant="default" />
             </span>
-            <span className="text-muted-foreground absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100">
+            <span className="absolute inset-0 flex items-center justify-center text-slate-400 opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100 dark:text-white/40">
               <PanelLeftOpen className="size-4" />
             </span>
           </button>
         </div>
-        <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
+        {/* Icon tree */}
+        <div className="flex-1 overflow-y-auto px-2 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {modules.map((module, mIdx) => {
-            const moduleItems = flattenItems([module]);
-            const hasActive = moduleItems.some((item) => item.id === activeId);
+            const hasActive = flattenItems([module]).some(
+              (i) => i.id === activeId,
+            );
             const isMiniOpen = expandedMini.has(module.id);
             return (
-              <div
-                key={module.id}
-                className="flex w-full flex-col items-center gap-1"
-              >
-                {mIdx > 0 && <div className="bg-border/60 my-1 h-px w-8" />}
+              <div key={module.id} className="py-1">
+                {mIdx > 0 && (
+                  <div className="bg-border/40 mx-auto mb-2 h-px w-10" />
+                )}
+
+                {/* Module button */}
                 <button
                   onClick={() =>
                     setManualExpanded((prev) => {
@@ -888,37 +860,119 @@ function ReviewSidebar({
                     })
                   }
                   title={module.title}
-                  className={cn(
-                    'flex size-10 items-center justify-center rounded-xl transition-colors',
-                    hasActive
-                      ? 'bg-brand-gold/15 text-brand-gold'
-                      : 'text-muted-foreground hover:bg-muted/60',
-                  )}
+                  className="hover:bg-muted/40 flex w-full items-center justify-center rounded-lg py-1.5 transition-colors"
                 >
-                  <Layers className="size-4" />
+                  <span
+                    className={cn(
+                      'flex size-10 items-center justify-center rounded-full',
+                      hasActive ? 'bg-brand-gold/30' : 'bg-brand-gold/15',
+                    )}
+                  >
+                    <Layers className="text-brand-gold size-5" />
+                  </span>
                 </button>
-                {isMiniOpen &&
-                  moduleItems.map((item) => {
-                    const Icon = KIND_ICON[item.kind];
-                    const isActive = item.id === activeId;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => onSelect(item.id)}
-                        title={item.title}
-                        className={cn(
-                          'flex size-10 items-center justify-center rounded-xl transition-colors',
-                          isActive
-                            ? 'bg-brand-gold shadow-sm'
-                            : 'text-muted-foreground hover:bg-muted/60',
-                        )}
-                      >
-                        <Icon
-                          className={cn('size-4', isActive ? 'text-white' : '')}
-                        />
-                      </button>
-                    );
-                  })}
+
+                {/* Lessons — tree line from module */}
+                {isMiniOpen && (
+                  <div className="border-muted-foreground/20 relative ml-5 border-l pl-2.5">
+                    {module.lessons.map((lesson) => {
+                      const lessonItems: ReviewItem[] = [
+                        ...lesson.documents,
+                        ...lesson.videos,
+                        ...lesson.quizzes,
+                        ...lesson.assignments,
+                      ];
+                      const lessonHasActive = lessonItems.some(
+                        (i) => i.id === activeId,
+                      );
+                      const isLessonOpen = miniLessonExpanded.has(lesson.id);
+                      return (
+                        <div key={lesson.id} className="relative py-1">
+                          {/* horizontal connector */}
+                          <div className="bg-muted-foreground/20 absolute top-[18px] -left-2.5 h-px w-2.5" />
+
+                          {/* Lesson button */}
+                          <button
+                            onClick={() =>
+                              setMiniLessonExpanded((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(lesson.id)) next.delete(lesson.id);
+                                else next.add(lesson.id);
+                                return next;
+                              })
+                            }
+                            title={lesson.title}
+                            className="hover:bg-muted/40 flex w-full items-center justify-center rounded-lg py-1 transition-colors"
+                          >
+                            <span
+                              className={cn(
+                                'flex size-8 items-center justify-center rounded-full',
+                                lessonHasActive
+                                  ? 'bg-brand-gold/30'
+                                  : 'bg-brand-gold/15',
+                              )}
+                            >
+                              <Folder className="text-brand-gold size-4" />
+                            </span>
+                          </button>
+
+                          {/* Items — tree line from lesson */}
+                          {isLessonOpen && lessonItems.length > 0 && (
+                            <div className="border-muted-foreground/20 relative ml-4 border-l pl-2.5">
+                              {lessonItems.map((item) => {
+                                const Icon = KIND_ICON[item.kind];
+                                const isActive = item.id === activeId;
+                                const status =
+                                  item.kind === 'quiz' ||
+                                  item.kind === 'assignment'
+                                    ? item.status
+                                    : null;
+                                return (
+                                  <div key={item.id} className="relative py-1">
+                                    {/* horizontal connector */}
+                                    <div className="bg-muted-foreground/20 absolute top-[16px] -left-2.5 h-px w-2.5" />
+                                    <button
+                                      onClick={() => onSelect(item.id)}
+                                      title={item.title}
+                                      className={cn(
+                                        'relative flex w-full items-center justify-center rounded-lg py-1 transition-colors',
+                                        isActive
+                                          ? 'bg-brand-gold/15'
+                                          : 'hover:bg-muted/40',
+                                      )}
+                                    >
+                                      <Icon
+                                        className={cn(
+                                          'size-5',
+                                          isActive
+                                            ? 'text-brand-gold'
+                                            : 'text-brand-gold/70',
+                                        )}
+                                      />
+                                      {status && (
+                                        <span className="absolute top-0.5 right-1.5">
+                                          {status === 'Ready' && (
+                                            <Check
+                                              className="size-3 text-green-500"
+                                              strokeWidth={3}
+                                            />
+                                          )}
+                                          {status === 'Draft' && (
+                                            <Clock className="size-3 text-amber-500" />
+                                          )}
+                                        </span>
+                                      )}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -945,78 +999,120 @@ function PreviewPanel({ item }: { item: ReviewItem }) {
 
 function VideoPanel({ item }: { item: VideoItem }) {
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <div className="flex items-center justify-between">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-            Video Lesson
-          </span>
-          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Clock className="h-3.5 w-3.5" />
-            {item.duration}
-          </span>
-        </div>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-          {item.intro}
-        </p>
-      </div>
-
-      {/* Player */}
-      <div className="bg-brand-navy relative aspect-video w-full overflow-hidden rounded-2xl ring-1 ring-white/6 dark:bg-[#071225]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,163,0,0.08)_0%,transparent_70%)]" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-          <div className="bg-brand-gold group relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full shadow-[0_0_32px_rgba(244,163,0,0.4)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_48px_rgba(244,163,0,0.5)]">
-            <Play className="text-brand-navy ml-1 h-7 w-7 fill-current" />
-          </div>
-          <div className="text-center">
-            <p className="text-base font-bold text-white">{item.title}</p>
-            <p className="mt-1 text-xs text-white/50">
-              Educator preview — learners watch the full video
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Topics */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground text-sm font-bold">In This Video</h3>
-        <ul className="mt-3 space-y-2">
-          {item.topics.map((topic, i) => (
-            <li
-              key={i}
-              className="text-muted-foreground flex items-start gap-2.5 text-sm"
-            >
-              <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
-                ▸
-              </span>
-              {topic}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Chapter markers */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground text-sm font-bold">Key Moments</h3>
-        <div className="mt-3 space-y-2">
-          {item.moments.map((moment, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <span className="bg-brand-gold/10 text-brand-gold shrink-0 rounded-md px-2 py-0.5 font-mono text-xs">
-                {moment.time}
-              </span>
-              <span className="text-muted-foreground text-sm">
-                {moment.label}
-              </span>
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+      {/* ── Main column: player + title/meta ──────────────────────────────── */}
+      <div className="min-w-0 space-y-4">
+        {/* Player */}
+        <div className="border-border relative aspect-video w-full overflow-hidden rounded-2xl border bg-black shadow-sm">
+          {item.youtubeId ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${item.youtubeId}?rel=0&modestbranding=1`}
+              title={item.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
+          ) : (
+            <div className="bg-brand-navy absolute inset-0 flex flex-col items-center justify-center gap-4 dark:bg-[#071225]">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,163,0,0.08)_0%,transparent_70%)]" />
+              <div className="bg-brand-gold relative flex h-16 w-16 items-center justify-center rounded-full shadow-[0_0_32px_rgba(244,163,0,0.4)]">
+                <Play className="text-brand-navy ml-1 h-7 w-7 fill-current" />
+              </div>
+              <div className="relative text-center">
+                <p className="text-base font-bold text-white">{item.title}</p>
+                <p className="mt-1 text-xs text-white/50">
+                  Educator preview — learners watch the full video
+                </p>
+              </div>
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Title + meta — below the video, YouTube-style */}
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+              <Play className="h-3 w-3" />
+              Video Lesson
+            </span>
+            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
+              <Clock className="h-3 w-3" />
+              {item.duration}
+            </span>
+          </div>
+          <h2 className="text-foreground mt-3 text-xl font-bold sm:text-2xl">
+            {item.title}
+          </h2>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            {item.intro}
+          </p>
         </div>
       </div>
+
+      {/* ── Side column: lesson resources ─────────────────────────────────── */}
+      <aside className="space-y-4 xl:sticky xl:top-0 xl:self-start">
+        {/* In This Video */}
+        <div className="border-border bg-card rounded-2xl border p-5">
+          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
+            <Lightbulb className="text-brand-gold h-4 w-4" />
+            In This Video
+          </h3>
+          <ul className="mt-3 space-y-2.5">
+            {item.topics.map((topic, i) => (
+              <li
+                key={i}
+                className="text-muted-foreground flex items-start gap-2.5 text-sm leading-snug"
+              >
+                <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
+                  ▸
+                </span>
+                {topic}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Key Moments — click to jump */}
+        <div className="border-border bg-card rounded-2xl border p-5">
+          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
+            <Clock className="text-brand-gold h-4 w-4" />
+            Key Moments
+          </h3>
+          <div className="mt-3 space-y-1">
+            {item.moments.map((moment, i) => (
+              <button
+                key={i}
+                type="button"
+                disabled={!item.youtubeId}
+                onClick={() =>
+                  item.youtubeId &&
+                  window.open(
+                    `https://www.youtube.com/watch?v=${item.youtubeId}&t=${timeToSeconds(moment.time)}s`,
+                    '_blank',
+                    'noopener,noreferrer',
+                  )
+                }
+                className="hover:bg-muted/60 -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+              >
+                <span className="bg-brand-gold/10 text-brand-gold shrink-0 rounded-md px-2 py-0.5 font-mono text-xs font-semibold">
+                  {moment.time}
+                </span>
+                <span className="text-muted-foreground text-sm leading-snug">
+                  {moment.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
     </div>
   );
+}
+
+/** Convert a "m:ss" or "h:mm:ss" timestamp to total seconds. */
+function timeToSeconds(time: string): number {
+  const parts = time.split(':').map(Number);
+  return parts.reduce((acc, part) => acc * 60 + part, 0);
 }
 
 function DocumentPanel({ item }: { item: DocumentItem }) {

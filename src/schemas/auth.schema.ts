@@ -37,7 +37,6 @@ export const oauthLoginRequestSchema = z
 /* ------------------------------------------------------------------ *
  * Backend responses — parsed server-side in the BFF / api layer.
  * ------------------------------------------------------------------ */
-
 /** `LoginResponseDto` — `tokenExpires` is epoch ms (number). */
 export const loginResponseSchema = z.object({
   token: z.string(),
@@ -57,7 +56,6 @@ export const refreshResponseSchema = z.object({
  * BFF → client responses — the refresh token is stripped here; only the
  * access token + expiry (and user, for login) ever reach the browser.
  * ------------------------------------------------------------------ */
-
 export const loginResultSchema = z.object({
   accessToken: z.string(),
   tokenExpires: z.number(),

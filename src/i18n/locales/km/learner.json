@@ -1,6 +1,6 @@
 {
   "learner": {
-    "dashboard": "ផ្ទាំងគ្រប់គ្រងរបស់ខ្ញុំ",
+    "dashboardTitle": "ផ្ទាំងគ្រប់គ្រងរបស់ខ្ញុំ",
     "continueLearning": "បន្តការសិក្សា",
     "recommended": "ណែនាំសម្រាប់អ្នក",
     "upcomingQuizzes": "សំណួរដែលនឹងមកដល់",
@@ -10,6 +10,84 @@
       "hoursLearned": "ម៉ោងសិក្សា",
       "quizzesTaken": "សំណួរដែលបានធ្វើ",
       "certificates": "វិញ្ញាបនបត្រ"
+    },
+    "dashboard": {
+      "greetingMorning": "អរុណសួស្តី",
+      "greetingAfternoon": "ទិវាសួស្តី",
+      "greetingEvening": "សាយ័ណ្ហសួស្តី",
+      "greetingTitle": "{greeting} {name}!",
+      "continueLearning": "បន្តការសិក្សា",
+      "lessonLabel": "មេរៀនទី {number}",
+      "percentComplete": "បានបញ្ចប់ {progress}%",
+      "continueLesson": "បន្តមេរៀន",
+      "viewLesson": "មើលមេរៀន",
+      "lessonsCompleted": "មេរៀនដែលបានបញ្ចប់",
+      "thisWeekCount": "{count} សប្តាហ៍នេះ",
+      "totalXp": "ពិន្ទុ XP សរុប",
+      "currentStreak": "ការសិក្សាជាប់គ្នា",
+      "daysValue": "{count} ថ្ងៃ",
+      "bestStreak": "ល្អបំផុត៖ {count} ថ្ងៃ",
+      "rank": "ចំណាត់ថ្នាក់",
+      "topPercent": "កំពូល {percent}%",
+      "amongLearners": "ក្នុងចំណោមអ្នកសិក្សាទាំងអស់",
+      "learningActivity": "សកម្មភាពសិក្សា",
+      "activitySubtitle": "នាទីសិក្សាប្រចាំថ្ងៃធៀបនឹងគោលដៅប្រចាំថ្ងៃរបស់អ្នក។",
+      "thisWeek": "សប្តាហ៍នេះ",
+      "yAxisMin": "{value} នាទី",
+      "minUnit": "នាទី",
+      "vsTarget": "{value} នាទី ធៀបនឹងគោលដៅ",
+      "todaysPlan": "ផែនការថ្ងៃនេះ",
+      "unitMin": "នាទី",
+      "unitLesson": "មេរៀន",
+      "unitPercent": "%",
+      "upNext": "បន្ទាប់",
+      "recentAchievements": "សមិទ្ធផលថ្មីៗ",
+      "xpSuffix": "XP",
+      "recommendedForYou": "ណែនាំសម្រាប់អ្នក",
+      "coursesSelected": "បានជ្រើសរើសវគ្គសិក្សា {count} ផ្អែកលើវឌ្ឍនភាពរបស់អ្នក",
+      "seeAll": "មើលទាំងអស់",
+      "weekdaysShort": {
+        "Mon": "ច័ន្ទ",
+        "Tue": "អង្គារ",
+        "Wed": "ពុធ",
+        "Thu": "ព្រហ.",
+        "Fri": "សុក្រ",
+        "Sat": "សៅរ៍",
+        "Sun": "អាទិត្យ"
+      },
+      "weekdaysFull": {
+        "Mon": "ថ្ងៃច័ន្ទ",
+        "Tue": "ថ្ងៃអង្គារ",
+        "Wed": "ថ្ងៃពុធ",
+        "Thu": "ថ្ងៃព្រហស្បតិ៍",
+        "Fri": "ថ្ងៃសុក្រ",
+        "Sat": "ថ្ងៃសៅរ៍",
+        "Sun": "ថ្ងៃអាទិត្យ"
+      },
+      "plan": {
+        "p1": "សិក្សា 30 នាទី",
+        "p2": "មើលមេរៀន 1",
+        "p3": "ទទួលបាន 80% លើកម្រងសំណួរ"
+      },
+      "upNextItems": {
+        "u1": { "label": "មេរៀនទី 9", "title": "មុខងារកម្រិតខ្ពស់" },
+        "u2": {
+          "label": "កម្រងសំណួរ",
+          "title": "កម្រងសំណួរ Smart Office Workflow"
+        },
+        "u3": { "label": "កិច្ចការ", "title": "ព្រាងផែនការ Workflow AI" }
+      },
+      "achievements": {
+        "a1": {
+          "title": "អ្នកចម្បាំងប្រចាំសប្តាហ៍",
+          "description": "បានបញ្ចប់ការសិក្សាជាប់គ្នា 7 ថ្ងៃ"
+        },
+        "a2": {
+          "title": "ម្ចាស់កម្រងសំណួរ",
+          "description": "ទទួលបាន 90% លើកម្រងសំណួរ 5"
+        },
+        "a3": { "title": "អ្នកសិក្សាលឿន", "description": "បានបញ្ចប់មេរៀន 10" }
+      }
     },
     "myLearning": {
       "title": "ការសិក្សារបស់ខ្ញុំ",
@@ -148,10 +226,10 @@
       "successToast": "ដាក់ស្នើការផ្ទៀងផ្ទាត់ជោគជ័យ!",
       "officialCert": "វិញ្ញាបនបត្រផ្លូវការ",
       "officialCertDesc": "ក្រិតយានប័ណ្ណរបស់អ្នកត្រូវបានផ្ទៀងផ្ទាត់",
-      "downloadPdf": "ទាញយក PDF ផ្លូវការ",
-      "printCert": "បោះពុម្ពវិញ្ញាបនបត្រ",
-      "shareCert": "ចែករំលែកវិញ្ញាបនបត្រ",
-      "copyLink": "ចម្លងតំណ",
+      "downloadPdf": "ទាញយក PDF ",
+      "printCert": "បោះពុម្ព",
+      "shareCert": "ចែករំលែក",
+      "copyLink": "ចម្លង",
       "downloadTitle": "ទាញយក ឬចែករំលែកវិញ្ញាបនបត្ររបស់អ្នក",
       "downloadDesc": "ការប្រើប្រាស់ទាំងនេះអាចធ្វើបានបន្ទាប់ពីការផ្ទៀងផ្ទាត់",
       "certOfCompletion": "វិញ្ញាបនបត្រនៃការបញ្ចប់",

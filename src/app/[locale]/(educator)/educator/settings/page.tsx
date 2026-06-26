@@ -2,7 +2,7 @@
 
 import { UserCircle } from 'lucide-react';
 import { useEducatorSettingsT } from '@/i18n';
-import EducatorTopBar from '@/components/common/TopBar';
+import TopBar from '@/components/common/TopBar';
 import { Button } from '@/components/ui/button';
 import { useProfileForm } from './_lib/useProfileForm';
 import { ProfileHeader } from './_components/ProfileHeader';
@@ -15,11 +15,7 @@ export default function EducatorSettingsPage() {
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <EducatorTopBar
-        role="educator"
-        title={t('title')}
-        subtitle={t('subtitle')}
-      />
+      <TopBar role="educator" title={t('title')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <section className="border-border bg-card rounded-2xl border p-6">

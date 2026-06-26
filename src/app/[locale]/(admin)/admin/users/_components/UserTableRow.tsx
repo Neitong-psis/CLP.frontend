@@ -26,7 +26,7 @@ import {
   ROLE_COLOR,
   STATUS_COLOR,
   userInitials,
-} from '@/components/pages/admin/components/users/constants';
+} from '@/constants/admin/users';
 import type { InviteStatus } from '@/constants/admin';
 
 const INVITE_STYLE: Record<InviteStatus, string> = {

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useEducatorStudentsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
-import EducatorTopBar from '@/components/common/TopBar';
+import TopBar from '@/components/common/TopBar';
 import { useStudentFilter, type SortKey } from './_lib/useStudentFilter';
 import { StatsStrip } from './_components/StatsStrip';
 import { StudentsToolbar } from './_components/StudentsToolbar';
@@ -85,11 +85,7 @@ export default function EducatorStudentsPage() {
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <EducatorTopBar
-        role="educator"
-        title={t('title')}
-        subtitle={t('subtitle')}
-      />
+      <TopBar role="educator" title={t('title')} subtitle={t('subtitle')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <StatsStrip

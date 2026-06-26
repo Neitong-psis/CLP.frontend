@@ -8,15 +8,17 @@ import {
   ClipboardCheck,
   Layers,
   BookOpen,
+  Check,
+  Clock,
+  Lock,
 } from 'lucide-react';
 import { useAdminReviewOverlayT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import {
-  REVIEW_STATUS_STYLE,
   lessonCount,
   type ReviewItem,
-  type ReviewItemKind,
   type ReviewModule,
+  type ReviewItemKind,
 } from '../../_lib/review';
 
 interface ReviewSidebarProps {
@@ -87,150 +89,151 @@ export function ReviewSidebar({
         </div>
       </div>
 
-      {/* Modules */}
-      <div className="flex-1 overflow-y-auto">
-        {modules.map((module) => {
-          const isOpen = expandedModules.has(module.id);
-          return (
-            <div key={module.id} className="border-b border-slate-100">
-              <button
-                onClick={() => onToggleModule(module.id)}
-                className="flex w-full items-start justify-between gap-2 px-5 py-3.5 text-left transition-colors hover:bg-slate-50"
-                aria-expanded={isOpen}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900">
-                    {module.title}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {lessonCount(module)} {t('lessonsCreatedBy')}
-                  </p>
-                </div>
-                <ChevronDown
-                  className={cn(
-                    'mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200',
-                    isOpen && 'rotate-180',
-                  )}
-                />
-              </button>
-
-              {isOpen && (
-                <div className="pb-2">
-                  <ItemGroup
-                    label={t('textImageLessons')}
-                    items={module.documents}
-                    activeItemId={activeItemId}
-                    onSelect={onSelect}
-                  />
-                  <ItemGroup
-                    label={t('videoLessons')}
-                    items={module.videos}
-                    activeItemId={activeItemId}
-                    onSelect={onSelect}
-                  />
-                  <ItemGroup
-                    label={t('quiz')}
-                    items={module.quizzes}
-                    activeItemId={activeItemId}
-                    onSelect={onSelect}
-                  />
-                  <ItemGroup
-                    label={t('assignment')}
-                    items={module.assignments}
-                    activeItemId={activeItemId}
-                    onSelect={onSelect}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
+      {/* Modules — tree */}
+      <div className="flex-1 overflow-y-auto px-3 py-2">
+        {modules.map((module) => (
+          <ModuleTree
+            key={module.id}
+            module={module}
+            isOpen={expandedModules.has(module.id)}
+            activeItemId={activeItemId}
+            onToggle={() => onToggleModule(module.id)}
+            onSelect={onSelect}
+          />
+        ))}
       </div>
     </aside>
   );
 }
 
-function ItemGroup({
-  label,
-  items,
+// ── ModuleTree (module → items, 2-level) ──────────────────────────────────────
+
+function ModuleTree({
+  module,
+  isOpen,
   activeItemId,
+  onToggle,
   onSelect,
 }: {
-  label: string;
-  items: ReviewItem[];
+  module: ReviewModule;
+  isOpen: boolean;
   activeItemId: string;
+  onToggle: () => void;
   onSelect: (id: string) => void;
 }) {
-  if (items.length === 0) return null;
+  const items: ReviewItem[] = [
+    ...module.documents,
+    ...module.videos,
+    ...module.quizzes,
+    ...module.assignments,
+  ];
 
   return (
-    <div className="mt-1">
-      <p className="px-5 py-1.5 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
-        {label}
-      </p>
-      <ul>
-        {items.map((item) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            isActive={item.id === activeItemId}
-            onSelect={() => onSelect(item.id)}
-          />
-        ))}
-      </ul>
+    <div className="py-0.5">
+      {/* Module row */}
+      <button
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-slate-50"
+      >
+        <ChevronDown
+          className={cn(
+            'h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
+        <span className="bg-brand-gold/20 flex size-7 shrink-0 items-center justify-center rounded-full">
+          <Layers className="text-brand-gold size-3.5" />
+        </span>
+        <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-900">
+          {module.title}
+        </span>
+      </button>
+
+      {/* Items — animated tree */}
+      {items.length > 0 && (
+        <div
+          className={cn(
+            'grid transition-[grid-template-rows] duration-200 ease-in-out',
+            isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="relative ml-[18px] border-l border-slate-200 pb-1 pl-5">
+              {items.map((item) => (
+                <AdminTreeItemRow
+                  key={item.id}
+                  item={item}
+                  isActive={item.id === activeItemId}
+                  onSelect={onSelect}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function ItemRow({
+// ── AdminTreeItemRow — icon + status overlay ──────────────────────────────────
+
+function AdminTreeItemRow({
   item,
   isActive,
   onSelect,
 }: {
   item: ReviewItem;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: (id: string) => void;
 }) {
   const Icon = KIND_ICON[item.kind];
-  const status =
-    item.kind === 'quiz' || item.kind === 'assignment' ? item.status : null;
+  const status = item.kind === 'video' ? null : item.status;
 
   return (
-    <li>
+    <div className="relative py-0.5">
+      {/* Horizontal branch connector */}
+      <div className="absolute top-[16px] -left-5 h-px w-4 bg-slate-200" />
+
       <button
-        onClick={onSelect}
+        onClick={() => onSelect(item.id)}
         className={cn(
-          'flex w-full items-center gap-2.5 px-5 py-2 text-left transition-colors',
-          isActive
-            ? 'bg-brand-gold/10 border-brand-gold border-l-2'
-            : 'border-l-2 border-transparent hover:bg-slate-50',
+          'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
+          isActive ? 'bg-brand-gold/10' : 'hover:bg-slate-50',
         )}
       >
-        <Icon
-          className={cn(
-            'h-3.5 w-3.5 shrink-0',
-            isActive ? 'text-brand-gold' : 'text-slate-400',
+        {/* Icon with status overlay */}
+        <div className="relative shrink-0">
+          <Icon
+            className={cn(
+              'size-4',
+              isActive ? 'text-brand-gold' : 'text-brand-gold/70',
+            )}
+          />
+          {status && (
+            <span className="absolute -top-1.5 -right-1.5">
+              {status === 'Ready' && (
+                <Check className="size-2.5 text-emerald-500" strokeWidth={3} />
+              )}
+              {status === 'Submitted' && (
+                <Clock className="size-2.5 text-blue-500" />
+              )}
+              {status === 'Locked' && (
+                <Lock className="size-2.5 text-slate-400" />
+              )}
+            </span>
           )}
-        />
+        </div>
+
         <span
           className={cn(
             'min-w-0 flex-1 truncate text-xs font-medium',
-            isActive ? 'text-brand-navy' : 'text-slate-600',
+            isActive ? 'text-brand-navy font-semibold' : 'text-slate-600',
           )}
         >
           {item.title}
         </span>
-        {status && (
-          <span
-            className={cn(
-              'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold',
-              REVIEW_STATUS_STYLE[status],
-            )}
-          >
-            {status}
-          </span>
-        )}
       </button>
-    </li>
+    </div>
   );
 }

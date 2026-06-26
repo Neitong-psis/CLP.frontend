@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Play, BookOpen, GraduationCap, Calendar } from 'lucide-react';
 import { CONTINUE_LEARNING } from '@/config/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
@@ -49,6 +50,7 @@ function LiveClock() {
 }
 
 export default function ContinueLearningCard() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const [barVisible, setBarVisible] = useState(false);
 
@@ -80,7 +82,7 @@ export default function ContinueLearningCard() {
         {/* ── Header: label + clock side-by-side ── */}
         <div className="flex items-start justify-between gap-4">
           <p className="text-brand-gold pt-1 text-sm font-semibold">
-            Continue Learning
+            {t('continueLearning')}
           </p>
           <LiveClock />
         </div>
@@ -91,9 +93,9 @@ export default function ContinueLearningCard() {
             {courseTitle}
           </h2>
           <p className="mt-1.5 text-sm text-white/50">
-            Lesson {lessonNumber}
+            {t('lessonLabel', { number: lessonNumber })}
             {lessonTitle && <> &middot; {lessonTitle}</>}
-            &ensp;|&ensp;{progress}% Complete
+            &ensp;|&ensp;{t('percentComplete', { progress })}
           </p>
         </div>
 
@@ -117,14 +119,14 @@ export default function ContinueLearningCard() {
             className="bg-brand-gold text-brand-navy hover:bg-brand-gold-dark inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm transition-all duration-150 hover:-translate-y-px hover:shadow-md active:scale-95"
           >
             <Play className="h-3.5 w-3.5 fill-current" aria-hidden />
-            Continue Lesson
+            {t('continueLesson')}
           </Link>
           <Link
             href="/my-learning"
             className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/6 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:-translate-y-px hover:bg-white/10 active:scale-95"
           >
             <BookOpen className="h-3.5 w-3.5" aria-hidden />
-            View Lesson
+            {t('viewLesson')}
           </Link>
         </div>
       </div>

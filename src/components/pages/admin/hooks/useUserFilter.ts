@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { AdminUserRow } from '@/constants/admin';
-import { PAGE_SIZE } from '@/components/pages/admin/components/users/constants';
+import { PAGE_SIZE } from '@/constants/admin/users';
 
 export interface UserFilter {
   search: string;

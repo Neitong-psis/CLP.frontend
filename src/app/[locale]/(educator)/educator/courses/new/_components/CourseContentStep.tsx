@@ -54,15 +54,15 @@ export function CourseContentStep({
         </div>
       ) : (
         <div className="space-y-4">
-          {modules.map((mod, i) => (
+          {modules.map((module, index) => (
             <ModuleItem
-              key={mod.id}
-              mod={mod}
-              modIndex={i}
+              key={module.id}
+              module={module}
+              moduleIndex={index}
               totalModules={modules.length}
-              onUpdate={(updated) => onUpdateModule(i, updated)}
-              onDelete={() => onDeleteModule(i)}
-              onMove={(dir) => onMoveModule(i, dir)}
+              onUpdate={(updated) => onUpdateModule(index, updated)}
+              onDelete={() => onDeleteModule(index)}
+              onMove={(dir) => onMoveModule(index, dir)}
             />
           ))}
         </div>

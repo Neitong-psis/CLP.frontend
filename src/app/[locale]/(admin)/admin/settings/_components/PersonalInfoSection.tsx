@@ -5,6 +5,7 @@ import { useAdminSettingsT } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/TextArea';
 import { ComboField } from '@/components/ui/ComboField';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { ADMIN_USER } from '@/constants/admin';
 import { AvatarCard } from './AvatarCard';
 import { SettingsField } from './SettingsField';
@@ -19,6 +20,7 @@ export function PersonalInfoSection() {
   const [nationality, setNationality] = useState('Khmer');
   const [address, setAddress] = useState('Phnom Penh, Cambodia');
   const [bio, setBio] = useState('');
+  const [dob, setDob] = useState('');
 
   return (
     <SettingsSection title={t('personalInfo')} subtitle={t('personalInfoDesc')}>
@@ -66,7 +68,14 @@ export function PersonalInfoSection() {
         <ComboField label={t('gender')} items={['Male', 'Female', 'Other']} />
 
         <SettingsField label={t('dateOfBirth')}>
-          <Input type="date" className="h-9" />
+          <DatePicker
+            value={dob}
+            onChange={setDob}
+            placeholder={t('selectDate')}
+            clearLabel={t('pickerClear')}
+            todayLabel={t('pickerToday')}
+            className="h-9"
+          />
         </SettingsField>
 
         <SettingsField label={t('nationality')}>

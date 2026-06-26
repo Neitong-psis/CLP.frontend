@@ -51,7 +51,10 @@
       "userDistribution": "User Distribution",
       "users": "users",
       "liveUserRecords": "Live user records",
-      "total": "total"
+      "total": "total",
+      "learners": "Learners",
+      "educators": "Educators",
+      "admins": "Admins"
     },
 
     "coursesPage": {
@@ -116,6 +119,9 @@
       "filterLevel": "Level",
       "filterAll": "All",
       "filterClearAll": "Clear all filters",
+      "filterShowResults": "Show {count} results",
+      "filterShowResult": "Show 1 result",
+      "filterNoResults": "No matches",
       "createModal": {
         "title": "Create New Course",
         "titleLabel": "Course Title",
@@ -192,6 +198,15 @@
       "searchPlaceholder": "Search by name or email…",
       "searchAriaLabel": "Search users by name or email",
       "addUser": "Add User",
+      "filterBtn": "Filter",
+      "filterRole": "Role",
+      "filterStatus": "Status",
+      "filterInvitation": "Invitation",
+      "filterAll": "All",
+      "filterClearAll": "Clear all filters",
+      "filterShowResults": "Show {count} results",
+      "filterShowResult": "Show 1 result",
+      "filterNoResults": "No matches",
       "noMatch": "No users match your search.",
       "showingOf": "Showing {from}–{to} of {total} users",
       "srShowing": "Showing {from} to {to} of {total} users.",
@@ -335,7 +350,11 @@
       "monthlyRevenue": "Monthly Revenue",
       "last12Months": "Last 12 months",
       "revByCategory": "Revenue by Category",
-      "topEarners": "Top earners this month"
+      "topEarners": "Top earners this month",
+      "statAnnualRevenue": "Annual Revenue",
+      "statThisMonth": "This Month",
+      "statMRR": "Monthly Recurring Revenue",
+      "statAOV": "Avg Order Value"
     },
 
     "systemPage": {
@@ -360,6 +379,9 @@
       "phoneNumber": "Phone Number",
       "gender": "Gender",
       "dateOfBirth": "Date of Birth",
+      "selectDate": "Select date",
+      "pickerClear": "Clear",
+      "pickerToday": "Today",
       "nationality": "Nationality",
       "userRole": "User Role",
       "address": "Address",
@@ -470,7 +492,8 @@
     "topCourses": {
       "title": "Top Performing Courses",
       "noData": "No course data yet.",
-      "enrolled": "enrolled"
+      "enrolled": "enrolled",
+      "coursesCount": "{count} courses"
     },
 
     "platformAnalytics": {

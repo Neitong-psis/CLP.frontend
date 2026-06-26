@@ -55,7 +55,7 @@ export function TablePagination({
             className={cn(
               'rounded-lg text-xs',
               p === currentPage
-                ? 'bg-foreground text-background hover:opacity-90'
+                ? 'bg-brand-accent text-white hover:opacity-90'
                 : 'text-muted-foreground hover:bg-muted',
             )}
           >

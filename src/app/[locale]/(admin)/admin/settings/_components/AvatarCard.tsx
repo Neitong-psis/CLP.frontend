@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { Camera, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useAdminSettingsT } from '@/i18n';
 import { ADMIN_USER } from '@/constants/admin';
 import { useToast } from '@/components/ui/toast';
@@ -70,14 +70,6 @@ export function AvatarCard({ name, email }: Props) {
         >
           <Upload className="h-3.5 w-3.5" />
           {t('uploadPicture')}
-        </button>
-        <button
-          type="button"
-          className={avatarBtnCls}
-          onClick={() => toast(t('cameraUnavailable'), 'error')}
-        >
-          <Camera className="h-3.5 w-3.5" />
-          {t('useCamera')}
         </button>
         <input
           ref={fileRef}

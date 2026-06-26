@@ -3,6 +3,7 @@
 import { ChevronDown } from 'lucide-react';
 import { useEducatorSettingsT } from '@/i18n';
 import { EDUCATOR_USER } from '@/constants/educator';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { ProfileForm } from '../_lib/useProfileForm';
 
 const inputCls =
@@ -81,11 +82,12 @@ export function ProfileFields({
       </div>
       <div>
         <label className={labelCls}>{t('dob')}</label>
-        <input
-          type="date"
+        <DatePicker
           value={form.dob}
-          onChange={(e) => onChange('dob', e.target.value)}
-          className={`${inputCls} cursor-pointer`}
+          onChange={(v) => onChange('dob', v)}
+          placeholder={t('selectDate')}
+          clearLabel={t('pickerClear')}
+          todayLabel={t('pickerToday')}
         />
       </div>
       <div>

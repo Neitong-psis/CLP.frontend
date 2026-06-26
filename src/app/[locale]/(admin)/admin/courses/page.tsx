@@ -18,6 +18,7 @@ import {
   ClipboardCheck,
   SlidersHorizontal,
   Plus,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { type CourseStatus, type AdminCourseRow } from '@/constants/admin';
@@ -55,48 +56,45 @@ interface ContextMenuState {
   y: number;
 }
 
-function FilterOption({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
+const STATUS_DOT: Record<CourseStatus, string> = {
+  Public: 'bg-emerald-500',
+  Pending: 'bg-amber-500',
+  Archive: 'bg-muted-foreground/60',
+};
+
+const CATEGORY_DOT: Record<string, string> = {
+  'Web Development': 'bg-blue-500',
+  'Data Science': 'bg-teal-500',
+  'Cloud Computing': 'bg-slate-400',
+  Programming: 'bg-emerald-500',
+  DevOps: 'bg-orange-500',
+  Design: 'bg-violet-500',
+};
+
+const LEVEL_FILL = { Beginner: 1, Intermediate: 2, Advanced: 3 } as const;
+
+function LevelDots({ level }: { level: string }) {
+  const filled = LEVEL_FILL[level as keyof typeof LEVEL_FILL] ?? 0;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
-        active
-          ? 'bg-brand-gold/8 text-brand-gold font-medium'
-          : 'text-foreground hover:bg-muted',
-      )}
-    >
-      <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center">
-        {active && <Check className="h-3 w-3" />}
-      </span>
-      {label}
-    </button>
+    <span className="flex gap-0.5">
+      {[1, 2, 3].map((n) => (
+        <span
+          key={n}
+          className={cn(
+            'h-1.5 w-1.5 rounded-full',
+            n <= filled ? 'bg-brand-accent' : 'bg-muted-foreground/20',
+          )}
+        />
+      ))}
+    </span>
   );
 }
 
-function FilterSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterSectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-muted-foreground px-3 pt-2.5 pb-1 text-[10px] font-semibold tracking-widest uppercase">
-        {label}
-      </p>
-      <div className="space-y-0.5 px-1 pb-1">{children}</div>
-    </div>
+    <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-widest uppercase">
+      {children}
+    </p>
   );
 }
 
@@ -111,6 +109,7 @@ export default function AdminCoursesPage() {
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [levelFilter, setLevelFilter] = useState<string>('All');
+  const [filterOpen, setFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
@@ -118,14 +117,14 @@ export default function AdminCoursesPage() {
   const [localCourses] = useState<AdminCourseRow[]>([]);
 
   function reviewUrl(course: AdminCourseRow) {
-    const p = new URLSearchParams({
+    const page = new URLSearchParams({
       title: course.title,
       instructor: course.instructor,
       category: course.category,
       level: course.level,
       status: course.status,
     });
-    return `/${locale}/admin/courses/${course.id}?${p.toString()}`;
+    return `/${locale}/admin/courses/${course.id}?${page.toString()}`;
   }
 
   // Close context menu on outside click / Escape
@@ -193,6 +192,38 @@ export default function AdminCoursesPage() {
     filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const pageEnd = Math.min(currentPage * PAGE_SIZE, filtered.length);
 
+  // ── Faceted counts — each option counted against the OTHER active filters,
+  //    so numbers reflect what you'd actually get if you toggled it. ──────────
+  const matchSearch = (c: AdminCourseRow) =>
+    !search || c.title.toLowerCase().includes(search.toLowerCase());
+
+  const statusCount = (s: CourseStatus | 'All') =>
+    allCourses.filter(
+      (c) =>
+        matchSearch(c) &&
+        (s === 'All' || c.status === s) &&
+        (categoryFilter === 'All' || c.category === categoryFilter) &&
+        (levelFilter === 'All' || c.level === levelFilter),
+    ).length;
+
+  const categoryCount = (cat: string) =>
+    allCourses.filter(
+      (c) =>
+        matchSearch(c) &&
+        (statusFilter === 'All' || c.status === statusFilter) &&
+        (cat === 'All' || c.category === cat) &&
+        (levelFilter === 'All' || c.level === levelFilter),
+    ).length;
+
+  const levelCount = (level: string) =>
+    allCourses.filter(
+      (c) =>
+        matchSearch(c) &&
+        (statusFilter === 'All' || c.status === statusFilter) &&
+        (categoryFilter === 'All' || c.category === categoryFilter) &&
+        (level === 'All' || c.level === level),
+    ).length;
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
@@ -232,7 +263,7 @@ export default function AdminCoursesPage() {
       )}
 
       <div className="flex min-h-full flex-col">
-        <TopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
+        <TopBar role="admin" title={t('title')} />
 
         <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {/* Toolbar */}
@@ -250,71 +281,227 @@ export default function AdminCoursesPage() {
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
               {/* Filter popover */}
-              <Popover>
+              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                 <PopoverTrigger className="border-border hover:bg-muted text-foreground inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors sm:px-4">
                   <SlidersHorizontal className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('filterBtn')}</span>
                   {activeFilterCount > 0 && (
-                    <span className="bg-brand-gold flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white">
+                    <span className="bg-brand-accent text-brand-accent-foreground flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold">
                       {activeFilterCount}
                     </span>
                   )}
                 </PopoverTrigger>
                 <PopoverContent
                   align="end"
-                  className="w-[calc(100vw-16px)] overflow-hidden p-0 sm:w-52"
+                  className="flex max-h-[min(34rem,calc(100vh-5rem))] w-[calc(100vw-16px)] flex-col gap-0 overflow-hidden p-0 sm:w-80"
                 >
-                  <FilterSection label={t('filterStatus')}>
-                    {STATUS_FILTERS.map((s) => (
-                      <FilterOption
-                        key={s}
-                        active={statusFilter === s}
-                        label={s === 'All' ? t('filterAll') : s}
-                        onClick={() => handleStatusFilter(s)}
-                      />
-                    ))}
-                  </FilterSection>
+                  {/* Header */}
+                  <div className="border-border flex shrink-0 items-center justify-between border-b px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-brand-accent/10 text-brand-accent flex h-6 w-6 items-center justify-center rounded-md">
+                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-foreground text-sm font-semibold">
+                        {t('filterBtn')}
+                      </span>
+                      {activeFilterCount > 0 && (
+                        <span className="bg-brand-accent text-brand-accent-foreground flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </div>
+                    {activeFilterCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="text-muted-foreground inline-flex items-center gap-1 text-xs transition-colors hover:text-rose-500"
+                      >
+                        <X className="h-3 w-3" />
+                        {t('filterClearAll')}
+                      </button>
+                    )}
+                  </div>
 
-                  <div className="bg-border mx-1 h-px" />
+                  {/* Scrollable body */}
+                  <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
+                    {/* Status — pill chips with live counts */}
+                    <div className="px-4 pt-3.5 pb-3">
+                      <FilterSectionLabel>
+                        {t('filterStatus')}
+                      </FilterSectionLabel>
+                      <div className="flex flex-wrap gap-1.5">
+                        {STATUS_FILTERS.map((s) => {
+                          const isActive = statusFilter === s;
+                          const isAll = s === 'All';
+                          const count = statusCount(s);
+                          return (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => handleStatusFilter(s)}
+                              className={cn(
+                                'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-all',
+                                isActive
+                                  ? isAll
+                                    ? 'border-foreground bg-foreground text-background'
+                                    : cn(
+                                        STATUS_STYLE[s as CourseStatus],
+                                        'border-current',
+                                      )
+                                  : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
+                              )}
+                            >
+                              {!isAll && (
+                                <span
+                                  className={cn(
+                                    'h-1.5 w-1.5 rounded-full',
+                                    STATUS_DOT[s as CourseStatus],
+                                  )}
+                                />
+                              )}
+                              {isAll ? t('filterAll') : s}
+                              <span
+                                className={cn(
+                                  'text-[10px] tabular-nums',
+                                  isActive ? 'opacity-70' : 'opacity-50',
+                                )}
+                              >
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                  <FilterSection label={t('filterCategory')}>
-                    {['All', ...ALL_CATEGORIES].map((cat) => (
-                      <FilterOption
-                        key={cat}
-                        active={categoryFilter === cat}
-                        label={cat === 'All' ? t('filterAll') : cat}
-                        onClick={() => handleCategoryFilter(cat)}
-                      />
-                    ))}
-                  </FilterSection>
+                    <div className="bg-border mx-4 h-px" />
 
-                  <div className="bg-border mx-1 h-px" />
-
-                  <FilterSection label={t('filterLevel')}>
-                    {['All', ...ALL_LEVELS].map((lvl) => (
-                      <FilterOption
-                        key={lvl}
-                        active={levelFilter === lvl}
-                        label={lvl === 'All' ? t('filterAll') : lvl}
-                        onClick={() => handleLevelFilter(lvl)}
-                      />
-                    ))}
-                  </FilterSection>
-
-                  {activeFilterCount > 0 && (
-                    <>
-                      <div className="bg-border mx-1 h-px" />
-                      <div className="p-1">
+                    {/* Category — 2-column grid with counts, dead ends disabled */}
+                    <div className="px-4 pt-3 pb-3">
+                      <FilterSectionLabel>
+                        {t('filterCategory')}
+                      </FilterSectionLabel>
+                      <div className="grid grid-cols-2 gap-1">
                         <button
                           type="button"
-                          onClick={clearFilters}
-                          className="w-full rounded-md px-2 py-1.5 text-left text-xs text-rose-500 transition-colors hover:bg-rose-500/10"
+                          onClick={() => handleCategoryFilter('All')}
+                          className={cn(
+                            'col-span-2 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all',
+                            categoryFilter === 'All'
+                              ? 'bg-muted text-foreground'
+                              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                          )}
                         >
-                          {t('filterClearAll')}
+                          <span
+                            className={cn(
+                              'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors',
+                              categoryFilter === 'All'
+                                ? 'border-foreground bg-foreground'
+                                : 'border-muted-foreground/40',
+                            )}
+                          >
+                            {categoryFilter === 'All' && (
+                              <span className="bg-background h-1.5 w-1.5 rounded-full" />
+                            )}
+                          </span>
+                          {t('filterAll')}
+                          <span className="text-muted-foreground/60 ml-auto text-[10px] tabular-nums">
+                            {categoryCount('All')}
+                          </span>
                         </button>
+                        {ALL_CATEGORIES.map((cat) => {
+                          const isActive = categoryFilter === cat;
+                          const count = categoryCount(cat);
+                          const disabled = count === 0 && !isActive;
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => handleCategoryFilter(cat)}
+                              className={cn(
+                                'flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all',
+                                isActive
+                                  ? 'bg-muted text-foreground'
+                                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                                disabled &&
+                                  'hover:text-muted-foreground cursor-not-allowed opacity-40 hover:bg-transparent',
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  'h-2 w-2 shrink-0 rounded-full',
+                                  CATEGORY_DOT[cat] ?? 'bg-muted-foreground/40',
+                                )}
+                              />
+                              <span className="truncate">{cat}</span>
+                              <span className="text-muted-foreground/60 ml-auto text-[10px] tabular-nums">
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
-                    </>
-                  )}
+                    </div>
+
+                    <div className="bg-border mx-4 h-px" />
+
+                    {/* Level — responsive card row with counts */}
+                    <div className="px-4 pt-3 pb-4">
+                      <FilterSectionLabel>
+                        {t('filterLevel')}
+                      </FilterSectionLabel>
+                      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                        {(['All', ...ALL_LEVELS] as const).map((lvl) => {
+                          const isActive = levelFilter === lvl;
+                          const count = levelCount(lvl);
+                          return (
+                            <button
+                              key={lvl}
+                              type="button"
+                              onClick={() => handleLevelFilter(lvl)}
+                              className={cn(
+                                'flex flex-col items-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-medium transition-all',
+                                isActive
+                                  ? 'border-foreground bg-muted text-foreground'
+                                  : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
+                              )}
+                            >
+                              {lvl !== 'All' ? (
+                                <LevelDots level={lvl} />
+                              ) : (
+                                <span className="text-muted-foreground text-sm leading-none">
+                                  —
+                                </span>
+                              )}
+                              <span className="leading-none">
+                                {lvl === 'All' ? t('filterAll') : lvl}
+                              </span>
+                              <span className="text-muted-foreground/60 text-[10px] leading-none tabular-nums">
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer — live result preview */}
+                  <div className="border-border bg-surface/60 shrink-0 border-t p-3">
+                    <Button
+                      type="button"
+                      onClick={() => setFilterOpen(false)}
+                      disabled={filtered.length === 0}
+                      className="bg-brand-accent hover:bg-brand-accent-hover text-brand-accent-foreground h-9 w-full rounded-lg text-sm font-semibold disabled:opacity-50"
+                    >
+                      {filtered.length === 0
+                        ? t('filterNoResults')
+                        : filtered.length === 1
+                          ? t('filterShowResult')
+                          : t('filterShowResults', { count: filtered.length })}
+                    </Button>
+                  </div>
                 </PopoverContent>
               </Popover>
 
@@ -331,6 +518,73 @@ export default function AdminCoursesPage() {
               </Link>
             </div>
           </div>
+
+          {/* Active filter chips */}
+          {activeFilterCount > 0 && (
+            <div className="-mt-1 mb-4 flex flex-wrap items-center gap-1.5">
+              {statusFilter !== 'All' && (
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
+                    STATUS_STYLE[statusFilter],
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      STATUS_DOT[statusFilter],
+                    )}
+                  />
+                  {statusFilter}
+                  <button
+                    type="button"
+                    onClick={() => handleStatusFilter('All')}
+                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {categoryFilter !== 'All' && (
+                <span className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      CATEGORY_DOT[categoryFilter] ?? 'bg-muted-foreground/60',
+                    )}
+                  />
+                  {categoryFilter}
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryFilter('All')}
+                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {levelFilter !== 'All' && (
+                <span className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+                  <LevelDots level={levelFilter} />
+                  {levelFilter}
+                  <button
+                    type="button"
+                    onClick={() => handleLevelFilter('All')}
+                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-muted-foreground ml-0.5 text-xs transition-colors hover:text-rose-500"
+              >
+                {t('filterClearAll')}
+              </button>
+            </div>
+          )}
 
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">
@@ -590,7 +844,7 @@ export default function AdminCoursesPage() {
                       className={cn(
                         'rounded-lg text-xs',
                         p === currentPage
-                          ? 'bg-brand-gold text-white hover:opacity-90'
+                          ? 'bg-brand-accent text-brand-accent-foreground hover:opacity-90'
                           : 'text-muted-foreground hover:bg-muted',
                       )}
                     >

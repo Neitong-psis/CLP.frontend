@@ -1,14 +1,6 @@
 import { z } from 'zod';
 import { roleSchema } from './role.schema';
 
-/**
- * Backend `User` domain shape (src/users/domain/user.ts), serialised with the
- * `me` group. Note `id` is a NUMBER (not a UUID); only `Role.id` is a UUID.
- *
- * Unknown fields (photo, timestamps, …) are intentionally dropped — we only
- * validate what the auth/RBAC layer depends on, so the contract fails loudly
- * if a relied-upon field changes shape.
- */
 export const userSchema = z.object({
   id: z.number(),
   email: z.string().email().nullable().optional(),

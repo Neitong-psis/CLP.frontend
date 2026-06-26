@@ -10,15 +10,15 @@ import { LessonItem } from './LessonItem';
 import { RowControls } from './RowControls';
 
 export function ModuleItem({
-  mod,
-  modIndex,
+  module,
+  moduleIndex,
   totalModules,
   onUpdate,
   onDelete,
   onMove,
 }: {
-  mod: CourseModule;
-  modIndex: number;
+  module: CourseModule;
+  moduleIndex: number;
   totalModules: number;
   onUpdate: (m: CourseModule) => void;
   onDelete: () => void;
@@ -28,31 +28,31 @@ export function ModuleItem({
 
   const addLesson = () =>
     onUpdate({
-      ...mod,
-      lessons: [...mod.lessons, makeLesson(mod.lessons.length + 1)],
+      ...module,
+      lessons: [...module.lessons, makeLesson(module.lessons.length + 1)],
     });
 
   const updateLesson = (i: number, updated: Lesson) =>
     onUpdate({
-      ...mod,
-      lessons: mod.lessons.map((l, j) => (j === i ? updated : l)),
+      ...module,
+      lessons: module.lessons.map((l, j) => (j === i ? updated : l)),
     });
 
   const deleteLesson = (i: number) =>
-    onUpdate({ ...mod, lessons: mod.lessons.filter((_, j) => j !== i) });
+    onUpdate({ ...module, lessons: module.lessons.filter((_, j) => j !== i) });
 
   const moveLesson = (i: number, dir: 'up' | 'down') =>
-    onUpdate({ ...mod, lessons: moveItem(mod.lessons, i, dir) });
+    onUpdate({ ...module, lessons: moveItem(module.lessons, i, dir) });
 
   const addSection = (lessonIndex: number, type: ContentSection['type']) => {
-    const lesson = mod.lessons[lessonIndex];
+    const lesson = module.lessons[lessonIndex];
     updateLesson(lessonIndex, {
       ...lesson,
       sections: [...lesson.sections, makeSection(type)],
     });
   };
 
-  const lessonCount = mod.lessons.length;
+  const lessonCount = module.lessons.length;
   const lessonCountLabel =
     lessonCount === 1
       ? t('content.module.lessonCountOne', { count: lessonCount })
@@ -63,55 +63,56 @@ export function ModuleItem({
       <div
         className={cn(
           'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
-          mod.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
+          module.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
         )}
-        onClick={() => onUpdate({ ...mod, expanded: !mod.expanded })}
+        onClick={() => onUpdate({ ...module, expanded: !module.expanded })}
       >
         <ChevronDown
           className={cn(
             'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
-            mod.expanded && 'rotate-180',
+            module.expanded && 'rotate-180',
           )}
         />
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/10 text-xs font-bold text-blue-950 dark:bg-amber-400/10 dark:text-amber-400">
-          {modIndex + 1}
+          {moduleIndex + 1}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-foreground truncate text-sm font-bold">
-            {mod.title || t('content.module.defaultTitle', { n: modIndex + 1 })}
+            {module.title ||
+              t('content.module.defaultTitle', { n: moduleIndex + 1 })}
           </p>
           <p className="text-muted-foreground text-[11px]">
             {lessonCountLabel}
           </p>
         </div>
         <RowControls
-          index={modIndex}
+          index={moduleIndex}
           total={totalModules}
           onMove={onMove}
           onDelete={onDelete}
         />
       </div>
 
-      {mod.expanded && (
+      {module.expanded && (
         <div className="animate-fade-in border-border/50 space-y-4 border-t px-4 py-4">
           <FormField label={t('content.module.titleLabel')}>
             <input
               type="text"
-              value={mod.title}
-              onChange={(e) => onUpdate({ ...mod, title: e.target.value })}
+              value={module.title}
+              onChange={(e) => onUpdate({ ...module, title: e.target.value })}
               placeholder={t('content.module.titlePlaceholder')}
               className={inputCls}
             />
           </FormField>
 
-          {mod.lessons.length > 0 && (
+          {module.lessons.length > 0 && (
             <div className="space-y-3">
-              {mod.lessons.map((lesson, li) => (
+              {module.lessons.map((lesson, li) => (
                 <LessonItem
                   key={lesson.id}
                   lesson={lesson}
                   lessonIndex={li}
-                  totalLessons={mod.lessons.length}
+                  totalLessons={module.lessons.length}
                   onUpdate={(updated) => updateLesson(li, updated)}
                   onDelete={() => deleteLesson(li)}
                   onMove={(dir) => moveLesson(li, dir)}

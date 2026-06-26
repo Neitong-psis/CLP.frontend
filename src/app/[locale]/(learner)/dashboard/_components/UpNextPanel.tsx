@@ -7,7 +7,8 @@ import {
   ClipboardList,
   ChevronRight,
 } from 'lucide-react';
-import { UP_NEXT_ITEMS, type UpNextItemType } from '@/config/learner';
+import { UP_NEXT_ITEMS, type UpNextItemType } from '@/constants/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
@@ -37,6 +38,7 @@ const TYPE_META: Record<UpNextItemType, TypeMeta> = {
 };
 
 export default function UpNextPanel() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
@@ -48,7 +50,9 @@ export default function UpNextPanel() {
       )}
       style={entranceStyle(inView, 80)}
     >
-      <h3 className="text-foreground mb-4 text-base font-bold">Up Next</h3>
+      <h3 className="text-foreground mb-4 text-base font-bold">
+        {t('upNext')}
+      </h3>
 
       <div className="space-y-1">
         {UP_NEXT_ITEMS.map((item, i) => {
@@ -78,10 +82,10 @@ export default function UpNextPanel() {
 
                 <div className="min-w-0 flex-1">
                   <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                    {item.label}
+                    {t(`upNextItems.${item.id}.label`)}
                   </p>
                   <p className="text-foreground group-hover:text-brand-gold mt-0.5 truncate text-sm font-semibold transition-colors duration-150">
-                    {item.title}
+                    {t(`upNextItems.${item.id}.title`)}
                   </p>
                 </div>
 

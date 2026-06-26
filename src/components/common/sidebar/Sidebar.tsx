@@ -157,7 +157,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
             collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
           )}
         >
-          <Logo variant="light" size="xl" className="w-37.5!" />
+          <Logo variant="light" size="md" showText />
           <Button
             onClick={() => setCollapsed(true)}
             aria-label="Collapse sidebar"
@@ -184,7 +184,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
             className="group relative size-10 rounded-lg hover:bg-white/[0.07]"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover:opacity-0">
-              <Logo variant="dark" size="lg" className="w-10!" />
+              <Logo variant="dark" size="md" />
             </span>
             <span className="absolute inset-0 flex items-center justify-center text-white/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <PanelLeftOpen className="size-4" />

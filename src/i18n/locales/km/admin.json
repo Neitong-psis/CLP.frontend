@@ -1,7 +1,7 @@
 {
   "admin": {
     "dashboard": "ផ្ទាំងគ្រប់គ្រងអ្នកគ្រប់គ្រង",
-    "overview": "ទិដ្ឋភាពរួម",
+    "overview": "ផ្ទាំងគ្រប់គ្រង",
     "users": "អ្នកប្រើប្រាស់",
     "courses": "វគ្គសិក្សា",
     "analytics": "ការវិភាគ",
@@ -37,7 +37,7 @@
 
     "dashboardPage": {
       "title": "ផ្ទាំងគ្រប់គ្រងអ្នកគ្រប់គ្រង",
-      "platformOverview": "ទិដ្ឋភាពប្លាតហ្វម",
+      "platformOverview": "ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធ",
       "totalEnrollments": "ការចុះឈ្មោះសរុប",
       "monthlyRevenue": "ប្រាក់ចំណូលប្រចាំខែ",
       "totalUsers": "អ្នកប្រើប្រាស់សរុប",
@@ -51,7 +51,10 @@
       "userDistribution": "ការចែកចាយអ្នកប្រើប្រាស់",
       "users": "អ្នកប្រើប្រាស់",
       "liveUserRecords": "កំណត់ត្រាអ្នកប្រើប្រាស់ផ្ទាល់",
-      "total": "សរុប"
+      "total": "សរុប",
+      "learners": "អ្នករៀន",
+      "educators": "គ្រូបង្រៀន",
+      "admins": "អ្នកគ្រប់គ្រង"
     },
 
     "coursesPage": {
@@ -109,13 +112,16 @@
         "publish": "ផ្សព្វផ្សាយ",
         "delete": "លុប"
       },
-      "filterBtn": "ច្រោះ",
-      "createBtn": "បង្កើតវគ្គ",
+      "filterBtn": "ជម្រើស",
+      "createBtn": "បង្កើតវគ្គសិក្សា",
       "filterStatus": "ស្ថានភាព",
       "filterCategory": "ប្រភេទ",
       "filterLevel": "កម្រិត",
       "filterAll": "ទាំងអស់",
       "filterClearAll": "លុបតម្រងទាំងអស់",
+      "filterShowResults": "បង្ហាញលទ្ធផល {count}",
+      "filterShowResult": "បង្ហាញលទ្ធផល ១",
+      "filterNoResults": "គ្មានលទ្ធផល",
       "createModal": {
         "title": "បង្កើតវគ្គថ្មី",
         "titleLabel": "ចំណងជើងវគ្គ",
@@ -192,6 +198,15 @@
       "searchPlaceholder": "ស្វែងរកតាមឈ្មោះ ឬអ៊ីម៉ែល…",
       "searchAriaLabel": "ស្វែងរកអ្នកប្រើប្រាស់តាមឈ្មោះ ឬអ៊ីម៉ែល",
       "addUser": "បន្ថែមអ្នកប្រើប្រាស់",
+      "filterBtn": "ជម្រើស",
+      "filterRole": "តួនាទី",
+      "filterStatus": "ស្ថានភាព",
+      "filterInvitation": "ការអញ្ជើញ",
+      "filterAll": "ទាំងអស់",
+      "filterClearAll": "លុបតម្រងទាំងអស់",
+      "filterShowResults": "បង្ហាញលទ្ធផល {count}",
+      "filterShowResult": "បង្ហាញលទ្ធផល ១",
+      "filterNoResults": "គ្មានលទ្ធផល",
       "noMatch": "រកមិនឃើញអ្នកប្រើប្រាស់ដែលត្រូវ។",
       "showingOf": "បង្ហាញ {from}–{to} នៃ {total} អ្នកប្រើប្រាស់",
       "srShowing": "បង្ហាញ {from} ទៅ {to} នៃ {total} អ្នកប្រើប្រាស់។",
@@ -335,7 +350,11 @@
       "monthlyRevenue": "ប្រាក់ចំណូលប្រចាំខែ",
       "last12Months": "១២ ខែចុងក្រោយ",
       "revByCategory": "ប្រាក់ចំណូលតាមប្រភេទ",
-      "topEarners": "អ្នករកចំណូលខ្ពស់ខែនេះ"
+      "topEarners": "អ្នករកចំណូលខ្ពស់ខែនេះ",
+      "statAnnualRevenue": "ប្រាក់ចំណូលប្រចាំឆ្នាំ",
+      "statThisMonth": "ខែនេះ",
+      "statMRR": "ប្រាក់ចំណូលកើតឡើងប្រចាំខែ",
+      "statAOV": "តម្លៃបញ្ជាទិញជាមធ្យម"
     },
 
     "systemPage": {
@@ -360,6 +379,9 @@
       "phoneNumber": "លេខទូរស័ព្ទ",
       "gender": "ភេទ",
       "dateOfBirth": "ថ្ងៃខែឆ្នាំកំណើត",
+      "selectDate": "ជ្រើសរើសកាលបរិច្ឆេទ",
+      "pickerClear": "សម្អាត",
+      "pickerToday": "ថ្ងៃនេះ",
       "nationality": "សញ្ជាតិ",
       "userRole": "តួនាទីអ្នកប្រើប្រាស់",
       "address": "អាសយដ្ឋាន",
@@ -470,7 +492,8 @@
     "topCourses": {
       "title": "វគ្គដែលបានការអនុវត្តខ្ពស់",
       "noData": "មិនទាន់មានទិន្នន័យវគ្គ។",
-      "enrolled": "ចុះឈ្មោះ"
+      "enrolled": "ចុះឈ្មោះ",
+      "coursesCount": "{count} វគ្គ"
     },
 
     "platformAnalytics": {

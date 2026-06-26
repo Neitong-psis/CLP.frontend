@@ -1,14 +1,3 @@
-/**
- * Admin courses API — typed, zod-validated functions over `/api/v1/courses`.
- * GET /courses is public; PATCH and DELETE require admin Bearer token
- * (injected automatically by the shared `http` instance).
- *
- * Mapping notes:
- * - `isPublished` drives Public vs non-Public. Pending is indicated by
- *   meta.status === "pending" on an unpublished course.
- * - Level, rating, and enrollment count are stored in the `meta` JSONB field.
- * - `createdAt` is not exposed by the courses endpoint so it shows "—".
- */
 import { http } from '@/lib/api/http';
 import { normalizeError } from '@/lib/api/errors';
 import {
@@ -89,7 +78,6 @@ function formatRevenue(amount: number): string {
 export function deriveCourseStats(raw: BackendCourse[]): CourseStats {
   const activeCourses = raw.filter((c) => c.isPublished).length;
 
-  // ── Top courses ─────────────────────────────────────────────────────────────
   const withCounts = raw.map((c) => {
     const meta = (c.meta ?? {}) as Record<string, unknown>;
     return {
@@ -110,7 +98,6 @@ export function deriveCourseStats(raw: BackendCourse[]): CourseStats {
       progress: maxCount > 0 ? Math.round((count / maxCount) * 100) : 0,
     }));
 
-  // ── Revenue by category ──────────────────────────────────────────────────────
   const catRevenue = new Map<string, number>();
   for (const { course, count } of withCounts) {
     const cat = course.category?.name ?? 'Other';

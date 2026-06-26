@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAdminRevenueT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
 export interface RevenueCategory {
@@ -18,6 +19,7 @@ export function RevenueByCategoryCard({
   data,
   className,
 }: RevenueByCategoryCardProps) {
+  const t = useAdminRevenueT();
   const [mounted, setMounted] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const ref = useRef<HTMLElement>(null);
@@ -48,10 +50,10 @@ export function RevenueByCategoryCard({
       <div className="mb-6 flex items-start justify-between gap-2">
         <div>
           <h3 className="text-foreground text-[14px] font-medium">
-            Revenue by Category
+            {t('revByCategory')}
           </h3>
           <p className="text-muted-foreground mt-0.5 text-[12px]">
-            Top earners this month
+            {t('topEarners')}
           </p>
         </div>
         <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium">

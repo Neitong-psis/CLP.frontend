@@ -8,9 +8,14 @@ import { useLearnerCertificatesT } from '@/i18n';
 import { useToast } from '@/components/ui/toast';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { MOCK_USER } from '@/config/learner';
+import { MOCK_USER } from '@/constants/learner';
 import { getCertById } from '../_lib/cert';
-import { markCertVerified } from '@/lib/utils/certStorage';
+import {
+  markCertVerified,
+  readCertDraft,
+  saveCertDraft,
+  clearCertDraft,
+} from '@/lib/utils/certStorage';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -239,17 +244,27 @@ export default function VerifyPage() {
   const [step, setStep] = useState<VerifyStep>(1);
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
-  const [data, setData] = useState<VerifyData>({
-    fullName: MOCK_USER.name,
-    email: MOCK_USER.email,
-    phone: '',
-    studentId: '',
-    institution: '',
-    cohort: '',
+  const [data, setData] = useState<VerifyData>(() => {
+    const draft = readCertDraft(id);
+    return (
+      draft || {
+        fullName: MOCK_USER.name,
+        email: MOCK_USER.email,
+        phone: '',
+        studentId: '',
+        institution: '',
+        cohort: '',
+      }
+    );
   });
 
   const cert = getCertById(id);
   if (!cert) return notFound();
+
+  function handleSaveDraft() {
+    saveCertDraft(id, data);
+    toast(t('saveDraft') + ' ✓', 'success');
+  }
 
   function update(field: keyof VerifyData, value: string) {
     setData((prev) => ({ ...prev, [field]: value }));
@@ -276,6 +291,7 @@ export default function VerifyPage() {
   function handleConfirm() {
     setShowModal(false);
     markCertVerified(id, data.fullName);
+    clearCertDraft(id);
     toast(t('successToast'), 'success');
     router.push(`/certificates/${id}/view`);
   }
@@ -418,7 +434,7 @@ export default function VerifyPage() {
               </button>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => toast(t('saveDraft') + ' ✓', 'success')}
+                  onClick={handleSaveDraft}
                   className="border-border text-foreground hover:bg-muted/60 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors"
                 >
                   {t('saveDraft')}

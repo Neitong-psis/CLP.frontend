@@ -2,6 +2,7 @@
 
 import { TrendingUp, DollarSign, Users, BookOpen } from 'lucide-react';
 import { DASHBOARD_STATS, MONTHLY_REVENUE } from '@/constants/admin';
+import { useAdminDashboardT } from '@/i18n';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useCourseStats } from '@/hooks/useCourseStats';
 import { cn } from '@/lib/utils/cn';
@@ -39,6 +40,7 @@ function StatCardSkeleton() {
 export function DashboardStatGrid({
   firstVisit = false,
 }: DashboardStatGridProps) {
+  const t = useAdminDashboardT();
   const enrollments = stat('Total Enrollments');
   const revenue = stat('Monthly Revenue');
   const users = stat('Total Users');
@@ -63,14 +65,14 @@ export function DashboardStatGrid({
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Static cards — always visible immediately */}
       <StatCard
-        label={enrollments.label}
+        label={t('totalEnrollments')}
         value={enrollments.value}
         change={enrollments.change}
         href="/admin/courses"
         icon={TrendingUp}
       />
       <StatCard
-        label={revenue.label}
+        label={t('monthlyRevenue')}
         value={revenue.value}
         change={revenue.change}
         href="/admin/revenue"
@@ -84,7 +86,7 @@ export function DashboardStatGrid({
       ) : (
         <div className={cn(cardEntrance)}>
           <StatCard
-            label={users.label}
+            label={t('totalUsers')}
             value={usersValue}
             change={usersChange}
             href="/admin/users"
@@ -99,7 +101,7 @@ export function DashboardStatGrid({
       ) : (
         <div className={cn(cardEntrance)}>
           <StatCard
-            label={courses.label}
+            label={t('activeCourses')}
             value={coursesValue}
             change={courses.change}
             href="/admin/courses"

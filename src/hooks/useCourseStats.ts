@@ -5,7 +5,7 @@ import {
   fetchRawCourses,
   deriveCourseStats,
   type CourseStats,
-} from '@/features/courses';
+} from '@/services/courses';
 
 interface UseCourseStatsResult {
   data: CourseStats | null;

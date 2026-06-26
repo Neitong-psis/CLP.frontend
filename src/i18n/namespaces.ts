@@ -68,6 +68,7 @@ export const NS = {
   // ── Learner ───────────────────────────────────────────────────────────────
   learner: {
     root: 'learner',
+    dashboard: 'learner.dashboard',
     myLearning: 'learner.myLearning',
     certificates: 'learner.certificates',
     explore: 'learner.explore',

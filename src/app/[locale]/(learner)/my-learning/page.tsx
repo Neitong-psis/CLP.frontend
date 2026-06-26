@@ -3,7 +3,7 @@ import { NS } from '@/i18n/namespaces';
 import { ENROLLED_COURSES, MOCK_USER } from '@/constants/learner';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import CourseGrid from '@/components/pages/learner/my-learning/CourseGrid';
+import CourseGrid from './_components/CourseGrid';
 
 export default async function MyLearningPage() {
   const t = await getTranslations(NS.learner.myLearning);

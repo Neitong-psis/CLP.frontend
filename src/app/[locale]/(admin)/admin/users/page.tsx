@@ -5,7 +5,7 @@ import { useAdminUsersT } from '@/i18n';
 import { Search, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { AdminUserRow } from '@/constants/admin';
-import type { SaveUserInput } from '@/features/users';
+import type { SaveUserInput } from '@/services/users';
 import { Button } from '@/components/ui/button/Button';
 import TopBar from '@/components/common/TopBar';
 import { useUserManagement } from '@/./app/[locale]/(admin)/admin/users/_hook/useUserManagement';
@@ -22,12 +22,14 @@ import {
 } from './_components/RowContextMenu';
 import { SkeletonRow, UserTableRow } from './_components/UserTableRow';
 import { TablePagination } from './_components/TablePagination';
+import { UsersActiveChips, UsersFilter } from './_components/UsersFilter';
 
 export default function AdminUsersPage() {
   const t = useAdminUsersT();
   const { users, loading, saveEdit, remove, suspend, activate, add } =
     useUserManagement();
 
+  const filter = useUserFilter(users);
   const {
     search,
     setSearch,
@@ -40,7 +42,7 @@ export default function AdminUsersPage() {
     goToPage,
     prevPage,
     nextPage,
-  } = useUserFilter(users);
+  } = filter;
 
   const [addOpen, setAddOpen] = useState(false);
   const [viewUser, setViewUser] = useState<AdminUserRow | null>(null);
@@ -138,15 +140,20 @@ export default function AdminUsersPage() {
                 className="focus:border-brand-gold/50 focus:ring-brand-gold/10 border-border bg-card text-foreground placeholder:text-muted-foreground h-10 w-full rounded-xl border pr-4 pl-10 text-sm outline-none focus:ring-2"
               />
             </div>
-            <Button
-              variant="secondary"
-              onClick={() => setAddOpen(true)}
-              className="shrink-0 rounded-full px-5 font-bold text-white shadow hover:text-white"
-            >
-              <UserPlus className="h-4 w-4" aria-hidden="true" />
-              {t('addUser')}
-            </Button>
+            <div className="flex shrink-0 items-center gap-3">
+              <UsersFilter filter={filter} />
+              <Button
+                variant="ghost"
+                onClick={() => setAddOpen(true)}
+                className="bg-brand-accent hover:bg-brand-accent-hover text-brand-accent-foreground inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors sm:px-4"
+              >
+                <UserPlus className="h-4 w-4" aria-hidden="true" />
+                {t('addUser')}
+              </Button>
+            </div>
           </div>
+
+          <UsersActiveChips filter={filter} />
 
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {filtered.length === 0

@@ -94,7 +94,7 @@ export default function ProfileMenu({
 
       <DropdownMenuContent
         side="top"
-        align="start"
+        align="center"
         className="border-border bg-card w-56 border p-0 shadow-lg dark:bg-[#071225]"
       >
         {/* Header */}

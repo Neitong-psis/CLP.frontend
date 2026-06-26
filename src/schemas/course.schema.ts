@@ -16,12 +16,6 @@ const categorySchema = z.object({
   name: z.string(),
 });
 
-/**
- * Backend `Course` domain shape (src/courses/domain/course.ts).
- * Status is derived: isPublished=true → "Public";
- * isPublished=false + meta.status="pending" → "Pending"; else → "Archive".
- * Level, rating and enrollment count live in the `meta` JSONB field.
- */
 export const backendCourseSchema = z.object({
   id: z.string(),
   title: z.string(),

@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { NS } from '@/i18n/namespaces';
 import { EXPLORE_COURSES, MOCK_USER } from '@/config/learner';
 import TopBar from '@/components/pages/learner/TopBar';
-import ExploreFilter from '@/components/pages/learner/explore/ExploreFilter';
+import ExploreFilter from './_components/ExploreFilter';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
 export default async function ExplorePage() {

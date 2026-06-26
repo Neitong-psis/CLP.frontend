@@ -11,11 +11,6 @@ const BASE =
 
 const subscribe = () => () => {};
 
-/**
- * Returns `true` only after client hydration. Implemented with
- * `useSyncExternalStore` (server snapshot `false`, client snapshot `true`) so
- * we get an SSR-safe mount flag without calling `setState` inside an effect.
- */
 function useHydrated(): boolean {
   return useSyncExternalStore(
     subscribe,

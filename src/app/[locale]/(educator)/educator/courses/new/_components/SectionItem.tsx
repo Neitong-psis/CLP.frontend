@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Brain,
   ClipboardList,
@@ -16,6 +17,19 @@ import { useCreateCourseT } from '@/i18n';
 import type { ContentSection, QuizOption, SectionType } from '../_lib/types';
 import { uid } from '../_lib/builder';
 import { SelectField, inputCls } from './form';
+
+// Lazy + client-only: keeps the Tiptap bundle out of the initial wizard load
+// and sidesteps SSR for the editor entirely.
+const RichEditor = dynamic(
+  () =>
+    import('@/components/ui/RichEditor/RichEditor').then((m) => m.RichEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="border-border/50 bg-background h-40 animate-pulse rounded-lg border" />
+    ),
+  },
+);
 
 export const SECTION_ICONS: Record<SectionType, React.ElementType> = {
   text: FileText,
@@ -65,12 +79,10 @@ export function SectionItem({
 
       <div className="p-4">
         {section.type === 'text' && (
-          <textarea
-            rows={4}
-            placeholder={t('content.section.textPlaceholder')}
+          <RichEditor
             value={section.text}
-            onChange={(e) => onUpdate({ ...section, text: e.target.value })}
-            className={cn(inputCls, 'resize-y text-xs')}
+            onChange={(json) => onUpdate({ ...section, text: json })}
+            placeholder={t('content.section.textPlaceholder')}
           />
         )}
 

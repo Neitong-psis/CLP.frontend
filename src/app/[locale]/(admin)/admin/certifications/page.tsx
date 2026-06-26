@@ -12,7 +12,6 @@ import {
   Filter,
   Download,
   Link2,
-  Clock,
   X,
   Printer,
   Share2,
@@ -569,10 +568,6 @@ export default function AdminCertificationsPage() {
     );
   }
 
-  function handleHistory(recipient: string) {
-    toast(`Showing history for ${recipient}.`, 'info');
-  }
-
   function openCertFromRecent(cert: (typeof RECENT_ISSUANCES)[number]) {
     const record = ISSUANCE_HISTORY.find((h) => h.recipient === cert.user) ?? {
       id: cert.id.toUpperCase(),
@@ -594,7 +589,7 @@ export default function AdminCertificationsPage() {
         />
       )}
 
-      <TopBar role="admin" title={t('title')} subtitle={t('subtitle')} />
+      <TopBar role="admin" title={t('title')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         {/* Tab bar + Create button */}
@@ -617,7 +612,7 @@ export default function AdminCertificationsPage() {
           </div>
           <button
             onClick={() => toast('Template creation coming soon.', 'info')}
-            className="bg-brand-gold hover:bg-brand-gold-dark flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
+            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
           >
             <Plus className="h-4 w-4" />
             {t('createTemplate')}
@@ -941,13 +936,6 @@ export default function AdminCertificationsPage() {
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
                           >
                             <Link2 className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            aria-label={t('historyAriaLabel')}
-                            onClick={() => handleHistory(row.recipient)}
-                            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
-                          >
-                            <Clock className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>

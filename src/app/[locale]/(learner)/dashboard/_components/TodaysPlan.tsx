@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Circle } from 'lucide-react';
-import { TODAY_PLAN } from '@/config/learner';
+import { TODAY_PLAN } from '@/constants/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
 
+const UNIT_KEY: Record<string, string> = {
+  min: 'unitMin',
+  lesson: 'unitLesson',
+  '%': 'unitPercent',
+};
+
 export default function TodaysPlan() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const [barsVisible, setBarsVisible] = useState(false);
 
@@ -27,7 +35,7 @@ export default function TodaysPlan() {
       style={entranceStyle(inView, 0)}
     >
       <h3 className="text-foreground mb-4 text-base font-bold">
-        Today&apos;s Plan
+        {t('todaysPlan')}
       </h3>
 
       <div className="space-y-4">
@@ -58,12 +66,12 @@ export default function TodaysPlan() {
                       goal.done ? 'text-muted-foreground' : 'text-foreground',
                     )}
                   >
-                    {goal.label}
+                    {t(`plan.${goal.id}`)}
                   </span>
                 </div>
                 <span className="text-muted-foreground shrink-0 text-xs font-semibold">
                   {goal.current}&thinsp;/&thinsp;{goal.target}&thinsp;
-                  {goal.unit}
+                  {t(UNIT_KEY[goal.unit] ?? 'unitMin')}
                 </span>
               </div>
 

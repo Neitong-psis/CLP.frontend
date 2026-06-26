@@ -13,7 +13,7 @@ import {
   resetUserPassword,
   generateUserPassword,
   type SaveUserInput,
-} from '@/features/users';
+} from '@/services/users';
 
 export interface UserManagement {
   users: AdminUserRow[];

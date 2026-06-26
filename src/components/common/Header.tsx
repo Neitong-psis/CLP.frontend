@@ -387,7 +387,6 @@ export default function Header() {
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       >
-        {/* Logo — width-constrained so the wide SVG renders correctly */}
         <Link
           href="/"
           className="shrink-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
@@ -396,7 +395,8 @@ export default function Header() {
           <Logo
             size="md"
             variant={scrolled ? 'default' : 'light'}
-            className="[&_img]:h-auto [&_img]:w-24 sm:[&_img]:w-28 md:[&_img]:w-36 lg:[&_img]:w-44"
+            showText
+            className="[&_img]:h-9 [&_img]:w-auto sm:[&_img]:h-10 lg:[&_img]:h-11"
           />
         </Link>
 

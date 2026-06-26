@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import { MOCK_USER } from '@/config/learner';
 import WeeklyStreak from './WeeklyStreak';
-import ProgressTimeline from './ProgressTimeline';
 
 const XP_PCT = Math.round((MOCK_USER.xp / MOCK_USER.nextLevelXp) * 100);
 
@@ -63,8 +62,6 @@ export default function StatCards() {
           </div>
         </div>
       </Link>
-
-      <ProgressTimeline />
     </div>
   );
 }

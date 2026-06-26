@@ -66,7 +66,7 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
           {t('title')}
         </h3>
         <span className="text-muted-foreground text-[12px]">
-          {data.length} courses
+          {t('coursesCount', { count: data.length })}
         </span>
       </header>
 

@@ -1,10 +1,13 @@
 'use client';
 
 import { useMemo, useRef, useEffect, useState } from 'react';
-import { WEEKLY_ACTIVITY } from '@/config/learner';
+import { WEEKLY_ACTIVITY } from '@/constants/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
+
+type TFn = ReturnType<typeof useLearnerDashboardT>;
 
 /* Weekdays only — matches the Figma artboard + "weekday target" copy. */
 const DATA = WEEKLY_ACTIVITY.slice(0, 5);
@@ -20,16 +23,6 @@ const Y_TICKS = [0, 30, 60, 90, 120] as const;
 const BRAND_GOLD = '#f4a300';
 const COUNT = DATA.length;
 const COL_W = CHART_W / (COUNT - 1);
-
-const DAY_FULL: Record<string, string> = {
-  Mon: 'Monday',
-  Tue: 'Tuesday',
-  Wed: 'Wednesday',
-  Thu: 'Thursday',
-  Fri: 'Friday',
-  Sat: 'Saturday',
-  Sun: 'Sunday',
-};
 
 function toPoint(index: number, minutes: number) {
   return {
@@ -55,6 +48,7 @@ function buildPaths(pts: { x: number; y: number }[]) {
 }
 
 export default function ActivityChart() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const lineRef = useRef<SVGPathElement>(null);
   const [pathLen, setPathLen] = useState(0);
@@ -87,14 +81,14 @@ export default function ActivityChart() {
       <div className="mb-2 flex items-start justify-between gap-4">
         <div>
           <h3 className="text-foreground text-lg font-bold tracking-tight">
-            Learning Activity
+            {t('learningActivity')}
           </h3>
           <p className="text-muted-foreground mt-1 text-sm">
-            Daily minutes spent learning against your weekday target.
+            {t('activitySubtitle')}
           </p>
         </div>
         <span className="border-border text-foreground/70 shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold">
-          This Week
+          {t('thisWeek')}
         </span>
       </div>
 
@@ -156,7 +150,7 @@ export default function ActivityChart() {
                   fontWeight="500"
                   fill="var(--muted-foreground)"
                 >
-                  {tick} min
+                  {t('yAxisMin', { value: tick })}
                 </text>
               </g>
             );
@@ -177,7 +171,7 @@ export default function ActivityChart() {
                 fontWeight={isHov ? '700' : '500'}
                 style={{ transition: 'fill 0.15s' }}
               >
-                {d.day}
+                {t(`weekdaysShort.${d.day}`)}
               </text>
             );
           })}
@@ -274,8 +268,9 @@ export default function ActivityChart() {
             xPct={(hoveredPt.x / VIEW_W) * 100}
             yPct={(hoveredPt.y / VIEW_H) * 100}
             below={hoveredPt.y < 58}
-            day={DAY_FULL[hoveredDay.day] ?? hoveredDay.day}
+            day={t(`weekdaysFull.${hoveredDay.day}`)}
             minutes={hoveredDay.minutes}
+            t={t}
           />
         )}
       </div>
@@ -289,9 +284,10 @@ interface TooltipProps {
   below: boolean;
   day: string;
   minutes: number;
+  t: TFn;
 }
 
-function Tooltip({ xPct, yPct, below, day, minutes }: TooltipProps) {
+function Tooltip({ xPct, yPct, below, day, minutes, t }: TooltipProps) {
   const delta = minutes - TARGET_MIN;
   const above = delta >= 0;
 
@@ -317,7 +313,9 @@ function Tooltip({ xPct, yPct, below, day, minutes }: TooltipProps) {
           <span className="text-foreground text-lg leading-none font-black tabular-nums">
             {minutes}
           </span>
-          <span className="text-muted-foreground text-[11px]">min</span>
+          <span className="text-muted-foreground text-[11px]">
+            {t('minUnit')}
+          </span>
         </div>
         <div
           className={cn(
@@ -327,7 +325,7 @@ function Tooltip({ xPct, yPct, below, day, minutes }: TooltipProps) {
               : 'text-rose-500 dark:text-rose-400',
           )}
         >
-          {above ? '▲' : '▼'} {Math.abs(delta)} min vs target
+          {above ? '▲' : '▼'} {t('vsTarget', { value: Math.abs(delta) })}
         </div>
 
         {/* Caret */}

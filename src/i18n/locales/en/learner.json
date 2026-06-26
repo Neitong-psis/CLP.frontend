@@ -1,6 +1,6 @@
 {
   "learner": {
-    "dashboard": "My Dashboard",
+    "dashboardTitle": "My Dashboard",
     "continueLearning": "Continue Learning",
     "recommended": "Recommended for you",
     "upcomingQuizzes": "Upcoming Quizzes",
@@ -10,6 +10,84 @@
       "hoursLearned": "Hours Learned",
       "quizzesTaken": "Quizzes Taken",
       "certificates": "Certificates"
+    },
+    "dashboard": {
+      "greetingMorning": "Good morning",
+      "greetingAfternoon": "Good afternoon",
+      "greetingEvening": "Good evening",
+      "greetingTitle": "{greeting}, {name}!",
+      "continueLearning": "Continue Learning",
+      "lessonLabel": "Lesson {number}",
+      "percentComplete": "{progress}% Complete",
+      "continueLesson": "Continue Lesson",
+      "viewLesson": "View Lesson",
+      "lessonsCompleted": "Lessons Completed",
+      "thisWeekCount": "{count} this week",
+      "totalXp": "Total XP",
+      "currentStreak": "Current Streak",
+      "daysValue": "{count} Days",
+      "bestStreak": "Best: {count} days",
+      "rank": "Rank",
+      "topPercent": "Top {percent}%",
+      "amongLearners": "Among all learners",
+      "learningActivity": "Learning Activity",
+      "activitySubtitle": "Daily minutes spent learning against your weekday target.",
+      "thisWeek": "This Week",
+      "yAxisMin": "{value} min",
+      "minUnit": "min",
+      "vsTarget": "{value} min vs target",
+      "todaysPlan": "Today's Plan",
+      "unitMin": "min",
+      "unitLesson": "lesson",
+      "unitPercent": "%",
+      "upNext": "Up Next",
+      "recentAchievements": "Recent Achievements",
+      "xpSuffix": "XP",
+      "recommendedForYou": "Recommended for You",
+      "coursesSelected": "{count} courses selected based on your progress",
+      "seeAll": "See All",
+      "weekdaysShort": {
+        "Mon": "Mon",
+        "Tue": "Tue",
+        "Wed": "Wed",
+        "Thu": "Thu",
+        "Fri": "Fri",
+        "Sat": "Sat",
+        "Sun": "Sun"
+      },
+      "weekdaysFull": {
+        "Mon": "Monday",
+        "Tue": "Tuesday",
+        "Wed": "Wednesday",
+        "Thu": "Thursday",
+        "Fri": "Friday",
+        "Sat": "Saturday",
+        "Sun": "Sunday"
+      },
+      "plan": {
+        "p1": "Learn 30 minutes",
+        "p2": "Watch 1 lesson",
+        "p3": "Score 80% on quiz"
+      },
+      "upNextItems": {
+        "u1": { "label": "Lesson 9", "title": "Advanced Features" },
+        "u2": { "label": "Quiz", "title": "Smart Office Workflow Quiz" },
+        "u3": { "label": "Assignment", "title": "Draft an AI Workflow Plan" }
+      },
+      "achievements": {
+        "a1": {
+          "title": "Week Warrior",
+          "description": "Completed 7-day streak"
+        },
+        "a2": {
+          "title": "Quiz Master",
+          "description": "Scored 90% on 5 quizzes"
+        },
+        "a3": {
+          "title": "Quick Learner",
+          "description": "Completed 10 lessons"
+        }
+      }
     },
     "myLearning": {
       "title": "My Learning",

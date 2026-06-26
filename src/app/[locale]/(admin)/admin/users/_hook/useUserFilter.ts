@@ -1,12 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import type { AdminUserRow } from '@/constants/admin';
-import { PAGE_SIZE } from '@/components/pages/admin/components/users/constants';
+import type {
+  AdminUserRow,
+  InviteStatus,
+  UserRole,
+  UserStatus,
+} from '@/constants/admin';
+import { PAGE_SIZE } from '@/constants/admin/users';
+
+type RoleFilter = UserRole | 'All';
+type StatusFilter = UserStatus | 'All';
+type InviteFilter = InviteStatus | 'All';
 
 export interface UserFilter {
   search: string;
   setSearch: (value: string) => void;
+
+  // ── Faceted filters ──────────────────────────────────────────────────────
+  roleFilter: RoleFilter;
+  statusFilter: StatusFilter;
+  inviteFilter: InviteFilter;
+  setRoleFilter: (value: RoleFilter) => void;
+  setStatusFilter: (value: StatusFilter) => void;
+  setInviteFilter: (value: InviteFilter) => void;
+  clearFilters: () => void;
+  activeFilterCount: number;
+  roleCount: (value: RoleFilter) => number;
+  statusCount: (value: StatusFilter) => number;
+  inviteCount: (value: InviteFilter) => number;
+
+  // ── Pagination ───────────────────────────────────────────────────────────
   currentPage: number;
   totalPages: number;
   pageStart: number;
@@ -19,25 +43,71 @@ export interface UserFilter {
 }
 
 /**
- * Filters and paginates a users array.
- * - Resets to page 1 on every search change.
+ * Filters and paginates a users array across search + role/status/invitation
+ * facets.
+ * - Resets to page 1 on every filter change.
  * - Syncs page state downward when deletions reduce totalPages below the
  *   current page (fixes the stale-page bug in the original implementation).
+ * - Facet counts are computed against the OTHER active facets, so each option's
+ *   number reflects what you'd actually get if you toggled it.
  *
  * Contract: goToPage(n) → filtered rows for page n; empty query → all rows.
  */
 export function useUserFilter(users: AdminUserRow[]): UserFilter {
   const [search, setSearchRaw] = useState('');
+  const [roleFilter, setRoleFilterRaw] = useState<RoleFilter>('All');
+  const [statusFilter, setStatusFilterRaw] = useState<StatusFilter>('All');
+  const [inviteFilter, setInviteFilterRaw] = useState<InviteFilter>('All');
   const [page, setPage] = useState(1);
 
-  const filtered = search
-    ? users.filter(({ name, email }) => {
-        const q = search.toLowerCase();
-        return (
-          name.toLowerCase().includes(q) || email.toLowerCase().includes(q)
-        );
-      })
-    : users;
+  const matchSearch = (u: AdminUserRow) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+  };
+
+  const filtered = users.filter(
+    (u) =>
+      matchSearch(u) &&
+      (roleFilter === 'All' || u.role === roleFilter) &&
+      (statusFilter === 'All' || u.status === statusFilter) &&
+      (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
+  );
+
+  // ── Faceted counts — exclude the dimension being counted ───────────────────
+  const roleCount = (value: RoleFilter) =>
+    users.filter(
+      (u) =>
+        matchSearch(u) &&
+        (value === 'All' || u.role === value) &&
+        (statusFilter === 'All' || u.status === statusFilter) &&
+        (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
+    ).length;
+
+  const statusCount = (value: StatusFilter) =>
+    users.filter(
+      (u) =>
+        matchSearch(u) &&
+        (roleFilter === 'All' || u.role === roleFilter) &&
+        (value === 'All' || u.status === value) &&
+        (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
+    ).length;
+
+  const inviteCount = (value: InviteFilter) =>
+    users.filter(
+      (u) =>
+        matchSearch(u) &&
+        (roleFilter === 'All' || u.role === roleFilter) &&
+        (statusFilter === 'All' || u.status === statusFilter) &&
+        (value === 'All' || u.inviteStatus === value),
+    ).length;
+
+  const activeFilterCount =
+    (roleFilter !== 'All' ? 1 : 0) +
+    (statusFilter !== 'All' ? 1 : 0) +
+    (inviteFilter !== 'All' ? 1 : 0);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -52,6 +122,28 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
 
   function setSearch(value: string) {
     setSearchRaw(value);
+    setPage(1);
+  }
+
+  function setRoleFilter(value: RoleFilter) {
+    setRoleFilterRaw(value);
+    setPage(1);
+  }
+
+  function setStatusFilter(value: StatusFilter) {
+    setStatusFilterRaw(value);
+    setPage(1);
+  }
+
+  function setInviteFilter(value: InviteFilter) {
+    setInviteFilterRaw(value);
+    setPage(1);
+  }
+
+  function clearFilters() {
+    setRoleFilterRaw('All');
+    setStatusFilterRaw('All');
+    setInviteFilterRaw('All');
     setPage(1);
   }
 
@@ -70,6 +162,17 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
   return {
     search,
     setSearch,
+    roleFilter,
+    statusFilter,
+    inviteFilter,
+    setRoleFilter,
+    setStatusFilter,
+    setInviteFilter,
+    clearFilters,
+    activeFilterCount,
+    roleCount,
+    statusCount,
+    inviteCount,
     currentPage,
     totalPages,
     pageStart,

@@ -1,12 +1,14 @@
 'use client';
 
 import { Award } from 'lucide-react';
-import { RECENT_ACHIEVEMENTS } from '@/config/learner';
+import { RECENT_ACHIEVEMENTS } from '@/constants/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
 
 export default function RecentAchievements() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
@@ -19,7 +21,7 @@ export default function RecentAchievements() {
       style={entranceStyle(inView, 160)}
     >
       <h3 className="text-foreground mb-4 text-base font-bold">
-        Recent Achievements
+        {t('recentAchievements')}
       </h3>
 
       <div className="space-y-3">
@@ -41,15 +43,15 @@ export default function RecentAchievements() {
 
             <div className="min-w-0 flex-1">
               <p className="text-foreground group-hover:text-brand-gold text-sm leading-tight font-bold transition-colors duration-150">
-                {achievement.title}
+                {t(`achievements.${achievement.id}.title`)}
               </p>
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
-                {achievement.description}
+                {t(`achievements.${achievement.id}.description`)}
               </p>
             </div>
 
             <span className="text-brand-gold bg-brand-gold/10 dark:bg-brand-gold/20 shrink-0 rounded-full px-2.5 py-1 text-xs font-bold transition-all duration-150 group-hover:scale-105">
-              +{achievement.xp}&thinsp;XP
+              +{achievement.xp}&thinsp;{t('xpSuffix')}
             </span>
           </div>
         ))}

@@ -24,6 +24,7 @@ export interface VideoItem extends BaseItem {
   intro: string;
   topics: string[];
   moments: { time: string; label: string }[];
+  youtubeId?: string;
 }
 
 export interface QuizQuestion {
@@ -245,6 +246,7 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'video',
             title: 'HTML Introduction',
             duration: '12 min',
+            youtubeId: 'it1rTvBcfRg',
             intro:
               'Meet the building blocks of every web page: elements, tags, attributes, and document structure.',
             topics: [
@@ -379,6 +381,7 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'video',
             title: 'CSS Layout Basics',
             duration: '15 min',
+            youtubeId: 'AGDDdsiZ0Ko',
             intro:
               'Position content with the box model, flexbox, and a few reliable layout patterns that work at every screen size.',
             topics: [
@@ -635,6 +638,7 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'video',
             title: 'Smart Office Workflow',
             duration: '18 min',
+            youtubeId: 'zofMnllkVfI',
             intro:
               'Use AI tools to organise office tasks, summarise long documents, and build faster daily workflows.',
             topics: [

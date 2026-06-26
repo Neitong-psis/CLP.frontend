@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { UserCircle, Upload, Camera, ChevronDown } from 'lucide-react';
+import { UserCircle, Upload, ChevronDown } from 'lucide-react';
 import { MOCK_USER } from '@/config/learner';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import { useToast } from '@/components/ui/toast';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 // ── Field styling (theme-token based, matches educator/admin settings) ──────────
 
@@ -150,16 +151,6 @@ export default function LearnerSettingsPage() {
                 <Upload className="h-4 w-4" />
                 Upload picture
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  toast('Camera is not available in this demo.', 'error')
-                }
-                className="border-border bg-background text-foreground/80 hover:border-brand-gold/40 hover:bg-muted hover:text-foreground flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all"
-              >
-                <Camera className="h-4 w-4" />
-                Use camera
-              </button>
             </div>
 
             <input
@@ -232,11 +223,10 @@ export default function LearnerSettingsPage() {
             </div>
             <div>
               <label className={labelCls}>Date of Birth</label>
-              <input
-                type="date"
+              <DatePicker
                 value={form.dob}
-                onChange={(e) => setField('dob', e.target.value)}
-                className={`${inputCls} cursor-pointer`}
+                onChange={(v) => setField('dob', v)}
+                placeholder="Select date"
               />
             </div>
             <div>

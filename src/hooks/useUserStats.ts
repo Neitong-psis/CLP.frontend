@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchUserStats, type UserStats } from '@/features/users';
+import { fetchUserStats, type UserStats } from '@/services/users';
 
 interface UseUserStatsResult {
   data: UserStats | null;

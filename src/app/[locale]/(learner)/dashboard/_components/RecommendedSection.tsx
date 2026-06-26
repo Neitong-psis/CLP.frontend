@@ -9,6 +9,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { ALL_COURSES, type Course, type CourseLevel } from '@/config/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
@@ -124,6 +125,7 @@ function CourseCard({ course, active, delay }: CourseCardProps) {
 }
 
 export default function RecommendedSection() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const recommended = ALL_COURSES.filter((c) => !c.enrolled).slice(0, 4);
 
@@ -138,17 +140,17 @@ export default function RecommendedSection() {
       >
         <div>
           <h3 className="text-foreground text-base font-bold">
-            Recommended for You
+            {t('recommendedForYou')}
           </h3>
           <p className="text-muted-foreground mt-0.5 text-xs">
-            {recommended.length} courses selected based on your progress
+            {t('coursesSelected', { count: recommended.length })}
           </p>
         </div>
         <Link
           href="/explore"
           className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 text-xs font-semibold transition-colors"
         >
-          See All <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+          {t('seeAll')} <ChevronRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
       </div>
 

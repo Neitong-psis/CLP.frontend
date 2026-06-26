@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import EducatorTopBar from '@/components/common/TopBar';
+import TopBar from '@/components/common/TopBar';
 import { AnalyticsHeader } from './_components/AnalyticsHeader';
 import { MetricCards } from './_components/MetricCards';
 import { WeeklyEnrollmentChart } from './_components/WeeklyEnrollmentChart';
@@ -11,11 +11,7 @@ export default async function EducatorAnalyticsPage() {
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <EducatorTopBar
-        role="educator"
-        title={t('title')}
-        subtitle={t('subtitle')}
-      />
+      <TopBar role="educator" title={t('title')} />
 
       <div className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         <div className="animate-fade-in-up">

@@ -3,7 +3,7 @@
 import TopBar from '@/components/common/TopBar';
 import { useCreateCourseT } from '@/i18n';
 import { useCourseBuilder } from './_lib/useCourseBuilder';
-import { StepBar, STEP_COUNT } from './_components/StepBar';
+import { StepBar } from './_components/StepBar';
 import { CourseInfoStep } from './_components/CourseInfoStep';
 import { CourseContentStep } from './_components/CourseContentStep';
 import { PreviewPublishStep } from './_components/PreviewPublishStep';
@@ -12,15 +12,10 @@ import { WizardFooter } from './_components/WizardFooter';
 export default function NewCoursePage() {
   const t = useCreateCourseT();
   const builder = useCourseBuilder();
-  const stepName = t(`steps.${builder.step}.title`);
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <TopBar
-        role="educator"
-        title={t('pageTitle')}
-        subtitle={`${t('stepOf', { current: builder.step, total: STEP_COUNT })} · ${stepName}`}
-      />
+      <TopBar role="educator" title={t('pageTitle')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <StepBar

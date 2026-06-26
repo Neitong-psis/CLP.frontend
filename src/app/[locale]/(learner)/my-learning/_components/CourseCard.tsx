@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, ArrowRight, RotateCcw } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/slugify';
-import type { Course } from '@/constants/learner';
+import { type Course, DEFAULT_COURSE_THUMBNAIL } from '@/constants/learner';
 
 interface CourseCardProps {
   course: Course;
@@ -50,25 +51,25 @@ export default function CourseCard({
     >
       {/* ── Thumbnail ────────────────────────────────────────────────── */}
       <div className="relative flex h-48 flex-col items-center justify-center overflow-hidden">
-        {/* Scaleable bg — zooms in on hover while content stays fixed */}
-        <div className="bg-brand-navy absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.04] dark:bg-[#071225]" />
+        {/* Navy fallback — visible if the cover image is missing */}
+        <div className="bg-brand-navy absolute inset-0 dark:bg-[#071225]" />
 
-        {/* Subtle vignette on hover */}
-        <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+        {/* Cover image — zooms in on hover */}
+        <Image
+          src={course.thumbnail ?? DEFAULT_COURSE_THUMBNAIL}
+          alt={course.title}
+          fill
+          sizes="(max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        />
+
+        {/* Legibility overlay so the badge + progress stay readable */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/0 to-black/10 transition-colors duration-300 group-hover:from-black/50" />
 
         {/* Top-left badge */}
         <span className="absolute top-3 left-3 z-10 rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
           {labels.courseType}
         </span>
-
-        {/* Center icon — grows and brightens on hover */}
-        <BookOpen
-          className={cn(
-            'text-brand-gold/70 relative z-10 h-16 w-16',
-            'transition-all duration-300',
-            'group-hover:text-brand-gold group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_rgba(244,163,0,0.5)]',
-          )}
-        />
 
         {/* Bottom-right progress circle — lifts on hover */}
         <div className="absolute right-3 bottom-3 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200 group-hover:scale-110">

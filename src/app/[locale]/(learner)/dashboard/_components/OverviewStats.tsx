@@ -2,10 +2,13 @@
 
 import { BookOpen, Zap, Flame, Trophy } from 'lucide-react';
 import { MOCK_USER } from '@/config/learner';
+import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { useCountUp } from '@/hooks/useCountUp';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
+
+type TFn = ReturnType<typeof useLearnerDashboardT>;
 
 interface StatDef {
   icon: React.ElementType;
@@ -18,48 +21,50 @@ interface StatDef {
   countDelay: number;
 }
 
-const STATS: StatDef[] = [
-  {
-    icon: BookOpen,
-    iconBg: 'bg-blue-500/10 dark:bg-blue-500/20',
-    iconFg: 'text-blue-500',
-    value: MOCK_USER.lessonsCompleted,
-    label: 'Lessons Completed',
-    sub: `${MOCK_USER.lessonsThisWeek} this week`,
-    format: (n) => String(Math.round(n)),
-    countDelay: 0,
-  },
-  {
-    icon: Zap,
-    iconBg: 'bg-amber-500/10 dark:bg-amber-500/20',
-    iconFg: 'text-brand-gold',
-    value: MOCK_USER.xp,
-    label: 'Total XP',
-    sub: `${MOCK_USER.xpThisWeek.toLocaleString()} this week`,
-    format: (n) => Math.round(n).toLocaleString(),
-    countDelay: 80,
-  },
-  {
-    icon: Flame,
-    iconBg: 'bg-orange-500/10 dark:bg-orange-500/20',
-    iconFg: 'text-orange-500',
-    value: MOCK_USER.streak,
-    label: 'Current Streak',
-    sub: `Best: ${MOCK_USER.personalBestStreak} days`,
-    format: (n) => `${Math.round(n)} Days`,
-    countDelay: 160,
-  },
-  {
-    icon: Trophy,
-    iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-    iconFg: 'text-emerald-500',
-    value: 18,
-    label: 'Rank',
-    sub: 'Among all learners',
-    format: (n) => `Top ${Math.round(n)}%`,
-    countDelay: 240,
-  },
-];
+function buildStats(t: TFn): StatDef[] {
+  return [
+    {
+      icon: BookOpen,
+      iconBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+      iconFg: 'text-blue-500',
+      value: MOCK_USER.lessonsCompleted,
+      label: t('lessonsCompleted'),
+      sub: t('thisWeekCount', { count: MOCK_USER.lessonsThisWeek }),
+      format: (n) => String(Math.round(n)),
+      countDelay: 0,
+    },
+    {
+      icon: Zap,
+      iconBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+      iconFg: 'text-brand-gold',
+      value: MOCK_USER.xp,
+      label: t('totalXp'),
+      sub: t('thisWeekCount', { count: MOCK_USER.xpThisWeek.toLocaleString() }),
+      format: (n) => Math.round(n).toLocaleString(),
+      countDelay: 80,
+    },
+    {
+      icon: Flame,
+      iconBg: 'bg-orange-500/10 dark:bg-orange-500/20',
+      iconFg: 'text-orange-500',
+      value: MOCK_USER.streak,
+      label: t('currentStreak'),
+      sub: t('bestStreak', { count: MOCK_USER.personalBestStreak }),
+      format: (n) => t('daysValue', { count: Math.round(n) }),
+      countDelay: 160,
+    },
+    {
+      icon: Trophy,
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      iconFg: 'text-emerald-500',
+      value: 18,
+      label: t('rank'),
+      sub: t('amongLearners'),
+      format: (n) => t('topPercent', { percent: Math.round(n) }),
+      countDelay: 240,
+    },
+  ];
+}
 
 interface StatCardProps {
   stat: StatDef;
@@ -103,11 +108,13 @@ function StatCard({ stat, active, entranceDelay }: StatCardProps) {
 }
 
 export default function OverviewStats() {
+  const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const stats = buildStats(t);
 
   return (
     <div ref={ref} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {STATS.map((stat, i) => (
+      {stats.map((stat, i) => (
         <StatCard
           key={stat.label}
           stat={stat}

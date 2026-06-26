@@ -40,7 +40,11 @@ export type Course = {
   originalPrice?: number;
   courseType?: CourseType;
   documents?: number;
+  thumbnail?: string;
 };
+
+/** Default cover used for course cards that don't set their own thumbnail. */
+export const DEFAULT_COURSE_THUMBNAIL = '/image/web_design_poster.png';
 
 export const ENROLLED_COURSES: Course[] = [
   {

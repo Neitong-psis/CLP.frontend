@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Eye, EyeOff, Pencil, RefreshCw, X } from 'lucide-react';
-import { generateUserPassword } from '@/features/users';
+import { generateUserPassword } from '@/services/users';
 import { cn } from '@/lib/utils/cn';
 import {
   type AdminUserRow,
@@ -19,7 +19,7 @@ import {
   STATUS_COLOR,
   CANCEL_BTN_CLS,
   userInitials,
-} from './constants';
+} from '@/constants/admin/users';
 
 // ─── Chip ─────────────────────────────────────────────────────────────────────
 

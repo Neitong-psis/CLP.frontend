@@ -1,16 +1,3 @@
-/**
- * Admin users API — typed, zod-validated functions over `/api/v1/users`
- * (admin-only endpoints, Bearer token injected by the shared `http` instance).
- *
- * The UI consumes `AdminUserRow`, so every function returns rows already
- * mapped from the backend `User` domain shape. Mapping notes:
- * - Backend statuses are only `active (1)` / `inactive (2)`. The admin page's
- *   suspend/activate toggle drives that flag, so `inactive` is rendered as
- *   "Suspended" (an "Inactive"/"Achieved"/"Suspended" choice in a modal all
- *   persist as `inactive`).
- * - The list endpoint exposes no per-user enrollment count or last-activity
- *   timestamp, so `enrolled` is 0 and `lastActive` is "—" for now.
- */
 import { z } from 'zod';
 import { http } from '@/lib/api/http';
 import { normalizeError } from '@/lib/api/errors';
@@ -36,12 +23,8 @@ const userStatsSchema = z.object({
 
 export type UserStats = z.infer<typeof userStatsSchema>;
 
-/** Backend caps `limit` at 50 (users.controller.ts). */
 const MAX_PAGE_LIMIT = 50;
-/** Safety cap for the fetch-all loop (50 × 100 = 5 000 users). */
 const MAX_PAGES = 100;
-
-/** Backend `StatusEnum` (src/statuses/statuses.enum.ts). */
 const STATUS_ACTIVE = 1;
 const STATUS_INACTIVE = 2;
 
@@ -57,18 +40,15 @@ const ROLE_LABEL_TO_ID: Record<UserRole, RoleId> = {
   Learner: ROLE.LEARNER,
 };
 
-/** Fields the admin table can create/update; mirrors what the modals collect. */
 export interface SaveUserInput {
   name: string;
   email: string;
   role: UserRole;
   status: UserStatus;
-  /** Explicit password for the create flow. Omit to auto-generate. */
   password?: string;
 }
 
 // ─── Domain → row mapping ────────────────────────────────────────────────────
-
 function resolveRoleLabel(user: AdminUser): UserRole {
   const owned = new Set(user.roles.map((r) => r.id));
   const primary = ROLE_PRIORITY.find((id) => owned.has(id));
@@ -106,9 +86,6 @@ export function toAdminUserRow(user: AdminUser): AdminUserRow {
 }
 
 // ─── Row → DTO mapping ───────────────────────────────────────────────────────
-
-/** "Sarah Jane Wilson" → { firstName: "Sarah", lastName: "Jane Wilson" }.
- *  Both DTO fields are required, so a single-word name is used for both. */
 function splitName(name: string): { firstName: string; lastName: string } {
   const [firstName, ...rest] = name.trim().split(/\s+/);
   return { firstName, lastName: rest.length ? rest.join(' ') : firstName };
@@ -135,7 +112,6 @@ export function generateUserPassword(length = 16): string {
 }
 
 // ─── API functions ───────────────────────────────────────────────────────────
-
 export async function fetchUserStats(): Promise<UserStats> {
   try {
     const { data } = await http.get<unknown>(`${USERS_ENDPOINT}/stats`);

@@ -1,9 +1,10 @@
 'use client';
 
+import { Menu, X } from 'lucide-react';
 import { useMobileSidebar } from '@/context/MobileSidebarContext';
 
 export function MobileMenuButton() {
-  const { provided, toggle, open, userInitials } = useMobileSidebar();
+  const { provided, toggle, open } = useMobileSidebar();
 
   if (!provided) return null;
 
@@ -14,9 +15,9 @@ export function MobileMenuButton() {
       aria-expanded={open}
       aria-haspopup="true"
       onClick={toggle}
-      className="bg-brand-gold ring-brand-gold/30 text-brand-navy flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 transition-all duration-200 active:scale-95 lg:hidden"
+      className="text-foreground hover:bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200 active:scale-95 lg:hidden"
     >
-      {userInitials}
+      {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
     </button>
   );
 }

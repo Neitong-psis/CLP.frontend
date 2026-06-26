@@ -1,11 +1,3 @@
-/**
- * Axios factory for creating pre-configured HTTP clients.
- *
- * Provides a reusable base for API instances across the application.
- * Authentication interceptors (token injection, 401 handling) are opt-in
- * via `getToken` and `onUnauthorized` — instances that don't need auth
- * simply omit those options.
- */
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -13,20 +5,13 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
-/** Resolves the current access token synchronously or asynchronously. */
 export type TokenProvider = () => Promise<string | null> | string | null;
-
-/** Called when a response returns 401, before the error propagates. */
 export type UnauthorizedHandler = (error: AxiosError) => void;
 
-export interface CreateApiOptionsProps {
-  /** Backend origin, e.g. `http://localhost:4000/api/v1`. No trailing slash. */
+export interface CreateApiProps {
   baseURL: string;
-  /** Called before each request to retrieve the Bearer token. */
   getToken?: TokenProvider;
-  /** Additional Axios config merged over the defaults (timeout, headers, etc.). */
   config?: AxiosRequestConfig;
-  /** Optional hook invoked on every 401 response (before the error propagates). */
   onUnauthorized?: UnauthorizedHandler;
 }
 
@@ -62,7 +47,7 @@ export const createApi = ({
   getToken,
   config,
   onUnauthorized,
-}: CreateApiOptionsProps): AxiosInstance => {
+}: CreateApiProps): AxiosInstance => {
   const api = axios.create({ baseURL, ...DEFAULT_CONFIG, ...config });
 
   api.interceptors.request.use(async (request: InternalAxiosRequestConfig) => {

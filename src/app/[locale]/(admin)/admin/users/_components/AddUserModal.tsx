@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button/Button';
 import { cn } from '@/lib/utils/cn';
 import type { UserRole } from '@/constants/admin';
-import { generateUserPassword, type SaveUserInput } from '@/features/users';
+import { generateUserPassword, type SaveUserInput } from '@/services/users';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

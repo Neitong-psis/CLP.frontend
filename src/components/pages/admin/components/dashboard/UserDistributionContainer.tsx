@@ -1,5 +1,6 @@
 'use client';
 
+import { useAdminDashboardT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import { useUserStats } from '@/hooks/useUserStats';
 import { UserDistributionCard, type RoleSegment } from './UserDistributionCard';
@@ -62,6 +63,7 @@ export function UserDistributionContainer({
   firstVisit = false,
   className,
 }: UserDistributionContainerProps) {
+  const t = useAdminDashboardT();
   const { data, loading } = useUserStats();
 
   if (loading) {
@@ -71,17 +73,17 @@ export function UserDistributionContainer({
   const segments: RoleSegment[] | undefined = data
     ? [
         {
-          label: 'Learners',
+          label: t('learners'),
           count: data.distribution.learners,
           color: SEGMENT_COLORS.learners,
         },
         {
-          label: 'Educators',
+          label: t('educators'),
           count: data.distribution.educators,
           color: SEGMENT_COLORS.educators,
         },
         {
-          label: 'Admins',
+          label: t('admins'),
           count: data.distribution.admins,
           color: SEGMENT_COLORS.admins,
         },
@@ -91,7 +93,7 @@ export function UserDistributionContainer({
   return (
     <UserDistributionCard
       data={segments}
-      period="Live user records"
+      period={t('liveUserRecords')}
       className={cn(
         !firstVisit && 'animate-in fade-in slide-in-from-bottom-2 duration-500',
         className,

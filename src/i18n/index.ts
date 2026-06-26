@@ -1,13 +1,5 @@
 'use client';
 
-// Public API for the i18n layer.
-//
-// Import all translation hooks and namespace utilities from here:
-//   import { useAdminCoursesT, NS, type NamespaceKey } from '@/i18n';
-//
-// For server components use getTranslations() from 'next-intl/server' directly,
-// passing a value from NS: getTranslations(NS.admin.courses)
-
 export * from './namespaces';
 import { useTranslations } from 'next-intl';
 import { NS } from './namespaces';
@@ -88,6 +80,7 @@ export const useCreateCourseT = () => useTranslations(NS.educator.createCourse);
 
 // ── Learner ────────────────────────────────────────────────────────────────
 export const useLearnerT = () => useTranslations(NS.learner.root);
+export const useLearnerDashboardT = () => useTranslations(NS.learner.dashboard);
 export const useLearnerMyLearningT = () =>
   useTranslations(NS.learner.myLearning);
 export const useLearnerCertificatesT = () =>

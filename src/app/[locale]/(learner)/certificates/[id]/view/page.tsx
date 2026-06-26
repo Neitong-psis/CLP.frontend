@@ -120,11 +120,12 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
                 <div className="flex items-center gap-3">
                   <Logo size="xl" variant="default" className="w-16" />
                   <div>
+                    {/* Certificate artifact text is always English (print/canvas design). */}
                     <p className="text-brand-navy text-[11px] font-black tracking-widest uppercase">
-                      {t('contentPlatform')}
+                      QBTECH LEARNING PLATFORM
                     </p>
                     <p className="text-brand-gold text-[10px] font-medium">
-                      {t('excellence')}
+                      Excellence in Education
                     </p>
                   </div>
                 </div>
@@ -138,17 +139,17 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
 
               <div className="mt-8 text-center">
                 <h1 className="text-brand-navy font-serif text-5xl font-bold">
-                  {t('certOfCompletion')}
+                  Certificate of Completion
                 </h1>
                 <p className="text-brand-gold mt-3 text-[11px] font-bold tracking-[0.3em] uppercase">
-                  {t('thisCertifies')}
+                  THIS CERTIFIES THAT
                 </p>
                 <p className="text-brand-navy mt-6 font-serif text-5xl font-bold">
                   {certName}
                 </p>
                 <div className="border-brand-navy/20 mx-auto mt-2 w-64 border-b" />
                 <p className="text-muted-foreground mt-4 text-[11px] font-semibold tracking-[0.25em] uppercase">
-                  {t('hasCompleted')}
+                  HAS COMPLETED THE COURSE
                 </p>
                 <p className="text-brand-navy mt-2 text-2xl font-bold">
                   {cert.fullTitle}
@@ -163,7 +164,7 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
                     </p>
                   </div>
                   <p className="text-muted-foreground mt-1.5 text-[10px] font-semibold tracking-widest uppercase">
-                    {t('dateOfIssue')}
+                    DATE OF ISSUE
                   </p>
                 </div>
                 <div className="text-center">
@@ -173,7 +174,7 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
                     </p>
                   </div>
                   <p className="text-muted-foreground mt-1.5 text-[10px] font-semibold tracking-widest uppercase">
-                    {t('leadInstructor')}
+                    LEAD INSTRUCTOR
                   </p>
                 </div>
               </div>
