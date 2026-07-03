@@ -239,6 +239,42 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
   },
 ];
 
+export interface ApprovalQueueItem {
+  id: string;
+  title: string;
+  instructor: string;
+  category: string;
+  lessons: number;
+  submittedAt: string;
+}
+
+export const APPROVAL_QUEUE: ApprovalQueueItem[] = [
+  {
+    id: 'aq1',
+    title: 'Kubernetes for Developers',
+    instructor: 'Maximilian Schwarzmuller',
+    category: 'DevOps',
+    lessons: 42,
+    submittedAt: 'Jun 27, 2026',
+  },
+  {
+    id: 'aq2',
+    title: 'Next.js 16 Full Stack',
+    instructor: 'Vercel Team',
+    category: 'Web Development',
+    lessons: 58,
+    submittedAt: 'Jun 26, 2026',
+  },
+  {
+    id: 'aq3',
+    title: 'Deep Learning with PyTorch',
+    instructor: 'Jose Portilla',
+    category: 'Data Science',
+    lessons: 35,
+    submittedAt: 'Jun 25, 2026',
+  },
+];
+
 export const DASHBOARD_STATS = [
   { label: 'Total Users', value: '7', change: '+13%', icon: 'users' },
   { label: 'Active Courses', value: '7', change: '+4%', icon: 'book' },

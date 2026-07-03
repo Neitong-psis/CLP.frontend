@@ -26,17 +26,17 @@ export default function GlobalError({
         <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white px-6 text-center">
           <span
             aria-hidden
-            className="font-heading pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-[10rem] leading-none font-black tracking-tighter text-[#00003e]/[0.05] select-none sm:text-[16rem]"
+            className="font-heading text-brand-navy/5 pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-[10rem] leading-none font-black tracking-tighter select-none sm:text-[16rem]"
           >
             500
           </span>
 
           <div className="relative z-10 flex flex-col items-center gap-4">
-            <h1 className="font-heading text-3xl font-bold tracking-tight text-[#00003e] sm:text-4xl">
+            <h1 className="font-heading text-brand-navy text-3xl font-bold tracking-tight sm:text-4xl">
               Something went wrong
             </h1>
 
-            <p className="max-w-sm text-sm text-[#00003e]/60">
+            <p className="text-brand-navy/60 max-w-sm text-sm">
               A critical error occurred. Please try again or return home.
             </p>
 
@@ -44,7 +44,7 @@ export default function GlobalError({
               <RetryButton onRetry={unstable_retry} />
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-full border border-[#00003e]/20 px-6 py-2.5 text-sm font-semibold text-[#00003e] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#00003e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f4a300]"
+                className="border-brand-navy/20 text-brand-navy hover:border-brand-navy focus-visible:ring-brand-gold inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
               >
                 <Home aria-hidden className="h-4 w-4" />
                 Go home

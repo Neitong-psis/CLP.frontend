@@ -10,11 +10,12 @@ import {
 } from 'react';
 import { EDUCATOR_COURSE_TASKS, type CourseTask } from '@/constants/educator';
 
-const STORAGE_KEY = 'qb_educator_course_tasks_v1';
+const STORAGE_KEY = 'qb_educator_course_tasks_v2';
 
 interface CourseTasksCtxValue {
   tasks: CourseTask[];
   addTask: (task: CourseTask) => void;
+  removeTask: (id: string) => void;
 }
 
 const CourseTasksContext = createContext<CourseTasksCtxValue | null>(null);
@@ -39,8 +40,12 @@ export function CourseTasksProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => [task, ...prev]);
   }, []);
 
+  const removeTask = useCallback((id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   return (
-    <CourseTasksContext.Provider value={{ tasks, addTask }}>
+    <CourseTasksContext.Provider value={{ tasks, addTask, removeTask }}>
       {children}
     </CourseTasksContext.Provider>
   );

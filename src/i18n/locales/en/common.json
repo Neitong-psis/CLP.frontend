@@ -39,6 +39,8 @@
     "help": "Help",
     "logout": "Log out",
     "signingOut": "Signing out…",
+    "logoutConfirmTitle": "Logout Account?",
+    "logoutConfirmMessage": "Are you sure you want to logout from your account?",
     "theme": "Theme",
     "language": "Language",
     "learnMore": "Learn More",

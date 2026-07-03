@@ -323,7 +323,7 @@ export default function AdminCoursesPage() {
                   </div>
 
                   {/* Scrollable body */}
-                  <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
+                  <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
                     {/* Status — pill chips with live counts */}
                     <div className="px-4 pt-3.5 pb-3">
                       <FilterSectionLabel>

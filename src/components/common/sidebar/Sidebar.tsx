@@ -17,6 +17,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   GraduationCap,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Logo from '@/components/common/Logo';
@@ -77,10 +78,15 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
       },
       settingsHref: '/settings',
       profileHref: '/settings',
+      learnMoreHref: '/learn-more',
     },
     educator: {
       navItems: [
-        { href: '/educator', icon: LayoutDashboard, label: tNav('dashboard') },
+        {
+          href: '/educator',
+          icon: LayoutDashboard,
+          label: tNav('dashboard'),
+        },
         {
           href: '/educator/courses',
           icon: BookOpen,
@@ -88,14 +94,19 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
           badge: 2,
         },
         {
+          href: '/educator/courses/new',
+          icon: Plus,
+          label: tEducator('newCourse'),
+        },
+        {
           href: '/educator/students',
           icon: Users,
-          label: tEducator('students'),
+          label: tEducator('learners'),
         },
         {
           href: '/educator/analytics',
           icon: BarChart3,
-          label: tEducator('analytics'),
+          label: tEducator('earnings'),
         },
       ],
       rootHref: '/educator',
@@ -141,6 +152,17 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
   const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
   const profileHref = profileHrefOverride ?? `${rootHref}/profile`;
 
+  /** Only the most specific (longest) matching href is active — prevents a
+   * parent route like `/educator/courses` and a nested one like
+   * `/educator/courses/new` from both lighting up at once. */
+  const activeHref = navItems.reduce<string | null>((best, item) => {
+    const isMatch =
+      pathname === item.href ||
+      (item.href !== rootHref && pathname.startsWith(`${item.href}/`));
+    if (!isMatch) return best;
+    return !best || item.href.length > best.length ? item.href : best;
+  }, null);
+
   return (
     <aside
       className={cn(
@@ -184,7 +206,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
             className="group relative size-10 rounded-lg hover:bg-white/[0.07]"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover:opacity-0">
-              <Logo variant="dark" size="md" />
+              <Logo scheme="on-dark" size="md" />
             </span>
             <span className="absolute inset-0 flex items-center justify-center text-white/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <PanelLeftOpen className="size-4" />
@@ -196,9 +218,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
       {/* Nav */}
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
         {navItems.map(({ href, icon: Icon, label, badge }) => {
-          const active =
-            pathname === href ||
-            (href !== rootHref && pathname.startsWith(href));
+          const active = href === activeHref;
 
           return (
             <Link
@@ -206,7 +226,8 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
               href={href}
               title={collapsed ? label : undefined}
               className={cn(
-                'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
+                'group relative flex items-center rounded-lg py-2.5 text-sm font-semibold transition-colors',
+                collapsed ? 'justify-center px-0' : 'gap-3 px-3',
                 active
                   ? 'bg-brand-gold text-brand-navy'
                   : 'text-white/60 hover:bg-white/[0.07] hover:text-white',
@@ -265,7 +286,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
         })}
       </nav>
 
-      <div className="shrink-0 border-t border-white/[0.07] p-1">
+      <div className="shrink-0 border-t border-white/[0.07] px-3 py-1">
         <ProfileMenu
           user={user}
           roleLabel={roleChip.label}

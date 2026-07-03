@@ -19,6 +19,7 @@ const INITIAL_INFO: CourseInfo = {
   level: '',
   pricingType: 'paid',
   price: '',
+  promoCode: '',
   thumbnail: '',
 };
 

@@ -1,11 +1,30 @@
+import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
-import { SIZE_CONFIG, VARIANT_CONFIG } from '@/constants/logo';
-import { AYLA_LOGO_DARK } from '@logos';
+import {
+  SIZE_CONFIG,
+  SCHEME_CONFIG,
+  VARIANT_TO_SCHEME,
+  type LogoScheme,
+} from '@/constants/logo';
 
 interface LogoProps {
   size?: 'xl' | 'lg' | 'md' | 'sm';
   isVertical?: boolean;
   isLoading?: boolean;
+  /**
+   * Controls which emblem and text colour to render:
+   *
+   * 'auto'     — Colored emblem in light mode, white emblem in CSS dark mode (default).
+   *              Use on backgrounds that follow the theme.
+   *
+   * 'on-dark'  — Always white/inverted emblem + white text.
+   *              Use on permanently dark or navy backgrounds.
+   *
+   * 'on-light' — Always colored emblem + navy text; ignores dark mode.
+   *              Use when the surface is always light (certificates, print).
+   */
+  scheme?: LogoScheme;
+  /** @deprecated Use `scheme` instead. Mapped automatically for backward compatibility. */
   variant?: 'default' | 'light' | 'dark' | 'alt';
   showText?: boolean;
   className?: string;
@@ -15,16 +34,15 @@ export default function Logo({
   isVertical = false,
   size = 'xl',
   isLoading = false,
-  variant = 'default',
+  scheme,
+  variant,
   showText = false,
   className = '',
 }: LogoProps) {
+  const resolvedScheme: LogoScheme =
+    scheme ?? (variant ? (VARIANT_TO_SCHEME[variant] ?? 'auto') : 'auto');
+  const config = SCHEME_CONFIG[resolvedScheme];
   const { image, text, gap } = SIZE_CONFIG[size];
-  const { logo, textColor, textColor2 } = VARIANT_CONFIG[variant];
-
-  // default/alt use the navy-fill SVG (Logo-21). Navy disappears on dark
-  // backgrounds, so swap to AYLA_LOGO_DARK (Logo-24, white fills) in dark mode.
-  const navyFill = variant === 'default' || variant === 'alt';
 
   return (
     <div
@@ -36,41 +54,52 @@ export default function Logo({
         className,
       )}
     >
-      {navyFill ? (
+      {config.autoSwap ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logo}
+          <Image
+            src={config.lightLogo}
             alt="AYLA logo"
             className={cn(image, 'dark:hidden')}
+            width={0}
+            height={0}
+            sizes="100vw"
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={AYLA_LOGO_DARK}
+          <Image
+            src={config.darkLogo}
             alt="AYLA logo"
             className={cn(image, 'hidden dark:block')}
+            width={0}
+            height={0}
+            sizes="100vw"
           />
         </>
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logo} alt="AYLA logo" className={image} />
+        <Image
+          src={config.lightLogo}
+          alt="AYLA logo"
+          className={image}
+          width={0}
+          height={0}
+          sizes="100vw"
+        />
       )}
+
       {showText && (
         <div className="flex flex-col items-start justify-center gap-0.5 leading-none">
           <span
             className={cn(
-              `${text} font-serif font-bold tracking-[0.12em] whitespace-nowrap uppercase`,
-              textColor,
-              navyFill && 'dark:text-white',
+              text,
+              'font-serif font-bold tracking-[0.12em] whitespace-nowrap uppercase',
+              config.textColor,
             )}
           >
             AUSTRALIA YOUNG LEADERS
           </span>
           <span
             className={cn(
-              `${text} font-serif font-bold tracking-[0.12em] whitespace-nowrap uppercase`,
-              textColor2,
-              navyFill && 'dark:text-white',
+              text,
+              'font-serif font-bold tracking-[0.12em] whitespace-nowrap uppercase',
+              config.textColor,
             )}
           >
             ACADEMY CO., LTD.

@@ -116,6 +116,9 @@ export type CourseTaskStatus =
 
 export type TaskPriority = 'High' | 'Medium' | 'Low';
 
+/** Admin decision on a submitted course, surfaced as the status badge under review. */
+export type ReviewState = 'Approved' | 'Reject' | 'Under Review';
+
 export interface CourseTask {
   id: string;
   title: string;
@@ -126,6 +129,18 @@ export interface CourseTask {
   status: CourseTaskStatus;
   priority: TaskPriority;
   dueDate: string;
+  /** Under Review — admin decision shown as the card's status badge. */
+  reviewState?: ReviewState;
+  /** Under Review — relative time since submission (e.g. "1 day ago"). */
+  submittedAgo?: string;
+  /** Published — enrolled learner count. */
+  students?: number;
+  /** Published — gross revenue label (e.g. "$163,938"). */
+  revenue?: string;
+  /** Published — average rating out of 5. */
+  rating?: number;
+  /** Published — relative time since the last update (e.g. "2 days ago"). */
+  updatedAgo?: string;
 }
 
 export const COURSE_TASK_STATUSES: CourseTaskStatus[] = [
@@ -137,6 +152,7 @@ export const COURSE_TASK_STATUSES: CourseTaskStatus[] = [
 ];
 
 export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
+  // ── To Do — assigned by admin, awaiting the educator to start writing ────────
   {
     id: 'ct1',
     title: 'AI Productivity for Office Teams',
@@ -170,8 +186,8 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
     price: 'Free',
     assignedBy: 'Sarah Wilson',
     status: 'To Do',
-    priority: 'Medium',
-    dueDate: 'Jun 4, 2026',
+    priority: 'High',
+    dueDate: 'May 30, 2026',
   },
   {
     id: 'ct4',
@@ -181,81 +197,299 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
     category: 'Marketing',
     price: '$24.99',
     assignedBy: 'Sarah Wilson',
-    status: 'In Writing',
+    status: 'To Do',
     priority: 'High',
-    dueDate: 'May 28, 2026',
+    dueDate: 'May 30, 2026',
   },
   {
     id: 'ct5',
     title: 'Foundations of Cloud Computing',
     description:
-      'Drafting core cloud concepts, service models, deployment patterns, and real-world examples.',
+      'Planning core cloud concepts, service models, deployment patterns, and real-world examples.',
     category: 'Cloud',
     price: '$34',
     assignedBy: 'Sarah Wilson',
-    status: 'In Writing',
-    priority: 'Medium',
-    dueDate: 'Jun 1, 2026',
+    status: 'To Do',
+    priority: 'High',
+    dueDate: 'May 30, 2026',
   },
+
+  // ── In Writing — educator is actively drafting the content ───────────────────
   {
     id: 'ct6',
-    title: 'Agile Project Management Basics',
+    title: 'UI/UX Design Fundamentals',
     description:
-      'Lessons on sprints, backlogs, and ceremonies are written and ready for the admin review pass.',
+      'Building lessons for user research, wireframes, design systems, usability testing, and product handoff.',
+    category: 'Design',
+    price: '$29',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'High',
+    dueDate: 'Jun 2, 2026',
+  },
+  {
+    id: 'ct7',
+    title: 'Full-Stack JavaScript Bootcamp',
+    description:
+      'Currently editing modules for frontend fundamentals, APIs, authentication, and deployment.',
+    category: 'Web Dev',
+    price: '$79',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'High',
+    dueDate: 'Jun 5, 2026',
+  },
+  {
+    id: 'ct8',
+    title: 'Prompt Engineering for Business Teams',
+    description:
+      'Writing practical prompt patterns for research, analysis, customer support, and operations.',
+    category: 'AI',
+    price: '$49',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'Medium',
+    dueDate: 'Jun 6, 2026',
+  },
+  {
+    id: 'ct9',
+    title: 'Product Management Essentials',
+    description:
+      'Drafting product discovery, roadmap planning, user stories, prioritization, and launch lessons.',
     category: 'Business',
-    price: '$32',
+    price: '$44.99',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'Medium',
+    dueDate: 'Jun 8, 2026',
+  },
+  {
+    id: 'ct10',
+    title: 'Data Visualization with Tableau',
+    description:
+      'Preparing visual analytics lessons focused on dashboards, storytelling, and stakeholder reporting.',
+    category: 'Data Science',
+    price: '$59',
+    assignedBy: 'Sarah Wilson',
+    status: 'In Writing',
+    priority: 'Low',
+    dueDate: 'Jun 10, 2026',
+  },
+
+  // ── Under Review — submitted, awaiting the admin decision ────────────────────
+  {
+    id: 'ct11',
+    title: 'Cybersecurity Awareness for Teams',
+    description:
+      'Submitted for admin review with modules on phishing, passwords, device safety, and reporting incidents.',
+    category: 'Security',
+    price: '$19',
     assignedBy: 'Sarah Wilson',
     status: 'Under Review',
     priority: 'High',
     dueDate: 'May 26, 2026',
+    reviewState: 'Approved',
+    submittedAgo: '1 day ago',
   },
   {
-    id: 'ct7',
-    title: 'Responsive Web Design Essentials',
+    id: 'ct12',
+    title: 'Figma to Developer Handoff',
     description:
-      'Mobile-first layout course submitted for approval — awaiting reviewer feedback before publishing.',
-    category: 'Web Development',
-    price: '$29',
+      'Submitted for admin review with lessons on components, design tokens, specs, and QA handoff.',
+    category: 'Design',
+    price: '$35',
+    assignedBy: 'Sarah Wilson',
+    status: 'Under Review',
+    priority: 'High',
+    dueDate: 'May 25, 2026',
+    reviewState: 'Reject',
+    submittedAgo: '2 days ago',
+  },
+  {
+    id: 'ct13',
+    title: 'Agile Project Management Basics',
+    description:
+      'Submitted for admin review with practical sprint planning, backlog, standup, and retrospective lessons.',
+    category: 'Business',
+    price: 'Free',
     assignedBy: 'Sarah Wilson',
     status: 'Under Review',
     priority: 'Medium',
-    dueDate: 'May 27, 2026',
+    dueDate: 'May 23, 2026',
+    reviewState: 'Under Review',
+    submittedAgo: '4 days ago',
   },
   {
-    id: 'ct8',
-    title: 'Complete Web Development Bootcamp',
+    id: 'ct14',
+    title: 'No-Code Automation with Zapier',
     description:
-      'Live for learners with strong completion rates. Track performance and reviews in analytics.',
-    category: 'Web Development',
-    price: '$49',
+      'Submitted for admin review with workflow automation examples for teams and small businesses.',
+    category: 'Productivity',
+    price: '$22',
+    assignedBy: 'Sarah Wilson',
+    status: 'Under Review',
+    priority: 'Medium',
+    dueDate: 'May 21, 2026',
+    reviewState: 'Under Review',
+    submittedAgo: '6 days ago',
+  },
+  {
+    id: 'ct15',
+    title: 'Online Teaching Methods',
+    description:
+      'Submitted for admin review with lesson planning, learner engagement, assessments, and feedback loops.',
+    category: 'Education',
+    price: '$27',
+    assignedBy: 'Sarah Wilson',
+    status: 'Under Review',
+    priority: 'Low',
+    dueDate: 'May 20, 2026',
+    reviewState: 'Under Review',
+    submittedAgo: '1 week ago',
+  },
+
+  // ── Published — approved by admin, live for learners ─────────────────────────
+  {
+    id: 'ct16',
+    title: 'React Masterclass for Production Apps',
+    description:
+      'Approved and publicly available with production React patterns, forms, routing, and performance lessons.',
+    category: 'Web Dev',
+    price: '$89',
     assignedBy: 'Sarah Wilson',
     status: 'Published',
     priority: 'Low',
     dueDate: 'Published May 10',
+    students: 1842,
+    revenue: '$163,938',
+    rating: 4.9,
+    updatedAgo: '2 days ago',
   },
   {
-    id: 'ct9',
-    title: 'Advanced CSS & Sass: Flexbox, Grid, Animations',
+    id: 'ct17',
+    title: 'AI for Marketing Content',
     description:
-      'Published and enrolling. Consider a refresh lesson on container queries next quarter.',
-    category: 'Web Development',
-    price: '$24',
+      'Approved course teaching AI-assisted campaign planning, content briefs, editing, and brand consistency.',
+    category: 'Marketing',
+    price: '$49',
     assignedBy: 'Sarah Wilson',
     status: 'Published',
     priority: 'Low',
-    dueDate: 'Published Apr 22',
+    dueDate: 'Published May 7',
+    students: 1260,
+    revenue: '$61,740',
+    rating: 4.8,
+    updatedAgo: '5 days ago',
   },
   {
-    id: 'ct10',
-    title: 'Legacy jQuery Patterns',
+    id: 'ct18',
+    title: 'Python Data Analysis Starter Kit',
     description:
-      'Archived after the framework refresh. Restore if you want to modernise and republish it.',
-    category: 'Programming',
+      'Approved public course covering notebooks, pandas, charts, data cleanup, and reporting workflows.',
+    category: 'Data Science',
+    price: '$59',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 5',
+    students: 980,
+    revenue: '$57,820',
+    rating: 4.7,
+    updatedAgo: '1 week ago',
+  },
+  {
+    id: 'ct19',
+    title: 'Brand Strategy for Startups',
+    description:
+      'Approved public course on positioning, messaging, customer segments, and launch storytelling.',
+    category: 'Business',
+    price: '$39',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 2',
+    students: 740,
+    revenue: '$28,860',
+    rating: 4.6,
+    updatedAgo: '10 days ago',
+  },
+  {
+    id: 'ct20',
+    title: 'Instructional Design for Digital Courses',
+    description:
+      'Approved public course for educators designing outcomes, activities, assessments, and course structure.',
+    category: 'Education',
+    price: 'Free',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 28',
+    students: 1560,
+    revenue: '$0',
+    rating: 4.8,
+    updatedAgo: '2 weeks ago',
+  },
+
+  // ── Archived — retired, editable for future resubmission ─────────────────────
+  {
+    id: 'ct21',
+    title: 'Legacy WordPress Site Management',
+    description:
+      'Retired course kept for records. Editing is locked and only Admin can restore or remove it.',
+    category: 'Web Dev',
     price: '$19',
     assignedBy: 'Sarah Wilson',
     status: 'Archived',
     priority: 'Low',
     dueDate: 'Archived Mar 2',
+  },
+  {
+    id: 'ct22',
+    title: 'Basic Email Marketing Tools',
+    description:
+      'Older marketing workflow course archived after the curriculum moved to a newer version.',
+    category: 'Marketing',
+    price: '$15',
+    assignedBy: 'Sarah Wilson',
+    status: 'Archived',
+    priority: 'Low',
+    dueDate: 'Archived Feb 18',
+  },
+  {
+    id: 'ct23',
+    title: 'Classroom Presentation Basics',
+    description:
+      'Archived teaching fundamentals course retained for historical review.',
+    category: 'Education',
+    price: 'Free',
+    assignedBy: 'Sarah Wilson',
+    status: 'Archived',
+    priority: 'Low',
+    dueDate: 'Archived Feb 4',
+  },
+  {
+    id: 'ct24',
+    title: 'Small Business Finance Starter',
+    description:
+      'Archived starter course replaced by the current business analytics track.',
+    category: 'Business',
+    price: '$25',
+    assignedBy: 'Sarah Wilson',
+    status: 'Archived',
+    priority: 'Low',
+    dueDate: 'Archived Jan 22',
+  },
+  {
+    id: 'ct25',
+    title: 'Design Portfolio Workshop',
+    description:
+      'Retired workshop course. Public edits and educator changes are disabled.',
+    category: 'Design',
+    price: '$29',
+    assignedBy: 'Sarah Wilson',
+    status: 'Archived',
+    priority: 'Low',
+    dueDate: 'Archived Jan 9',
   },
 ];
 
@@ -371,6 +605,150 @@ export const EDUCATOR_STUDENTS: StudentRow[] = [
     enrolled: 'May 2026',
     lastSeen: '6h ago',
     earnings: '$29',
+  },
+  {
+    id: 's9',
+    name: 'Priya Nair',
+    email: 'priya.n@clp.com',
+    course: 'React & TypeScript – Full Stack',
+    progress: 47,
+    activity: 'Active',
+    status: 'Active',
+    enrolled: 'Mar 2026',
+    lastSeen: '5h ago',
+    earnings: '$24',
+  },
+  {
+    id: 's10',
+    name: 'Tomás Herrera',
+    email: 'tomas.h@clp.com',
+    course: 'Complete Web Development Bootcamp',
+    progress: 100,
+    activity: 'Highly active',
+    status: 'Completed',
+    enrolled: 'Nov 2025',
+    lastSeen: '2d ago',
+    earnings: '$49',
+  },
+  {
+    id: 's11',
+    name: 'Chloe Martin',
+    email: 'chloe.m@clp.com',
+    course: 'Advanced CSS & Sass',
+    progress: 12,
+    activity: 'At risk',
+    status: 'Inactive',
+    enrolled: 'Apr 2026',
+    lastSeen: '3w ago',
+    earnings: '$24',
+  },
+  {
+    id: 's12',
+    name: 'Kenji Watanabe',
+    email: 'kenji.w@clp.com',
+    course: 'Node.js, Express, MongoDB & More',
+    progress: 68,
+    activity: 'Active',
+    status: 'Active',
+    enrolled: 'Feb 2026',
+    lastSeen: '3h ago',
+    earnings: '$29',
+  },
+  {
+    id: 's13',
+    name: 'Fatima Al-Sayed',
+    email: 'fatima.a@clp.com',
+    course: 'React & TypeScript – Full Stack',
+    progress: 89,
+    activity: 'Highly active',
+    status: 'Active',
+    enrolled: 'Jan 2026',
+    lastSeen: '45m ago',
+    earnings: '$24',
+  },
+  {
+    id: 's14',
+    name: 'Liam O’Brien',
+    email: 'liam.o@clp.com',
+    course: 'Complete Web Development Bootcamp',
+    progress: 100,
+    activity: 'Active',
+    status: 'Completed',
+    enrolled: 'Dec 2025',
+    lastSeen: '5d ago',
+    earnings: '$49',
+  },
+  {
+    id: 's15',
+    name: 'Sofia Rossi',
+    email: 'sofia.r@clp.com',
+    course: 'Advanced CSS & Sass',
+    progress: 34,
+    activity: 'At risk',
+    status: 'Inactive',
+    enrolled: 'Apr 2026',
+    lastSeen: '2w ago',
+    earnings: '$24',
+  },
+  {
+    id: 's16',
+    name: 'Noah Williams',
+    email: 'noah.w@clp.com',
+    course: 'Node.js, Express, MongoDB & More',
+    progress: 76,
+    activity: 'Highly active',
+    status: 'Active',
+    enrolled: 'Feb 2026',
+    lastSeen: '1h ago',
+    earnings: '$29',
+  },
+  {
+    id: 's17',
+    name: 'Amara Okafor',
+    email: 'amara.o@clp.com',
+    course: 'Complete Web Development Bootcamp',
+    progress: 58,
+    activity: 'Active',
+    status: 'Active',
+    enrolled: 'Mar 2026',
+    lastSeen: '7h ago',
+    earnings: '$49',
+  },
+  {
+    id: 's18',
+    name: 'Lucas Silva',
+    email: 'lucas.s@clp.com',
+    course: 'React & TypeScript – Full Stack',
+    progress: 100,
+    activity: 'Highly active',
+    status: 'Completed',
+    enrolled: 'Nov 2025',
+    lastSeen: '4d ago',
+    earnings: '$24',
+  },
+  {
+    id: 's19',
+    name: 'Hannah Becker',
+    email: 'hannah.b@clp.com',
+    course: 'Advanced CSS & Sass',
+    progress: 8,
+    activity: 'At risk',
+    status: 'Inactive',
+    enrolled: 'May 2026',
+    lastSeen: '1mo ago',
+    earnings: '$24',
+  },
+  {
+    id: 's20',
+    name: 'Mateo González',
+    email: 'mateo.g@clp.com',
+    course: 'Complete Web Development Bootcamp',
+    progress: 63,
+    activity: 'Active',
+    status: 'Active',
+    enrolled: 'Feb 2026',
+    lastSeen: '2h ago',
+    earnings: '$49',
   },
 ];
 

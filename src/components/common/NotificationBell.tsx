@@ -115,7 +115,7 @@ function NotificationItem({
   return (
     <div
       className={cn(
-        'group relative flex gap-3 px-4 py-3.5 transition-colors',
+        'group relative flex gap-3 rounded-xl px-3 py-3 transition-colors',
         notif.read
           ? 'hover:bg-muted/50'
           : 'bg-blue-500/4 hover:bg-blue-500/[0.07]',
@@ -239,7 +239,7 @@ function NotificationPanel({
             </p>
           </div>
         ) : (
-          <div className="divide-border divide-y">
+          <div className="flex flex-col gap-0.5 p-1.5">
             {notifs.map((n) => (
               <NotificationItem
                 key={n.id}

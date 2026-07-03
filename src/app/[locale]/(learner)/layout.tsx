@@ -18,7 +18,6 @@ export default function LearnerLayout({
             <Sidebar role="learner" />
           </div>
 
-          {/* Profile dropdown menu — triggered from TopBar avatar on mobile/tablet */}
           <MobileSidebarDrawer role="learner" />
 
           {/* Main content */}

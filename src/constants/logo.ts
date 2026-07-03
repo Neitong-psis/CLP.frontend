@@ -25,25 +25,51 @@ export const SIZE_CONFIG = {
   },
 } as const;
 
-export const VARIANT_CONFIG = {
-  default: {
-    logo: AYLA_LOGO_ALT,
-    textColor: 'text-[#00003e]',
-    textColor2: 'text-[#00003e]',
+/**
+ * Three rendering schemes, each controlling which emblem SVG(s) to show
+ * and what text colour to apply.
+ *
+ * 'auto'     — Colored emblem in light mode; automatically swaps to the
+ *              white/inverted emblem when the `dark` CSS class is active.
+ *              Use wherever the background follows the theme (dashboards,
+ *              content pages, course players).
+ *
+ * 'on-dark'  — Always the white/inverted emblem + white text.
+ *              Use on permanently dark/navy backgrounds: sidebar, hero,
+ *              auth pages, footer, dark fixed-header state.
+ *
+ * 'on-light' — Always the colored emblem + navy text; ignores dark mode.
+ *              Use when the background is always light regardless of theme
+ *              (print/certificate exports, light-only UI panels).
+ */
+export const SCHEME_CONFIG = {
+  auto: {
+    lightLogo: AYLA_LOGO_ALT,
+    darkLogo: AYLA_LOGO_DARK,
+    autoSwap: true,
+    textColor: 'text-[#00003e] dark:text-white',
   },
-  light: {
-    logo: AYLA_LOGO_DARK,
+  'on-dark': {
+    lightLogo: AYLA_LOGO_DARK,
+    darkLogo: AYLA_LOGO_DARK,
+    autoSwap: false,
     textColor: 'text-white',
-    textColor2: 'text-white',
   },
-  dark: {
-    logo: AYLA_LOGO_DARK,
+  'on-light': {
+    lightLogo: AYLA_LOGO_ALT,
+    darkLogo: AYLA_LOGO_ALT,
+    autoSwap: false,
     textColor: 'text-[#00003e]',
-    textColor2: 'text-[#00003e]',
-  },
-  alt: {
-    logo: AYLA_LOGO_ALT,
-    textColor: 'text-[#00003e]',
-    textColor2: 'text-[#00003e]',
   },
 } as const;
+
+export type LogoScheme = keyof typeof SCHEME_CONFIG;
+
+// Maps the legacy `variant` prop to a LogoScheme so all existing callers
+// continue to work without any changes.
+export const VARIANT_TO_SCHEME: Record<string, LogoScheme> = {
+  default: 'auto',
+  alt: 'on-light',
+  light: 'on-dark',
+  dark: 'on-light', // was broken: white logo + navy text → now correctly shows colored logo
+};

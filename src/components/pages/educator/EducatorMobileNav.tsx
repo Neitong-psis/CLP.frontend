@@ -18,11 +18,11 @@ export function EducatorMobileNav() {
       icon: BookOpen,
       label: tEducator('myCourses'),
     },
-    { href: '/educator/students', icon: Users, label: tEducator('students') },
+    { href: '/educator/students', icon: Users, label: tEducator('learners') },
     {
       href: '/educator/analytics',
       icon: BarChart3,
-      label: tEducator('analytics'),
+      label: tEducator('earnings'),
     },
   ];
 

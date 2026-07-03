@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
 import { useLearnerCertificatesT } from '@/i18n';
 import TopBar from '@/components/pages/learner/TopBar';
+import { PageHero } from '@/components/common/PageHero';
+import { SortMenu, type SortOption } from '@/components/common/list/SortMenu';
+import { SearchInput } from '@/components/common/list/SearchInput';
+import { Pagination } from '@/components/common/list/Pagination';
+import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { CERTIFICATES, MOCK_USER } from '@/config/learner';
+import { CERTIFICATES, MOCK_USER, type Certificate } from '@/config/learner';
 import { cn } from '@/lib/utils/cn';
 import {
   readVerifiedCerts,
@@ -13,9 +17,41 @@ import {
 } from '@/lib/utils/certStorage';
 import { CertificateCard } from './_components/CertificateCard';
 
+const PAGE_SIZE = 6;
+
+type StatusFilter = 'all' | 'verify' | 'view';
+type SortKey = 'recent' | 'title-az' | 'title-za' | 'status';
+
+function sortCertificates(
+  list: Certificate[],
+  sort: SortKey,
+  verifiedIds: string[],
+): Certificate[] {
+  if (sort === 'recent') return list;
+  return [...list].sort((a, b) => {
+    switch (sort) {
+      case 'title-az':
+        return a.fullTitle.localeCompare(b.fullTitle);
+      case 'title-za':
+        return b.fullTitle.localeCompare(a.fullTitle);
+      case 'status': {
+        // Unverified (still actionable) certificates first.
+        const av = a.verified || verifiedIds.includes(a.id);
+        const bv = b.verified || verifiedIds.includes(b.id);
+        return Number(av) - Number(bv);
+      }
+      default:
+        return 0;
+    }
+  });
+}
+
 export default function CertificatesPage() {
   const t = useLearnerCertificatesT();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sort, setSort] = useState<SortKey>('recent');
+  const [page, setPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   // IDs verified in this session or a previous session (persisted in localStorage).
   // Starts empty; populated on mount so SSR/hydration is always consistent.
@@ -39,11 +75,47 @@ export default function CertificatesPage() {
     return () => clearTimeout(id);
   }, []);
 
-  const filtered = CERTIFICATES.filter(
-    (c) =>
+  const filtered = CERTIFICATES.filter((c) => {
+    const matchSearch =
       c.fullTitle.toLowerCase().includes(search.toLowerCase()) ||
-      c.certificateId.toLowerCase().includes(search.toLowerCase()),
+      c.certificateId.toLowerCase().includes(search.toLowerCase());
+    if (!matchSearch) return false;
+
+    const isVerified = c.verified || verifiedIds.includes(c.id);
+    if (statusFilter === 'verify') return !isVerified;
+    if (statusFilter === 'view') return isVerified;
+    return true;
+  });
+
+  const sorted = sortCertificates(filtered, sort, verifiedIds);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = sorted.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
   );
+
+  const verifiedCount = CERTIFICATES.filter(
+    (c) => c.verified || verifiedIds.includes(c.id),
+  ).length;
+
+  const STATUS_TABS: PillTab<StatusFilter>[] = [
+    { value: 'all', label: t('filterAll'), count: CERTIFICATES.length },
+    {
+      value: 'verify',
+      label: t('filterVerify'),
+      count: CERTIFICATES.length - verifiedCount,
+    },
+    { value: 'view', label: t('filterView'), count: verifiedCount },
+  ];
+
+  const SORT_OPTIONS: readonly SortOption<SortKey>[] = [
+    { value: 'recent', label: t('sortRecent') },
+    { value: 'title-az', label: t('sortTitleAz') },
+    { value: 'title-za', label: t('sortTitleZa') },
+    { value: 'status', label: t('sortStatus') },
+  ];
 
   return (
     <div className="bg-background flex min-h-dvh flex-col">
@@ -54,40 +126,62 @@ export default function CertificatesPage() {
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <PageHero
+          className="mb-6"
+          title={t('heroTitle', { name: MOCK_USER.name.split(' ')[0] })}
+          description={t('heroDesc')}
+        />
+
         <div className="space-y-6">
-          {/* Search + stats row */}
+          {/* Toolbar: status tabs · count + sort + search */}
           <div
             className={cn(
-              'flex flex-wrap items-center gap-4 transition-all duration-500 ease-out',
+              'flex flex-col gap-3 transition-all duration-500 ease-out sm:flex-row sm:items-center sm:justify-between',
               mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
             )}
           >
-            <div className="border-border bg-card focus-within:border-brand-gold/50 relative w-full max-w-xs rounded-2xl border shadow-sm transition-colors duration-150">
-              <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('search')}
-                className="text-foreground placeholder:text-muted-foreground w-full rounded-2xl bg-transparent py-2.5 pr-4 pl-10 text-sm outline-none"
+            {/* Status filter tabs */}
+            <PillTabs
+              tabs={STATUS_TABS}
+              value={statusFilter}
+              onChange={(v) => {
+                setStatusFilter(v);
+                setPage(1);
+              }}
+              ariaLabel={t('title')}
+            />
+
+            {/* Count · sort · search */}
+            <div className="flex items-center gap-2">
+              <span className="text-foreground shrink-0 text-sm font-bold">
+                {t('resultCount', { count: sorted.length })}
+              </span>
+              <SortMenu
+                options={SORT_OPTIONS}
+                value={sort}
+                onChange={(v) => {
+                  setSort(v);
+                  setPage(1);
+                }}
+                ariaLabel={t('sortAria')}
+                defaultValue="recent"
               />
-            </div>
-
-            <div className="ml-auto" />
-
-            <div className="border-border bg-card flex items-center gap-4 rounded-2xl border px-6 py-3 shadow-sm">
-              <p className="text-muted-foreground text-sm font-medium">
-                {t('available')}
-              </p>
-              <p className="text-brand-navy dark:text-foreground text-3xl font-black">
-                {CERTIFICATES.length}
-              </p>
+              <SearchInput
+                value={search}
+                onChange={(v) => {
+                  setSearch(v);
+                  setPage(1);
+                }}
+                placeholder={t('search')}
+                ariaLabel={t('search')}
+                className="w-full sm:w-64 lg:w-72"
+              />
             </div>
           </div>
 
           {/* Certificate grid */}
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((cert, i) => (
+            {paginated.map((cert, i) => (
               <CertificateCard
                 key={cert.id}
                 cert={cert}
@@ -100,14 +194,20 @@ export default function CertificatesPage() {
             ))}
           </div>
 
-          {filtered.length === 0 && (
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+
+          {sorted.length === 0 && (
             <p
               className={cn(
                 'text-muted-foreground py-12 text-center text-sm transition-all duration-500 ease-out',
                 mounted ? 'opacity-100' : 'opacity-0',
               )}
             >
-              No certificates match your search.
+              {t('noResults')}
             </p>
           )}
         </div>

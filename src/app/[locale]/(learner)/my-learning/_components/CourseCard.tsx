@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, RotateCcw } from 'lucide-react';
@@ -18,36 +17,18 @@ interface CourseCardProps {
     replayCourse: string;
     by: string;
   };
-  active: boolean;
-  delay: number;
 }
 
-export default function CourseCard({
-  course,
-  labels,
-  active,
-  delay,
-}: CourseCardProps) {
-  const [barVisible, setBarVisible] = useState(false);
+export default function CourseCard({ course, labels }: CourseCardProps) {
   const isCompleted = course.progress === 100;
-
-  /* Progress bar animates in after the card entrance finishes */
-  useEffect(() => {
-    if (!active) return;
-    const id = setTimeout(() => setBarVisible(true), delay + 250);
-    return () => clearTimeout(id);
-  }, [active, delay]);
-
   const ActionIcon = isCompleted ? RotateCcw : ArrowRight;
 
   return (
     <div
       className={cn(
-        'group border-border cursor-default overflow-hidden rounded-xl border transition-all duration-500 ease-out',
+        'group border-border cursor-default overflow-hidden rounded-xl border transition-all duration-300 ease-out',
         'hover:border-brand-gold/25 hover:-translate-y-1.5 hover:shadow-xl',
-        active ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
       )}
-      style={{ transitionDelay: active ? `${delay}ms` : '0ms' }}
     >
       {/* ── Thumbnail ────────────────────────────────────────────────── */}
       <div className="relative flex h-48 flex-col items-center justify-center overflow-hidden">
@@ -97,14 +78,14 @@ export default function CourseCard({
             : ''}
         </p>
 
-        {/* Animated progress bar */}
+        {/* Progress bar */}
         <div className="bg-muted mt-4 h-1.5 overflow-hidden rounded-full">
           <div
             className={cn(
-              'h-full rounded-full transition-[width] duration-700 ease-out',
+              'h-full rounded-full',
               isCompleted ? 'bg-foreground' : 'bg-brand-gold',
             )}
-            style={{ width: barVisible ? `${course.progress}%` : '0%' }}
+            style={{ width: `${course.progress}%` }}
           />
         </div>
 

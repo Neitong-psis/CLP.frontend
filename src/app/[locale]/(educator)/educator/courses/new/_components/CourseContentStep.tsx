@@ -63,6 +63,7 @@ export function CourseContentStep({
               onUpdate={(updated) => onUpdateModule(index, updated)}
               onDelete={() => onDeleteModule(index)}
               onMove={(dir) => onMoveModule(index, dir)}
+              onAddModule={onAddModule}
             />
           ))}
         </div>

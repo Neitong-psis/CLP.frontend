@@ -3,9 +3,9 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
 import { useCourseTasks } from '@/context/CourseTasksContext';
-import { EDUCATOR_USER } from '@/constants/educator';
+import { EDUCATOR_USER, EDUCATOR_COURSE_TASKS } from '@/constants/educator';
 import type { CourseInfo, CourseModule } from './types';
-import { makeModule, moveItem } from './builder';
+import { makeDraftFromTask, makeModule, moveItem } from './builder';
 
 const INITIAL_INFO: CourseInfo = {
   title: '',
@@ -15,20 +15,32 @@ const INITIAL_INFO: CourseInfo = {
   level: '',
   pricingType: 'paid',
   price: '',
+  promoCode: '',
   thumbnail: '',
 };
 
-export function useCourseBuilder() {
+/** When `draftId` matches an existing "In Writing" task, the wizard opens
+ *  pre-populated with that draft's info and starter modules. */
+export function useCourseBuilder(draftId?: string | null) {
   const router = useRouter();
   const { toast } = useToast();
   const { addTask } = useCourseTasks();
   const t = useTranslations('educator.createCourse');
 
+  // Seed from the draft (if any). Only consumed by the lazy state initializers
+  // below, so it is computed exactly once on mount.
+  const seed = useMemo<{ info: CourseInfo; modules: CourseModule[] }>(() => {
+    const task = draftId
+      ? EDUCATOR_COURSE_TASKS.find((t) => t.id === draftId)
+      : undefined;
+    return task ? makeDraftFromTask(task) : { info: INITIAL_INFO, modules: [] };
+  }, [draftId]);
+
   const [step, setStep] = useState(1);
   /** Furthest step the user has reached — every step up to here stays revisitable. */
   const [maxStep, setMaxStep] = useState(1);
-  const [info, setInfo] = useState<CourseInfo>(INITIAL_INFO);
-  const [modules, setModules] = useState<CourseModule[]>([]);
+  const [info, setInfo] = useState<CourseInfo>(() => seed.info);
+  const [modules, setModules] = useState<CourseModule[]>(() => seed.modules);
 
   const missing = useMemo(() => {
     const list: string[] = [];

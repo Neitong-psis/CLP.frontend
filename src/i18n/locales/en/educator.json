@@ -2,8 +2,8 @@
   "educator": {
     "dashboard": "Educator Dashboard",
     "myCourses": "My Courses",
-    "students": "Students",
-    "analytics": "Analytics",
+    "learners": "Learners",
+    "earnings": "Earnings",
     "newCourse": "New Course",
     "greeting": "Welcome back",
     "stats": {
@@ -34,11 +34,13 @@
       "create": "Create a Course",
       "assignedBy": "Assigned by",
       "courseCreation": "Course Creation",
-      "priorityLabel": "{priority} priority",
+      "priorityLabel": "Priority: {priority}",
+      "due": "Due {date}",
       "noResultsSearch": "No courses match your search",
       "tryKeyword": "Try a different keyword or switch tabs.",
       "nothingInStatus": "Nothing in \"{status}\" yet",
       "tasksWillAppear": "Tasks will appear here as your courses move through this stage.",
+      "deletedToast": "\"{title}\" was deleted.",
       "statusHint": {
         "toDo": "Open task details to review requirements before starting.",
         "inWriting": "Keep drafting modules and lessons, then submit for review.",
@@ -46,19 +48,37 @@
         "published": "Live for learners. Track performance in analytics.",
         "archived": "Hidden from learners. Restore it to edit and republish."
       },
-      "actionLabel": {
-        "toDo": "Task Details",
-        "inWriting": "Continue Writing",
-        "underReview": "View Submission",
-        "published": "View Course",
-        "archived": "Restore"
+      "actions": {
+        "taskDetails": "Task Details",
+        "edit": "Edit",
+        "delete": "Delete",
+        "review": "Review"
+      },
+      "reviewState": {
+        "approved": "Approved",
+        "reject": "Reject",
+        "pending": "Under Review"
+      },
+      "note": {
+        "draftLabel": "Draft:",
+        "draftBody": "no students, revenue, completion, or progress tracking until Admin publishes the course. Auto-save ready.",
+        "reviewLabel": "Review:",
+        "reviewBody": "submitted {ago}. Admin feedback: No revision notes yet.",
+        "archivedLabel": "Archived:",
+        "archivedBody": "no price, public visibility, or progress tracking. Content remains editable for future resubmission."
+      },
+      "publishedStats": {
+        "students": "{count} students",
+        "revenue": "{revenue} revenue",
+        "rating": "{rating} rating",
+        "updated": "Updated {ago}"
       }
     },
 
     "studentsPage": {
-      "title": "Student Management",
+      "title": "Learner Management",
       "subtitle": "Track progress and engagement across your courses",
-      "colStudent": "Student",
+      "colStudent": "Learner",
       "colCourse": "Course",
       "colProgress": "Progress",
       "colActivity": "Activity",
@@ -79,41 +99,43 @@
       "results": "{count} results",
       "result": "{count} result",
       "searchPlaceholder": "Search name, email, or course…",
-      "addStudent": "Add Student",
+      "addStudent": "Add Learner",
       "achievedLabel": "Achieved",
       "modal": {
-        "title": "Add Student",
+        "title": "Add Learner",
         "subtitle": "Invite a learner to one of your courses",
         "fullName": "Full name",
         "email": "Email",
         "course": "Course",
         "namePlaceholder": "e.g. Dara Chan",
-        "emailPlaceholder": "student@example.com",
+        "emailPlaceholder": "educator@example.com",
         "selectCourse": "Select a published course…",
         "cancel": "Cancel",
         "sendInvite": "Send Invite",
-        "pendingNote1": "The student appears as",
+        "pendingNote1": "The learner appears as",
         "inactive": "Inactive",
         "pendingNote2": "until they accept the invitation.",
-        "errorName": "Enter the student name",
+        "errorName": "Enter the learner name",
         "errorEmail": "Enter a valid email address",
         "errorCourse": "Choose a course"
       }
     },
 
     "analyticsPage": {
-      "title": "Analytics",
-      "subtitle": "Your course performance and learner insights",
+      "title": "Earnings",
+      "subtitle": "Your income and revenue performance",
       "export": "Export",
-      "refreshAriaLabel": "Refresh analytics",
+      "refreshAriaLabel": "Refresh earnings",
       "liveLastUpdated": "Live · last updated",
       "metrics": {
-        "totalStudents": "Total Students",
-        "publishedCourses": "Published Courses",
-        "avgCompletion": "Avg. Completion",
-        "totalRevenue": "Total Revenue",
+        "totalEarned": "Total Earned",
+        "thisMonth": "This Month",
+        "lastMonth": "Last Month",
+        "revenuePerStudent": "Revenue/Student",
+        "allTime": "All time",
         "vsLastMonth": "vs last month",
-        "newThisMonth": "new this month"
+        "vsPriorMonth": "vs prior month",
+        "perLearner": "per enrolled learner"
       },
       "weekly": {
         "title": "Weekly Enrollments",
@@ -184,6 +206,9 @@
       "editShort": "Edit",
       "resubmitBtn": "Resubmit for Review",
       "resubmitShort": "Resubmit",
+      "restoreBtn": "Restore Course",
+      "restoreShort": "Restore",
+      "restoredToast": "\"{title}\" was restored to In Writing.",
       "openingEditor": "Opening the course editor…",
       "courseContent": "Course Content",
       "modules": "{count} Modules",
@@ -257,6 +282,12 @@
         "free": "Free",
         "paid": "Paid",
         "freeCourseNote": "This course will be free for all learners.",
+        "promoCode": "Promo code",
+        "promoCodeNote": "Optional — generate a code learners can redeem for this course.",
+        "generateCode": "Generate code",
+        "regenerateCode": "Regenerate code",
+        "copyCode": "Copy code",
+        "codeCopied": "Promo code copied!",
         "price": "Price",
         "priceNote": "Price shown in USD ($).",
         "livePreview": "Live preview",

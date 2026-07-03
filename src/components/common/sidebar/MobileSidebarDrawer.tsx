@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { ThemeSwitchToggle } from '@/components/ui/ThemeToggle';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import { LogoutConfirmModal } from '@/components/common/LogoutConfirmModal';
 import { useMobileSidebar } from '@/context/MobileSidebarContext';
 import { useAuth } from '@/hooks/use-auth';
 import { useNavT, useEducatorT, useAdminT } from '@/i18n';
@@ -56,6 +57,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, isLoggingOut } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const tNav = useNavT();
   const tEducator = useEducatorT();
@@ -80,6 +82,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
       user: MOCK_USER,
       logoutHref: '/auth',
       settingsHref: '/settings',
+      learnMoreHref: '/learn-more',
     },
     educator: {
       navItems: [
@@ -93,12 +96,12 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         {
           href: '/educator/students',
           icon: Users,
-          label: tEducator('students'),
+          label: tEducator('learners'),
         },
         {
           href: '/educator/analytics',
           icon: BarChart3,
-          label: tEducator('analytics'),
+          label: tEducator('earnings'),
         },
       ],
       rootHref: '/educator',
@@ -146,6 +149,16 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
   } = MOBILE_CONFIG[role];
 
   const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
+
+  /** Only the most specific (longest) matching href is active — prevents a
+   * parent route and a nested one from both lighting up at once. */
+  const activeHref = navItems.reduce<string | null>((best, item) => {
+    const isMatch =
+      pathname === item.href ||
+      (item.href !== rootHref && pathname.startsWith(`${item.href}/`));
+    if (!isMatch) return best;
+    return !best || item.href.length > best.length ? item.href : best;
+  }, null);
 
   // Close on Escape
   useEffect(() => {
@@ -214,9 +227,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
           </p>
           <div className="flex flex-col gap-0.5">
             {navItems.map(({ href, icon: Icon, label, badge }) => {
-              const active =
-                pathname === href ||
-                (href !== rootHref && pathname.startsWith(href));
+              const active = href === activeHref;
               return (
                 <Link
                   key={href}
@@ -296,7 +307,10 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         <div className="border-border border-t p-2 dark:border-white/[0.07]">
           <button
             type="button"
-            onClick={() => void handleLogout()}
+            onClick={() => {
+              close();
+              setShowLogoutConfirm(true);
+            }}
             disabled={isLoggingOut}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-500/80 transition-colors hover:bg-rose-500/8 hover:text-rose-500 disabled:opacity-50 dark:text-rose-400/90 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
           >
@@ -305,6 +319,17 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
           </button>
         </div>
       </div>
+
+      {showLogoutConfirm && (
+        <LogoutConfirmModal
+          isLoggingOut={isLoggingOut}
+          onClose={() => setShowLogoutConfirm(false)}
+          onConfirm={() => {
+            setShowLogoutConfirm(false);
+            void handleLogout();
+          }}
+        />
+      )}
     </>
   );
 }

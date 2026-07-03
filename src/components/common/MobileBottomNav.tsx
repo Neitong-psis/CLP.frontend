@@ -19,11 +19,20 @@ interface MobileBottomNavProps {
 export function MobileBottomNav({ items, rootHref }: MobileBottomNavProps) {
   const pathname = usePathname();
 
+  /** Only the most specific (longest) matching href is active — prevents a
+   * parent route and a nested one from both lighting up at once. */
+  const activeHref = items.reduce<string | null>((best, item) => {
+    const isMatch =
+      pathname === item.href ||
+      (item.href !== rootHref && pathname.startsWith(`${item.href}/`));
+    if (!isMatch) return best;
+    return !best || item.href.length > best.length ? item.href : best;
+  }, null);
+
   return (
     <nav className="bg-brand-navy fixed right-0 bottom-0 left-0 z-40 flex border-t border-white/[0.07] lg:hidden">
       {items.map(({ href, icon: Icon, label }) => {
-        const active =
-          pathname === href || (href !== rootHref && pathname.startsWith(href));
+        const active = href === activeHref;
 
         return (
           <Link

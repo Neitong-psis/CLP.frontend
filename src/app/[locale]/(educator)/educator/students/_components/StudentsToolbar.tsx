@@ -2,7 +2,7 @@
 
 import { Search, UserPlus, X } from 'lucide-react';
 import { useEducatorStudentsT } from '@/i18n';
-import { cn } from '@/lib/utils/cn';
+import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import { STATUS_OPTIONS, type StatusFilter } from '../_lib/constants';
 
 export function StudentsToolbar({
@@ -22,26 +22,20 @@ export function StudentsToolbar({
 }) {
   const t = useEducatorStudentsT();
 
+  const STATUS_TABS: PillTab<StatusFilter>[] = STATUS_OPTIONS.map((opt) => ({
+    value: opt,
+    label: opt === 'Completed' ? t('achievedLabel') : opt,
+  }));
+
   return (
     <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      {/* Status chips */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        {STATUS_OPTIONS.map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onStatusChange(opt)}
-            className={cn(
-              'rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-150',
-              statusFilter === opt
-                ? 'border-brand-navy bg-brand-navy text-white shadow-sm'
-                : 'border-border bg-card text-muted-foreground hover:border-border hover:text-foreground',
-            )}
-          >
-            {opt === 'Completed' ? t('achievedLabel') : opt}
-          </button>
-        ))}
-      </div>
+      {/* Status tabs */}
+      <PillTabs
+        tabs={STATUS_TABS}
+        value={statusFilter}
+        onChange={onStatusChange}
+        ariaLabel={t('title')}
+      />
 
       <div className="flex items-center gap-3">
         <p className="text-muted-foreground hidden text-xs whitespace-nowrap sm:block">

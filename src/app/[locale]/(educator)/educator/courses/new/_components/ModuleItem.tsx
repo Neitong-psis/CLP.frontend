@@ -16,6 +16,7 @@ export function ModuleItem({
   onUpdate,
   onDelete,
   onMove,
+  onAddModule,
 }: {
   module: CourseModule;
   moduleIndex: number;
@@ -23,6 +24,7 @@ export function ModuleItem({
   onUpdate: (m: CourseModule) => void;
   onDelete: () => void;
   onMove: (dir: 'up' | 'down') => void;
+  onAddModule: () => void;
 }) {
   const t = useCreateCourseT();
 
@@ -59,78 +61,93 @@ export function ModuleItem({
       : t('content.module.lessonCountOther', { count: lessonCount });
 
   return (
-    <div className="animate-fade-in border-border bg-card overflow-hidden rounded-2xl border transition-shadow hover:shadow-sm">
-      <div
-        className={cn(
-          'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
-          module.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
-        )}
-        onClick={() => onUpdate({ ...module, expanded: !module.expanded })}
-      >
-        <ChevronDown
+    <div className="group/module animate-fade-in relative">
+      <div className="border-border bg-card overflow-hidden rounded-2xl border transition-shadow group-hover/module:shadow-sm">
+        {/* Header — hover it to reveal the move / delete controls */}
+        <div
           className={cn(
-            'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
-            module.expanded && 'rotate-180',
+            'group/head flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
+            module.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
           )}
-        />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/10 text-xs font-bold text-blue-950 dark:bg-amber-400/10 dark:text-amber-400">
-          {moduleIndex + 1}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-foreground truncate text-sm font-bold">
-            {module.title ||
-              t('content.module.defaultTitle', { n: moduleIndex + 1 })}
-          </p>
-          <p className="text-muted-foreground text-[11px]">
-            {lessonCountLabel}
-          </p>
+          onClick={() => onUpdate({ ...module, expanded: !module.expanded })}
+        >
+          <ChevronDown
+            className={cn(
+              'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
+              module.expanded && 'rotate-180',
+            )}
+          />
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/10 text-xs font-bold text-blue-950 dark:bg-amber-400/10 dark:text-amber-400">
+            {moduleIndex + 1}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-foreground truncate text-sm font-bold">
+              {module.title ||
+                t('content.module.defaultTitle', { n: moduleIndex + 1 })}
+            </p>
+            <p className="text-muted-foreground text-[11px]">
+              {lessonCountLabel}
+            </p>
+          </div>
+          <RowControls
+            index={moduleIndex}
+            total={totalModules}
+            onMove={onMove}
+            onDelete={onDelete}
+            className="opacity-0 transition-opacity duration-200 group-hover/head:opacity-100 focus-within:opacity-100"
+          />
         </div>
-        <RowControls
-          index={moduleIndex}
-          total={totalModules}
-          onMove={onMove}
-          onDelete={onDelete}
-        />
+
+        {module.expanded && (
+          <div className="animate-fade-in border-border/50 space-y-4 border-t px-4 py-4">
+            <FormField label={t('content.module.titleLabel')}>
+              <input
+                type="text"
+                value={module.title}
+                onChange={(e) => onUpdate({ ...module, title: e.target.value })}
+                placeholder={t('content.module.titlePlaceholder')}
+                className={inputCls}
+              />
+            </FormField>
+
+            {module.lessons.length > 0 && (
+              <div className="space-y-3">
+                {module.lessons.map((lesson, li) => (
+                  <LessonItem
+                    key={lesson.id}
+                    lesson={lesson}
+                    lessonIndex={li}
+                    totalLessons={module.lessons.length}
+                    onUpdate={(updated) => updateLesson(li, updated)}
+                    onDelete={() => deleteLesson(li)}
+                    onMove={(dir) => moveLesson(li, dir)}
+                    onAddSection={(type) => addSection(li, type)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {module.expanded && (
-        <div className="animate-fade-in border-border/50 space-y-4 border-t px-4 py-4">
-          <FormField label={t('content.module.titleLabel')}>
-            <input
-              type="text"
-              value={module.title}
-              onChange={(e) => onUpdate({ ...module, title: e.target.value })}
-              placeholder={t('content.module.titlePlaceholder')}
-              className={inputCls}
-            />
-          </FormField>
-
-          {module.lessons.length > 0 && (
-            <div className="space-y-3">
-              {module.lessons.map((lesson, li) => (
-                <LessonItem
-                  key={lesson.id}
-                  lesson={lesson}
-                  lessonIndex={li}
-                  totalLessons={module.lessons.length}
-                  onUpdate={(updated) => updateLesson(li, updated)}
-                  onDelete={() => deleteLesson(li)}
-                  onMove={(dir) => moveLesson(li, dir)}
-                  onAddSection={(type) => addSection(li, type)}
-                />
-              ))}
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={addLesson}
-            className="border-border text-muted-foreground flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-xs font-semibold transition hover:border-blue-900 hover:bg-blue-950/10 hover:text-blue-950 active:scale-[0.99] dark:hover:border-amber-400 dark:hover:bg-amber-400/10 dark:hover:text-amber-400"
-          >
+      {/* Insert bar — hover the bottom border to add a lesson or another module.
+          Sits over the bottom edge; hidden until the module is hovered (or
+          focused, for keyboard/touch), and kept interactive while revealed so
+          the pointer can reach the pills. */}
+      <div className="pointer-events-none absolute inset-x-0 -bottom-3.5 z-10 flex translate-y-1 justify-center opacity-0 transition-all duration-200 group-focus-within/module:pointer-events-auto group-focus-within/module:translate-y-0 group-focus-within/module:opacity-100 group-hover/module:pointer-events-auto group-hover/module:translate-y-0 group-hover/module:opacity-100">
+        <div className="border-border bg-card flex items-center gap-0.5 rounded-full border p-1 shadow-md">
+          <button type="button" onClick={addLesson} className={INSERT_PILL}>
             <Plus className="h-3.5 w-3.5" /> {t('content.module.addLesson')}
           </button>
+          <span className="bg-border h-4 w-px" />
+          <button type="button" onClick={onAddModule} className={INSERT_PILL}>
+            <Plus className="h-3.5 w-3.5" /> {t('content.addModule')}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
+
+const INSERT_PILL =
+  'text-muted-foreground flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition hover:bg-blue-950/10 hover:text-blue-950 active:scale-95 dark:hover:bg-amber-400/10 dark:hover:text-amber-400';

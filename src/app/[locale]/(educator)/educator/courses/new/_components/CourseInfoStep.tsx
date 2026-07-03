@@ -5,8 +5,11 @@ import {
   ArrowRight,
   Check,
   Clock,
+  Copy,
   ImageIcon,
   Plus,
+  RefreshCw,
+  Sparkles,
   Star,
   Upload,
   User,
@@ -15,9 +18,21 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useCreateCourseT } from '@/i18n';
+import { useToast } from '@/components/ui/toast';
 import type { CourseInfo } from '../_lib/types';
 import { priceLabel } from '../_lib/builder';
 import { FormField, SelectField, inputCls } from './form';
+
+const PROMO_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O, 1/I
+
+function generatePromoCode(): string {
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code +=
+      PROMO_CODE_CHARS[Math.floor(Math.random() * PROMO_CODE_CHARS.length)];
+  }
+  return code;
+}
 
 const CATEGORIES = [
   'Web Development',
@@ -340,10 +355,21 @@ export function CourseInfoStep({
   onChange: (key: keyof CourseInfo, val: string) => void;
 }) {
   const t = useCreateCourseT();
+  const { toast } = useToast();
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
   const [extraLevels, setExtraLevels] = useState<string[]>([]);
 
   const isFree = info.pricingType === 'free';
+
+  function handleGenerateCode() {
+    onChange('promoCode', generatePromoCode());
+  }
+
+  function handleCopyCode() {
+    if (!info.promoCode) return;
+    navigator.clipboard.writeText(info.promoCode);
+    toast(t('info.codeCopied'), 'success');
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
@@ -474,9 +500,55 @@ export function CourseInfoStep({
           </div>
 
           {isFree ? (
-            <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-              {t('info.freeCourseNote')}
-            </p>
+            <div className="mt-4 max-w-xs space-y-3">
+              <p className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                {t('info.freeCourseNote')}
+              </p>
+
+              <div>
+                <label className="text-foreground/80 mb-1 block text-sm font-semibold">
+                  {t('info.promoCode')}
+                </label>
+                <p className="text-muted-foreground mb-2 text-[11px]">
+                  {t('info.promoCodeNote')}
+                </p>
+
+                {info.promoCode ? (
+                  <div className="border-border bg-card flex items-center justify-between rounded-lg border px-3 py-2">
+                    <span className="text-foreground font-mono text-sm font-semibold tracking-[0.15em]">
+                      {info.promoCode}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handleCopyCode}
+                        title={t('info.copyCode')}
+                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md transition"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleGenerateCode}
+                        title={t('info.regenerateCode')}
+                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md transition"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleGenerateCode}
+                    className="border-border text-foreground hover:bg-muted/40 flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-semibold transition"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {t('info.generateCode')}
+                  </button>
+                )}
+              </div>
+            </div>
           ) : (
             <div className="mt-4 max-w-xs">
               <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">

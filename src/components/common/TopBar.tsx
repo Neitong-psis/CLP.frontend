@@ -34,16 +34,21 @@ const ROLE_BADGE: Record<SidebarRole, { label: string; className: string }> = {
   },
 };
 
-export default function TopBar({ role, title, action }: TopBarProps) {
+export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
   const badge = ROLE_BADGE[role];
 
   return (
     <header className="border-border bg-card sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 sm:h-16 sm:gap-4 sm:px-6 lg:px-8">
-      {/* Title */}
+      {/* Title + subtitle */}
       <div className="min-w-0 flex-1">
         <h1 className="text-foreground truncate text-base font-bold sm:text-lg">
           {title}
         </h1>
+        {subtitle && (
+          <p className="text-muted-foreground truncate text-xs sm:text-sm">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       {/* Right actions */}

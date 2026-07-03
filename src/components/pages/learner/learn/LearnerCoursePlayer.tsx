@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLearnerMyLearningT } from '@/i18n';
 import {
@@ -25,6 +26,8 @@ import {
   Check,
   XCircle,
   X,
+  Trophy,
+  Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -95,17 +98,19 @@ export default function LearnerCoursePlayer({
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set(modules.map((m) => m.id)),
   );
-  const [viewed, setViewed] = useState<Set<string>>(() => {
-    const staticCompleted = new Set(
-      Object.entries(LEARNER_ITEM_STATUSES)
-        .filter(([, s]) => s === 'completed' || s === 'passed')
-        .map(([id]) => id),
-    );
-    const stored = readCourseProgress(course.id);
-    return new Set([...staticCompleted, ...stored]);
-  });
+  // localStorage is unavailable during SSR, so initialize from static data only;
+  // real progress is merged in via readCourseProgress after mount.
+  const [viewed, setViewed] = useState<Set<string>>(
+    () =>
+      new Set(
+        Object.entries(LEARNER_ITEM_STATUSES)
+          .filter(([, s]) => s === 'completed' || s === 'passed')
+          .map(([id]) => id),
+      ),
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showContents, setShowContents] = useState(false);
+  const [showCompletion, setShowCompletion] = useState(false);
   const [mobileModuleId, setMobileModuleId] = useState<string>(
     () =>
       modules.find((m) =>
@@ -135,15 +140,26 @@ export default function LearnerCoursePlayer({
     saveCourseProgress(course.id, [...viewed]);
   }, [course.id, viewed]);
 
-  // Fire completion toast + notification the first time the course hits 100%
-  useEffect(() => {
-    if (alreadyCompleteRef.current) return;
-    if (items.length > 0 && viewed.size >= items.length) {
+  const active = items.find((i) => i.id === activeId) ?? items[0];
+  const currentIndex = items.findIndex((i) => i.id === activeId);
+  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
+  const nextItem =
+    currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+
+  function markViewed(id: string) {
+    let nextViewed = viewed;
+    setViewed((prev) => {
+      nextViewed = new Set(prev).add(id);
+      return nextViewed;
+    });
+
+    if (
+      !alreadyCompleteRef.current &&
+      items.length > 0 &&
+      nextViewed.size >= items.length
+    ) {
       alreadyCompleteRef.current = true;
-      toast(
-        '🎉 Course complete! Visit Certificates to verify your credential.',
-        'success',
-      );
+      setShowCompletion(true);
       pushNotif({
         id: `complete-${course.id}`,
         type: 'success',
@@ -153,17 +169,11 @@ export default function LearnerCoursePlayer({
         read: false,
       });
     }
-  }, [course.id, course.title, items.length, toast, viewed.size]);
-
-  const active = items.find((i) => i.id === activeId) ?? items[0];
-  const currentIndex = items.findIndex((i) => i.id === activeId);
-  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
-  const nextItem =
-    currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+  }
 
   function select(id: string) {
     setActiveId(id);
-    setViewed((prev) => new Set(prev).add(id));
+    markViewed(id);
     const newMod = modules.find((m) =>
       flattenItems([m]).some((item) => item.id === id),
     );
@@ -181,7 +191,7 @@ export default function LearnerCoursePlayer({
 
   function handleMarkComplete() {
     if (!activeId) return;
-    setViewed((prev) => new Set(prev).add(activeId));
+    markViewed(activeId);
     if (nextItem) select(nextItem.id);
     else toast(t('markComplete') + ' ✓', 'success');
   }
@@ -244,27 +254,40 @@ export default function LearnerCoursePlayer({
           </header>
 
           {/* ── Mobile: module tabs + lesson chips ── */}
-          <div className="border-border/60 shrink-0 border-b lg:hidden">
-            {/* Module tabs — horizontal scroll */}
-            <div className="flex gap-1.5 overflow-x-auto px-3 pt-2.5 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {modules.map((mod) => (
-                <button
-                  key={mod.id}
-                  type="button"
-                  onClick={() => setMobileModuleId(mod.id)}
-                  className={cn(
-                    'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
-                    mod.id === mobileModuleId
-                      ? 'bg-brand-navy dark:bg-brand-gold dark:text-brand-navy text-white'
-                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
-                  )}
-                >
-                  {mod.title}
-                </button>
-              ))}
+          <div className="border-border/60 shrink-0 border-b px-3 pt-2.5 pb-1.5 lg:hidden">
+            {/* Module tabs — pill bar styled like the certificates status tabs */}
+            <div className="border-border bg-card scrollbar-none flex items-center gap-1 overflow-x-auto rounded-full border p-1 shadow-sm [&::-webkit-scrollbar]:hidden">
+              {modules.map((mod) => {
+                const isActiveTab = mod.id === mobileModuleId;
+                return (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    onClick={() => setMobileModuleId(mod.id)}
+                    className={cn(
+                      'flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all duration-150',
+                      isActiveTab
+                        ? 'bg-brand-gold/10 text-brand-gold ring-brand-gold/40 ring-1'
+                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+                    )}
+                  >
+                    {mod.title}
+                    <span
+                      className={cn(
+                        'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums',
+                        isActiveTab
+                          ? 'bg-brand-gold text-brand-navy'
+                          : 'bg-muted-foreground/12 text-muted-foreground dark:bg-white/10 dark:text-white/70',
+                      )}
+                    >
+                      {lessonCount(mod)}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             {/* Lesson chips — horizontal scroll for selected module */}
-            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="scrollbar-none flex gap-1.5 overflow-x-auto pt-2 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
@@ -342,32 +365,23 @@ export default function LearnerCoursePlayer({
                 {t('backToMyLearning')}
               </Button>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!prevItem}
-                  onClick={() => prevItem && select(prevItem.id)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleMarkComplete}
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  {t('markComplete')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!nextItem}
-                  onClick={() => nextItem && select(nextItem.id)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={handleMarkComplete}
+              >
+                {!nextItem ? (
+                  <>
+                    <Trophy className="h-4 w-4" />
+                    Finish Course
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    {t('markComplete')}
+                  </>
+                )}
+              </Button>
             </div>
           </footer>
         </div>
@@ -389,6 +403,104 @@ export default function LearnerCoursePlayer({
           t={t}
         />
       )}
+
+      {showCompletion && (
+        <CourseCompletionOverlay
+          courseTitle={course.title}
+          totalItems={items.length}
+          onClaim={() => router.push('/certificates')}
+          onDismiss={() => setShowCompletion(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Course completion overlay ─────────────────────────────────────────────────
+
+function CourseCompletionOverlay({
+  courseTitle,
+  totalItems,
+  onClaim,
+  onDismiss,
+}: {
+  courseTitle: string;
+  totalItems: number;
+  onClaim: () => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+      <div className="bg-card border-border relative w-full max-w-md rounded-2xl border p-8 text-center shadow-2xl">
+        {/* Dismiss */}
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-muted-foreground hover:text-foreground absolute top-4 right-4 rounded-lg p-1 transition-colors"
+        >
+          <X className="size-4" />
+        </button>
+
+        {/* Icon */}
+        <div className="mb-5 flex justify-center">
+          <span className="bg-brand-gold/15 border-brand-gold/25 flex size-20 items-center justify-center rounded-full border-2">
+            <Trophy className="text-brand-gold size-10" />
+          </span>
+        </div>
+
+        {/* Heading */}
+        <h2 className="text-foreground mb-1 text-2xl font-bold">
+          Course Complete!
+        </h2>
+        <p className="text-muted-foreground mb-1 text-sm font-medium">
+          {courseTitle}
+        </p>
+        <p className="text-muted-foreground mb-6 text-xs">
+          {totalItems} of {totalItems} items completed
+        </p>
+
+        {/* Stats row */}
+        <div className="border-border mb-6 flex divide-x rounded-xl border">
+          <div className="flex flex-1 flex-col items-center gap-0.5 py-3">
+            <Award className="text-brand-gold mb-0.5 size-5" />
+            <span className="text-foreground text-sm font-bold">100%</span>
+            <span className="text-muted-foreground text-[11px]">Progress</span>
+          </div>
+          <div className="flex flex-1 flex-col items-center gap-0.5 py-3">
+            <CheckCircle2 className="mb-0.5 size-5 text-emerald-500" />
+            <span className="text-foreground text-sm font-bold">
+              {totalItems}
+            </span>
+            <span className="text-muted-foreground text-[11px]">
+              Items done
+            </span>
+          </div>
+          <div className="flex flex-1 flex-col items-center gap-0.5 py-3">
+            <Trophy className="text-brand-gold mb-0.5 size-5" />
+            <span className="text-foreground text-sm font-bold">1</span>
+            <span className="text-muted-foreground text-[11px]">
+              Certificate
+            </span>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button
+          type="button"
+          onClick={onClaim}
+          className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 mb-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all hover:scale-[1.02] active:scale-95"
+        >
+          <Award className="size-4" />
+          Claim Your Certificate
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-muted-foreground hover:text-foreground w-full rounded-xl py-2 text-sm transition-colors"
+        >
+          Continue Reviewing
+        </button>
+      </div>
     </div>
   );
 }
@@ -495,7 +607,7 @@ function MobileContentsSheet({
         </div>
 
         {/* Module cards */}
-        <div className="flex-1 overflow-y-auto px-3 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-3 pb-8 [&::-webkit-scrollbar]:hidden">
           {modules.map((module) => {
             const isOpen = expanded.has(module.id);
             return (
@@ -577,7 +689,7 @@ function ReviewSidebar({
     <aside
       className={cn(
         'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
-        collapsed ? 'lg:w-24' : 'lg:w-72 xl:w-80',
+        collapsed ? 'lg:w-18' : 'lg:w-72 xl:w-80',
       )}
     >
       {/* ── EXPANDED — full tree layout ──────────────────────────────────────── */}
@@ -589,7 +701,13 @@ function ReviewSidebar({
       >
         {/* Brand header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 sm:h-16 dark:border-white/10 dark:bg-transparent">
-          <Logo size="md" variant="default" showText />
+          <Link
+            href="/my-learning"
+            aria-label={t('backToMyLearning')}
+            className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+          >
+            <Logo size="md" variant="default" showText />
+          </Link>
           <button
             onClick={onCollapse}
             aria-label="Collapse sidebar"
@@ -636,7 +754,7 @@ function ReviewSidebar({
         </div>
 
         {/* Tree — scrollable */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-3 py-2 [&::-webkit-scrollbar]:hidden">
           {modules.map((module) => (
             <ModuleCard
               key={module.id}
@@ -654,7 +772,7 @@ function ReviewSidebar({
       {/* ── COLLAPSED — icon tree ────────────────────────────────────────────── */}
       <div
         className={cn(
-          'absolute inset-0 flex w-24 flex-col transition-opacity duration-200',
+          'absolute inset-0 flex w-18 flex-col transition-opacity duration-200',
           collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >
@@ -674,20 +792,33 @@ function ReviewSidebar({
           </button>
         </div>
 
-        {/* Icon tree */}
-        <div className="flex-1 overflow-y-auto px-2 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Icon tree — staggered per level, leaf ticks reach the *edge* of each icon's ring
+            (not its center — the tick's length equals that row's own left padding, so it
+            stops exactly where the circle begins). Offsets are fixed pixel values chosen so
+            the deepest (item) icon still lands inside the 60px content area:
+              module center = 4(pl) + 14(half of size-7)      = 18px absolute
+              lesson center = 18 + 4(pl) + 12(half of size-6) = 34px absolute
+              item circle   = 34 + 4(pl) .. 34 + 4 + 20(size-5) = 38..58px absolute (fits, 60 max)
+            Every level shares the same "circle node" treatment (sized down per level) for a
+            consistent, cohesive look instead of mixing bare icons with circled ones. */}
+        <div className="scrollbar-none flex-1 overflow-y-auto px-1.5 py-3 [&::-webkit-scrollbar]:hidden">
           {modules.map((module, mIdx) => {
             const hasActive = flattenItems([module]).some(
               (i) => i.id === activeId,
             );
             const isMiniOpen = expandedMini.has(module.id);
             return (
-              <div key={module.id} className="py-1">
+              <div key={module.id} className="relative py-1">
                 {mIdx > 0 && (
-                  <div className="bg-border/40 mx-auto mb-2 h-px w-10" />
+                  <div className="bg-muted-foreground/25 mx-auto mb-2 h-px w-8" />
                 )}
 
-                {/* Module button */}
+                {/* Rail — from the module icon's center down through its open lessons/items */}
+                {isMiniOpen && (
+                  <div className="bg-muted-foreground/30 absolute top-6 bottom-0 left-[18px] w-px" />
+                )}
+
+                {/* Module button — icon fixed at x=18px (pl-1 + half of size-7) */}
                 <button
                   onClick={() =>
                     setManualExpanded((prev) => {
@@ -698,21 +829,20 @@ function ReviewSidebar({
                     })
                   }
                   title={module.title}
-                  className="hover:bg-muted/40 flex w-full items-center justify-center rounded-lg py-1.5 transition-colors"
+                  className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1.5 pl-1 transition-colors"
                 >
                   <span
                     className={cn(
-                      'flex size-10 items-center justify-center rounded-full',
+                      'flex size-7 shrink-0 items-center justify-center rounded-full',
                       hasActive ? 'bg-brand-gold/30' : 'bg-brand-gold/15',
                     )}
                   >
-                    <Layers className="text-brand-gold size-5" />
+                    <Layers className="text-brand-gold size-3.5" />
                   </span>
                 </button>
 
-                {/* Lessons — tree line from module */}
                 {isMiniOpen && (
-                  <div className="border-muted-foreground/20 relative ml-5 border-l pl-2.5">
+                  <div className="relative ml-[18px]">
                     {module.lessons.map((lesson) => {
                       const lessonItems: ReviewItem[] = [
                         ...lesson.documents,
@@ -725,38 +855,45 @@ function ReviewSidebar({
                       );
                       const isLessonOpen = miniLessonExpanded.has(lesson.id);
                       return (
-                        <div key={lesson.id} className="relative py-1">
-                          {/* horizontal connector */}
-                          <div className="bg-muted-foreground/20 absolute top-[18px] -left-2.5 h-px w-2.5" />
+                        <div key={lesson.id} className="py-1">
+                          {/* Row wrapper — holds ONLY the leaf + button, so top-1/2 below
+                              measures just this row's height, not the items rendered after it. */}
+                          <div className="relative">
+                            {/* Leaf — reaches from the module trunk to the edge of this lesson icon's ring */}
+                            <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
 
-                          {/* Lesson button */}
-                          <button
-                            onClick={() =>
-                              setMiniLessonExpanded((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(lesson.id)) next.delete(lesson.id);
-                                else next.add(lesson.id);
-                                return next;
-                              })
-                            }
-                            title={lesson.title}
-                            className="hover:bg-muted/40 flex w-full items-center justify-center rounded-lg py-1 transition-colors"
-                          >
-                            <span
-                              className={cn(
-                                'flex size-8 items-center justify-center rounded-full',
-                                lessonHasActive
-                                  ? 'bg-brand-gold/30'
-                                  : 'bg-brand-gold/15',
-                              )}
+                            {/* Lesson button — icon fixed at x=16px relative to this wrapper */}
+                            <button
+                              onClick={() =>
+                                setMiniLessonExpanded((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(lesson.id))
+                                    next.delete(lesson.id);
+                                  else next.add(lesson.id);
+                                  return next;
+                                })
+                              }
+                              title={lesson.title}
+                              className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1 pl-1 transition-colors"
                             >
-                              <Folder className="text-brand-gold size-4" />
-                            </span>
-                          </button>
+                              <span
+                                className={cn(
+                                  'flex size-6 shrink-0 items-center justify-center rounded-full',
+                                  lessonHasActive
+                                    ? 'bg-brand-gold/30'
+                                    : 'bg-brand-gold/15',
+                                )}
+                              >
+                                <Folder className="text-brand-gold size-3.5" />
+                              </span>
+                            </button>
+                          </div>
 
-                          {/* Items — tree line from lesson */}
+                          {/* Items — indented so the trunk aligns under the lesson icon's center */}
                           {isLessonOpen && lessonItems.length > 0 && (
-                            <div className="border-muted-foreground/20 relative ml-4 border-l pl-2.5">
+                            <div className="relative ml-4">
+                              {/* Trunk — was missing, so item leaves pointed at nothing to branch from */}
+                              <div className="bg-muted-foreground/30 absolute inset-y-0 left-0 w-px" />
                               {lessonItems.map((item) => {
                                 const Icon = KIND_ICON[item.kind];
                                 const isActive = item.id === activeId;
@@ -765,41 +902,48 @@ function ReviewSidebar({
                                   : (LEARNER_ITEM_STATUSES[item.id] ??
                                     'unread');
                                 return (
-                                  <div key={item.id} className="relative py-1">
-                                    {/* horizontal connector */}
-                                    <div className="bg-muted-foreground/20 absolute top-[16px] -left-2.5 h-px w-2.5" />
+                                  <div
+                                    key={item.id}
+                                    className="relative py-1.5"
+                                  >
+                                    {/* Leaf — reaches from the lesson trunk to the edge of this item icon's ring */}
+                                    <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
                                     <button
                                       onClick={() => onSelect(item.id)}
                                       title={item.title}
-                                      className={cn(
-                                        'relative flex w-full items-center justify-center rounded-lg py-1 transition-colors',
-                                        isActive
-                                          ? 'bg-brand-gold/15'
-                                          : 'hover:bg-muted/40',
-                                      )}
+                                      className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-0.5 pl-1 transition-colors"
                                     >
-                                      <Icon
+                                      <span
                                         className={cn(
-                                          'size-5',
+                                          'relative flex size-5 shrink-0 items-center justify-center rounded-full',
                                           isActive
-                                            ? 'text-brand-gold'
-                                            : 'text-brand-gold/70',
+                                            ? 'bg-brand-gold/25'
+                                            : 'bg-brand-gold/10',
                                         )}
-                                      />
-                                      <span className="absolute top-0.5 right-1.5">
-                                        {(status === 'completed' ||
-                                          status === 'passed') && (
-                                          <Check
-                                            className="size-3 text-green-500"
-                                            strokeWidth={3}
-                                          />
-                                        )}
-                                        {status === 'failed' && (
-                                          <XCircle className="size-3 text-red-500" />
-                                        )}
-                                        {status === 'submitted' && (
-                                          <Clock className="text-brand-gold size-3" />
-                                        )}
+                                      >
+                                        <Icon
+                                          className={cn(
+                                            'size-3',
+                                            isActive
+                                              ? 'text-brand-gold'
+                                              : 'text-brand-gold/70',
+                                          )}
+                                        />
+                                        <span className="absolute -top-0.5 -right-0.5">
+                                          {(status === 'completed' ||
+                                            status === 'passed') && (
+                                            <Check
+                                              className="size-2.5 text-green-500"
+                                              strokeWidth={3}
+                                            />
+                                          )}
+                                          {status === 'failed' && (
+                                            <XCircle className="size-2.5 text-red-500" />
+                                          )}
+                                          {status === 'submitted' && (
+                                            <Clock className="text-brand-gold size-2.5" />
+                                          )}
+                                        </span>
                                       </span>
                                     </button>
                                   </div>
@@ -839,28 +983,28 @@ function ModuleCard({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="py-0.5">
-      {/* Module row */}
+    <div className="mb-0.5">
+      {/* Module header */}
       <button
         onClick={onToggle}
         aria-expanded={isOpen}
-        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
+        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors"
       >
-        <ChevronDown
-          className={cn(
-            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
-            isOpen && 'rotate-180',
-          )}
-        />
         <span className="bg-brand-gold/20 flex size-7 shrink-0 items-center justify-center rounded-full">
           <Layers className="text-brand-gold size-3.5" />
         </span>
         <span className="text-foreground min-w-0 flex-1 truncate text-sm font-bold">
           {module.title}
         </span>
+        <ChevronDown
+          className={cn(
+            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
       </button>
 
-      {/* Lessons — animated tree */}
+      {/* Lessons — flat, indented */}
       <div
         className={cn(
           'grid transition-[grid-template-rows] duration-200 ease-in-out',
@@ -868,7 +1012,7 @@ function ModuleCard({
         )}
       >
         <div className="overflow-hidden">
-          <div className="border-muted-foreground/20 relative ml-[18px] border-l pb-1 pl-5">
+          <div className="pb-1 pl-2">
             {module.lessons.map((lesson) => (
               <LessonCard
                 key={lesson.id}
@@ -907,30 +1051,27 @@ function LessonCard({
   ];
 
   return (
-    <div className="relative py-0.5">
-      {/* Horizontal branch connector */}
-      <div className="bg-muted-foreground/20 absolute top-[18px] -left-5 h-px w-4" />
-
-      {/* Lesson row */}
+    <div className="py-0.5">
+      {/* Lesson header */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
       >
+        <span className="bg-brand-gold/15 flex size-6 shrink-0 items-center justify-center rounded-full">
+          <Folder className="text-brand-gold size-3" />
+        </span>
+        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
+          {lesson.title}
+        </span>
         <ChevronDown
           className={cn(
             'text-muted-foreground h-3 w-3 shrink-0 transition-transform duration-200',
             open && 'rotate-180',
           )}
         />
-        <span className="bg-brand-gold/20 flex size-6 shrink-0 items-center justify-center rounded-full">
-          <Folder className="text-brand-gold size-3" />
-        </span>
-        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
-          {lesson.title}
-        </span>
       </button>
 
-      {/* Items — animated tree */}
+      {/* Items — flat list */}
       {allItems.length > 0 && (
         <div
           className={cn(
@@ -939,7 +1080,7 @@ function LessonCard({
           )}
         >
           <div className="overflow-hidden">
-            <div className="border-muted-foreground/20 relative ml-[14px] border-l pb-1 pl-4">
+            <div className="pb-1 pl-2">
               {allItems.map((item) => (
                 <TreeItemRow
                   key={item.id}
@@ -976,50 +1117,42 @@ function TreeItemRow({
     : (LEARNER_ITEM_STATUSES[item.id] ?? 'unread');
 
   return (
-    <div className="relative py-0.5">
-      {/* Horizontal branch connector */}
-      <div className="bg-muted-foreground/20 absolute top-[14px] -left-4 h-px w-3" />
+    <button
+      onClick={() => onSelect(item.id)}
+      className={cn(
+        'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
+        isActive ? 'bg-brand-gold/10' : 'hover:bg-muted/40',
+      )}
+    >
+      <div className="relative shrink-0">
+        <Icon
+          className={cn(
+            'size-4',
+            isActive ? 'text-brand-gold' : 'text-brand-gold/70',
+          )}
+        />
+        <span className="absolute -top-1.5 -right-1.5">
+          {(learnerStatus === 'completed' || learnerStatus === 'passed') && (
+            <Check className="size-2.5 text-green-500" strokeWidth={3} />
+          )}
+          {learnerStatus === 'failed' && (
+            <XCircle className="size-2.5 text-red-500" />
+          )}
+          {learnerStatus === 'submitted' && (
+            <Clock className="text-brand-gold size-2.5" />
+          )}
+        </span>
+      </div>
 
-      <button
-        onClick={() => onSelect(item.id)}
+      <span
         className={cn(
-          'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
-          isActive ? 'bg-brand-gold/10' : 'hover:bg-muted/40',
+          'min-w-0 flex-1 truncate text-xs font-medium',
+          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground',
         )}
       >
-        {/* Icon with status badge overlay */}
-        <div className="relative shrink-0">
-          <Icon
-            className={cn(
-              'size-4',
-              isActive ? 'text-brand-gold' : 'text-brand-gold/70',
-            )}
-          />
-          <span className="absolute -top-1.5 -right-1.5">
-            {(learnerStatus === 'completed' || learnerStatus === 'passed') && (
-              <Check className="size-2.5 text-green-500" strokeWidth={3} />
-            )}
-            {learnerStatus === 'failed' && (
-              <XCircle className="size-2.5 text-red-500" />
-            )}
-            {learnerStatus === 'submitted' && (
-              <Clock className="text-brand-gold size-2.5" />
-            )}
-          </span>
-        </div>
-
-        <span
-          className={cn(
-            'min-w-0 flex-1 truncate text-xs font-medium',
-            isActive
-              ? 'text-foreground font-semibold'
-              : 'text-muted-foreground',
-          )}
-        >
-          {item.title}
-        </span>
-      </button>
-    </div>
+        {item.title}
+      </span>
+    </button>
   );
 }
 

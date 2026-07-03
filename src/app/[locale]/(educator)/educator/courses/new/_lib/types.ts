@@ -43,5 +43,6 @@ export interface CourseInfo {
   level: string;
   pricingType: string;
   price: string;
+  promoCode: string;
   thumbnail: string;
 }

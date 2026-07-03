@@ -58,8 +58,8 @@ export const ENROLLED_COURSES: Course[] = [
     completed: false,
     rating: 4.9,
     hours: 24,
-    modules: 2,
-    lessons: 5,
+    modules: 3,
+    lessons: 8,
   },
   {
     id: '2',
@@ -72,8 +72,8 @@ export const ENROLLED_COURSES: Course[] = [
     completed: false,
     rating: 4.7,
     hours: 18,
-    modules: 2,
-    lessons: 5,
+    modules: 3,
+    lessons: 8,
   },
   {
     id: '3',
@@ -86,8 +86,8 @@ export const ENROLLED_COURSES: Course[] = [
     completed: false,
     rating: 4.8,
     hours: 16,
-    modules: 2,
-    lessons: 5,
+    modules: 3,
+    lessons: 8,
   },
   {
     id: '4',
@@ -100,8 +100,8 @@ export const ENROLLED_COURSES: Course[] = [
     completed: true,
     rating: 4.9,
     hours: 36,
-    modules: 2,
-    lessons: 5,
+    modules: 3,
+    lessons: 8,
   },
   {
     id: '5',
@@ -114,8 +114,8 @@ export const ENROLLED_COURSES: Course[] = [
     completed: true,
     rating: 4.8,
     hours: 28,
-    modules: 2,
-    lessons: 5,
+    modules: 3,
+    lessons: 8,
   },
 ];
 

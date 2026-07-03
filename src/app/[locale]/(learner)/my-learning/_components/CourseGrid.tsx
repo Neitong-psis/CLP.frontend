@@ -1,13 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useSyncExternalStore } from 'react';
 import { Search } from 'lucide-react';
 import { useLearnerMyLearningT } from '@/i18n';
-import { cn } from '@/lib/utils/cn';
 import { type Course, ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
+import {
+  COURSE_MODULES_MAP,
+  flattenItems,
+} from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
+import { readCourseProgress } from '@/lib/utils/courseStorage';
+import { Pagination } from '@/components/common/list/Pagination';
+import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import CourseCard from './CourseCard';
+import CourseCardSkeleton from './CourseCardSkeleton';
 
 const LS_ENROLLED = 'qb_enrolled_courses';
+const PAGE_SIZE = 6;
 
 function readEnrolledIds(): string[] {
   if (typeof window === 'undefined') return [];
@@ -21,6 +29,24 @@ function readEnrolledIds(): string[] {
 // All possible courses a learner could have enrolled in via the Explore page
 const EXPLORE_LOOKUP: Course[] = [...ALL_COURSES, ...EXPLORE_COURSES];
 
+// Detects "we've hydrated on the client" without an effect + setState —
+// localStorage snapshots differ between the server render and the client,
+// so useSyncExternalStore is used to bridge the two without a mismatch.
+const noopSubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+// Replaces the mock `progress`/`completed` fields with the learner's actual
+// progress, computed from the items they have marked viewed in the course
+// player (persisted in localStorage — see lib/utils/courseStorage.ts).
+function withRealProgress(course: Course): Course {
+  const modules = COURSE_MODULES_MAP[course.id];
+  const total = modules ? flattenItems(modules).length : 0;
+  const viewed = readCourseProgress(course.id).length;
+  const progress = total === 0 ? 0 : Math.round((viewed / total) * 100);
+  return { ...course, progress, completed: progress === 100 };
+}
+
 type Tab = 'all' | 'in-progress' | 'completed';
 
 interface CourseGridProps {
@@ -32,21 +58,22 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
   const t = useLearnerMyLearningT();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('all');
-  const [mounted, setMounted] = useState(false);
-  const [allCourses, setAllCourses] = useState<Course[]>(courses);
+  const [page, setPage] = useState(1);
+  const mounted = useSyncExternalStore(
+    noopSubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
 
-  useEffect(() => {
-    const id = setTimeout(() => {
-      const enrolledIds = readEnrolledIds();
-      const existingIds = new Set(courses.map((c) => c.id));
-      const extra = EXPLORE_LOOKUP.filter(
-        (c) => enrolledIds.includes(c.id) && !existingIds.has(c.id),
-      ).map((c) => ({ ...c, enrolled: true, progress: 0, completed: false }));
-      setAllCourses([...courses, ...extra]);
-      setMounted(true);
-    }, 60);
-    return () => clearTimeout(id);
-  }, [courses]);
+  const allCourses = useMemo<Course[]>(() => {
+    if (!mounted) return courses;
+    const enrolledIds = readEnrolledIds();
+    const existingIds = new Set(courses.map((c) => c.id));
+    const extra = EXPLORE_LOOKUP.filter(
+      (c) => enrolledIds.includes(c.id) && !existingIds.has(c.id),
+    ).map((c) => ({ ...c, enrolled: true }));
+    return [...courses, ...extra].map(withRealProgress);
+  }, [mounted, courses]);
 
   const inProgressCourses = allCourses.filter((c) => !c.completed);
   const completedCourses = allCourses.filter((c) => c.completed);
@@ -66,7 +93,15 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
       )
     : tabSource;
 
-  const tabs: { value: Tab; label: string; count: number }[] = [
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  const tabs: PillTab<Tab>[] = [
+    { value: 'all', label: t('all'), count: allCourses.length },
     {
       value: 'in-progress',
       label: t('inProgress'),
@@ -77,7 +112,6 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
       label: t('completed'),
       count: completedCourses.length,
     },
-    { value: 'all', label: t('all'), count: allCourses.length },
   ];
 
   const emptyMessage = search.trim()
@@ -100,12 +134,7 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
   return (
     <div className="space-y-5">
       {/* Welcome heading */}
-      <div
-        className={cn(
-          'transition-all duration-500 ease-out',
-          mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
-        )}
-      >
+      <div>
         <h1 className="text-brand-gold text-2xl font-black sm:text-3xl">
           {t('welcomeBack', { name: userName })}
         </h1>
@@ -115,30 +144,17 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
       </div>
 
       {/* Filter tabs + search on the same row */}
-      <div
-        className={cn(
-          'flex flex-col gap-3 transition-all duration-500 ease-out sm:flex-row sm:items-center sm:justify-between',
-          mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
-        )}
-        style={{ transitionDelay: mounted ? '80ms' : '0ms' }}
-      >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {tabs.map(({ value, label, count }) => (
-            <button
-              key={value}
-              onClick={() => setActiveTab(value)}
-              className={cn(
-                'rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-150',
-                activeTab === value
-                  ? 'border-brand-gold text-brand-gold bg-brand-gold/5'
-                  : 'border-border text-muted-foreground hover:border-brand-gold/50 hover:text-foreground',
-              )}
-            >
-              {label} ({count})
-            </button>
-          ))}
-        </div>
+        <PillTabs
+          tabs={tabs}
+          value={activeTab}
+          onChange={(v) => {
+            setActiveTab(v);
+            setPage(1);
+          }}
+          ariaLabel={t('welcomeBack', { name: userName })}
+        />
 
         {/* Search field — right-aligned with filters */}
         <div className="border-border bg-card focus-within:border-brand-gold/50 flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 transition-colors duration-150 sm:w-64 lg:w-72">
@@ -146,30 +162,41 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder={t('searchPlaceholder')}
             className="text-foreground placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
           />
         </div>
       </div>
 
-      {/* Course grid or empty state */}
-      {filtered.length === 0 ? (
+      {/* Course grid, loading skeleton, or empty state */}
+      {!mounted ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <CourseCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <p className="text-muted-foreground py-16 text-center text-sm">
           {emptyMessage}
         </p>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((course, i) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              labels={labels}
-              active={mounted}
-              delay={160 + i * 80}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {paginated.map((course) => (
+              <CourseCard key={course.id} course={course} labels={labels} />
+            ))}
+          </div>
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            className="mt-2"
+          />
+        </>
       )}
     </div>
   );

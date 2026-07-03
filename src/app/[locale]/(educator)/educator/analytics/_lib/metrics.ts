@@ -1,16 +1,5 @@
-import {
-  TrendingUp,
-  Users,
-  BookOpen,
-  DollarSign,
-  type LucideIcon,
-} from 'lucide-react';
-import {
-  WEEKLY_ENROLLMENTS,
-  EDUCATOR_STUDENTS,
-  EDUCATOR_COURSES,
-  TOP_COURSES,
-} from '@/constants/educator';
+import { TrendingUp, Users, DollarSign, type LucideIcon } from 'lucide-react';
+import { WEEKLY_ENROLLMENTS, TOP_COURSES } from '@/constants/educator';
 
 // ── Metric accents ──────────────────────────────────────────────────────────
 // Each KPI gets its own accent so the strip reads as an enterprise overview
@@ -23,8 +12,6 @@ export interface MetricAccent {
   glow: string;
   /** Sparkline + area-gradient colour. */
   stroke: string;
-  /** Trend pill colours. */
-  badge: string;
 }
 
 const ACCENTS = {
@@ -32,44 +19,31 @@ const ACCENTS = {
     tile: 'from-accent-blue to-accent-indigo',
     glow: 'group-hover:shadow-accent-blue/30',
     stroke: '#3b5bfd',
-    badge: 'bg-accent-blue-soft text-accent-blue',
-  },
-  gold: {
-    tile: 'from-brand-gold to-brand-gold-dark',
-    glow: 'group-hover:shadow-brand-gold/30',
-    stroke: '#f4a300',
-    badge: 'bg-amber-50 text-brand-gold-dark',
   },
   emerald: {
     tile: 'from-emerald-400 to-emerald-600',
     glow: 'group-hover:shadow-emerald-500/30',
     stroke: '#10b981',
-    badge: 'bg-emerald-50 text-emerald-600',
   },
   navy: {
     tile: 'from-brand-navy-tint to-brand-navy',
     glow: 'group-hover:shadow-brand-navy/30',
     stroke: '#00003e',
-    badge: 'bg-indigo-50 text-indigo-600',
+  },
+  violet: {
+    tile: 'from-violet-400 to-violet-600',
+    glow: 'group-hover:shadow-violet-500/30',
+    stroke: '#8b5cf6',
   },
 } satisfies Record<string, MetricAccent>;
-
-const coursesWithLearners = EDUCATOR_COURSES.filter((c) => c.enrolled > 0);
-
-const publishedCount = EDUCATOR_COURSES.filter(
-  (c) => c.status === 'Published',
-).length;
-
-const avgCompletion = Math.round(
-  coursesWithLearners.reduce((a, c) => a + c.completionRate, 0) /
-    coursesWithLearners.length,
-);
 
 export interface Metric {
   label: string;
   icon: LucideIcon;
   /** Count-up target. */
   target: number;
+  /** Decimal places to keep in the count-up display (e.g. 1 for "312.4"). */
+  decimals?: number;
   prefix: string;
   suffix: string;
   change: string;
@@ -82,52 +56,53 @@ export interface Metric {
 
 export const METRICS: Metric[] = [
   {
-    label: 'Total Students',
-    icon: Users,
-    target: EDUCATOR_STUDENTS.length,
-    prefix: '',
+    label: 'Total Earned',
+    icon: DollarSign,
+    target: 312.4,
+    decimals: 1,
+    prefix: '$',
+    suffix: 'k',
+    change: 'All time',
+    caption: 'Lifetime earnings',
+    trend: 'up',
+    accent: ACCENTS.emerald,
+    spark: [220, 240, 255, 270, 285, 295, 305, 312.4],
+  },
+  {
+    label: 'This Month',
+    icon: TrendingUp,
+    target: 7960,
+    prefix: '$',
     suffix: '',
-    change: '+12.5%',
+    change: '+24%',
     caption: 'vs last month',
     trend: 'up',
     accent: ACCENTS.blue,
-    spark: [4, 5, 5, 6, 6, 7, 7, 8],
+    spark: [5200, 5600, 6100, 6500, 7000, 7300, 7700, 7960],
   },
   {
-    label: 'Published Courses',
-    icon: BookOpen,
-    target: publishedCount,
-    prefix: '',
-    suffix: '',
-    change: '+1',
-    caption: 'new this month',
-    trend: 'up',
-    accent: ACCENTS.gold,
-    spark: [2, 2, 3, 3, 3, 4, 4, 4],
-  },
-  {
-    label: 'Avg. Completion',
-    icon: TrendingUp,
-    target: avgCompletion,
-    prefix: '',
-    suffix: '%',
-    change: '+3.2%',
-    caption: 'vs last month',
-    trend: 'up',
-    accent: ACCENTS.emerald,
-    spark: [52, 55, 54, 58, 57, 60, 59, 61],
-  },
-  {
-    label: 'Total Revenue',
+    label: 'Last Month',
     icon: DollarSign,
-    target: 20208,
+    target: 6820,
     prefix: '$',
     suffix: '',
-    change: '+8.4%',
-    caption: 'vs last month',
-    trend: 'up',
+    change: '-3%',
+    caption: 'vs prior month',
+    trend: 'down',
     accent: ACCENTS.navy,
-    spark: [12, 14, 15, 16, 17, 18, 19, 20],
+    spark: [7400, 7200, 7100, 7000, 6950, 6900, 6850, 6820],
+  },
+  {
+    label: 'Revenue/Student',
+    icon: Users,
+    target: 49,
+    prefix: '$',
+    suffix: '',
+    change: 'avg',
+    caption: 'per enrolled learner',
+    trend: 'up',
+    accent: ACCENTS.violet,
+    spark: [42, 44, 45, 46, 47, 48, 48, 49],
   },
 ];
 

@@ -39,6 +39,8 @@
     "help": "ជំនួយ",
     "logout": "ចាកចេញ",
     "signingOut": "កំពុងចាកចេញ...",
+    "logoutConfirmTitle": "ចាកចេញពីគណនី?",
+    "logoutConfirmMessage": "តើអ្នកពិតជាចង់ចាកចេញពីគណនីរបស់អ្នកមែនទេ?",
     "theme": "រូបរាង",
     "language": "ភាសា",
     "learnMore": "ស្វែងយល់បន្ថែម",

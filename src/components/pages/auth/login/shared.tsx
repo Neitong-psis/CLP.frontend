@@ -121,6 +121,48 @@ export function FormField({
   );
 }
 
+const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
+const STRENGTH_COLORS = [
+  'bg-red-400',
+  'bg-amber-400',
+  'bg-yellow-400',
+  'bg-emerald-500',
+] as const;
+
+function getPasswordStrength(password: string): number {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  return score;
+}
+
+export function PasswordStrength({ value }: { value: string }) {
+  if (!value) return null;
+  const strength = getPasswordStrength(value);
+  return (
+    <div className="space-y-1">
+      <div className="flex gap-1" aria-hidden="true">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+              i < strength ? STRENGTH_COLORS[strength - 1] : 'bg-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-xs text-slate-400">
+        Strength:{' '}
+        <span className="font-medium text-slate-600">
+          {STRENGTH_LABELS[strength - 1] ?? 'Too short'}
+        </span>
+      </p>
+    </div>
+  );
+}
+
 export function SubmitBtn({
   label,
   disabled,

@@ -1,5 +1,7 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import TopBar from '@/components/common/TopBar';
 import { useCreateCourseT } from '@/i18n';
 import { useCourseBuilder } from './_lib/useCourseBuilder';
@@ -10,8 +12,18 @@ import { PreviewPublishStep } from './_components/PreviewPublishStep';
 import { WizardFooter } from './_components/WizardFooter';
 
 export default function NewCoursePage() {
+  // useSearchParams must sit under a Suspense boundary in the App Router.
+  return (
+    <Suspense fallback={null}>
+      <NewCourseWizard />
+    </Suspense>
+  );
+}
+
+function NewCourseWizard() {
   const t = useCreateCourseT();
-  const builder = useCourseBuilder();
+  const searchParams = useSearchParams();
+  const builder = useCourseBuilder(searchParams.get('draft'));
 
   return (
     <div className="bg-background flex min-h-full flex-col">

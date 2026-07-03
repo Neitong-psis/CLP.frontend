@@ -44,7 +44,7 @@ export function LessonItem({
   return (
     <div className="animate-fade-in border-border bg-muted/20 overflow-hidden rounded-xl border">
       <div
-        className="hover:bg-muted/40 flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 transition-colors"
+        className="group/head hover:bg-muted/40 flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 transition-colors"
         onClick={() => onUpdate({ ...lesson, expanded: !lesson.expanded })}
       >
         <ChevronDown
@@ -70,6 +70,7 @@ export function LessonItem({
           total={totalLessons}
           onMove={onMove}
           onDelete={onDelete}
+          className="opacity-0 transition-opacity duration-200 group-hover/head:opacity-100 focus-within:opacity-100"
         />
       </div>
 

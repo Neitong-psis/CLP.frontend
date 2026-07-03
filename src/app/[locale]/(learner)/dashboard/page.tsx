@@ -32,6 +32,7 @@ export default async function DashboardPage() {
           greeting: t(greetingKey(now.getHours())),
           name: firstName,
         })}
+        subtitle={t('dashboardSubtitle')}
       />
 
       <main className="px-4 py-6 sm:px-6 lg:px-8">

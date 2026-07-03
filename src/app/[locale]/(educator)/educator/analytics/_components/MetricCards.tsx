@@ -9,17 +9,17 @@ import { cn } from '@/lib/utils/cn';
 import { METRICS, type Metric } from '../_lib/metrics';
 
 const METRIC_LABEL_KEYS = [
-  'totalStudents',
-  'publishedCourses',
-  'avgCompletion',
-  'totalRevenue',
+  'totalEarned',
+  'thisMonth',
+  'lastMonth',
+  'revenuePerStudent',
 ] as const;
 
 const METRIC_CAPTION_KEYS = [
+  'allTime',
   'vsLastMonth',
-  'newThisMonth',
-  'vsLastMonth',
-  'vsLastMonth',
+  'vsPriorMonth',
+  'perLearner',
 ] as const;
 
 const SPARK_W = 120;
@@ -116,10 +116,21 @@ function MetricCard({
   label: string;
   caption: string;
 }) {
-  const { icon: Icon, target, prefix, suffix, change, trend } = metric;
-  const { tile, glow, stroke, badge } = metric.accent;
+  const {
+    icon: Icon,
+    target,
+    decimals = 0,
+    prefix,
+    suffix,
+    change,
+    trend,
+  } = metric;
+  const { tile, glow, stroke } = metric.accent;
   const animated = useCountUp(target, { active, delay: index * 120 });
   const TrendIcon = trend === 'up' ? ArrowUpRight : ArrowDownRight;
+  const value = decimals
+    ? animated.toFixed(decimals)
+    : Math.round(animated).toLocaleString();
 
   return (
     <div
@@ -149,7 +160,9 @@ function MetricCard({
         <span
           className={cn(
             'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold',
-            badge,
+            trend === 'up'
+              ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+              : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400',
           )}
         >
           <TrendIcon className="h-3 w-3" />
@@ -163,7 +176,7 @@ function MetricCard({
         </p>
         <p className="text-foreground mt-1 text-3xl font-black tracking-tight tabular-nums">
           {prefix}
-          {Math.round(animated).toLocaleString()}
+          {value}
           {suffix}
         </p>
         <p className="text-muted-foreground/60 mt-0.5 text-[10px]">{caption}</p>
