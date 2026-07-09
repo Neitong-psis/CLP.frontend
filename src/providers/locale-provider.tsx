@@ -69,7 +69,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   // Track which user id we've already restored the locale for, to ensure we
   // run the restore exactly once per login — not on every navigation or re-render.
-  const restoredForRef = useRef<number | null>(null);
+  const restoredForRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) {

@@ -4,13 +4,13 @@ const PREFIX = 'qb_locale';
 
 const supportedLocales = new Set(routing.locales);
 
-const getStorageKey = (userId: number) => `${PREFIX}:${userId}`;
+const getStorageKey = (userId: string) => `${PREFIX}:${userId}`;
 
 function isLocale(value: string): value is Locale {
   return supportedLocales.has(value as Locale);
 }
 
-export function getSavedLocale(userId: number): Locale | null {
+export function getSavedLocale(userId: string): Locale | null {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -22,7 +22,7 @@ export function getSavedLocale(userId: number): Locale | null {
   }
 }
 
-export function saveLocale(userId: number, locale: Locale): void {
+export function saveLocale(userId: string, locale: Locale): void {
   if (typeof window === 'undefined') return;
 
   try {

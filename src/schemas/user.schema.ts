@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { roleSchema } from './role.schema';
 
 export const userSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   email: z.string().email().nullable().optional(),
   firstName: z.string().nullable().optional(),
   lastName: z.string().nullable().optional(),

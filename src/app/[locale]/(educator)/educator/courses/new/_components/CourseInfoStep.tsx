@@ -564,7 +564,7 @@ export function CourseInfoStep({
                   min={0}
                   value={info.price}
                   onChange={(e) => onChange('price', e.target.value)}
-                  className="text-foreground flex-1 bg-transparent px-3 py-2 text-sm outline-none"
+                  className="text-foreground flex-1 [appearance:textfield] bg-transparent px-3 py-2 text-sm outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 />
               </div>
               <p className="text-muted-foreground mt-1 text-[11px]">
