@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
@@ -9,7 +9,18 @@ import type {
 import {
   makeModule,
   moveItem,
+  deriveAnswerFormat,
 } from '@/app/[locale]/(educator)/educator/courses/new/_lib/builder';
+import { fetchAllCategories, type Category } from '@/services/categories';
+import { fetchAllUsers } from '@/services/users';
+import type { AdminUserRow } from '@/constants/admin';
+import {
+  createCourse,
+  syncCourseCurriculum,
+  type SyncCurriculumInput,
+  type SyncCurriculumSection,
+} from '@/services/courses';
+import { isApiError } from '@/lib/api/errors';
 
 const INITIAL_INFO: CourseInfo = {
   title: '',
@@ -19,9 +30,47 @@ const INITIAL_INFO: CourseInfo = {
   level: '',
   pricingType: 'paid',
   price: '',
+  currency: 'USD',
   promoCode: '',
   thumbnail: '',
 };
+
+/** The backend accepts one question per "quiz" section, but the wizard now
+ *  lets an educator author many questions in a single quiz block — so each
+ *  question is expanded into its own quiz section when syncing. */
+function toSyncCurriculumInput(modules: CourseModule[]): SyncCurriculumInput {
+  return {
+    modules: modules.map((m) => ({
+      title: m.title,
+      lessons: m.lessons.map((l) => ({
+        title: l.title,
+        sections: l.sections.flatMap((s): SyncCurriculumSection[] => {
+          if (s.type === 'quiz') {
+            return s.quizQuestions.map((q) => ({
+              type: 'quiz',
+              question: q.question || undefined,
+              answerFormat: deriveAnswerFormat(q.options),
+              options: q.options.length
+                ? q.options.map((o) => ({ text: o.text, correct: o.correct }))
+                : undefined,
+            }));
+          }
+          return [
+            {
+              type: s.type,
+              text: s.text || undefined,
+              videoTitle: s.videoTitle || undefined,
+              videoUrl: s.videoUrl || undefined,
+              assignmentDesc: s.assignmentDesc || undefined,
+              dueDate: s.dueDate || undefined,
+              submissionType: s.submissionType || undefined,
+            },
+          ];
+        }),
+      })),
+    })),
+  };
+}
 
 export function useAdminCourseBuilder() {
   const router = useRouter();
@@ -33,6 +82,25 @@ export function useAdminCourseBuilder() {
   const [info, setInfo] = useState<CourseInfo>(INITIAL_INFO);
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [assignedEducator, setAssignedEducator] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [educators, setEducators] = useState<AdminUserRow[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([fetchAllCategories(), fetchAllUsers()])
+      .then(([fetchedCategories, users]) => {
+        if (cancelled) return;
+        setCategories(fetchedCategories);
+        setEducators(users.filter((u) => u.role === 'Educator'));
+      })
+      .catch(() => {
+        if (!cancelled) toast(t('toast.loadFailed'), 'error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [toast, t]);
 
   const missing = useMemo(() => {
     const list: string[] = [];
@@ -44,6 +112,11 @@ export function useAdminCourseBuilder() {
   }, [info.title, info.description, assignedEducator, modules.length]);
 
   const canSubmit = missing.length === 0;
+
+  const educatorName = useMemo(
+    () => educators.find((e) => e.id === assignedEducator)?.name ?? '',
+    [educators, assignedEducator],
+  );
 
   const setInfoField = (key: keyof CourseInfo, value: string) =>
     setInfo((prev) => ({ ...prev, [key]: value }));
@@ -79,17 +152,45 @@ export function useAdminCourseBuilder() {
     toast(t('toast.draftSaved'), 'success');
   }
 
-  function submit() {
+  async function submit() {
     if (!canSubmit) {
       setStep(3);
       toast(t('toast.fixMissingAdmin'), 'error');
       return;
     }
-    toast(
-      t('toast.created', { title: info.title, educator: assignedEducator }),
-      'success',
-    );
-    router.push('/admin/courses');
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      const categoryId = categories.find((c) => c.name === info.category)?.id;
+      const course = await createCourse({
+        title: info.title,
+        subtitle: info.subtitle || undefined,
+        description: info.description || undefined,
+        price: info.pricingType === 'free' ? 0 : Number(info.price) || 0,
+        thumbnail: info.thumbnail || undefined,
+        level: info.level ? info.level.toLowerCase() : undefined,
+        categoryId,
+        instructorId: assignedEducator || undefined,
+      });
+
+      if (modules.length > 0) {
+        await syncCourseCurriculum(course.id, toSyncCurriculumInput(modules));
+      }
+
+      toast(
+        t('toast.created', { title: info.title, educator: educatorName }),
+        'success',
+      );
+      router.push('/admin/courses');
+    } catch (error) {
+      toast(
+        isApiError(error) ? error.message : t('toast.createFailed'),
+        'error',
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return {
@@ -99,6 +200,10 @@ export function useAdminCourseBuilder() {
     modules,
     missing,
     canSubmit,
+    submitting,
+    categories,
+    educators,
+    educatorName,
     assignedEducator,
     setAssignedEducator,
     setInfoField,
@@ -106,6 +211,7 @@ export function useAdminCourseBuilder() {
     updateModule,
     deleteModule,
     moveModule,
+    setModules,
     goBack,
     goNext,
     goToStep,

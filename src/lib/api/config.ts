@@ -3,6 +3,10 @@ const DEFAULT_API_BASE_URL = 'http://localhost:4000';
 
 const publicBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// A missing public base URL is a hard error in production — but only at *runtime*.
+// Throwing at module-evaluation would also abort `next build` (which evaluates this
+// module while collecting page data, with NODE_ENV==='production'), so the build
+// phase is excluded. Set NEXT_PUBLIC_API_BASE_URL in your deploy env to silence this.
 if (
   !publicBaseUrl &&
   process.env.NODE_ENV === 'production' &&

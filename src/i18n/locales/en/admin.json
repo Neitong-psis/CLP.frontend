@@ -42,6 +42,7 @@
       "monthlyRevenue": "Monthly Revenue",
       "totalUsers": "Total Users",
       "activeCourses": "Active Courses",
+      "totalCertificates": "Total Issued Certificates",
       "vsLastMonth": "vs last month",
       "quizAnalytics": "Quiz Analytics",
       "quizzes": "{count} quizzes",
@@ -144,10 +145,16 @@
       "backToCourses": "Back to courses",
       "reject": "Reject",
       "approve": "Approve",
+      "exportPdf": "Export PDF",
       "courseContent": "Course Content",
       "modules": "{count} Modules",
       "lessons": "{count} Lessons",
       "itemsReviewed": "{reviewed} of {total} items reviewed",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "locked": "Locked",
+      "lockedHint": "Complete {lesson} to unlock",
+      "lockedNextHint": "Complete this lesson to continue.",
       "lessonsCreatedBy": "lessons created by educator",
       "textImageLessons": "Text/Image Lessons",
       "videoLessons": "Video Lessons",
@@ -312,6 +319,17 @@
       "tabTemplates": "Templates",
       "tabIssuance": "Issuance History",
       "createTemplate": "Create Template",
+      "uploadTemplate": "Upload Template",
+      "uploadTemplateDesc": "Upload a certificate design (image or PDF) to add it as a new draft template.",
+      "uploadInvalidFile": "Please choose an image or PDF file.",
+      "uploadSuccess": "Template \"{name}\" created.",
+      "chooseFile": "Click to choose a file",
+      "fileTypeHint": "PNG, JPG, or PDF",
+      "changeFileHint": "Click to choose a different file",
+      "templateName": "Template name",
+      "templateNamePlaceholder": "e.g. Corporate Bootcamp",
+      "templateCategory": "Category",
+      "cancel": "Cancel",
       "statTotalIssued": "Total Issued Certificates",
       "statVerifiedClaims": "Verified Claims",
       "statActiveTemplates": "Active Templates",
@@ -370,7 +388,7 @@
 
     "settingsPage": {
       "title": "Platform Settings",
-      "subtitle": "Live workspace synced for admin",
+      "subtitle": "Live workspace synced from {email}",
       "personalInfo": "Personal Information",
       "personalInfoDesc": "Manage the profile details used across your CLP workspace.",
       "fullName": "Full Name",
@@ -506,7 +524,9 @@
     "monthlyRevenue": {
       "title": "Monthly Revenue",
       "last12": "Last 12 months",
-      "vsPrevMonth": "vs prev month"
+      "vsPrevMonth": "vs prev month",
+      "emptyTitle": "No revenue yet",
+      "emptyDesc": "Revenue will appear here once learners start enrolling in paid courses."
     }
   }
 }

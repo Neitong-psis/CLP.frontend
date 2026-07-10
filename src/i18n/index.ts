@@ -86,3 +86,4 @@ export const useLearnerMyLearningT = () =>
 export const useLearnerCertificatesT = () =>
   useTranslations(NS.learner.certificates);
 export const useLearnerExploreT = () => useTranslations(NS.learner.explore);
+export const useLearnerCheckoutT = () => useTranslations(NS.learner.checkout);

@@ -6,10 +6,10 @@ import {
   DollarSign,
 } from 'lucide-react';
 
+/** Static role label/fallback initials — actual identity comes from
+ *  `useCurrentUser()`, sourced from the authenticated session. */
 export const EDUCATOR_USER = {
-  name: 'Dr. Angela Yu',
-  email: 'angela@clp.com',
-  initials: 'AY',
+  initials: '?',
   role: 'Educator',
 };
 
@@ -865,6 +865,21 @@ export const EDUCATOR_STAT_CONFIG: DashboardStatConfig[] = [
   },
 ];
 
+export const MONTHLY_REVENUE = [
+  { month: 'Jun', amount: 1820 },
+  { month: 'Jul', amount: 2440 },
+  { month: 'Aug', amount: 3010 },
+  { month: 'Sep', amount: 2200 },
+  { month: 'Oct', amount: 3580 },
+  { month: 'Nov', amount: 4310 },
+  { month: 'Dec', amount: 3790 },
+  { month: 'Jan', amount: 4820 },
+  { month: 'Feb', amount: 6100 },
+  { month: 'Mar', amount: 5520 },
+  { month: 'Apr', amount: 6640 },
+  { month: 'May', amount: 7960 },
+];
+
 export const MONTHLY_ENROLLMENTS = [
   { month: 'Jun', count: 80 },
   { month: 'Jul', count: 105 },
@@ -924,4 +939,34 @@ export const QUIZ_ANALYTICS = [
     avgScore: 84,
     passRate: 88,
   },
+];
+
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+export const FILTER_PROGRESS_OPTIONS: FilterOption[] = [
+  { value: '0-25', label: '0–25%' },
+  { value: '26-50', label: '26–50%' },
+  { value: '51-75', label: '51–75%' },
+  { value: '76-100', label: '76–100%' },
+];
+
+export const FILTER_ACTIVITY_OPTIONS: FilterOption[] = [
+  { value: 'Highly active', label: 'Highly active' },
+  { value: 'Active', label: 'Active' },
+  { value: 'At risk', label: 'At risk' },
+];
+
+export const FILTER_STATUS_OPTIONS: FilterOption[] = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Inactive', label: 'Inactive' },
+  { value: 'Completed', label: 'Completed' },
+];
+
+export const FILTER_LAST_ACTIVE_OPTIONS: FilterOption[] = [
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'This week' },
+  { value: 'month', label: 'This month' },
 ];

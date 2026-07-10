@@ -1,6 +1,7 @@
 export {
   fetchAllUsers,
   fetchUserStats,
+  fetchUserAnalytics,
   createUser,
   updateUser,
   setUserActive,
@@ -8,5 +9,5 @@ export {
   resetUserPassword,
   generateUserPassword,
 } from './users.api';
-export type { SaveUserInput, UserStats } from './users.api';
+export type { SaveUserInput, UserStats, UserAnalytics } from './users.api';
 export type { AdminUser, UsersPage } from '@/schemas/admin-user.schema';

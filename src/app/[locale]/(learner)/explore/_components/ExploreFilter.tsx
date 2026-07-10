@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Star, Clock, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useLearnerExploreT } from '@/i18n';
@@ -11,10 +13,11 @@ import {
   EXPLORE_CATEGORIES,
   DEFAULT_COURSE_THUMBNAIL,
 } from '@/constants/learner';
+import { slugify } from '@/lib/utils/slugify';
 import { SortMenu, type SortOption } from '@/components/common/list/SortMenu';
 import { SearchInput } from '@/components/common/list/SearchInput';
 import { Pagination } from '@/components/common/list/Pagination';
-import { PaymentModal } from './PaymentModal';
+import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 
 // ── Sorting ─────────────────────────────────────────────────────────────────
 
@@ -66,14 +69,6 @@ function toggleInList(key: string, id: string): string[] {
   return next;
 }
 
-function addToList(key: string, id: string): string[] {
-  const list = readList(key);
-  if (list.includes(id)) return list;
-  const next = [...list, id];
-  localStorage.setItem(key, JSON.stringify(next));
-  return next;
-}
-
 // ── Level + type styling ──────────────────────────────────────────────────────
 
 const LEVEL_STYLE: Record<CourseLevel, string> = {
@@ -117,6 +112,7 @@ function CourseCard({
   const price = course.price ?? 49;
   const originalPrice = course.originalPrice ?? 99;
   const savings = originalPrice - price;
+  const previewHref = `/explore/${slugify(course.title)}`;
 
   return (
     <div
@@ -128,8 +124,11 @@ function CourseCard({
       )}
       style={{ transitionDelay: active ? `${delay}ms` : '0ms' }}
     >
-      {/* Thumbnail */}
-      <div className="relative flex h-28 shrink-0 flex-col items-center justify-center overflow-hidden sm:h-44">
+      {/* Thumbnail — links through to the course's preview/enrollment page */}
+      <Link
+        href={previewHref}
+        className="relative flex h-28 shrink-0 flex-col items-center justify-center overflow-hidden sm:h-44"
+      >
         {/* Gradient fallback — visible if the cover image is missing/slow */}
         <div
           className={cn(
@@ -180,7 +179,7 @@ function CourseCard({
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-3 sm:p-5">
@@ -206,9 +205,12 @@ function CourseCard({
         </div>
 
         {/* Title */}
-        <p className="text-foreground group-hover:text-brand-gold mb-1 line-clamp-2 text-sm leading-snug font-bold transition-colors duration-200">
+        <Link
+          href={previewHref}
+          className="text-foreground group-hover:text-brand-gold mb-1 line-clamp-2 text-sm leading-snug font-bold transition-colors duration-200"
+        >
           {course.title}
-        </p>
+        </Link>
 
         {/* Description */}
         {course.description && (
@@ -274,16 +276,16 @@ function CourseCard({
 
 export default function ExploreFilter({ courses }: { courses: Course[] }) {
   const t = useLearnerExploreT();
+  const router = useRouter();
 
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('recommended');
   const [showSaved, setShowSaved] = useState(false);
-  const [enrolled, setEnrolled] = useState<string[]>(() =>
-    readList(LS_ENROLLED),
-  );
-  const [saved, setSaved] = useState<string[]>(() => readList(LS_SAVED));
-  const [enrollingCourse, setEnrollingCourse] = useState<Course | null>(null);
+  // Start empty so the first client render matches SSR; localStorage-derived
+  // lists are only loaded after mount (see effect below).
+  const [enrolled, setEnrolled] = useState<string[]>([]);
+  const [saved, setSaved] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -291,18 +293,20 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
   const savedCount = mounted ? saved.length : 0;
 
   useEffect(() => {
-    const id = setTimeout(() => setMounted(true), 60);
+    const id = setTimeout(() => {
+      setEnrolled(readList(LS_ENROLLED));
+      setSaved(readList(LS_SAVED));
+      setMounted(true);
+    }, 60);
     return () => clearTimeout(id);
   }, []);
 
-  const handleEnroll = useCallback((course: Course) => {
-    setEnrollingCourse(course);
-  }, []);
-
-  const handlePaymentSuccess = useCallback((courseId: string) => {
-    const next = addToList(LS_ENROLLED, courseId);
-    setEnrolled(next);
-  }, []);
+  const handleEnroll = useCallback(
+    (course: Course) => {
+      router.push(`/checkout/${slugify(course.title)}`);
+    },
+    [router],
+  );
 
   const handleSave = useCallback((courseId: string) => {
     const next = toggleInList(LS_SAVED, courseId);
@@ -332,6 +336,11 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
     { value: 'title-az', label: t('sortTitleAz') },
   ];
 
+  const CATEGORY_TABS: PillTab<string>[] = EXPLORE_CATEGORIES.map((cat) => ({
+    value: cat,
+    label: cat === 'All' ? t('all') : cat,
+  }));
+
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const paginated = sorted.slice(
@@ -349,26 +358,17 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
         )}
         style={{ transitionDelay: mounted ? '60ms' : '0ms' }}
       >
-        {/* Category chips — scrollable on mobile */}
-        <div className="scrollbar-none flex min-w-0 flex-1 gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-          {EXPLORE_CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setCategory(cat);
-                setPage(1);
-              }}
-              className={cn(
-                'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-all duration-150',
-                cat === category
-                  ? 'bg-brand-gold text-brand-navy'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60',
-              )}
-            >
-              {cat === 'All' ? t('all') : cat}
-            </button>
-          ))}
-        </div>
+        {/* Category tabs — scrollable on mobile */}
+        <PillTabs
+          tabs={CATEGORY_TABS}
+          value={category}
+          onChange={(v) => {
+            setCategory(v);
+            setPage(1);
+          }}
+          ariaLabel={t('title')}
+          className="w-auto min-w-0 flex-1"
+        />
 
         {/* Saved + Sort + Search grouped on the right */}
         <div className="flex shrink-0 items-center gap-2">
@@ -457,15 +457,6 @@ export default function ExploreFilter({ courses }: { courses: Course[] }) {
         onPageChange={setPage}
         className="mt-6"
       />
-
-      {/* Payment modal */}
-      {enrollingCourse && (
-        <PaymentModal
-          course={enrollingCourse}
-          onClose={() => setEnrollingCourse(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
     </>
   );
 }

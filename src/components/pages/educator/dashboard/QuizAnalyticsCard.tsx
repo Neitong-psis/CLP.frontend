@@ -43,7 +43,9 @@ export function QuizAnalyticsCard({ data }: QuizAnalyticsCardProps) {
   return (
     <div className="border-border bg-card rounded-2xl border p-6 transition-shadow duration-200 hover:shadow-md">
       <div className="mb-5">
-        <h3 className="text-foreground text-sm font-bold">Quiz Analytics</h3>
+        <h3 className="text-foreground text-sm font-bold">
+          Assignment Analytics
+        </h3>
         <p className="text-muted-foreground mt-0.5 text-[11px]">
           Completion rates, averages, pass/fail signals, and difficult question
           insights.

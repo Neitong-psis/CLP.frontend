@@ -23,6 +23,13 @@ const userStatsSchema = z.object({
 
 export type UserStats = z.infer<typeof userStatsSchema>;
 
+const userAnalyticsSchema = z.object({
+  months: z.array(z.string()),
+  growth: z.array(z.number()),
+});
+
+export type UserAnalytics = z.infer<typeof userAnalyticsSchema>;
+
 const MAX_PAGE_LIMIT = 50;
 const MAX_PAGES = 100;
 const STATUS_ACTIVE = 1;
@@ -116,6 +123,15 @@ export async function fetchUserStats(): Promise<UserStats> {
   try {
     const { data } = await http.get<unknown>(`${USERS_ENDPOINT}/stats`);
     return userStatsSchema.parse(data);
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+export async function fetchUserAnalytics(): Promise<UserAnalytics> {
+  try {
+    const { data } = await http.get<unknown>(`${USERS_ENDPOINT}/analytics`);
+    return userAnalyticsSchema.parse(data);
   } catch (error) {
     throw normalizeError(error);
   }

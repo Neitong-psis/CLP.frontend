@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { ALL_COURSES, EXPLORE_COURSES, MOCK_USER } from '@/constants/learner';
+import { ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
 import {
   COURSE_MODULES_MAP,
   REVIEW_MODULES,
@@ -54,7 +54,6 @@ export default async function CoursePlayerPage({
       modules={modules}
       startItemId={startItemId}
       isReplay={isReplay}
-      userEmail={MOCK_USER.email}
     />
   );
 }

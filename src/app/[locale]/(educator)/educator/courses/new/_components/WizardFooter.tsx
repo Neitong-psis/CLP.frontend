@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Loader2,
   Save,
   TriangleAlert,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ export function WizardFooter({
   onSaveDraft,
   onSubmit,
   submitLabel,
+  submitting = false,
 }: {
   step: number;
   canSubmit: boolean;
@@ -29,6 +31,7 @@ export function WizardFooter({
   onSaveDraft: () => void;
   onSubmit: () => void;
   submitLabel?: string;
+  submitting?: boolean;
 }) {
   const t = useCreateCourseT();
   const isLast = step >= STEP_COUNT;
@@ -99,11 +102,17 @@ export function WizardFooter({
               variant="default"
               className="gap-2 bg-blue-950 hover:bg-blue-900 focus-visible:ring-blue-950 disabled:opacity-50 dark:bg-amber-400 dark:text-gray-900 dark:hover:bg-amber-300 dark:focus-visible:ring-amber-400"
               onClick={onSubmit}
-              disabled={!canSubmit}
+              disabled={!canSubmit || submitting}
               title={canSubmit ? undefined : t('footer.completeRequired')}
             >
-              {resolvedSubmitLabel}
-              <ArrowRight className="h-4 w-4" />
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {resolvedSubmitLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           )}
         </div>

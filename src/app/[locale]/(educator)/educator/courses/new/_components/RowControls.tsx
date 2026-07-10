@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -24,7 +24,12 @@ export function RowControls({
   className?: string;
 }) {
   return (
-    <div className={cn('flex items-center gap-0.5', className)}>
+    <div
+      className={cn(
+        'border-border bg-card flex items-center gap-0.5 rounded-lg border p-0.5',
+        className,
+      )}
+    >
       <button
         type="button"
         aria-label="Move up"
@@ -33,9 +38,9 @@ export function RowControls({
           onMove('up');
         }}
         disabled={index === 0}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-6 w-6 items-center justify-center rounded transition disabled:opacity-30"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-30"
       >
-        <ChevronUp className="h-4 w-4" />
+        <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
       </button>
       <button
         type="button"
@@ -45,10 +50,11 @@ export function RowControls({
           onMove('down');
         }}
         disabled={index === total - 1}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-6 w-6 items-center justify-center rounded transition disabled:opacity-30"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-30"
       >
-        <ChevronDown className="h-4 w-4" />
+        <ArrowDown className="h-3.5 w-3.5" strokeWidth={2.5} />
       </button>
+      <div className="bg-border mx-0.5 h-4 w-px" />
       <button
         type="button"
         aria-label="Delete"
@@ -56,9 +62,9 @@ export function RowControls({
           e.stopPropagation();
           onDelete();
         }}
-        className="text-muted-foreground flex h-6 w-6 items-center justify-center rounded transition hover:bg-red-400/10 hover:text-red-400"
+        className="text-muted-foreground flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-rose-500/10 hover:text-rose-500"
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash2 className="h-3.5 w-3.5" />
       </button>
     </div>
   );

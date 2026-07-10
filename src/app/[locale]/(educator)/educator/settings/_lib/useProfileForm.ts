@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { EDUCATOR_USER } from '@/constants/educator';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/components/ui/toast';
 
 export interface ProfileForm {
@@ -14,23 +14,41 @@ export interface ProfileForm {
   bio: string;
 }
 
-const INITIAL: ProfileForm = {
-  fullName: EDUCATOR_USER.name,
-  username: 'devid',
-  email: EDUCATOR_USER.email,
-  phone: '+855 12 345 678',
-  gender: '',
-  dob: '',
-  nationality: 'Cambodian',
-  address: 'Phnom Penh, Cambodia',
-  bio: '',
-};
-
 /** Profile form state, avatar preview lifecycle, and dirty tracking. */
 export function useProfileForm() {
   const { toast } = useToast();
-  const [form, setForm] = useState<ProfileForm>(INITIAL);
+  const currentUser = useCurrentUser();
+
+  // The authenticated profile only loads after the silent auth bootstrap
+  // resolves, so the form seeds itself as soon as real data is available.
+  // Fields the backend doesn't provide (phone, bio, ...) start blank rather
+  // than carrying over fabricated placeholder values.
+  const initial = useMemo<ProfileForm>(
+    () => ({
+      fullName: currentUser.fullName,
+      username: currentUser.email.split('@')[0] ?? '',
+      email: currentUser.email,
+      phone: '',
+      gender: '',
+      dob: '',
+      nationality: '',
+      address: '',
+      bio: '',
+    }),
+    [currentUser],
+  );
+
+  const [form, setForm] = useState<ProfileForm>(initial);
   const [avatar, setAvatar] = useState<File | null>(null);
+  // Once the educator edits a field, stop re-syncing from `initial` so their
+  // in-progress edits aren't clobbered when the auth bootstrap resolves.
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (touched) return;
+    const id = setTimeout(() => setForm(initial), 0);
+    return () => clearTimeout(id);
+  }, [initial, touched]);
 
   const avatarUrl = useMemo(
     () => (avatar ? URL.createObjectURL(avatar) : null),
@@ -42,21 +60,34 @@ export function useProfileForm() {
   }, [avatarUrl]);
 
   const dirty = useMemo(
-    () => JSON.stringify(form) !== JSON.stringify(INITIAL) || avatar !== null,
-    [form, avatar],
+    () => JSON.stringify(form) !== JSON.stringify(initial) || avatar !== null,
+    [form, initial, avatar],
   );
 
-  const setField = (key: keyof ProfileForm, value: string) =>
+  const setField = (key: keyof ProfileForm, value: string) => {
+    setTouched(true);
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   function save() {
     toast('Your profile has been updated.', 'success');
   }
 
   function reset() {
-    setForm(INITIAL);
+    setForm(initial);
     setAvatar(null);
+    setTouched(false);
   }
 
-  return { form, setField, avatar, setAvatar, avatarUrl, dirty, save, reset };
+  return {
+    form,
+    setField,
+    avatar,
+    setAvatar,
+    avatarUrl,
+    initials: currentUser.initials,
+    dirty,
+    save,
+    reset,
+  };
 }

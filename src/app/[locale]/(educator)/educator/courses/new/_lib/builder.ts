@@ -1,7 +1,26 @@
-import type { ContentSection, CourseInfo, Lesson, CourseModule } from './types';
+import type {
+  ContentSection,
+  CourseInfo,
+  Lesson,
+  CourseModule,
+  QuizOption,
+  QuizQuestion,
+} from './types';
 
 let _seq = 0;
 export const uid = () => String(++_seq);
+
+export function makeQuizQuestion(): QuizQuestion {
+  return {
+    id: uid(),
+    question: '',
+    options: ['A', 'B', 'C', 'D'].map(() => ({
+      id: uid(),
+      text: '',
+      correct: false,
+    })),
+  };
+}
 
 export function makeSection(type: ContentSection['type']): ContentSection {
   return {
@@ -11,17 +30,23 @@ export function makeSection(type: ContentSection['type']): ContentSection {
     imageUrl: '',
     videoTitle: '',
     videoUrl: '',
-    question: '',
-    answerFormat: 'single',
-    options: ['A', 'B', 'C', 'D'].map(() => ({
-      id: uid(),
-      text: '',
-      correct: false,
-    })),
+    videoFileName: '',
+    videoDescription: '',
+    quizQuestions: type === 'quiz' ? [makeQuizQuestion()] : [],
     assignmentDesc: '',
     dueDate: '',
     submissionType: '',
   };
+}
+
+/** Single correct answer → single choice; more than one → multiple choice.
+ *  No manual toggle — the format is inferred from what the educator marked. */
+export function deriveAnswerFormat(
+  options: QuizOption[],
+): 'single' | 'multiple' | undefined {
+  const correctCount = options.filter((o) => o.correct).length;
+  if (correctCount === 0) return undefined;
+  return correctCount > 1 ? 'multiple' : 'single';
 }
 
 export function makeLesson(index: number): Lesson {
@@ -32,9 +57,20 @@ export function makeModule(index: number): CourseModule {
   return { id: uid(), title: `Module ${index}`, expanded: true, lessons: [] };
 }
 
+/** Groups a digit string into thousands with the given separator, e.g.
+ *  `formatThousands('2222222', ',')` → `'2,222,222'`. Non-digits are stripped
+ *  first, so it also doubles as a paste-safe sanitizer. */
+export function formatThousands(value: string, separator: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+}
+
 export function priceLabel(info: CourseInfo): string {
   if (info.pricingType === 'free') return 'Free';
-  return info.price ? `$${info.price}` : '—';
+  if (!info.price) return '—';
+  const formatted = formatThousands(info.price, ',');
+  return info.currency === 'KHR' ? `${formatted} KHR` : `$${formatted}`;
 }
 
 /** A text lesson with its intro paragraph pre-filled — used to seed draft content. */
@@ -64,6 +100,7 @@ export function makeDraftFromTask(task: {
     level: 'Beginner',
     pricingType: isFree ? 'free' : 'paid',
     price: isFree ? '' : task.price.replace(/[^0-9.]/g, ''),
+    currency: 'USD',
     promoCode: '',
     thumbnail: '',
   };
@@ -107,4 +144,36 @@ export function moveItem<T>(arr: T[], index: number, dir: 'up' | 'down'): T[] {
   const next = [...arr];
   [next[index], next[target]] = [next[target], next[index]];
   return next;
+}
+
+/** Inserts `item` immediately before/after the element with `anchorId`.
+ *  Appends to the end if the anchor isn't found (e.g. an empty drop target). */
+export function insertByAnchor<T extends { id: string }>(
+  list: T[],
+  item: T,
+  anchorId: string,
+  position: 'before' | 'after',
+): T[] {
+  const anchorIndex = list.findIndex((x) => x.id === anchorId);
+  if (anchorIndex === -1) return [...list, item];
+  const next = [...list];
+  next.splice(position === 'before' ? anchorIndex : anchorIndex + 1, 0, item);
+  return next;
+}
+
+/** Moves the element with `id` to sit immediately before/after `anchorId` within the same list. */
+export function reorderByAnchor<T extends { id: string }>(
+  list: T[],
+  id: string,
+  anchorId: string,
+  position: 'before' | 'after',
+): T[] {
+  const item = list.find((x) => x.id === id);
+  if (!item) return list;
+  return insertByAnchor(
+    list.filter((x) => x.id !== id),
+    item,
+    anchorId,
+    position,
+  );
 }

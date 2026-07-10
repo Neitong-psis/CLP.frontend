@@ -4,11 +4,8 @@ import { useState, useMemo, useSyncExternalStore } from 'react';
 import { Search } from 'lucide-react';
 import { useLearnerMyLearningT } from '@/i18n';
 import { type Course, ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
-import {
-  COURSE_MODULES_MAP,
-  flattenItems,
-} from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
-import { readCourseProgress } from '@/lib/utils/courseStorage';
+import { COURSE_MODULES_MAP } from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
+import { getCourseProgressPercent } from '@/lib/utils/courseStorage';
 import { Pagination } from '@/components/common/list/Pagination';
 import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import CourseCard from './CourseCard';
@@ -41,9 +38,7 @@ const getServerSnapshot = () => false;
 // player (persisted in localStorage — see lib/utils/courseStorage.ts).
 function withRealProgress(course: Course): Course {
   const modules = COURSE_MODULES_MAP[course.id];
-  const total = modules ? flattenItems(modules).length : 0;
-  const viewed = readCourseProgress(course.id).length;
-  const progress = total === 0 ? 0 : Math.round((viewed / total) * 100);
+  const progress = modules ? getCourseProgressPercent(course.id, modules) : 0;
   return { ...course, progress, completed: progress === 100 };
 }
 

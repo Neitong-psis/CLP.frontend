@@ -41,6 +41,8 @@ export type Course = {
   courseType?: CourseType;
   documents?: number;
   thumbnail?: string;
+  /** Redeemable code that grants free enrollment (see Explore's "Redeem Code"). */
+  code?: string;
 };
 
 /** Default cover used for course cards that don't set their own thumbnail. */
@@ -60,6 +62,7 @@ export const ENROLLED_COURSES: Course[] = [
     hours: 24,
     modules: 3,
     lessons: 8,
+    code: 'LEAD-01',
   },
   {
     id: '2',
@@ -74,6 +77,7 @@ export const ENROLLED_COURSES: Course[] = [
     hours: 18,
     modules: 3,
     lessons: 8,
+    code: 'CRIT-02',
   },
   {
     id: '3',
@@ -88,6 +92,7 @@ export const ENROLLED_COURSES: Course[] = [
     hours: 16,
     modules: 3,
     lessons: 8,
+    code: 'COMM-03',
   },
   {
     id: '4',
@@ -102,6 +107,7 @@ export const ENROLLED_COURSES: Course[] = [
     hours: 36,
     modules: 3,
     lessons: 8,
+    code: 'STEM-04',
   },
   {
     id: '5',
@@ -116,6 +122,7 @@ export const ENROLLED_COURSES: Course[] = [
     hours: 28,
     modules: 3,
     lessons: 8,
+    code: 'LEAD-05',
   },
 ];
 
@@ -132,6 +139,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.6,
     hours: 20,
+    code: 'INNO-06',
   },
   {
     id: '7',
@@ -144,6 +152,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.7,
     hours: 14,
+    code: 'LEAD-07',
   },
   {
     id: '8',
@@ -156,6 +165,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.8,
     hours: 22,
+    code: 'STEM-08',
   },
   {
     id: '9',
@@ -168,6 +178,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.9,
     hours: 16,
+    code: 'COMM-09',
   },
   {
     id: '10',
@@ -180,6 +191,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.7,
     hours: 18,
+    code: 'LEAD-10',
   },
   {
     id: '11',
@@ -192,6 +204,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.6,
     hours: 30,
+    code: 'CRIT-11',
   },
   {
     id: '12',
@@ -204,6 +217,7 @@ export const ALL_COURSES: Course[] = [
     completed: false,
     rating: 4.8,
     hours: 12,
+    code: 'CRIT-12',
   },
 ];
 
@@ -234,6 +248,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'PROG-01',
   },
   {
     id: 'e2',
@@ -251,6 +266,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'WEBD-02',
   },
   {
     id: 'e3',
@@ -268,6 +284,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DATA-03',
   },
   {
     id: 'e4',
@@ -285,6 +302,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DEVO-04',
   },
   {
     id: 'e5',
@@ -302,6 +320,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DSGN-05',
   },
   {
     id: 'e6',
@@ -319,6 +338,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'PROG-06',
   },
   {
     id: 'e7',
@@ -336,6 +356,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'CLUD-07',
   },
   {
     id: 'e8',
@@ -353,6 +374,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'WEBD-08',
   },
   {
     id: 'e9',
@@ -370,6 +392,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DATA-09',
   },
   {
     id: 'e10',
@@ -388,6 +411,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DSGN-10',
   },
   {
     id: 'e11',
@@ -406,6 +430,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'PROG-11',
   },
   {
     id: 'e12',
@@ -424,6 +449,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DATA-12',
   },
   {
     id: 'e13',
@@ -442,6 +468,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'PROG-13',
   },
   {
     id: 'e14',
@@ -459,6 +486,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'DEVO-14',
   },
   {
     id: 'e15',
@@ -476,6 +504,7 @@ export const EXPLORE_COURSES: Course[] = [
     progress: 0,
     enrolled: false,
     completed: false,
+    code: 'WEBD-15',
   },
 ];
 
@@ -868,22 +897,6 @@ export const COURSE_CONTENTS: CourseContent[] = [
 ];
 
 /* ── Overview dashboard data ── */
-
-export interface ContinueLearningData {
-  courseId: string;
-  courseTitle: string;
-  lessonNumber: number;
-  lessonTitle: string;
-  progress: number;
-}
-
-export const CONTINUE_LEARNING: ContinueLearningData = {
-  courseId: '1',
-  courseTitle: 'Introduction to Leadership',
-  lessonNumber: 8,
-  lessonTitle: 'Persuasion & Influence',
-  progress: 65,
-};
 
 export interface PlanGoal {
   id: string;

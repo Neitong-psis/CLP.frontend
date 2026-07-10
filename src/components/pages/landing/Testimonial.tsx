@@ -22,10 +22,10 @@ function TestimonialCard({ testimonial, index, active }: TestimonialCardProps) {
       className={entranceClass(active, 'lg')}
       style={entranceStyle(active, HEADER_LEAD_MS + index * CARD_STAGGER_MS)}
     >
-      <figure className="group border-brand-navy/10 bg-brand-navy/2 hover:border-brand-gold/40 relative flex h-full flex-col gap-5 overflow-hidden rounded-lg border p-7 transition-colors hover:bg-white">
+      <figure className="group border-brand-navy/10 bg-brand-navy/2 hover:border-brand-gold/40 hover:shadow-brand-navy/10 relative flex h-full flex-col gap-5 overflow-hidden rounded-lg border p-7 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:bg-white hover:shadow-xl">
         <Quote
           aria-hidden
-          className="text-brand-gold/0 group-hover:text-brand-gold/8 pointer-events-none absolute -top-2 -right-2 h-24 w-24 transition-colors"
+          className="text-brand-gold/0 group-hover:text-brand-gold/10 pointer-events-none absolute -top-2 -right-2 h-24 w-24 transition-colors"
         />
 
         <div className="flex items-center gap-0.5">

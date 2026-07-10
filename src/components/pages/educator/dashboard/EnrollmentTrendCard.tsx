@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
-import { TrendingUp } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 export interface EnrollmentPoint {
@@ -13,8 +12,6 @@ export interface EnrollmentTrendCardProps {
   data: readonly EnrollmentPoint[];
   title?: string;
 }
-
-type Period = '6M' | '1Y';
 
 const W = 800;
 const H = 230;
@@ -247,68 +244,14 @@ function InteractiveChart({ data }: { data: readonly EnrollmentPoint[] }) {
 
 export function EnrollmentTrendCard({
   data,
-  title = 'Enrollment Trend',
+  title = 'Monthly Enrollment Trend',
 }: EnrollmentTrendCardProps) {
-  const [period, setPeriod] = useState<Period>('1Y');
-  const visible = useMemo(
-    () => (period === '6M' ? data.slice(-6) : data),
-    [data, period],
-  );
-
-  const total = visible.reduce((sum, d) => sum + d.count, 0);
-  const growth =
-    visible.length > 1
-      ? Math.round(
-          ((visible[visible.length - 1].count - visible[0].count) /
-            visible[0].count) *
-            100,
-        )
-      : 0;
-
   return (
     <div className="border-border bg-card mb-6 rounded-2xl border p-6 transition-shadow duration-200 hover:shadow-md">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="text-foreground text-sm font-bold">{title}</h3>
-          <div className="mt-1.5 flex items-baseline gap-2.5">
-            <p className="text-foreground text-2xl font-black">
-              {total.toLocaleString()}
-            </p>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-500">
-              <TrendingUp className="h-3 w-3" />
-              {growth >= 0 ? '+' : ''}
-              {growth}%
-            </span>
-          </div>
-          <p className="text-muted-foreground mt-0.5 text-[11px]">
-            Total enrollments · {period === '6M' ? 'last 6' : 'last 12'} months
-          </p>
-        </div>
-
-        {/* period toggle */}
-        <div className="border-border bg-muted flex rounded-lg border p-0.5">
-          {(['6M', '1Y'] as Period[]).map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPeriod(p)}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-xs font-semibold transition-all',
-                period === p
-                  ? 'text-foreground bg-card ring-border shadow-sm ring-1'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+      <div className="mb-5">
+        <h3 className="text-foreground text-sm font-bold">{title}</h3>
       </div>
-
-      {/* key remounts the chart so the draw animation replays on toggle */}
-      <div key={period}>
-        <InteractiveChart data={visible} />
-      </div>
+      <InteractiveChart data={data} />
     </div>
   );
 }

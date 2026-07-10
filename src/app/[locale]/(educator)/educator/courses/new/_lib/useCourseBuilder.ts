@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
 import { useCourseTasks } from '@/context/CourseTasksContext';
-import { EDUCATOR_USER, EDUCATOR_COURSE_TASKS } from '@/constants/educator';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { EDUCATOR_COURSE_TASKS } from '@/constants/educator';
 import type { CourseInfo, CourseModule } from './types';
 import { makeDraftFromTask, makeModule, moveItem } from './builder';
 
@@ -15,6 +16,7 @@ const INITIAL_INFO: CourseInfo = {
   level: '',
   pricingType: 'paid',
   price: '',
+  currency: 'USD',
   promoCode: '',
   thumbnail: '',
 };
@@ -25,6 +27,7 @@ export function useCourseBuilder(draftId?: string | null) {
   const router = useRouter();
   const { toast } = useToast();
   const { addTask } = useCourseTasks();
+  const currentUser = useCurrentUser();
   const t = useTranslations('educator.createCourse');
 
   // Seed from the draft (if any). Only consumed by the lazy state initializers
@@ -103,9 +106,11 @@ export function useCourseBuilder(draftId?: string | null) {
         info.pricingType === 'free'
           ? 'Free'
           : info.price
-            ? `$${info.price}`
+            ? info.currency === 'KHR'
+              ? `${info.price} KHR`
+              : `$${info.price}`
             : 'Paid',
-      assignedBy: EDUCATOR_USER.name,
+      assignedBy: currentUser.fullName,
       status: 'Under Review',
       priority: 'Medium',
       dueDate: new Date().toLocaleDateString('en-US', {
@@ -130,6 +135,9 @@ export function useCourseBuilder(draftId?: string | null) {
     updateModule,
     deleteModule,
     moveModule,
+    /** Raw setter for drag-and-drop reordering, which needs to move lessons
+     *  across module boundaries — a shape the per-index callbacks above can't express. */
+    setModules,
     goBack,
     goNext,
     goToStep,

@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import { useAdminSettingsT } from '@/i18n';
-import { ADMIN_USER } from '@/constants/admin';
+import { userInitials } from '@/lib/utils/user';
 import { useToast } from '@/components/ui/toast';
 
 const avatarBtnCls =
@@ -50,7 +50,7 @@ export function AvatarCard({ name, email }: Props) {
             />
           ) : (
             <div className="bg-brand-gold flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white">
-              {ADMIN_USER.initials}
+              {userInitials(name)}
             </div>
           )}
         </div>

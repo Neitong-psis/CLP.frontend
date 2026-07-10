@@ -77,13 +77,25 @@ function RevenueStatCard({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function RevenueStatsGrid() {
+export interface RevenueStatValue {
+  value: string;
+  change: string;
+}
+
+interface RevenueStatsGridProps {
+  /** Overrides the static REVENUE_STATS fallback, in the same 4-item order
+   *  (annual revenue, this month, MRR, AOV). */
+  stats?: readonly RevenueStatValue[];
+}
+
+export function RevenueStatsGrid({ stats }: RevenueStatsGridProps) {
   const t = useAdminRevenueT();
+  const items = stats ?? REVENUE_STATS;
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {REVENUE_STATS.map(({ label, value, change }, i) => (
+      {items.map(({ value, change }, i) => (
         <RevenueStatCard
-          key={label}
+          key={STAT_LABEL_KEYS[i]}
           label={t(STAT_LABEL_KEYS[i]!)}
           value={value}
           change={change}

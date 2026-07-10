@@ -16,7 +16,6 @@ import {
   Pencil,
   Trash2,
   ClipboardCheck,
-  SlidersHorizontal,
   Plus,
   X,
 } from 'lucide-react';
@@ -33,11 +32,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TopBar from '@/components/common/TopBar';
+import { Popover, PopoverTrigger } from '@/components/ui/Popover';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/Popover';
+  FilterPanel,
+  FilterTrigger,
+  FilterDivider,
+} from '@/components/pages/admin/filters/FilterPanelShell';
+import {
+  FilterSectionLabel,
+  FilterOptionList,
+} from '@/components/pages/admin/filters/FilterOptionList';
 import { EditModal } from './_components/EditModal';
 import { DeleteModal } from './_components/DeleteModal';
 import { RowContextMenu } from './_components/RowContextMenu';
@@ -87,14 +91,6 @@ function LevelDots({ level }: { level: string }) {
         />
       ))}
     </span>
-  );
-}
-
-function FilterSectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-widest uppercase">
-      {children}
-    </p>
   );
 }
 
@@ -224,6 +220,10 @@ export default function AdminCoursesPage() {
         (level === 'All' || c.level === level),
     ).length;
 
+  const statusOptions = STATUS_FILTERS.filter(
+    (s): s is CourseStatus => s !== 'All',
+  );
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
@@ -283,226 +283,93 @@ export default function AdminCoursesPage() {
               {/* Filter popover */}
               <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                 <PopoverTrigger className="border-border hover:bg-muted text-foreground inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors sm:px-4">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('filterBtn')}</span>
-                  {activeFilterCount > 0 && (
-                    <span className="bg-brand-accent text-brand-accent-foreground flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold">
-                      {activeFilterCount}
-                    </span>
-                  )}
+                  <FilterTrigger
+                    label={t('filterBtn')}
+                    activeFilterCount={activeFilterCount}
+                  />
                 </PopoverTrigger>
-                <PopoverContent
-                  align="end"
-                  className="flex max-h-[min(34rem,calc(100vh-5rem))] w-[calc(100vw-16px)] flex-col gap-0 overflow-hidden p-0 sm:w-80"
+                <FilterPanel
+                  title={t('filterBtn')}
+                  activeFilterCount={activeFilterCount}
+                  clearLabel={t('filterClearAll')}
+                  onClear={clearFilters}
+                  resultCount={filtered.length}
+                  noResultsLabel={t('filterNoResults')}
+                  oneResultLabel={t('filterShowResult')}
+                  manyResultsLabel={(count) =>
+                    t('filterShowResults', { count })
+                  }
+                  onApply={() => setFilterOpen(false)}
                 >
-                  {/* Header */}
-                  <div className="border-border flex shrink-0 items-center justify-between border-b px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-brand-accent/10 text-brand-accent flex h-6 w-6 items-center justify-center rounded-md">
-                        <SlidersHorizontal className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="text-foreground text-sm font-semibold">
-                        {t('filterBtn')}
-                      </span>
-                      {activeFilterCount > 0 && (
-                        <span className="bg-brand-accent text-brand-accent-foreground flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold">
-                          {activeFilterCount}
-                        </span>
-                      )}
-                    </div>
-                    {activeFilterCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={clearFilters}
-                        className="text-muted-foreground inline-flex items-center gap-1 text-xs transition-colors hover:text-rose-500"
-                      >
-                        <X className="h-3 w-3" />
-                        {t('filterClearAll')}
-                      </button>
-                    )}
+                  <div className="px-4 pt-3.5 pb-3">
+                    <FilterSectionLabel>{t('filterStatus')}</FilterSectionLabel>
+                    <FilterOptionList
+                      allLabel={t('filterAll')}
+                      options={statusOptions}
+                      value={statusFilter}
+                      onSelect={handleStatusFilter}
+                      dot={STATUS_DOT}
+                      count={statusCount}
+                    />
                   </div>
 
-                  {/* Scrollable body */}
-                  <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
-                    {/* Status — pill chips with live counts */}
-                    <div className="px-4 pt-3.5 pb-3">
-                      <FilterSectionLabel>
-                        {t('filterStatus')}
-                      </FilterSectionLabel>
-                      <div className="flex flex-wrap gap-1.5">
-                        {STATUS_FILTERS.map((s) => {
-                          const isActive = statusFilter === s;
-                          const isAll = s === 'All';
-                          const count = statusCount(s);
-                          return (
-                            <button
-                              key={s}
-                              type="button"
-                              onClick={() => handleStatusFilter(s)}
-                              className={cn(
-                                'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-all',
-                                isActive
-                                  ? isAll
-                                    ? 'border-foreground bg-foreground text-background'
-                                    : cn(
-                                        STATUS_STYLE[s as CourseStatus],
-                                        'border-current',
-                                      )
-                                  : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
-                              )}
-                            >
-                              {!isAll && (
-                                <span
-                                  className={cn(
-                                    'h-1.5 w-1.5 rounded-full',
-                                    STATUS_DOT[s as CourseStatus],
-                                  )}
-                                />
-                              )}
-                              {isAll ? t('filterAll') : s}
-                              <span
-                                className={cn(
-                                  'text-[10px] tabular-nums',
-                                  isActive ? 'opacity-70' : 'opacity-50',
-                                )}
-                              >
-                                {count}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  <FilterDivider />
 
-                    <div className="bg-border mx-4 h-px" />
+                  <div className="px-4 pt-3 pb-3">
+                    <FilterSectionLabel>
+                      {t('filterCategory')}
+                    </FilterSectionLabel>
+                    <FilterOptionList
+                      allLabel={t('filterAll')}
+                      options={ALL_CATEGORIES}
+                      value={categoryFilter}
+                      onSelect={handleCategoryFilter}
+                      dot={CATEGORY_DOT}
+                      count={categoryCount}
+                    />
+                  </div>
 
-                    {/* Category — 2-column grid with counts, dead ends disabled */}
-                    <div className="px-4 pt-3 pb-3">
-                      <FilterSectionLabel>
-                        {t('filterCategory')}
-                      </FilterSectionLabel>
-                      <div className="grid grid-cols-2 gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleCategoryFilter('All')}
-                          className={cn(
-                            'col-span-2 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all',
-                            categoryFilter === 'All'
-                              ? 'bg-muted text-foreground'
-                              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                          )}
-                        >
-                          <span
+                  <FilterDivider />
+
+                  {/* Level — kept as a compact card row: difficulty has an
+                      inherent order a plain checklist would flatten. */}
+                  <div className="px-4 pt-3 pb-4">
+                    <FilterSectionLabel>{t('filterLevel')}</FilterSectionLabel>
+                    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                      {(['All', ...ALL_LEVELS] as const).map((lvl) => {
+                        const isActive = levelFilter === lvl;
+                        const count = levelCount(lvl);
+                        return (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => handleLevelFilter(lvl)}
                             className={cn(
-                              'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors',
-                              categoryFilter === 'All'
-                                ? 'border-foreground bg-foreground'
-                                : 'border-muted-foreground/40',
+                              'flex flex-col items-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-medium transition-all',
+                              isActive
+                                ? 'border-foreground bg-muted text-foreground'
+                                : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
                             )}
                           >
-                            {categoryFilter === 'All' && (
-                              <span className="bg-background h-1.5 w-1.5 rounded-full" />
+                            {lvl !== 'All' ? (
+                              <LevelDots level={lvl} />
+                            ) : (
+                              <span className="text-muted-foreground text-sm leading-none">
+                                —
+                              </span>
                             )}
-                          </span>
-                          {t('filterAll')}
-                          <span className="text-muted-foreground/60 ml-auto text-[10px] tabular-nums">
-                            {categoryCount('All')}
-                          </span>
-                        </button>
-                        {ALL_CATEGORIES.map((cat) => {
-                          const isActive = categoryFilter === cat;
-                          const count = categoryCount(cat);
-                          const disabled = count === 0 && !isActive;
-                          return (
-                            <button
-                              key={cat}
-                              type="button"
-                              disabled={disabled}
-                              onClick={() => handleCategoryFilter(cat)}
-                              className={cn(
-                                'flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all',
-                                isActive
-                                  ? 'bg-muted text-foreground'
-                                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                                disabled &&
-                                  'hover:text-muted-foreground cursor-not-allowed opacity-40 hover:bg-transparent',
-                              )}
-                            >
-                              <span
-                                className={cn(
-                                  'h-2 w-2 shrink-0 rounded-full',
-                                  CATEGORY_DOT[cat] ?? 'bg-muted-foreground/40',
-                                )}
-                              />
-                              <span className="truncate">{cat}</span>
-                              <span className="text-muted-foreground/60 ml-auto text-[10px] tabular-nums">
-                                {count}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="bg-border mx-4 h-px" />
-
-                    {/* Level — responsive card row with counts */}
-                    <div className="px-4 pt-3 pb-4">
-                      <FilterSectionLabel>
-                        {t('filterLevel')}
-                      </FilterSectionLabel>
-                      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-                        {(['All', ...ALL_LEVELS] as const).map((lvl) => {
-                          const isActive = levelFilter === lvl;
-                          const count = levelCount(lvl);
-                          return (
-                            <button
-                              key={lvl}
-                              type="button"
-                              onClick={() => handleLevelFilter(lvl)}
-                              className={cn(
-                                'flex flex-col items-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-medium transition-all',
-                                isActive
-                                  ? 'border-foreground bg-muted text-foreground'
-                                  : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
-                              )}
-                            >
-                              {lvl !== 'All' ? (
-                                <LevelDots level={lvl} />
-                              ) : (
-                                <span className="text-muted-foreground text-sm leading-none">
-                                  —
-                                </span>
-                              )}
-                              <span className="leading-none">
-                                {lvl === 'All' ? t('filterAll') : lvl}
-                              </span>
-                              <span className="text-muted-foreground/60 text-[10px] leading-none tabular-nums">
-                                {count}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
+                            <span className="leading-none">
+                              {lvl === 'All' ? t('filterAll') : lvl}
+                            </span>
+                            <span className="text-muted-foreground/60 text-[10px] leading-none tabular-nums">
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  {/* Footer — live result preview */}
-                  <div className="border-border bg-surface/60 shrink-0 border-t p-3">
-                    <Button
-                      type="button"
-                      onClick={() => setFilterOpen(false)}
-                      disabled={filtered.length === 0}
-                      className="bg-brand-accent hover:bg-brand-accent-hover text-brand-accent-foreground h-9 w-full rounded-lg text-sm font-semibold disabled:opacity-50"
-                    >
-                      {filtered.length === 0
-                        ? t('filterNoResults')
-                        : filtered.length === 1
-                          ? t('filterShowResult')
-                          : t('filterShowResults', { count: filtered.length })}
-                    </Button>
-                  </div>
-                </PopoverContent>
+                </FilterPanel>
               </Popover>
 
               {/* Create Course */}

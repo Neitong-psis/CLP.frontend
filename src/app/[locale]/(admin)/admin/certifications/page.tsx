@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BadgeCheck,
   Award,
@@ -16,11 +16,13 @@ import {
   Printer,
   Share2,
   Copy,
+  Upload,
 } from 'lucide-react';
 import { useAdminCertificationsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
+import { exportCertificateToPdf } from '@/lib/utils/certificatePdf';
 
 type Tab = 'dashboard' | 'templates' | 'issuance';
 type IssuanceStatus = 'Verify' | 'Pending';
@@ -32,6 +34,11 @@ type CertRecord = {
   course: string;
   issued: string;
 };
+
+/** This admin view has no per-record instructor in its mock data — the
+ *  on-screen certificate and the downloaded PDF share this one value so
+ *  they can't silently drift apart. */
+const DEFAULT_INSTRUCTOR = 'Dr. Angela Yu';
 
 const CERT_STATS_DATA = [
   {
@@ -117,12 +124,20 @@ const VERIFICATION_OPS = [
   },
 ];
 
-const CERT_TEMPLATES: {
+interface CertTemplate {
   name: string;
   category: string;
   status: TemplateStatus;
   issued: number;
-}[] = [
+  /** Set when the template was created from an uploaded image — renders as
+   *  the card's real preview instead of the placeholder mockup. */
+  thumbnailUrl?: string;
+  /** Set when the uploaded file wasn't an image (e.g. a PDF) — there's no
+   *  thumbnail to show, but the card can still name the attached file. */
+  fileName?: string;
+}
+
+const CERT_TEMPLATES: CertTemplate[] = [
   {
     name: 'Corporate Bootcamp',
     category: 'Corporate',
@@ -221,13 +236,15 @@ function CertificateModal({
   onClose,
   onDownload,
   onCopyLink,
+  onShare,
 }: {
   cert: CertRecord;
   onClose: () => void;
   onDownload: () => void;
   onCopyLink: (url: string) => void;
+  onShare: (url: string) => void;
 }) {
-  const verifyUrl = `http://127.0.0.1:5173/verify/${cert.id}`;
+  const verifyUrl = `${window.location.origin}/verify/${cert.id}`;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -375,7 +392,7 @@ function CertificateModal({
                   className="text-[11px] font-medium"
                   style={{ color: '#0f2044' }}
                 >
-                  Dr. Angela Yu, Lead Instructor
+                  {DEFAULT_INSTRUCTOR}
                 </p>
                 <p
                   className="mt-0.5 text-[9px] font-semibold tracking-widest uppercase"
@@ -411,11 +428,12 @@ function CertificateModal({
             </button>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons — same outline treatment on all three, so
+              Download doesn't read as more "primary" than Print/Share. */}
           <div className="mt-3 grid grid-cols-3 gap-2">
             <button
               onClick={onDownload}
-              className="bg-brand-navy flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
+              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               Download Official PDF
@@ -428,7 +446,7 @@ function CertificateModal({
               Print Certificate
             </button>
             <button
-              onClick={() => onCopyLink(verifyUrl)}
+              onClick={() => onShare(verifyUrl)}
               className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
             >
               <Share2 className="h-3.5 w-3.5" />
@@ -449,13 +467,31 @@ function CertPreview({
   certOfCompletion,
   learnerName,
   courseTitle,
+  thumbnailUrl,
 }: {
   name: string;
   category: string;
   certOfCompletion: string;
   learnerName: string;
   courseTitle: string;
+  thumbnailUrl?: string;
 }) {
+  if (thumbnailUrl) {
+    return (
+      <div className="border-border bg-card flex flex-col overflow-hidden rounded-xl border shadow">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbnailUrl}
+          alt={name}
+          className="h-40 w-full object-cover"
+        />
+        <p className="text-muted-foreground px-3 py-2 text-center text-[10px] font-semibold">
+          {name}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="border-border bg-card flex flex-col rounded-xl border p-4 shadow">
       <div className="text-muted-foreground flex items-start justify-between text-[10px] font-bold tracking-wider uppercase">
@@ -492,26 +528,42 @@ function TemplateCard({
   issuedTimesLabel,
   editTemplateLabel,
 }: {
-  tpl: (typeof CERT_TEMPLATES)[number];
+  tpl: CertTemplate;
   onEdit: (name: string) => void;
   issuedTimesLabel: string;
   editTemplateLabel: string;
 }) {
   return (
     <div className="border-border bg-card hover:border-border/80 overflow-hidden rounded-xl border shadow transition-colors">
-      <div className="bg-surface p-5">
-        <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10">
-          <Award className="h-4 w-4 text-blue-500" />
+      {tpl.thumbnailUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={tpl.thumbnailUrl}
+          alt={tpl.name}
+          className="bg-surface h-32 w-full object-cover"
+        />
+      ) : tpl.fileName ? (
+        <div className="bg-surface flex h-32 flex-col items-center justify-center gap-2 px-4">
+          <FileText className="h-6 w-6 text-blue-500" />
+          <p className="text-muted-foreground max-w-full truncate text-[11px] font-medium">
+            {tpl.fileName}
+          </p>
         </div>
-        <div className="space-y-2">
-          <div className="bg-muted h-2 w-full rounded-full" />
-          <div className="bg-muted h-2 w-4/5 rounded-full" />
-          <div className="h-2 w-3/5 rounded-full bg-blue-500/20" />
-          <div className="bg-muted h-2 w-full rounded-full" />
-          <div className="bg-muted h-2 w-2/3 rounded-full" />
+      ) : (
+        <div className="bg-surface p-5">
+          <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10">
+            <Award className="h-4 w-4 text-blue-500" />
+          </div>
+          <div className="space-y-2">
+            <div className="bg-muted h-2 w-full rounded-full" />
+            <div className="bg-muted h-2 w-4/5 rounded-full" />
+            <div className="h-2 w-3/5 rounded-full bg-blue-500/20" />
+            <div className="bg-muted h-2 w-full rounded-full" />
+            <div className="bg-muted h-2 w-2/3 rounded-full" />
+          </div>
+          <div className="bg-muted mt-3 h-1.5 w-1/3 rounded-full" />
         </div>
-        <div className="bg-muted mt-3 h-1.5 w-1/3 rounded-full" />
-      </div>
+      )}
       <div className="border-border border-t px-4 py-3">
         <div className="flex items-center justify-between">
           <p className="text-foreground text-sm font-bold">{tpl.name}</p>
@@ -542,6 +594,184 @@ function TemplateCard({
   );
 }
 
+// ─── Upload template modal ────────────────────────────────────────────────────
+
+function UploadTemplateModal({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void;
+  onCreate: (template: CertTemplate) => void;
+}) {
+  const t = useAdminCertificationsT();
+  const { toast } = useToast();
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('Custom');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  function handleFile(picked: File | undefined) {
+    if (!picked) return;
+    const isAllowed =
+      picked.type.startsWith('image/') || picked.type === 'application/pdf';
+    if (!isAllowed) {
+      toast(t('uploadInvalidFile'), 'error');
+      return;
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setFile(picked);
+    setPreviewUrl(
+      picked.type.startsWith('image/') ? URL.createObjectURL(picked) : null,
+    );
+    if (!name) {
+      setName(picked.name.replace(/\.[^/.]+$/, ''));
+    }
+  }
+
+  function handleSubmit() {
+    if (!file || !name.trim()) return;
+    onCreate({
+      name: name.trim(),
+      category: category.trim() || 'Custom',
+      status: 'Draft',
+      issued: 0,
+      thumbnailUrl: previewUrl ?? undefined,
+      fileName: previewUrl ? undefined : file.name,
+    });
+    toast(t('uploadSuccess', { name: name.trim() }), 'success');
+    onClose();
+  }
+
+  const canSubmit = Boolean(file) && name.trim().length > 0;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card ring-border w-full max-w-md rounded-2xl shadow-2xl ring-1"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-border flex items-center justify-between border-b px-6 py-4">
+          <h2 className="text-foreground text-base font-bold">
+            {t('uploadTemplate')}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4 px-6 py-5">
+          <p className="text-muted-foreground text-xs">
+            {t('uploadTemplateDesc')}
+          </p>
+
+          {/* File picker / preview */}
+          <label className="border-border hover:border-brand-gold/40 hover:bg-muted/40 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-6 text-center transition-colors">
+            {previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewUrl}
+                alt=""
+                className="h-24 w-full rounded-lg object-cover"
+              />
+            ) : file ? (
+              <>
+                <FileText className="text-muted-foreground h-6 w-6" />
+                <p className="text-foreground text-xs font-medium">
+                  {file.name}
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className="text-muted-foreground h-6 w-6" />
+                <p className="text-foreground text-xs font-medium">
+                  {t('chooseFile')}
+                </p>
+                <p className="text-muted-foreground text-[11px]">
+                  {t('fileTypeHint')}
+                </p>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files?.[0])}
+            />
+          </label>
+          {file && (
+            <p className="text-muted-foreground -mt-2 text-[11px]">
+              {t('changeFileHint')}
+            </p>
+          )}
+
+          <div>
+            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
+              {t('templateName')}
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('templateNamePlaceholder')}
+              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+            />
+          </div>
+
+          <div>
+            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
+              {t('templateCategory')}
+            </label>
+            <input
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Corporate, Specialized, Standard…"
+              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+            />
+          </div>
+        </div>
+
+        <div className="border-border flex items-center justify-end gap-2 border-t px-6 py-4">
+          <button
+            onClick={onClose}
+            className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('createTemplate')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminCertificationsPage() {
@@ -549,7 +779,28 @@ export default function AdminCertificationsPage() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [histSearch, setHistSearch] = useState('');
   const [viewCert, setViewCert] = useState<CertRecord | null>(null);
+  const [templates, setTemplates] = useState<CertTemplate[]>(CERT_TEMPLATES);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
+
+  // Uploaded thumbnails are blob: object URLs — release them when the page
+  // unmounts. A ref (not `templates` in the deps array) keeps the cleanup
+  // pointed at the latest list instead of a stale first-render snapshot.
+  const templatesRef = useRef(templates);
+  useEffect(() => {
+    templatesRef.current = templates;
+  }, [templates]);
+  useEffect(() => {
+    return () => {
+      templatesRef.current.forEach((tpl) => {
+        if (tpl.thumbnailUrl) URL.revokeObjectURL(tpl.thumbnailUrl);
+      });
+    };
+  }, []);
+
+  function handleCreateTemplate(template: CertTemplate) {
+    setTemplates((prev) => [template, ...prev]);
+  }
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'dashboard', label: t('tabDashboard') },
@@ -557,8 +808,16 @@ export default function AdminCertificationsPage() {
     { key: 'issuance', label: t('tabIssuance') },
   ];
 
-  function handleDownload(id: string) {
-    toast(`Certificate ${id} downloaded.`, 'success');
+  function handleDownload(cert: CertRecord) {
+    exportCertificateToPdf({
+      learnerName: cert.recipient,
+      courseTitle: cert.course,
+      completedDate: cert.issued,
+      instructor: DEFAULT_INSTRUCTOR,
+      certificateId: cert.id,
+      verifyUrl: `${window.location.origin}/verify/${cert.id}`,
+    });
+    toast(`Certificate ${cert.id} downloaded.`, 'success');
   }
 
   function handleCopyLink(url: string) {
@@ -566,6 +825,14 @@ export default function AdminCertificationsPage() {
       () => toast(`Link copied: ${url}`, 'success'),
       () => toast('Could not copy link.', 'error'),
     );
+  }
+
+  function handleShare(url: string) {
+    if (navigator.share) {
+      navigator.share({ title: 'Official certificate', url }).catch(() => {});
+    } else {
+      handleCopyLink(url);
+    }
   }
 
   function openCertFromRecent(cert: (typeof RECENT_ISSUANCES)[number]) {
@@ -584,8 +851,15 @@ export default function AdminCertificationsPage() {
         <CertificateModal
           cert={viewCert}
           onClose={() => setViewCert(null)}
-          onDownload={() => handleDownload(viewCert.id)}
+          onDownload={() => handleDownload(viewCert)}
           onCopyLink={handleCopyLink}
+          onShare={handleShare}
+        />
+      )}
+      {uploadOpen && (
+        <UploadTemplateModal
+          onClose={() => setUploadOpen(false)}
+          onCreate={handleCreateTemplate}
         />
       )}
 
@@ -611,7 +885,7 @@ export default function AdminCertificationsPage() {
             ))}
           </div>
           <button
-            onClick={() => toast('Template creation coming soon.', 'info')}
+            onClick={() => setUploadOpen(true)}
             className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
           >
             <Plus className="h-4 w-4" />
@@ -765,7 +1039,7 @@ export default function AdminCertificationsPage() {
                 {t('templatePreviewSubtitle')}
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                {CERT_TEMPLATES.map((tpl) => (
+                {templates.map((tpl) => (
                   <div key={tpl.name} className="flex flex-col gap-3">
                     <CertPreview
                       name={tpl.name}
@@ -773,6 +1047,7 @@ export default function AdminCertificationsPage() {
                       certOfCompletion={t('certOfCompletion')}
                       learnerName={t('learnerName')}
                       courseTitle={t('courseTitle')}
+                      thumbnailUrl={tpl.thumbnailUrl}
                     />
                     <button
                       onClick={() =>
@@ -798,7 +1073,7 @@ export default function AdminCertificationsPage() {
                 {t('certTemplatesSubtitle')}
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                {CERT_TEMPLATES.map((tpl) => (
+                {templates.map((tpl) => (
                   <TemplateCard
                     key={tpl.name}
                     tpl={tpl}
@@ -921,7 +1196,7 @@ export default function AdminCertificationsPage() {
                         <div className="flex justify-end gap-1.5">
                           <button
                             aria-label={t('downloadAriaLabel')}
-                            onClick={() => handleDownload(row.id)}
+                            onClick={() => handleDownload(row)}
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
                           >
                             <Download className="h-3.5 w-3.5" />
@@ -930,7 +1205,7 @@ export default function AdminCertificationsPage() {
                             aria-label={t('copyLinkAriaLabel')}
                             onClick={() =>
                               handleCopyLink(
-                                `http://127.0.0.1:5173/verify/${row.id}`,
+                                `${window.location.origin}/verify/${row.id}`,
                               )
                             }
                             className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"

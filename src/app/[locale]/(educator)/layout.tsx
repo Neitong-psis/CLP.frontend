@@ -1,7 +1,9 @@
-export default function EducatorRootLayout({
+import type { ReactNode } from 'react';
+
+export default function EducatorGroupLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  return <div className="bg-brand-navy min-h-screen">{children}</div>;
+  return <>{children}</>;
 }

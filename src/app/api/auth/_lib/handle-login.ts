@@ -33,12 +33,6 @@ export async function establishSessionResponse(
 
   const loginResponse = loginResponseSchema.safeParse(data);
   if (!loginResponse.success) {
-    console.error(
-      '[auth] login response failed schema validation:',
-      loginResponse.error.flatten(),
-      'received keys:',
-      data && typeof data === 'object' ? Object.keys(data) : typeof data,
-    );
     return NextResponse.json(
       {
         status: 502,

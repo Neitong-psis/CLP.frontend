@@ -19,6 +19,8 @@ interface DatePickerProps {
   fromYear?: number;
   toYear?: number;
   disableFuture?: boolean;
+  /** Blocks dates before today — for due dates, deadlines, and other forward-looking fields. */
+  disablePast?: boolean;
   clearLabel?: string;
   todayLabel?: string;
 }
@@ -31,6 +33,7 @@ export function DatePicker({
   fromYear = 1920,
   toYear = new Date().getFullYear(),
   disableFuture = true,
+  disablePast = false,
   clearLabel = 'Clear',
   todayLabel = 'Today',
 }: DatePickerProps) {
@@ -38,6 +41,12 @@ export function DatePicker({
 
   const parsed = value ? parseISO(value) : undefined;
   const selected = parsed && isValid(parsed) ? parsed : undefined;
+
+  // Historic default (year 2000) suits birthdate-style pickers. When past
+  // dates are blocked, that default would open on a fully-disabled month —
+  // open on today's month instead so a date is actually pickable.
+  const initialMonth =
+    selected ?? (disablePast ? new Date() : new Date(2000, 0));
 
   function commit(date: Date | undefined) {
     if (!date) return;
@@ -69,10 +78,16 @@ export function DatePicker({
           selected={selected}
           onSelect={commit}
           captionLayout="dropdown"
-          defaultMonth={selected ?? new Date(2000, 0)}
+          defaultMonth={initialMonth}
           startMonth={new Date(fromYear, 0)}
           endMonth={new Date(toYear, 11)}
-          disabled={disableFuture ? { after: new Date() } : undefined}
+          disabled={
+            disablePast
+              ? { before: new Date() }
+              : disableFuture
+                ? { after: new Date() }
+                : undefined
+          }
           autoFocus
         />
         <div className="border-border flex items-center justify-between border-t px-3 py-2">

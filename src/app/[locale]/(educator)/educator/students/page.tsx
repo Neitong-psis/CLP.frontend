@@ -13,13 +13,12 @@ import { useEducatorStudentsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useStudentFilter, type SortKey } from './_lib/useStudentFilter';
-import { StatsStrip } from './_components/StatsStrip';
 import { StudentsToolbar } from './_components/StudentsToolbar';
 import { StudentRow } from './_components/StudentRow';
 import { AddStudentModal } from './_components/AddStudentModal';
-import { StudentViewModal } from './_components/StudentViewModal';
+import { StudentProfileModal } from '@/components/pages/educator/students/StudentProfileModal';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 export default function EducatorStudentsPage() {
   const t = useEducatorStudentsT();
@@ -43,8 +42,6 @@ export default function EducatorStudentsPage() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    riskOnly,
-    setRiskOnly,
     sortKey,
     sortDir,
     toggleSort,
@@ -88,31 +85,6 @@ export default function EducatorStudentsPage() {
       <TopBar role="educator" title={t('title')} subtitle={t('subtitle')} />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        <StatsStrip
-          counts={counts}
-          statusFilter={statusFilter}
-          riskOnly={riskOnly}
-          onAll={() => {
-            clearFilters();
-            resetPage();
-          }}
-          onActive={() => {
-            setRiskOnly(false);
-            setStatusFilter('Active');
-            resetPage();
-          }}
-          onAchieved={() => {
-            setRiskOnly(false);
-            setStatusFilter('Completed');
-            resetPage();
-          }}
-          onAtRisk={() => {
-            setStatusFilter('All');
-            setRiskOnly(true);
-            resetPage();
-          }}
-        />
-
         <StudentsToolbar
           search={search}
           onSearchChange={(v) => {
@@ -121,10 +93,10 @@ export default function EducatorStudentsPage() {
           }}
           statusFilter={statusFilter}
           onStatusChange={(s) => {
-            setRiskOnly(false);
             setStatusFilter(s);
             resetPage();
           }}
+          counts={counts}
           resultCount={filtered.length}
           onAddStudent={() => setAddOpen(true)}
         />
@@ -263,12 +235,10 @@ export default function EducatorStudentsPage() {
         onAdd={addStudent}
       />
 
-      {viewStudent && (
-        <StudentViewModal
-          student={viewStudent}
-          onClose={() => setViewStudent(null)}
-        />
-      )}
+      <StudentProfileModal
+        student={viewStudent}
+        onClose={() => setViewStudent(null)}
+      />
     </div>
   );
 }

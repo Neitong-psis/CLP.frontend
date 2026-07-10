@@ -31,8 +31,13 @@ export function proxy(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const { prefix, rest } = splitLocale(pathname);
 
+  // Skip RBAC entirely when demo mode is active (env var or runtime cookie).
+  const isDemoMode =
+    process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
+    request.cookies.get('qb_demo')?.value === '1';
+
   // Admin login is public; every other protected route flows through RBAC.
-  if (rest !== ADMIN_LOGIN) {
+  if (!isDemoMode && rest !== ADMIN_LOGIN) {
     const route = matchProtectedRoute(rest);
     if (route) {
       const hasRefreshToken = Boolean(

@@ -24,6 +24,7 @@ import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { LogoutConfirmModal } from '@/components/common/LogoutConfirmModal';
 import { useMobileSidebar } from '@/context/MobileSidebarContext';
 import { useAuth } from '@/hooks/use-auth';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavT, useEducatorT, useAdminT } from '@/i18n';
 import { MOCK_USER } from '@/constants/learner';
 import { ADMIN_USER } from '@/constants/admin';
@@ -57,6 +58,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, isLoggingOut } = useAuth();
+  const currentUser = useCurrentUser();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const tNav = useNavT();
@@ -79,7 +81,11 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
       rootHref: '/dashboard',
       roleLabel: MOCK_USER.role,
       roleIcon: BookOpen,
-      user: MOCK_USER,
+      user: {
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
+      },
       logoutHref: '/auth',
       settingsHref: '/settings',
       learnMoreHref: '/learn-more',
@@ -107,7 +113,11 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
       rootHref: '/educator',
       roleLabel: EDUCATOR_USER.role,
       roleIcon: GraduationCap,
-      user: EDUCATOR_USER,
+      user: {
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
+      },
       learnMoreHref: '/educator/learn-more',
       logoutHref: '/auth',
     },
@@ -131,7 +141,11 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
       rootHref: '/admin',
       roleLabel: ADMIN_USER.role,
       roleIcon: ShieldCheck,
-      user: ADMIN_USER,
+      user: {
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
+      },
       learnMoreHref: '/admin/learn-more',
       logoutHref: '/admin/login',
     },
@@ -149,16 +163,6 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
   } = MOBILE_CONFIG[role];
 
   const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
-
-  /** Only the most specific (longest) matching href is active — prevents a
-   * parent route and a nested one from both lighting up at once. */
-  const activeHref = navItems.reduce<string | null>((best, item) => {
-    const isMatch =
-      pathname === item.href ||
-      (item.href !== rootHref && pathname.startsWith(`${item.href}/`));
-    if (!isMatch) return best;
-    return !best || item.href.length > best.length ? item.href : best;
-  }, null);
 
   // Close on Escape
   useEffect(() => {
@@ -226,44 +230,54 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
             {tNav('menu')}
           </p>
           <div className="flex flex-col gap-0.5">
-            {navItems.map(({ href, icon: Icon, label, badge }) => {
-              const active = href === activeHref;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={close}
-                  className={cn(
-                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150',
-                    active
-                      ? 'bg-brand-gold text-brand-navy font-semibold'
-                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium dark:text-white/55 dark:hover:bg-white/4 dark:hover:text-white/90',
-                  )}
-                >
-                  <Icon
+            {(() => {
+              const bestMatchHref = navItems
+                .filter(({ href }) =>
+                  href === rootHref
+                    ? pathname === href
+                    : pathname === href || pathname.startsWith(href + '/'),
+                )
+                .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
+              return navItems.map(({ href, icon: Icon, label, badge }) => {
+                const active = href === bestMatchHref;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={close}
                     className={cn(
-                      'h-4.5 w-4.5 shrink-0',
+                      'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150',
                       active
-                        ? 'text-brand-navy'
-                        : 'text-muted-foreground/60 group-hover:text-foreground/70 dark:text-white/40 dark:group-hover:text-white/70',
+                        ? 'bg-brand-gold text-brand-navy font-semibold'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium dark:text-white/55 dark:hover:bg-white/4 dark:hover:text-white/90',
                     )}
-                  />
-                  <span className="flex-1">{label}</span>
-                  {badge != null && (
-                    <span
+                  >
+                    <Icon
                       className={cn(
-                        'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
+                        'h-4.5 w-4.5 shrink-0',
                         active
-                          ? 'bg-brand-navy/15 text-brand-navy'
-                          : 'bg-muted-foreground/15 text-muted-foreground dark:bg-white/10 dark:text-white/70',
+                          ? 'text-brand-navy'
+                          : 'text-muted-foreground/60 group-hover:text-foreground/70 dark:text-white/40 dark:group-hover:text-white/70',
                       )}
-                    >
-                      {badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+                    />
+                    <span className="flex-1">{label}</span>
+                    {badge != null && (
+                      <span
+                        className={cn(
+                          'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
+                          active
+                            ? 'bg-brand-navy/15 text-brand-navy'
+                            : 'bg-muted-foreground/15 text-muted-foreground dark:bg-white/10 dark:text-white/70',
+                        )}
+                      >
+                        {badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              });
+            })()}
           </div>
         </nav>
 

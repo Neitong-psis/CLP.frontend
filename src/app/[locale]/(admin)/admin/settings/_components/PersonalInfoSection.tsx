@@ -1,26 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAdminSettingsT } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/TextArea';
 import { ComboField } from '@/components/ui/ComboField';
 import { DatePicker } from '@/components/ui/DatePicker';
-import { ADMIN_USER } from '@/constants/admin';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { AvatarCard } from './AvatarCard';
 import { SettingsField } from './SettingsField';
 import { SettingsSection } from './SettingsSection';
 
 export function PersonalInfoSection() {
   const t = useAdminSettingsT();
-  const [name, setName] = useState(ADMIN_USER.name);
+  const currentUser = useCurrentUser();
+  const [name, setName] = useState(currentUser.fullName);
   const [username, setUsername] = useState('admin');
-  const [email, setEmail] = useState(ADMIN_USER.email);
+  const [email, setEmail] = useState(currentUser.email);
   const [phone, setPhone] = useState('+855 12 345 678');
   const [nationality, setNationality] = useState('Khmer');
   const [address, setAddress] = useState('Phnom Penh, Cambodia');
   const [bio, setBio] = useState('');
   const [dob, setDob] = useState('');
+  // The authenticated profile only loads after the silent auth bootstrap
+  // resolves, so re-seed once real data arrives — but stop the moment the
+  // admin edits either field, so their in-progress typing isn't clobbered.
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    if (touched) return;
+    const id = setTimeout(() => {
+      setName(currentUser.fullName);
+      setEmail(currentUser.email);
+    }, 0);
+    return () => clearTimeout(id);
+  }, [currentUser, touched]);
 
   return (
     <SettingsSection title={t('personalInfo')} subtitle={t('personalInfoDesc')}>
@@ -30,8 +43,11 @@ export function PersonalInfoSection() {
         <SettingsField label={t('fullName')}>
           <Input
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Sarah Wilson"
+            onChange={(e) => {
+              setTouched(true);
+              setName(e.target.value);
+            }}
+            placeholder={t('fullName')}
             className="h-9"
           />
         </SettingsField>
@@ -49,7 +65,10 @@ export function PersonalInfoSection() {
           <Input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setTouched(true);
+              setEmail(e.target.value);
+            }}
             placeholder="admin@gmail.com"
             className="h-9"
           />

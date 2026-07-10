@@ -1,6 +1,7 @@
 'use client';
 
 import { useAdminPlatformAnalyticsT } from '@/i18n';
+import { cn } from '@/lib/utils/cn';
 
 export interface AnalyticsPoint {
   month: string;
@@ -10,6 +11,7 @@ export interface AnalyticsPoint {
 
 export interface PlatformAnalyticsCardProps {
   data: readonly AnalyticsPoint[];
+  className?: string;
 }
 
 const YMAX = 120000;
@@ -106,10 +108,18 @@ function LineChart({ data }: { data: readonly AnalyticsPoint[] }) {
   );
 }
 
-export function PlatformAnalyticsCard({ data }: PlatformAnalyticsCardProps) {
+export function PlatformAnalyticsCard({
+  data,
+  className,
+}: PlatformAnalyticsCardProps) {
   const t = useAdminPlatformAnalyticsT();
   return (
-    <div className="border-border bg-card rounded-xl border p-5 shadow">
+    <div
+      className={cn(
+        'border-border bg-card rounded-xl border p-5 shadow',
+        className,
+      )}
+    >
       <h3 className="text-foreground text-sm font-bold">{t('title')}</h3>
       <p className="text-muted-foreground mt-1 mb-5 text-xs">{t('subtitle')}</p>
       <LineChart data={data} />

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
-  fetchRawCourses,
-  deriveCourseStats,
+  fetchCourseStats,
+  fetchTopPerformingCourses,
+  buildCourseStats,
   type CourseStats,
 } from '@/services/courses';
 
@@ -18,9 +19,9 @@ export function useCourseStats(): UseCourseStatsResult {
 
   useEffect(() => {
     let cancelled = false;
-    fetchRawCourses()
-      .then((raw) => {
-        if (!cancelled) setData(deriveCourseStats(raw));
+    Promise.all([fetchCourseStats(), fetchTopPerformingCourses()])
+      .then(([stats, topPerforming]) => {
+        if (!cancelled) setData(buildCourseStats(stats, topPerforming));
       })
       .catch(() => {
         // Leave data null — components fall back to static constants

@@ -42,12 +42,12 @@ export function RevenueByCategoryCard({
     <section
       ref={ref}
       className={cn(
-        'border-border bg-card flex h-full flex-col rounded-2xl border-[0.5px] p-6',
+        'border-border bg-card flex h-full max-h-110 flex-col rounded-2xl border-[0.5px] p-6',
         className,
       )}
     >
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-2">
+      <div className="mb-6 flex shrink-0 items-start justify-between gap-2">
         <div>
           <h3 className="text-foreground text-[14px] font-medium">
             {t('revByCategory')}
@@ -61,8 +61,9 @@ export function RevenueByCategoryCard({
         </span>
       </div>
 
-      {/* Rows — flex-1 + justify-between fills card height evenly */}
-      <ul className="flex flex-1 flex-col justify-between">
+      {/* Rows — flex-1 + justify-between fills card height evenly, scrolls
+          internally (scrollbar hidden) once content exceeds the card's cap */}
+      <ul className="scrollbar-none flex flex-1 flex-col justify-between gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         {data.map((cat, i) => {
           const isHovered = hoveredIdx === i;
           const isDimmed = hoveredIdx !== null && !isHovered;

@@ -56,12 +56,12 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
   return (
     <section
       className={cn(
-        'border-border bg-card overflow-hidden rounded-2xl border-[0.5px]',
+        'border-border bg-card flex max-h-110 flex-col overflow-hidden rounded-2xl border-[0.5px]',
         className,
       )}
       aria-label="Top performing courses"
     >
-      <header className="border-border flex items-center justify-between border-b px-6 py-4">
+      <header className="border-border flex shrink-0 items-center justify-between border-b px-6 py-4">
         <h3 className="text-foreground text-[14px] font-medium">
           {t('title')}
         </h3>
@@ -75,7 +75,7 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
           {t('noData')}
         </p>
       ) : (
-        <ul className="divide-border divide-y">
+        <ul className="divide-border scrollbar-none flex-1 divide-y overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {data.map((course, i) => (
             <li
               key={course.title}

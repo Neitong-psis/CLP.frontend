@@ -1,7 +1,4 @@
 export const ADMIN_USER = {
-  name: 'Sarah Wilson',
-  email: 'admin@clp.com',
-  initials: 'SW',
   role: 'Platform Admin',
 };
 
@@ -19,6 +16,16 @@ export interface AdminUserRow {
   enrolled: number;
   joined: string;
   lastActive: string;
+  username?: string;
+  phone?: string;
+  studentId?: string;
+  program?: string;
+  organization?: string;
+  gender?: string;
+  dob?: string;
+  nationality?: string;
+  address?: string;
+  bio?: string;
 }
 
 export const ADMIN_USERS: AdminUserRow[] = [
@@ -113,6 +120,10 @@ export interface AdminCourseRow {
   rating: number;
   status: CourseStatus;
   createdAt: string;
+  dueDate?: string;
+  priority?: string;
+  workProgress?: number;
+  workStatus?: string;
 }
 
 export const ADMIN_COURSES: AdminCourseRow[] = [
@@ -126,6 +137,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.8,
     status: 'Archive',
     createdAt: 'May 13, 2026',
+    dueDate: '2026-06-30',
+    priority: 'medium',
+    workProgress: 0,
+    workStatus: 'archived',
   },
   {
     id: 'ac2',
@@ -137,6 +152,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.9,
     status: 'Public',
     createdAt: 'May 12, 2026',
+    dueDate: '2026-05-12',
+    priority: 'high',
+    workProgress: 100,
+    workStatus: 'published',
   },
   {
     id: 'ac3',
@@ -148,6 +167,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.7,
     status: 'Public',
     createdAt: 'May 11, 2026',
+    dueDate: '2026-05-10',
+    priority: 'high',
+    workProgress: 100,
+    workStatus: 'published',
   },
   {
     id: 'ac4',
@@ -159,6 +182,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.9,
     status: 'Public',
     createdAt: 'May 10, 2026',
+    dueDate: '2026-05-20',
+    priority: 'medium',
+    workProgress: 100,
+    workStatus: 'published',
   },
   {
     id: 'ac5',
@@ -170,6 +197,10 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.8,
     status: 'Pending',
     createdAt: 'May 9, 2026',
+    dueDate: '2026-07-25',
+    priority: 'high',
+    workProgress: 45,
+    workStatus: 'writing',
   },
   {
     id: 'ac6',
@@ -181,6 +212,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.7,
     status: 'Public',
     createdAt: 'May 8, 2026',
+    workStatus: 'published',
   },
   {
     id: 'ac7',
@@ -192,6 +224,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.8,
     status: 'Public',
     createdAt: 'May 7, 2026',
+    workStatus: 'published',
   },
   {
     id: 'ac8',
@@ -203,6 +236,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.6,
     status: 'Archive',
     createdAt: 'May 6, 2026',
+    workStatus: 'archived',
   },
   {
     id: 'ac9',
@@ -214,6 +248,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.9,
     status: 'Pending',
     createdAt: 'May 5, 2026',
+    workStatus: 'todo',
   },
   {
     id: 'ac10',
@@ -225,6 +260,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.9,
     status: 'Public',
     createdAt: 'May 4, 2026',
+    workStatus: 'published',
   },
   {
     id: 'ac11',
@@ -236,6 +272,7 @@ export const ADMIN_COURSES: AdminCourseRow[] = [
     rating: 4.8,
     status: 'Public',
     createdAt: 'May 3, 2026',
+    workStatus: 'published',
   },
 ];
 
@@ -276,22 +313,46 @@ export const APPROVAL_QUEUE: ApprovalQueueItem[] = [
 ];
 
 export const DASHBOARD_STATS = [
-  { label: 'Total Users', value: '7', change: '+13%', icon: 'users' },
-  { label: 'Active Courses', value: '7', change: '+4%', icon: 'book' },
+  {
+    label: 'Active Courses',
+    value: '7',
+    change: '+8%',
+    icon: 'book',
+    iconColor: 'bg-emerald-600 text-white',
+    desc: '11 total courses',
+  },
+  {
+    label: 'Total Users',
+    value: '7',
+    change: '+12%',
+    icon: 'users',
+    iconColor: 'bg-blue-600 text-white',
+    desc: 'From live user records',
+  },
+  {
+    label: 'Monthly Revenue',
+    value: '$98.6k',
+    change: '+18%',
+    icon: 'dollar',
+    iconColor: 'bg-orange-500 text-white',
+    desc: 'May 2026',
+  },
   {
     label: 'Total Enrollments',
     value: '2,313,870',
     change: '+28%',
     icon: 'trending',
+    iconColor: 'bg-violet-600 text-white',
+    desc: 'All-time enrollments',
   },
-  { label: 'Monthly Revenue', value: '$98.6k', change: '+15%', icon: 'dollar' },
   {
-    label: 'Total Certificates',
+    label: 'Total Issued Certificates',
     value: '12,450',
-    change: '+14%',
+    change: '+9%',
     icon: 'award',
+    iconColor: 'bg-amber-500 text-white',
+    desc: 'Total issued to date',
   },
-  { label: 'Verified Claims', value: '8,920', change: '+14%', icon: 'shield' },
 ] as const;
 
 export const USER_DISTRIBUTION = [
@@ -363,18 +424,18 @@ export const REVENUE_STATS = [
 ] as const;
 
 export const MONTHLY_REVENUE = [
-  { month: 'Jun', amount: 38 },
-  { month: 'Jul', amount: 42 },
-  { month: 'Aug', amount: 45 },
-  { month: 'Sep', amount: 52 },
-  { month: 'Oct', amount: 58 },
-  { month: 'Nov', amount: 63 },
-  { month: 'Dec', amount: 71 },
-  { month: 'Jan', amount: 75 },
-  { month: 'Feb', amount: 82 },
-  { month: 'Mar', amount: 88 },
-  { month: 'Apr', amount: 91 },
-  { month: 'May', amount: 98.6 },
+  { month: 'Jun', amount: 38_000 },
+  { month: 'Jul', amount: 42_000 },
+  { month: 'Aug', amount: 45_000 },
+  { month: 'Sep', amount: 52_000 },
+  { month: 'Oct', amount: 58_000 },
+  { month: 'Nov', amount: 63_000 },
+  { month: 'Dec', amount: 71_000 },
+  { month: 'Jan', amount: 75_000 },
+  { month: 'Feb', amount: 82_000 },
+  { month: 'Mar', amount: 88_000 },
+  { month: 'Apr', amount: 91_000 },
+  { month: 'May', amount: 98_600 },
 ];
 
 export const REVENUE_BY_CATEGORY = [
@@ -475,3 +536,7 @@ export const TOP_COURSES = [
   { title: 'React – The Complete Guide', enrolled: 178765, completion: 58 },
   { title: 'Machine Learning A-Z', enrolled: 190810, completion: 45 },
 ];
+
+export * from './certifications';
+export * from './courses';
+export * from './users';

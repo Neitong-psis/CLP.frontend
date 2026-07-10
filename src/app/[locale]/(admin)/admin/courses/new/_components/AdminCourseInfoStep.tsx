@@ -4,22 +4,22 @@ import { User } from 'lucide-react';
 import { CourseInfoStep } from '@/app/[locale]/(educator)/educator/courses/new/_components/CourseInfoStep';
 import { SelectField } from '@/app/[locale]/(educator)/educator/courses/new/_components/form';
 import type { CourseInfo } from '@/app/[locale]/(educator)/educator/courses/new/_lib/types';
-import { ADMIN_USERS } from '@/constants/admin';
-
-const EDUCATORS = ADMIN_USERS.filter((u) => u.role === 'Educator');
+import type { AdminUserRow } from '@/constants/admin';
 
 export function AdminCourseInfoStep({
   info,
   onChange,
   assignedEducator,
   onEducatorChange,
+  educators,
 }: {
   info: CourseInfo;
   onChange: (key: keyof CourseInfo, val: string) => void;
   assignedEducator: string;
-  onEducatorChange: (educator: string) => void;
+  onEducatorChange: (educatorId: string) => void;
+  educators: AdminUserRow[];
 }) {
-  const selectedEducator = EDUCATORS.find((e) => e.name === assignedEducator);
+  const selectedEducator = educators.find((e) => e.id === assignedEducator);
 
   return (
     <div className="space-y-6">
@@ -39,8 +39,8 @@ export function AdminCourseInfoStep({
             </label>
             <SelectField value={assignedEducator} onChange={onEducatorChange}>
               <option value="">Select an educator…</option>
-              {EDUCATORS.map((e) => (
-                <option key={e.id} value={e.name}>
+              {educators.map((e) => (
+                <option key={e.id} value={e.id}>
                   {e.name}
                 </option>
               ))}

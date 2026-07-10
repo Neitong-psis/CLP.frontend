@@ -134,7 +134,7 @@ export async function fetchCourseContent(id: string): Promise<ApiSection[]> {
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('clp_token') ?? localStorage.getItem('token');
 }
 
 function authHeaders(): Record<string, string> {

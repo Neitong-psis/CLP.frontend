@@ -1,8 +1,11 @@
+'use client';
+
 import { MONTHLY_ENROLLMENTS, QUIZ_ANALYTICS } from '@/constants/educator';
 
 import TopBar from '@/components/common/TopBar';
 import { RoleGate } from '@/components/auth/RoleGate';
 import { ROLE } from '@/constants/roles';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { GreetingHero } from '@/components/pages/educator/dashboard/GreetingHero';
 import { DashboardStats } from '@/components/pages/educator/dashboard/DashboardStats';
 import { EnrollmentTrendCard } from '@/components/pages/educator/dashboard/EnrollmentTrendCard';
@@ -10,6 +13,8 @@ import { QuizAnalyticsCard } from '@/components/pages/educator/dashboard/QuizAna
 import { CourseInsightsGrid } from '@/components/pages/educator/dashboard/CourseInsightsGrid';
 
 export default function EducatorDashboardPage() {
+  const currentUser = useCurrentUser();
+
   return (
     <RoleGate
       roles={[ROLE.EDUCATOR]}
@@ -17,7 +22,11 @@ export default function EducatorDashboardPage() {
       fallback={<AccessDenied />}
     >
       <div className="bg-background flex min-h-full flex-col">
-        <TopBar role="educator" title="Educator Dashboard" />
+        <TopBar
+          role="educator"
+          title="Educator Overview"
+          subtitle={`Live workspace synced for ${currentUser.email}`}
+        />
 
         <div className="flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <GreetingHero />

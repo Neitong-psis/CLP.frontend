@@ -1,33 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLearnerMyLearningT } from '@/i18n';
 import {
   ArrowLeft,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  FileText,
   Play,
-  ClipboardList,
-  ClipboardCheck,
-  Layers,
-  BookOpen,
   CheckCircle2,
   Clock,
   Lightbulb,
   FileUp,
   UploadCloud,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Folder,
-  Check,
-  XCircle,
+  Lock,
   X,
   Trophy,
   Award,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -35,27 +25,45 @@ import { useToast } from '@/components/ui/toast';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
-import Logo from '@/components/common/Logo';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import type { Course } from '@/constants/learner';
 import {
   readCourseProgress,
   saveCourseProgress,
+  readCourseState,
+  saveCourseState,
 } from '@/lib/utils/courseStorage';
 import { pushNotif } from '@/lib/utils/notifStorage';
+import { exportCourseToPdf } from '@/lib/utils/courseExportPdf';
 import {
   LEARNER_ITEM_STATUSES,
   flattenItems,
   lessonCount,
   type ReviewModule,
-  type ReviewLesson,
   type ReviewItem,
-  type ReviewItemKind,
   type DocumentItem,
   type VideoItem,
   type QuizItem,
   type AssignmentItem,
 } from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
 import type { QuizQuestion } from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
+import Logo from '@/components/common/Logo';
+import { Link } from '@/i18n/navigation';
+import { RelearnOverlay } from '@/components/course-content/RelearnOverlay';
+import { KIND_ICON } from '@/components/course-content/types';
+import {
+  CourseSidebar,
+  type CourseSidebarLabels,
+} from '@/components/course-sidebar';
+import { toSidebarCourse } from './courseSidebarAdapter';
+import {
+  computeLocks,
+  flattenLessons,
+  type ItemDone,
+} from '@/lib/course-progress';
+
+const MAX_QUIZ_ATTEMPTS = 3;
+const QUIZ_PASS_PERCENT = 60;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -64,21 +72,7 @@ interface LearnerCoursePlayerProps {
   modules: ReviewModule[];
   startItemId: string;
   isReplay: boolean;
-  userEmail: string;
 }
-
-// ── Kind icon map ─────────────────────────────────────────────────────────────
-
-const KIND_ICON: Record<ReviewItemKind, typeof Play> = {
-  document: FileText,
-  video: Play,
-  quiz: ClipboardList,
-  assignment: ClipboardCheck,
-};
-
-// ── Translation type ──────────────────────────────────────────────────────────
-
-type TFn = ReturnType<typeof useLearnerMyLearningT>;
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -87,29 +81,97 @@ export default function LearnerCoursePlayer({
   modules,
   startItemId,
   isReplay,
-  userEmail,
 }: LearnerCoursePlayerProps) {
   const router = useRouter();
   const t = useLearnerMyLearningT();
   const { toast } = useToast();
+  const currentUser = useCurrentUser();
   const items = useMemo(() => flattenItems(modules), [modules]);
 
   const [activeId, setActiveId] = useState(startItemId);
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(modules.map((m) => m.id)),
-  );
-  // localStorage is unavailable during SSR, so initialize from static data only;
-  // real progress is merged in via readCourseProgress after mount.
+  const itemIds = useMemo(() => new Set(items.map((i) => i.id)), [items]);
+
+  // localStorage is unavailable during SSR, so initialize from static demo
+  // data only; real progress is merged in after mount (see hydrate effect).
+  // Docs/videos count via `viewed` (persisted to the legacy array key so the
+  // My Learning / dashboard percent readers keep working); quizzes must be
+  // *passed* and assignments *submitted*, tracked in `passed`/`submitted`.
+  // Seeds are filtered against this course's real item ids so unrelated demo
+  // ids can't inflate progress.
   const [viewed, setViewed] = useState<Set<string>>(
     () =>
       new Set(
         Object.entries(LEARNER_ITEM_STATUSES)
-          .filter(([, s]) => s === 'completed' || s === 'passed')
+          .filter(
+            ([id, s]) =>
+              (s === 'completed' || s === 'passed') && itemIds.has(id),
+          )
           .map(([id]) => id),
       ),
   );
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showContents, setShowContents] = useState(false);
+  const [passed, setPassed] = useState<Set<string>>(
+    () =>
+      new Set(
+        Object.entries(LEARNER_ITEM_STATUSES)
+          .filter(([id, s]) => s === 'passed' && itemIds.has(id))
+          .map(([id]) => id),
+      ),
+  );
+  const [submitted, setSubmitted] = useState<Set<string>>(
+    () =>
+      new Set(
+        Object.entries(LEARNER_ITEM_STATUSES)
+          .filter(([id, s]) => s === 'submitted' && itemIds.has(id))
+          .map(([id]) => id),
+      ),
+  );
+  const [attempts, setAttempts] = useState<Record<string, number>>({});
+  const [relearn, setRelearn] = useState<{
+    lessonId: string;
+    lessonTitle: string;
+  } | null>(null);
+
+  // Guards the persist effects below so they can't overwrite previously-saved
+  // progress with the static seed before that data has been read in.
+  const hydratedRef = useRef(false);
+  const alreadyCompleteRef = useRef(false);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const storedViewed = readCourseProgress(course.id).filter((itemId) =>
+        itemIds.has(itemId),
+      );
+      const state = readCourseState(course.id);
+      const storedPassed = state.passed.filter((i) => itemIds.has(i));
+      const storedSubmitted = state.submitted.filter((i) => itemIds.has(i));
+
+      const mergedViewed = new Set([...viewed, ...storedViewed]);
+      const mergedPassed = new Set([...passed, ...storedPassed]);
+      const mergedSubmitted = new Set([...submitted, ...storedSubmitted]);
+
+      setViewed(mergedViewed);
+      setPassed(mergedPassed);
+      setSubmitted(mergedSubmitted);
+      setAttempts(state.attempts);
+
+      // Suppress the completion overlay on re-entry into an already-finished
+      // course by pre-marking it complete against the freshly-read state.
+      const done = (item: ReviewItem) =>
+        item.kind === 'quiz'
+          ? mergedPassed.has(item.id)
+          : item.kind === 'assignment'
+            ? mergedSubmitted.has(item.id)
+            : mergedViewed.has(item.id);
+      alreadyCompleteRef.current = items.length > 0 && items.every(done);
+
+      hydratedRef.current = true;
+    }, 0);
+    return () => clearTimeout(id);
+    // Seed sets are stable identities from useState initializers; re-running
+    // only when the course/item set changes is intentional.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course.id, itemIds, items]);
+
   const [showCompletion, setShowCompletion] = useState(false);
   const [mobileModuleId, setMobileModuleId] = useState<string>(
     () =>
@@ -129,36 +191,44 @@ export default function LearnerCoursePlayer({
     [mobileModule],
   );
 
-  // True if the course was already 100% complete before this session started —
-  // used to suppress the completion notification on replay / re-entry.
-  const alreadyCompleteRef = useRef(
-    items.length > 0 && readCourseProgress(course.id).length >= items.length,
+  // ── Completion + locking ────────────────────────────────────────────────────
+  const isItemDone = useCallback<ItemDone>(
+    (item) => {
+      if (item.kind === 'quiz') return passed.has(item.id);
+      if (item.kind === 'assignment') return submitted.has(item.id);
+      return viewed.has(item.id);
+    },
+    [passed, submitted, viewed],
   );
 
-  // Persist progress whenever viewed changes
+  const locks = useMemo(
+    () => computeLocks(modules, isItemDone, true),
+    [modules, isItemDone],
+  );
+
+  // Persist viewed (legacy key) and the richer state (separate key).
   useEffect(() => {
+    if (!hydratedRef.current) return;
     saveCourseProgress(course.id, [...viewed]);
   }, [course.id, viewed]);
 
-  const active = items.find((i) => i.id === activeId) ?? items[0];
-  const currentIndex = items.findIndex((i) => i.id === activeId);
-  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
-  const nextItem =
-    currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
-
-  function markViewed(id: string) {
-    let nextViewed = viewed;
-    setViewed((prev) => {
-      nextViewed = new Set(prev).add(id);
-      return nextViewed;
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    saveCourseState(course.id, {
+      passed: [...passed],
+      submitted: [...submitted],
+      attempts,
     });
+  }, [course.id, passed, submitted, attempts]);
 
-    if (
-      !alreadyCompleteRef.current &&
-      items.length > 0 &&
-      nextViewed.size >= items.length
-    ) {
-      alreadyCompleteRef.current = true;
+  // Fire the completion overlay once the whole course is genuinely done. The
+  // state update is deferred a tick so it isn't a synchronous setState in the
+  // effect body (matches the pattern used elsewhere in this app).
+  useEffect(() => {
+    if (!hydratedRef.current || alreadyCompleteRef.current) return;
+    if (!(items.length > 0 && items.every(isItemDone))) return;
+    alreadyCompleteRef.current = true;
+    const id = setTimeout(() => {
       setShowCompletion(true);
       pushNotif({
         id: `complete-${course.id}`,
@@ -168,10 +238,30 @@ export default function LearnerCoursePlayer({
         time: 'Just now',
         read: false,
       });
-    }
+    }, 0);
+    return () => clearTimeout(id);
+  }, [isItemDone, items, course.id, course.title]);
+
+  const active = items.find((i) => i.id === activeId) ?? items[0];
+  const currentIndex = items.findIndex((i) => i.id === activeId);
+  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
+  const nextItem =
+    currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+  const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
+  const activeLessonId = useMemo(
+    () =>
+      flattenLessons(modules).find((f) =>
+        f.items.some((i) => i.id === activeId),
+      )?.lesson.id,
+    [modules, activeId],
+  );
+
+  function markViewed(id: string) {
+    setViewed((prev) => new Set(prev).add(id));
   }
 
-  function select(id: string) {
+  /** Navigate + mark viewed without a lock check (for programmatic moves). */
+  function goTo(id: string) {
     setActiveId(id);
     markViewed(id);
     const newMod = modules.find((m) =>
@@ -180,40 +270,188 @@ export default function LearnerCoursePlayer({
     if (newMod) setMobileModuleId(newMod.id);
   }
 
-  function toggleModule(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  /** Public selection — blocks locked items with a hint toast. */
+  function select(id: string) {
+    if (locks.lockedItemIds.has(id)) {
+      toast(t('lockedToast'), 'info');
+      return;
+    }
+    goTo(id);
   }
 
-  function handleMarkComplete() {
-    if (!activeId) return;
-    markViewed(activeId);
-    if (nextItem) select(nextItem.id);
-    else toast(t('markComplete') + ' ✓', 'success');
+  /** Reset a lesson's content + quiz progress (keep submitted assignments) and
+   *  send the learner back to its first item to relearn it. */
+  function relearnLesson(lessonId: string) {
+    const flat = flattenLessons(modules).find((f) => f.lesson.id === lessonId);
+    if (!flat) return;
+    const contentIds = [...flat.lesson.documents, ...flat.lesson.videos].map(
+      (i) => i.id,
+    );
+    const quizIds = flat.lesson.quizzes.map((q) => q.id);
+    const wipe = new Set([...contentIds, ...quizIds]);
+
+    setViewed((prev) => new Set([...prev].filter((id) => !wipe.has(id))));
+    setPassed(
+      (prev) => new Set([...prev].filter((id) => !quizIds.includes(id))),
+    );
+    setAttempts((prev) => {
+      const next = { ...prev };
+      for (const id of quizIds) delete next[id];
+      return next;
+    });
+
+    const firstId = flat.items[0]?.id;
+    if (firstId) goTo(firstId);
+    setRelearn({ lessonId, lessonTitle: flat.lesson.title });
   }
+
+  function handleQuizResult(quizPassed: boolean) {
+    if (!active) return;
+    markViewed(active.id);
+    if (quizPassed) {
+      setPassed((prev) => new Set(prev).add(active.id));
+      return;
+    }
+    // Already-passed quizzes can be retaken freely without re-triggering the
+    // 3-strikes relearn.
+    if (passed.has(active.id)) return;
+    const used = (attempts[active.id] ?? 0) + 1;
+    setAttempts((prev) => ({ ...prev, [active.id]: used }));
+    if (used >= MAX_QUIZ_ATTEMPTS && activeLessonId) {
+      relearnLesson(activeLessonId);
+    }
+  }
+
+  function handleAssignmentSubmitted() {
+    if (!active) return;
+    setSubmitted((prev) => new Set(prev).add(active.id));
+    markViewed(active.id);
+  }
+
+  /** Footer primary action — advance to the next item, blocked at a lesson
+   *  boundary until the current lesson is fully complete. */
+  function handleContinue() {
+    if (!nextItem) {
+      if (items.every(isItemDone)) setShowCompletion(true);
+      else toast(t('finishBlocked'), 'info');
+      return;
+    }
+    if (nextLocked) {
+      toast(t('lockedToast'), 'info');
+      return;
+    }
+    goTo(nextItem.id);
+  }
+
+  function handleExportPdf() {
+    exportCourseToPdf(
+      {
+        title: course.title,
+        author: course.author,
+        category: course.category,
+        level: course.level,
+        description: course.description,
+      },
+      modules,
+    );
+  }
+
+  const sidebarLabels: Partial<CourseSidebarLabels> = useMemo(
+    () => ({
+      courseContent: t('courseContent'),
+      overallProgress: t('overallProgress'),
+      moduleLabel: (index) => t('moduleLabel', { number: index + 1 }),
+      moduleCompleted: (done, total) => t('itemsCompleted', { done, total }),
+      modulePercent: (percent) => t('modulePercent', { percent }),
+      lockedModule: t('lockedModule'),
+      lockedLesson: t('locked'),
+      disabledModule: t('notPublished'),
+      collapse: t('collapseSidebar'),
+      expand: t('expandSidebar'),
+      closeDrawer: t('closeContents'),
+      openDrawer: t('openContents'),
+      itemTypes: {
+        document: t('reading'),
+        video: t('video'),
+        quiz: t('quiz'),
+        assignment: t('assignment'),
+      },
+      minutesShort: (count) => t('minutesShort', { count }),
+    }),
+    [t],
+  );
+
+  // Rebuilt whenever completion, attempts, or locking changes — the sidebar is
+  // a pure projection of that state, never a second copy of it.
+  const sidebarCourse = useMemo(
+    () =>
+      toSidebarCourse({
+        courseId: course.id,
+        courseTitle: course.title,
+        modules,
+        locks,
+        isItemDone,
+        attempts,
+        submitted,
+        maxQuizAttempts: MAX_QUIZ_ATTEMPTS,
+        labels: {
+          completed: t('statusCompleted'),
+          pending: t('statusPending'),
+          submitted: t('statusSubmitted'),
+          attemptsUsed: (used, max) => t('attemptsUsed', { used, max }),
+          lockedHint: (lesson) => t('lockedHint', { lesson }),
+          lockedFallback: t('locked'),
+        },
+      }),
+    [
+      course.id,
+      course.title,
+      modules,
+      locks,
+      isItemDone,
+      attempts,
+      submitted,
+      t,
+    ],
+  );
 
   return (
     <div className="bg-background fixed inset-0 z-50 flex overflow-hidden">
       {/* ── Body: sidebar | main column ────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Review sidebar (owns its brand header) */}
-        <ReviewSidebar
-          courseTitle={course.title}
-          modules={modules}
-          activeId={activeId}
-          viewed={viewed}
-          totalCount={items.length}
-          expanded={expanded}
-          collapsed={sidebarCollapsed}
-          onCollapse={() => setSidebarCollapsed((v) => !v)}
-          onToggleModule={toggleModule}
-          onSelect={select}
-          t={t}
-        />
+        {/* Desktop only: the player already owns the mobile module tabs below,
+            so the sidebar's own drawer trigger is suppressed under lg.
+            `lg:contents` lets the sidebar be a direct flex child of this row. */}
+        <div className="hidden lg:contents">
+          <CourseSidebar
+            course={sidebarCourse}
+            currentItemId={activeId}
+            onSelectItem={(item) => select(item.id)}
+            onLockedItem={() => toast(t('lockedToast'), 'info')}
+            storageKey={`course-sidebar:${course.id}`}
+            labels={sidebarLabels}
+            brand={
+              <Link
+                href="/my-learning"
+                aria-label={t('backToMyLearning')}
+                className="focus-visible:ring-course-accent rounded-md outline-none focus-visible:ring-2"
+              >
+                <Logo size="md" variant="default" showText />
+              </Link>
+            }
+            titleAction={
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                aria-label={t('exportPdf')}
+                title={t('exportPdf')}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-course-accent flex size-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2"
+              >
+                <Download aria-hidden className="size-4" />
+              </button>
+            }
+          />
+        </div>
 
         {/* Main column: header + content + footer nav */}
         <div className="flex min-w-0 flex-1 flex-col">
@@ -232,6 +470,14 @@ export default function LearnerCoursePlayer({
               <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-bold sm:text-base">
                 {course.title}
               </h1>
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                aria-label={t('exportPdf')}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors"
+              >
+                <Download className="h-5 w-5" />
+              </button>
             </div>
 
             {/* ── Desktop: my learning title | role badge + controls ── */}
@@ -240,13 +486,14 @@ export default function LearnerCoursePlayer({
                 {t('title')}
               </h1>
               <p className="text-muted-foreground truncate text-[11px]">
-                {t('liveWorkspace', { email: userEmail })}
+                {t('liveWorkspace', { email: currentUser.email })}
               </p>
             </div>
             <div className="hidden items-center gap-1.5 lg:flex">
               <span className="border-brand-gold/30 bg-brand-gold/10 text-brand-gold rounded-full border px-3 py-0.5 text-xs font-semibold">
                 Learner
               </span>
+              {/* Export now lives in the sidebar's brand row, beside the logo. */}
               <ThemeToggle className="size-8" />
               <NotificationBell />
               <LanguageSwitcher />
@@ -291,6 +538,8 @@ export default function LearnerCoursePlayer({
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
+                const locked = locks.lockedItemIds.has(item.id);
+                const done = isItemDone(item);
                 return (
                   <button
                     key={item.id}
@@ -298,12 +547,20 @@ export default function LearnerCoursePlayer({
                     onClick={() => select(item.id)}
                     className={cn(
                       'border-border flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
-                      isActive
-                        ? 'bg-brand-gold border-brand-gold text-brand-navy'
-                        : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
+                      locked
+                        ? 'bg-muted/30 text-muted-foreground/60 cursor-not-allowed'
+                        : isActive
+                          ? 'bg-brand-gold border-brand-gold text-brand-navy'
+                          : done
+                            ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
                     )}
                   >
-                    <Icon className="h-3 w-3 shrink-0" />
+                    {locked ? (
+                      <Lock className="h-3 w-3 shrink-0" />
+                    ) : (
+                      <Icon className="h-3 w-3 shrink-0" />
+                    )}
                     <span>{item.title}</span>
                   </button>
                 );
@@ -319,6 +576,10 @@ export default function LearnerCoursePlayer({
                 isReplay={isReplay}
                 continueFromSaved={t('continueFromSaved')}
                 startingFromBeginning={t('startingFromBeginning')}
+                quizAttemptsUsed={attempts[active.id] ?? 0}
+                onQuizResult={handleQuizResult}
+                onAssignmentSubmitted={handleAssignmentSubmitted}
+                attemptLabel={(n, max) => t('attemptOf', { n, max })}
               />
             )}
           </main>
@@ -330,7 +591,7 @@ export default function LearnerCoursePlayer({
               <button
                 type="button"
                 disabled={!prevItem}
-                onClick={() => prevItem && select(prevItem.id)}
+                onClick={() => prevItem && goTo(prevItem.id)}
                 className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-25"
               >
                 <ChevronLeft className="h-4 w-4 shrink-0" />
@@ -342,14 +603,23 @@ export default function LearnerCoursePlayer({
               </button>
               <button
                 type="button"
-                disabled={!nextItem}
-                onClick={() => nextItem && select(nextItem.id)}
+                disabled={!nextItem || nextLocked}
+                onClick={handleContinue}
+                title={nextLocked ? t('lockedNextHint') : undefined}
                 className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 flex min-w-0 flex-1 items-center justify-end gap-1.5 rounded-xl px-3 py-2.5 text-right font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-25"
               >
-                {nextItem && (
-                  <span className="truncate text-[11px]">{nextItem.title}</span>
+                {nextLocked ? (
+                  <Lock className="h-4 w-4 shrink-0" />
+                ) : (
+                  <>
+                    {nextItem && (
+                      <span className="truncate text-[11px]">
+                        {nextItem.title}
+                      </span>
+                    )}
+                    <ChevronRight className="h-4 w-4 shrink-0" />
+                  </>
                 )}
-                <ChevronRight className="h-4 w-4 shrink-0" />
               </button>
             </div>
 
@@ -368,12 +638,19 @@ export default function LearnerCoursePlayer({
               <Button
                 size="sm"
                 className="gap-1.5"
-                onClick={handleMarkComplete}
+                onClick={handleContinue}
+                disabled={Boolean(nextItem) && nextLocked}
+                title={nextItem && nextLocked ? t('lockedNextHint') : undefined}
               >
                 {!nextItem ? (
                   <>
                     <Trophy className="h-4 w-4" />
-                    Finish Course
+                    {t('finishCourse')}
+                  </>
+                ) : nextLocked ? (
+                  <>
+                    <Lock className="h-4 w-4" />
+                    {t('locked')}
                   </>
                 ) : (
                   <>
@@ -387,29 +664,22 @@ export default function LearnerCoursePlayer({
         </div>
       </div>
 
-      {showContents && (
-        <MobileContentsSheet
-          modules={modules}
-          activeId={activeId}
-          expanded={expanded}
-          viewed={viewed}
-          totalCount={items.length}
-          onSelect={(id) => {
-            select(id);
-            setShowContents(false);
-          }}
-          onToggleModule={toggleModule}
-          onClose={() => setShowContents(false)}
-          t={t}
-        />
-      )}
-
       {showCompletion && (
         <CourseCompletionOverlay
           courseTitle={course.title}
           totalItems={items.length}
           onClaim={() => router.push('/certificates')}
           onDismiss={() => setShowCompletion(false)}
+        />
+      )}
+
+      {relearn && (
+        <RelearnOverlay
+          lessonTitle={relearn.lessonTitle}
+          title={t('relearnTitle')}
+          body={t('relearnBody')}
+          reviewCta={t('relearnCta')}
+          onReview={() => setRelearn(null)}
         />
       )}
     </div>
@@ -505,657 +775,6 @@ function CourseCompletionOverlay({
   );
 }
 
-// ── Mobile contents sheet ─────────────────────────────────────────────────────
-
-function MobileContentsSheet({
-  modules,
-  activeId,
-  expanded,
-  viewed,
-  totalCount,
-  onSelect,
-  onToggleModule,
-  onClose,
-  t,
-}: {
-  modules: ReviewModule[];
-  activeId: string;
-  expanded: Set<string>;
-  viewed: Set<string>;
-  totalCount: number;
-  onSelect: (id: string) => void;
-  onToggleModule: (id: string) => void;
-  onClose: () => void;
-  t: TFn;
-}) {
-  const pct =
-    totalCount === 0 ? 0 : Math.round((viewed.size / totalCount) * 100);
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('keydown', handler);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-60 sm:hidden">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden
-      />
-
-      {/* Sheet panel */}
-      <div className="bg-background absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col rounded-t-2xl shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
-        {/* Drag handle */}
-        <div className="flex shrink-0 justify-center pt-3 pb-1">
-          <div className="bg-muted-foreground/25 h-1 w-10 rounded-full" />
-        </div>
-
-        {/* Sheet header */}
-        <div className="border-border/60 flex shrink-0 items-center justify-between border-b px-4 pt-1 pb-3">
-          <div>
-            <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
-              {t('courseContent')}
-            </p>
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <Layers className="h-3 w-3" />
-                {t('modulesCount', { count: modules.length })}
-              </span>
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <BookOpen className="h-3 w-3" />
-                {t('lessonsCount', {
-                  count: modules.reduce((s, m) => s + lessonCount(m), 0),
-                })}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-8 items-center justify-center rounded-lg transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Progress bar */}
-        <div className="shrink-0 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">
-              {viewed.size} / {totalCount} completed
-            </span>
-            <span className="text-brand-gold text-[11px] font-bold">
-              {pct}%
-            </span>
-          </div>
-          <div className="bg-muted mt-1.5 h-1.5 overflow-hidden rounded-full">
-            <div
-              className="bg-brand-gold h-full rounded-full transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Module cards */}
-        <div className="scrollbar-none flex-1 overflow-y-auto px-3 pb-8 [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => {
-            const isOpen = expanded.has(module.id);
-            return (
-              <ModuleCard
-                key={module.id}
-                module={module}
-                isOpen={isOpen}
-                activeId={activeId}
-                viewed={viewed}
-                onToggle={() => onToggleModule(module.id)}
-                onSelect={onSelect}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-
-function ReviewSidebar({
-  courseTitle,
-  modules,
-  activeId,
-  viewed,
-  totalCount,
-  expanded,
-  collapsed,
-  onToggleModule,
-  onCollapse,
-  onSelect,
-  t,
-}: {
-  courseTitle: string;
-  modules: ReviewModule[];
-  activeId: string;
-  viewed: Set<string>;
-  totalCount: number;
-  expanded: Set<string>;
-  collapsed: boolean;
-  onCollapse: () => void;
-  onToggleModule: (id: string) => void;
-  onSelect: (id: string) => void;
-  t: TFn;
-}) {
-  const lessons = modules.reduce((sum, m) => sum + lessonCount(m), 0);
-  const pct =
-    totalCount === 0 ? 0 : Math.round((viewed.size / totalCount) * 100);
-
-  const [manualExpanded, setManualExpanded] = useState<Set<string>>(() => {
-    const active = modules.find((m) =>
-      flattenItems([m]).some((i) => i.id === activeId),
-    );
-    return active ? new Set([active.id]) : new Set();
-  });
-
-  // all lessons open by default in mini view
-  const [miniLessonExpanded, setMiniLessonExpanded] = useState<Set<string>>(
-    () => new Set(modules.flatMap((m) => m.lessons.map((l) => l.id))),
-  );
-
-  const activeModuleId = useMemo(
-    () =>
-      modules.find((m) => flattenItems([m]).some((i) => i.id === activeId))?.id,
-    [activeId, modules],
-  );
-
-  const expandedMini = useMemo(
-    () =>
-      activeModuleId
-        ? new Set([...manualExpanded, activeModuleId])
-        : manualExpanded,
-    [manualExpanded, activeModuleId],
-  );
-
-  return (
-    <aside
-      className={cn(
-        'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
-        collapsed ? 'lg:w-18' : 'lg:w-72 xl:w-80',
-      )}
-    >
-      {/* ── EXPANDED — full tree layout ──────────────────────────────────────── */}
-      <div
-        className={cn(
-          'absolute inset-0 flex flex-col transition-opacity duration-200',
-          collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
-        )}
-      >
-        {/* Brand header */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 sm:h-16 dark:border-white/10 dark:bg-transparent">
-          <Link
-            href="/my-learning"
-            aria-label={t('backToMyLearning')}
-            className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-          >
-            <Logo size="md" variant="default" showText />
-          </Link>
-          <button
-            onClick={onCollapse}
-            aria-label="Collapse sidebar"
-            className="ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white/70"
-          >
-            <PanelLeftClose className="size-4" />
-          </button>
-        </div>
-
-        {/* Course info + progress */}
-        <div className="border-border/60 shrink-0 border-b px-4 py-4">
-          <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
-            {t('courseContent')}
-          </p>
-          <h2 className="text-foreground mt-1.5 text-sm leading-snug font-bold">
-            {courseTitle}
-          </h2>
-          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <Layers className="h-3 w-3" />
-              {t('modulesCount', { count: modules.length })}
-            </span>
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <BookOpen className="h-3 w-3" />
-              {t('lessonsCount', { count: lessons })}
-            </span>
-          </div>
-          <div className="mt-3">
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-brand-gold h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-muted-foreground text-[11px]">
-                {viewed.size} / {totalCount} completed
-              </p>
-              <span className="text-brand-gold text-[11px] font-bold">
-                {pct}%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tree — scrollable */}
-        <div className="scrollbar-none flex-1 overflow-y-auto px-3 py-2 [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => (
-            <ModuleCard
-              key={module.id}
-              module={module}
-              isOpen={expanded.has(module.id)}
-              activeId={activeId}
-              viewed={viewed}
-              onToggle={() => onToggleModule(module.id)}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* ── COLLAPSED — icon tree ────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          'absolute inset-0 flex w-18 flex-col transition-opacity duration-200',
-          collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
-        )}
-      >
-        {/* Header — logo → expand on hover */}
-        <div className="group/mini relative flex h-14 shrink-0 items-center justify-center border-b border-black/10 bg-white sm:h-16 dark:border-white/10 dark:bg-transparent">
-          <button
-            onClick={onCollapse}
-            aria-label="Expand sidebar"
-            className="relative flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
-          >
-            <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover/mini:opacity-0">
-              <Logo size="sm" variant="default" />
-            </span>
-            <span className="absolute inset-0 flex items-center justify-center text-slate-400 opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100 dark:text-white/40">
-              <PanelLeftOpen className="size-4" />
-            </span>
-          </button>
-        </div>
-
-        {/* Icon tree — staggered per level, leaf ticks reach the *edge* of each icon's ring
-            (not its center — the tick's length equals that row's own left padding, so it
-            stops exactly where the circle begins). Offsets are fixed pixel values chosen so
-            the deepest (item) icon still lands inside the 60px content area:
-              module center = 4(pl) + 14(half of size-7)      = 18px absolute
-              lesson center = 18 + 4(pl) + 12(half of size-6) = 34px absolute
-              item circle   = 34 + 4(pl) .. 34 + 4 + 20(size-5) = 38..58px absolute (fits, 60 max)
-            Every level shares the same "circle node" treatment (sized down per level) for a
-            consistent, cohesive look instead of mixing bare icons with circled ones. */}
-        <div className="scrollbar-none flex-1 overflow-y-auto px-1.5 py-3 [&::-webkit-scrollbar]:hidden">
-          {modules.map((module, mIdx) => {
-            const hasActive = flattenItems([module]).some(
-              (i) => i.id === activeId,
-            );
-            const isMiniOpen = expandedMini.has(module.id);
-            return (
-              <div key={module.id} className="relative py-1">
-                {mIdx > 0 && (
-                  <div className="bg-muted-foreground/25 mx-auto mb-2 h-px w-8" />
-                )}
-
-                {/* Rail — from the module icon's center down through its open lessons/items */}
-                {isMiniOpen && (
-                  <div className="bg-muted-foreground/30 absolute top-6 bottom-0 left-[18px] w-px" />
-                )}
-
-                {/* Module button — icon fixed at x=18px (pl-1 + half of size-7) */}
-                <button
-                  onClick={() =>
-                    setManualExpanded((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(module.id)) next.delete(module.id);
-                      else next.add(module.id);
-                      return next;
-                    })
-                  }
-                  title={module.title}
-                  className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1.5 pl-1 transition-colors"
-                >
-                  <span
-                    className={cn(
-                      'flex size-7 shrink-0 items-center justify-center rounded-full',
-                      hasActive ? 'bg-brand-gold/30' : 'bg-brand-gold/15',
-                    )}
-                  >
-                    <Layers className="text-brand-gold size-3.5" />
-                  </span>
-                </button>
-
-                {isMiniOpen && (
-                  <div className="relative ml-[18px]">
-                    {module.lessons.map((lesson) => {
-                      const lessonItems: ReviewItem[] = [
-                        ...lesson.documents,
-                        ...lesson.videos,
-                        ...lesson.quizzes,
-                        ...lesson.assignments,
-                      ];
-                      const lessonHasActive = lessonItems.some(
-                        (i) => i.id === activeId,
-                      );
-                      const isLessonOpen = miniLessonExpanded.has(lesson.id);
-                      return (
-                        <div key={lesson.id} className="py-1">
-                          {/* Row wrapper — holds ONLY the leaf + button, so top-1/2 below
-                              measures just this row's height, not the items rendered after it. */}
-                          <div className="relative">
-                            {/* Leaf — reaches from the module trunk to the edge of this lesson icon's ring */}
-                            <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
-
-                            {/* Lesson button — icon fixed at x=16px relative to this wrapper */}
-                            <button
-                              onClick={() =>
-                                setMiniLessonExpanded((prev) => {
-                                  const next = new Set(prev);
-                                  if (next.has(lesson.id))
-                                    next.delete(lesson.id);
-                                  else next.add(lesson.id);
-                                  return next;
-                                })
-                              }
-                              title={lesson.title}
-                              className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1 pl-1 transition-colors"
-                            >
-                              <span
-                                className={cn(
-                                  'flex size-6 shrink-0 items-center justify-center rounded-full',
-                                  lessonHasActive
-                                    ? 'bg-brand-gold/30'
-                                    : 'bg-brand-gold/15',
-                                )}
-                              >
-                                <Folder className="text-brand-gold size-3.5" />
-                              </span>
-                            </button>
-                          </div>
-
-                          {/* Items — indented so the trunk aligns under the lesson icon's center */}
-                          {isLessonOpen && lessonItems.length > 0 && (
-                            <div className="relative ml-4">
-                              {/* Trunk — was missing, so item leaves pointed at nothing to branch from */}
-                              <div className="bg-muted-foreground/30 absolute inset-y-0 left-0 w-px" />
-                              {lessonItems.map((item) => {
-                                const Icon = KIND_ICON[item.kind];
-                                const isActive = item.id === activeId;
-                                const status = viewed.has(item.id)
-                                  ? 'completed'
-                                  : (LEARNER_ITEM_STATUSES[item.id] ??
-                                    'unread');
-                                return (
-                                  <div
-                                    key={item.id}
-                                    className="relative py-1.5"
-                                  >
-                                    {/* Leaf — reaches from the lesson trunk to the edge of this item icon's ring */}
-                                    <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
-                                    <button
-                                      onClick={() => onSelect(item.id)}
-                                      title={item.title}
-                                      className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-0.5 pl-1 transition-colors"
-                                    >
-                                      <span
-                                        className={cn(
-                                          'relative flex size-5 shrink-0 items-center justify-center rounded-full',
-                                          isActive
-                                            ? 'bg-brand-gold/25'
-                                            : 'bg-brand-gold/10',
-                                        )}
-                                      >
-                                        <Icon
-                                          className={cn(
-                                            'size-3',
-                                            isActive
-                                              ? 'text-brand-gold'
-                                              : 'text-brand-gold/70',
-                                          )}
-                                        />
-                                        <span className="absolute -top-0.5 -right-0.5">
-                                          {(status === 'completed' ||
-                                            status === 'passed') && (
-                                            <Check
-                                              className="size-2.5 text-green-500"
-                                              strokeWidth={3}
-                                            />
-                                          )}
-                                          {status === 'failed' && (
-                                            <XCircle className="size-2.5 text-red-500" />
-                                          )}
-                                          {status === 'submitted' && (
-                                            <Clock className="text-brand-gold size-2.5" />
-                                          )}
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-// ── ModuleCard ────────────────────────────────────────────────────────────────
-
-function ModuleCard({
-  module,
-  isOpen,
-  activeId,
-  viewed,
-  onToggle,
-  onSelect,
-}: {
-  module: ReviewModule;
-  isOpen: boolean;
-  activeId: string;
-  viewed: Set<string>;
-  onToggle: () => void;
-  onSelect: (id: string) => void;
-}) {
-  return (
-    <div className="mb-0.5">
-      {/* Module header */}
-      <button
-        onClick={onToggle}
-        aria-expanded={isOpen}
-        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors"
-      >
-        <span className="bg-brand-gold/20 flex size-7 shrink-0 items-center justify-center rounded-full">
-          <Layers className="text-brand-gold size-3.5" />
-        </span>
-        <span className="text-foreground min-w-0 flex-1 truncate text-sm font-bold">
-          {module.title}
-        </span>
-        <ChevronDown
-          className={cn(
-            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
-            isOpen && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {/* Lessons — flat, indented */}
-      <div
-        className={cn(
-          'grid transition-[grid-template-rows] duration-200 ease-in-out',
-          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="pb-1 pl-2">
-            {module.lessons.map((lesson) => (
-              <LessonCard
-                key={lesson.id}
-                lesson={lesson}
-                activeId={activeId}
-                viewed={viewed}
-                onSelect={onSelect}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── LessonCard ────────────────────────────────────────────────────────────────
-
-function LessonCard({
-  lesson,
-  activeId,
-  viewed,
-  onSelect,
-}: {
-  lesson: ReviewLesson;
-  activeId: string;
-  viewed: Set<string>;
-  onSelect: (id: string) => void;
-}) {
-  const [open, setOpen] = useState(true);
-  const allItems: ReviewItem[] = [
-    ...lesson.documents,
-    ...lesson.videos,
-    ...lesson.quizzes,
-    ...lesson.assignments,
-  ];
-
-  return (
-    <div className="py-0.5">
-      {/* Lesson header */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
-      >
-        <span className="bg-brand-gold/15 flex size-6 shrink-0 items-center justify-center rounded-full">
-          <Folder className="text-brand-gold size-3" />
-        </span>
-        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
-          {lesson.title}
-        </span>
-        <ChevronDown
-          className={cn(
-            'text-muted-foreground h-3 w-3 shrink-0 transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {/* Items — flat list */}
-      {allItems.length > 0 && (
-        <div
-          className={cn(
-            'grid transition-[grid-template-rows] duration-200 ease-in-out',
-            open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-          )}
-        >
-          <div className="overflow-hidden">
-            <div className="pb-1 pl-2">
-              {allItems.map((item) => (
-                <TreeItemRow
-                  key={item.id}
-                  item={item}
-                  isActive={item.id === activeId}
-                  viewed={viewed}
-                  onSelect={onSelect}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── TreeItemRow — icon + status badge overlay ─────────────────────────────────
-
-function TreeItemRow({
-  item,
-  isActive,
-  viewed,
-  onSelect,
-}: {
-  item: ReviewItem;
-  isActive: boolean;
-  viewed: Set<string>;
-  onSelect: (id: string) => void;
-}) {
-  const Icon = KIND_ICON[item.kind];
-  const learnerStatus = viewed.has(item.id)
-    ? 'completed'
-    : (LEARNER_ITEM_STATUSES[item.id] ?? 'unread');
-
-  return (
-    <button
-      onClick={() => onSelect(item.id)}
-      className={cn(
-        'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
-        isActive ? 'bg-brand-gold/10' : 'hover:bg-muted/40',
-      )}
-    >
-      <div className="relative shrink-0">
-        <Icon
-          className={cn(
-            'size-4',
-            isActive ? 'text-brand-gold' : 'text-brand-gold/70',
-          )}
-        />
-        <span className="absolute -top-1.5 -right-1.5">
-          {(learnerStatus === 'completed' || learnerStatus === 'passed') && (
-            <Check className="size-2.5 text-green-500" strokeWidth={3} />
-          )}
-          {learnerStatus === 'failed' && (
-            <XCircle className="size-2.5 text-red-500" />
-          )}
-          {learnerStatus === 'submitted' && (
-            <Clock className="text-brand-gold size-2.5" />
-          )}
-        </span>
-      </div>
-
-      <span
-        className={cn(
-          'min-w-0 flex-1 truncate text-xs font-medium',
-          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground',
-        )}
-      >
-        {item.title}
-      </span>
-    </button>
-  );
-}
-
 // ── Content panels ────────────────────────────────────────────────────────────
 
 function ContentPanel({
@@ -1163,11 +782,19 @@ function ContentPanel({
   isReplay,
   continueFromSaved,
   startingFromBeginning,
+  quizAttemptsUsed,
+  onQuizResult,
+  onAssignmentSubmitted,
+  attemptLabel,
 }: {
   item: ReviewItem;
   isReplay: boolean;
   continueFromSaved: string;
   startingFromBeginning: string;
+  quizAttemptsUsed: number;
+  onQuizResult: (passed: boolean) => void;
+  onAssignmentSubmitted: () => void;
+  attemptLabel: (n: number, max: number) => string;
 }) {
   switch (item.kind) {
     case 'video':
@@ -1182,9 +809,18 @@ function ContentPanel({
     case 'document':
       return <DocumentPanel item={item} />;
     case 'quiz':
-      return <QuizPanel item={item} />;
+      return (
+        <QuizPanel
+          item={item}
+          attemptsUsed={quizAttemptsUsed}
+          onResult={onQuizResult}
+          attemptLabel={attemptLabel}
+        />
+      );
     case 'assignment':
-      return <AssignmentPanel item={item} />;
+      return (
+        <AssignmentPanel item={item} onSubmitted={onAssignmentSubmitted} />
+      );
   }
 }
 
@@ -1477,7 +1113,17 @@ function QuizOption({
   );
 }
 
-function QuizPanel({ item }: { item: QuizItem }) {
+function QuizPanel({
+  item,
+  attemptsUsed,
+  onResult,
+  attemptLabel,
+}: {
+  item: QuizItem;
+  attemptsUsed: number;
+  onResult: (passed: boolean) => void;
+  attemptLabel: (n: number, max: number) => string;
+}) {
   const totalQ = item.questions.length;
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -1499,7 +1145,10 @@ function QuizPanel({ item }: { item: QuizItem }) {
 
   function goNext() {
     if (isLast) {
+      const passedNow =
+        Math.round((finalScore / totalQ) * 100) >= QUIZ_PASS_PERCENT;
       setFinished(true);
+      onResult(passedNow);
     } else {
       const nextIdx = currentQ + 1;
       const saved = answers[nextIdx];
@@ -1530,7 +1179,8 @@ function QuizPanel({ item }: { item: QuizItem }) {
   // ── Results screen ──────────────────────────────────────────────────────────
   if (finished) {
     const pctScore = Math.round((finalScore / totalQ) * 100);
-    const passed = pctScore >= 60;
+    const passed = pctScore >= QUIZ_PASS_PERCENT;
+    const attemptsLeft = MAX_QUIZ_ATTEMPTS - (attemptsUsed + 1);
     return (
       <div className="border-border bg-card overflow-hidden rounded-2xl border">
         <div className="border-border/60 border-b px-6 pt-6 pb-4">
@@ -1572,17 +1222,20 @@ function QuizPanel({ item }: { item: QuizItem }) {
           </p>
           {!passed && (
             <p className="text-muted-foreground text-center text-xs">
-              A score of 60% or above is required to pass. Review the lesson and
-              try again.
+              {attemptsLeft > 0
+                ? `A score of ${QUIZ_PASS_PERCENT}% or above is required to pass. ${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} left.`
+                : 'No attempts remaining — this lesson has been reset for you to review again.'}
             </p>
           )}
-          <button
-            type="button"
-            onClick={restart}
-            className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground mt-2 rounded-xl border px-6 py-2.5 text-sm font-medium transition-colors"
-          >
-            Retry Quiz
-          </button>
+          {!passed && attemptsLeft > 0 && (
+            <button
+              type="button"
+              onClick={restart}
+              className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground mt-2 rounded-xl border px-6 py-2.5 text-sm font-medium transition-colors"
+            >
+              Retry Quiz
+            </button>
+          )}
         </div>
       </div>
     );
@@ -1608,6 +1261,9 @@ function QuizPanel({ item }: { item: QuizItem }) {
           </span>
           <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-medium sm:px-3 sm:py-1 sm:text-xs">
             Single Choice
+          </span>
+          <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 sm:px-3 sm:py-1 sm:text-xs dark:text-amber-400">
+            {attemptLabel(attemptsUsed + 1, MAX_QUIZ_ATTEMPTS)}
           </span>
         </div>
       </div>
@@ -1690,7 +1346,13 @@ function QuizPanel({ item }: { item: QuizItem }) {
   );
 }
 
-function AssignmentPanel({ item }: { item: AssignmentItem }) {
+function AssignmentPanel({
+  item,
+  onSubmitted,
+}: {
+  item: AssignmentItem;
+  onSubmitted: () => void;
+}) {
   const initialStatus = LEARNER_ITEM_STATUSES[item.id] ?? 'unread';
 
   const [files, setFiles] = useState<File[]>([]);
@@ -1754,7 +1416,10 @@ function AssignmentPanel({ item }: { item: AssignmentItem }) {
       if (progress >= 100) {
         clearInterval(intervalRef.current!);
         setUploadProgress(100);
-        setTimeout(() => setUploadState('done'), 400);
+        setTimeout(() => {
+          setUploadState('done');
+          onSubmitted();
+        }, 400);
       } else {
         setUploadProgress(Math.round(Math.min(progress, 99)));
       }

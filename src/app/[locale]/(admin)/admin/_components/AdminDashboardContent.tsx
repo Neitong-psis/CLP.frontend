@@ -1,17 +1,16 @@
 'use client';
 
 import { useAdminDashboardT } from '@/i18n';
-import { QUIZ_ANALYTICS } from '@/constants/admin';
 import TopBar from '@/components/common/TopBar';
 import { DashboardStatGrid } from '@/components/pages/admin/components/dashboard/DashboardStatGrid';
 import { UserDistributionContainer } from '@/components/pages/admin/components/dashboard/UserDistributionContainer';
 import { MonthlyRevenueCard } from '@/components/pages/admin/components/dashboard/MonthlyRevenueCard';
-import { QuizAnalyticsCard } from '@/components/pages/admin/components/dashboard/QuizAnalyticsCard';
 import { CourseWidgetsContainer } from '@/components/pages/admin/components/dashboard/CourseWidgetsContainer';
 import { AdminDashboardSkeleton } from '@/components/pages/admin/components/dashboard/AdminDashboardSkeleton';
 import { useFirstVisit } from '@/hooks/useFirstVisit';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useCourseStats } from '@/hooks/useCourseStats';
+import { useRevenueStats } from '@/hooks/useRevenueStats';
 import { cn } from '@/lib/utils/cn';
 
 export function AdminDashboardContent() {
@@ -19,8 +18,17 @@ export function AdminDashboardContent() {
   const isFirstVisit = useFirstVisit('admin-overview');
   const { loading: usersLoading } = useUserStats();
   const { loading: coursesLoading } = useCourseStats();
+  const { monthly, loading: revenueLoading } = useRevenueStats();
 
-  const showPageSkeleton = isFirstVisit && (usersLoading || coursesLoading);
+  const showPageSkeleton =
+    isFirstVisit && (usersLoading || coursesLoading || revenueLoading);
+
+  const monthlyRevenueData = monthly
+    ? monthly.months.map((month, i) => ({
+        month,
+        amount: monthly.amounts[i] ?? 0,
+      }))
+    : undefined;
 
   return (
     <div className="bg-background relative flex min-h-full flex-col">
@@ -49,13 +57,14 @@ export function AdminDashboardContent() {
           <DashboardStatGrid firstVisit={isFirstVisit} />
 
           <div className="grid gap-6 md:grid-cols-[1fr_260px] lg:grid-cols-3">
-            <MonthlyRevenueCard className="lg:col-span-2" />
+            <MonthlyRevenueCard
+              data={monthlyRevenueData}
+              className="lg:col-span-2"
+            />
             <UserDistributionContainer firstVisit={isFirstVisit} />
           </div>
 
           <CourseWidgetsContainer firstVisit={isFirstVisit} />
-
-          <QuizAnalyticsCard data={QUIZ_ANALYTICS} />
         </div>
       </div>
     </div>

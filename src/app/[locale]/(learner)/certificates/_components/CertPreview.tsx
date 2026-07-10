@@ -1,6 +1,9 @@
+'use client';
+
 import { ShieldCheck, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { MOCK_USER, type Certificate } from '@/config/learner';
+import { type Certificate } from '@/config/learner';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export const THEME_CONFIG = {
   navy: {
@@ -64,7 +67,8 @@ export function CertPreview({
   name?: string;
 }) {
   const s = THEME_CONFIG[cert.theme];
-  const displayName = name ?? MOCK_USER.name;
+  const currentUser = useCurrentUser();
+  const displayName = name ?? currentUser.fullName;
   return (
     <div
       className={cn(

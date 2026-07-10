@@ -42,6 +42,7 @@
       "monthlyRevenue": "ប្រាក់ចំណូលប្រចាំខែ",
       "totalUsers": "អ្នកប្រើប្រាស់សរុប",
       "activeCourses": "វគ្គសកម្ម",
+      "totalCertificates": "វិញ្ញាបនបត្រចេញសរុប",
       "vsLastMonth": "បើប្រៀបខែមុន",
       "quizAnalytics": "ការវិភាគសំណួរ",
       "quizzes": "{count} សំណួរ",
@@ -144,10 +145,16 @@
       "backToCourses": "ត្រឡប់ទៅវគ្គ",
       "reject": "បដិសេធ",
       "approve": "អនុម័ត",
+      "exportPdf": "នាំចេញជា PDF",
       "courseContent": "មាតិកាវគ្គ",
       "modules": "{count} ម៉ូឌុល",
       "lessons": "{count} មេរៀន",
       "itemsReviewed": "បានពិនិត្យ {reviewed} នៃ {total} ធាតុ",
+      "collapseSidebar": "បង្រួមរបារចំហៀង",
+      "expandSidebar": "ពង្រីករបារចំហៀង",
+      "locked": "ជាប់សោ",
+      "lockedHint": "បញ្ចប់ {lesson} ដើម្បីដោះសោ",
+      "lockedNextHint": "បញ្ចប់មេរៀននេះដើម្បីបន្ត។",
       "lessonsCreatedBy": "មេរៀនបានបង្កើតដោយគ្រូ",
       "textImageLessons": "មេរៀនអត្ថបទ/រូបភាព",
       "videoLessons": "មេរៀនវីដេអូ",
@@ -312,6 +319,17 @@
       "tabTemplates": "គំរូ",
       "tabIssuance": "ប្រវត្តិការចេញ",
       "createTemplate": "បង្កើតគំរូ",
+      "uploadTemplate": "អាប់ឡូតគំរូ",
+      "uploadTemplateDesc": "អាប់ឡូតការរចនាវិញ្ញាបនបត្រ (រូបភាព ឬ PDF) ដើម្បីបន្ថែមជាគំរូព្រាងថ្មី។",
+      "uploadInvalidFile": "សូមជ្រើសរើសឯកសាររូបភាព ឬ PDF។",
+      "uploadSuccess": "គំរូ \"{name}\" ត្រូវបានបង្កើត។",
+      "chooseFile": "ចុចដើម្បីជ្រើសរើសឯកសារ",
+      "fileTypeHint": "PNG, JPG, ឬ PDF",
+      "changeFileHint": "ចុចដើម្បីជ្រើសរើសឯកសារផ្សេង",
+      "templateName": "ឈ្មោះគំរូ",
+      "templateNamePlaceholder": "ឧ. Corporate Bootcamp",
+      "templateCategory": "ប្រភេទ",
+      "cancel": "បោះបង់",
       "statTotalIssued": "វិញ្ញាបនបត្រចេញសរុប",
       "statVerifiedClaims": "ការទាមទារដែលបានផ្ទៀងផ្ទាត់",
       "statActiveTemplates": "គំរូសកម្ម",
@@ -370,7 +388,7 @@
 
     "settingsPage": {
       "title": "ការកំណត់ប្លាតហ្វម",
-      "subtitle": "កន្លែងធ្វើការបន្តផ្ទាល់ពីគណនីអ្នកគ្រប់គ្រង",
+      "subtitle": "កន្លែងធ្វើការបន្តផ្ទាល់ពី {email}",
       "personalInfo": "ព័ត៌មានផ្ទាល់ខ្លួន",
       "personalInfoDesc": "គ្រប់គ្រងព័ត៌មានប្រវត្តិរូបដែលប្រើក្នុងកន្លែងធ្វើការ CLP របស់អ្នក។",
       "fullName": "ឈ្មោះពេញ",
@@ -506,7 +524,9 @@
     "monthlyRevenue": {
       "title": "ប្រាក់ចំណូលប្រចាំខែ",
       "last12": "១២ ខែចុងក្រោយ",
-      "vsPrevMonth": "បើប្រៀបខែមុន"
+      "vsPrevMonth": "បើប្រៀបខែមុន",
+      "emptyTitle": "មិនទាន់មានប្រាក់ចំណូលនៅឡើយ",
+      "emptyDesc": "ប្រាក់ចំណូលនឹងបង្ហាញនៅទីនេះនៅពេលដែលអ្នកសិក្សាចាប់ផ្តើមចុះឈ្មោះក្នុងវគ្គសិក្សាដែលមានបង់ប្រាក់។"
     }
   }
 }

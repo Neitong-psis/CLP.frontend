@@ -11,14 +11,13 @@ export interface NewStudentInput {
   course: string;
 }
 
-/** Search, status/risk filtering and sorting over the educator's learner roster. */
+/** Search, status filtering and sorting over the educator's learner roster. */
 export function useStudentFilter() {
   const [students, setStudents] = useState<StudentRow[]>([
     ...EDUCATOR_STUDENTS,
   ]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
-  const [riskOnly, setRiskOnly] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -26,17 +25,14 @@ export function useStudentFilter() {
     const c = {
       total: students.length,
       active: 0,
+      inactive: 0,
       achieved: 0,
-      atRisk: 0,
-      avgProgress: 0,
     };
     for (const s of students) {
       if (s.status === 'Active') c.active++;
+      if (s.status === 'Inactive') c.inactive++;
       if (s.status === 'Completed') c.achieved++;
-      if (s.activity === 'At risk') c.atRisk++;
-      c.avgProgress += s.progress;
     }
-    c.avgProgress = Math.round(c.avgProgress / (students.length || 1));
     return c;
   }, [students]);
 
@@ -68,7 +64,6 @@ export function useStudentFilter() {
     const q = search.trim().toLowerCase();
     const rows = students.filter((s) => {
       if (statusFilter !== 'All' && s.status !== statusFilter) return false;
-      if (riskOnly && s.activity !== 'At risk') return false;
       if (
         q &&
         !s.name.toLowerCase().includes(q) &&
@@ -89,7 +84,7 @@ export function useStudentFilter() {
       });
     }
     return rows;
-  }, [students, search, statusFilter, riskOnly, sortKey, sortDir]);
+  }, [students, search, statusFilter, sortKey, sortDir]);
 
   /** Cycle a column: asc → desc → off. */
   function toggleSort(key: Exclude<SortKey, null>) {
@@ -106,18 +101,15 @@ export function useStudentFilter() {
   function clearFilters() {
     setSearch('');
     setStatusFilter('All');
-    setRiskOnly(false);
   }
 
-  const hasFilters = search !== '' || statusFilter !== 'All' || riskOnly;
+  const hasFilters = search !== '' || statusFilter !== 'All';
 
   return {
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
-    riskOnly,
-    setRiskOnly,
     sortKey,
     sortDir,
     toggleSort,

@@ -10,6 +10,7 @@ export function StudentsToolbar({
   onSearchChange,
   statusFilter,
   onStatusChange,
+  counts,
   resultCount,
   onAddStudent,
 }: {
@@ -17,14 +18,23 @@ export function StudentsToolbar({
   onSearchChange: (value: string) => void;
   statusFilter: StatusFilter;
   onStatusChange: (value: StatusFilter) => void;
+  counts: { total: number; active: number; inactive: number; achieved: number };
   resultCount: number;
   onAddStudent: () => void;
 }) {
   const t = useEducatorStudentsT();
 
+  const TAB_COUNT: Record<StatusFilter, number> = {
+    All: counts.total,
+    Active: counts.active,
+    Inactive: counts.inactive,
+    Completed: counts.achieved,
+  };
+
   const STATUS_TABS: PillTab<StatusFilter>[] = STATUS_OPTIONS.map((opt) => ({
     value: opt,
     label: opt === 'Completed' ? t('achievedLabel') : opt,
+    count: TAB_COUNT[opt],
   }));
 
   return (

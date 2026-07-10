@@ -12,11 +12,13 @@ const btnCls =
 export function ProfileHeader({
   fullName,
   email,
+  initials,
   avatarUrl,
   onAvatarChange,
 }: {
   fullName: string;
   email: string;
+  initials: string;
   avatarUrl: string | null;
   onAvatarChange: (file: File | null) => void;
 }) {
@@ -38,7 +40,7 @@ export function ProfileHeader({
             />
           ) : (
             <div className="bg-brand-gold flex h-full w-full items-center justify-center text-xl font-bold text-white">
-              {EDUCATOR_USER.initials}
+              {initials}
             </div>
           )}
         </div>

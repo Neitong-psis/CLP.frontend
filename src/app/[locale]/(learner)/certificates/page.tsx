@@ -9,7 +9,8 @@ import { SearchInput } from '@/components/common/list/SearchInput';
 import { Pagination } from '@/components/common/list/Pagination';
 import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { CERTIFICATES, MOCK_USER, type Certificate } from '@/config/learner';
+import { CERTIFICATES, type Certificate } from '@/config/learner';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils/cn';
 import {
   readVerifiedCerts,
@@ -48,6 +49,7 @@ function sortCertificates(
 
 export default function CertificatesPage() {
   const t = useLearnerCertificatesT();
+  const { firstName, email } = useCurrentUser();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<SortKey>('recent');
@@ -122,13 +124,13 @@ export default function CertificatesPage() {
       <TopBar
         role="learner"
         title={t('title')}
-        subtitle={t('subtitle', { email: MOCK_USER.email })}
+        subtitle={t('subtitle', { email })}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <PageHero
           className="mb-6"
-          title={t('heroTitle', { name: MOCK_USER.name.split(' ')[0] })}
+          title={t('heroTitle', { name: firstName })}
           description={t('heroDesc')}
         />
 

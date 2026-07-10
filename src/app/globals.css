@@ -109,6 +109,22 @@
   --chart-indigo: #6366f1; /* distribution: learners */
   --chart-warn: #f59e0b; /* pass-rate 60–79% (theme-stable) */
   --chart-bad: #f43f5e; /* pass-rate < 60% (theme-stable) */
+
+  /* Course sidebar. `course-accent` is the "active / current" blue and
+     `course-done` the completion green. Both are declared here (not in @theme)
+     because the raw hues are too dark to read against the dark navy surface and
+     need the .dark lift below. */
+  --course-accent: var(--color-accent-blue);
+  --course-done: var(--chart-emerald);
+
+  /* Checkout. A deliberately distinct register from the rest of the app —
+     Stripe-style trust blue rather than brand navy/gold — scoped to this one
+     flow the same way the sidebar's tokens are. `checkout-surface` is the
+     page's own #FAFAFA backdrop (the app's --background is pure white; the
+     checkout wants a hair of contrast behind its white cards). */
+  --checkout-accent: #2563eb;
+  --checkout-accent-hover: #1d4ed8;
+  --checkout-surface: #fafafa;
 }
 
 .dark {
@@ -142,6 +158,15 @@
   --chart-emerald: #34d399;
   --chart-blue: #60a5fa;
   --chart-indigo: #818cf8;
+
+  /* #3b5bfd sits at ~3.4:1 on the dark surface — lift both sidebar hues. */
+  --course-accent: #5b78ff;
+  --course-done: var(--chart-emerald);
+
+  /* #2563eb reads fine on dark too, but blue-500 has a touch more pop. */
+  --checkout-accent: #3b82f6;
+  --checkout-accent-hover: #2563eb;
+  --checkout-surface: var(--background);
 }
 
 /* Expose semantic + chart tokens to Tailwind. `inline` makes utilities resolve
@@ -183,6 +208,13 @@
   --color-chart-emerald: var(--chart-emerald);
   --color-chart-blue: var(--chart-blue);
   --color-chart-indigo: var(--chart-indigo);
+
+  --color-course-accent: var(--course-accent);
+  --color-course-done: var(--course-done);
+
+  --color-checkout-accent: var(--checkout-accent);
+  --color-checkout-accent-hover: var(--checkout-accent-hover);
+  --color-checkout-surface: var(--checkout-surface);
 }
 
 @layer base {

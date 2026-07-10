@@ -1,27 +1,36 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Clock,
   Copy,
   ImageIcon,
+  Maximize2,
   Plus,
   RefreshCw,
-  Sparkles,
   Star,
   Upload,
   User,
   Users,
   X,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils/cn';
 import { useCreateCourseT } from '@/i18n';
 import { useToast } from '@/components/ui/toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { CourseInfo } from '../_lib/types';
-import { priceLabel } from '../_lib/builder';
+import { priceLabel, formatThousands } from '../_lib/builder';
 import { FormField, SelectField, inputCls } from './form';
+import { PromoCodeQrModal } from './PromoCodeQrModal';
 
 const PROMO_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O, 1/I
 
@@ -33,6 +42,40 @@ function generatePromoCode(): string {
   }
   return code;
 }
+
+// Flag emoji don't render consistently across platforms (some show bare
+// country-code text), so currency flags are drawn as inline SVGs instead.
+function FlagUS({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 14" className={className} aria-hidden>
+      <rect width="20" height="14" fill="#B22234" />
+      <g fill="#fff">
+        <rect y="1.08" width="20" height="1.08" />
+        <rect y="3.23" width="20" height="1.08" />
+        <rect y="5.38" width="20" height="1.08" />
+        <rect y="7.54" width="20" height="1.08" />
+        <rect y="9.69" width="20" height="1.08" />
+        <rect y="11.85" width="20" height="1.08" />
+      </g>
+      <rect width="8" height="7.54" fill="#3C3B6E" />
+    </svg>
+  );
+}
+
+function FlagKH({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 14" className={className} aria-hidden>
+      <rect width="20" height="14" fill="#032EA1" />
+      <rect y="3.5" width="20" height="7" fill="#E00025" />
+      <rect x="7.5" y="4.5" width="5" height="5" rx="0.5" fill="#fff" />
+    </svg>
+  );
+}
+
+const CURRENCIES = [
+  { code: 'USD', Flag: FlagUS, placeholder: '79' },
+  { code: 'KHR', Flag: FlagKH, placeholder: '4000' },
+] as const;
 
 const CATEGORIES = [
   'Web Development',
@@ -358,18 +401,41 @@ export function CourseInfoStep({
   const { toast } = useToast();
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
   const [extraLevels, setExtraLevels] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
+  const [spinning, setSpinning] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const isFree = info.pricingType === 'free';
+  const currency =
+    CURRENCIES.find((c) => c.code === info.currency) ?? CURRENCIES[0];
+
+  // A free course always has a redeemable code — generate one the moment
+  // "Free" is selected (or if a draft was seeded without one).
+  useEffect(() => {
+    if (isFree && !info.promoCode) {
+      onChange('promoCode', generatePromoCode());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFree, info.promoCode]);
 
   function handleGenerateCode() {
+    setSpinning(true);
     onChange('promoCode', generatePromoCode());
+    setTimeout(() => setSpinning(false), 500);
   }
 
   function handleCopyCode() {
     if (!info.promoCode) return;
-    navigator.clipboard.writeText(info.promoCode);
+    navigator.clipboard?.writeText(info.promoCode).catch(() => {});
     toast(t('info.codeCopied'), 'success');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   }
+
+  const redeemUrl =
+    typeof window !== 'undefined' && info.promoCode
+      ? `${window.location.origin}/explore?redeem=${info.promoCode}`
+      : '';
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
@@ -500,11 +566,7 @@ export function CourseInfoStep({
           </div>
 
           {isFree ? (
-            <div className="mt-4 max-w-xs space-y-3">
-              <p className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-                {t('info.freeCourseNote')}
-              </p>
-
+            <div className="mt-4 max-w-md space-y-3">
               <div>
                 <label className="text-foreground/80 mb-1 block text-sm font-semibold">
                   {t('info.promoCode')}
@@ -513,40 +575,61 @@ export function CourseInfoStep({
                   {t('info.promoCodeNote')}
                 </p>
 
-                {info.promoCode ? (
-                  <div className="border-border bg-card flex items-center justify-between rounded-lg border px-3 py-2">
-                    <span className="text-foreground font-mono text-sm font-semibold tracking-[0.15em]">
-                      {info.promoCode}
+                <div className="border-border bg-card flex flex-col gap-4 rounded-lg border p-3 sm:flex-row sm:items-center">
+                  <div className="flex flex-1 items-center justify-between gap-2">
+                    <span
+                      key={info.promoCode}
+                      className="text-foreground animate-in fade-in zoom-in-95 font-mono text-base font-semibold tracking-[0.2em] duration-300"
+                    >
+                      {info.promoCode || '········'}
                     </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <button
                         type="button"
                         onClick={handleCopyCode}
                         title={t('info.copyCode')}
-                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md transition"
+                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        {copied ? (
+                          <Check className="animate-in zoom-in h-4 w-4 text-emerald-500 duration-200" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
                       </button>
                       <button
                         type="button"
                         onClick={handleGenerateCode}
                         title={t('info.regenerateCode')}
-                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md transition"
+                        className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
                       >
-                        <RefreshCw className="h-3.5 w-3.5" />
+                        <RefreshCw
+                          className={cn(
+                            'h-4 w-4 transition-transform',
+                            spinning && 'animate-spin',
+                          )}
+                        />
                       </button>
                     </div>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleGenerateCode}
-                    className="border-border text-foreground hover:bg-muted/40 flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-semibold transition"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    {t('info.generateCode')}
-                  </button>
-                )}
+
+                  {/* QR — scan to open the redeem flow pre-filled with this code */}
+                  <div className="border-border flex shrink-0 flex-col items-center gap-1.5 border-t pt-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowQrModal(true)}
+                      title={t('info.expandQr')}
+                      className="group/qr relative rounded-md bg-white p-1.5 transition-transform hover:scale-105"
+                    >
+                      <QRCodeSVG value={redeemUrl || ' '} size={72} />
+                      <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/0 opacity-0 transition-all group-hover/qr:bg-black/40 group-hover/qr:opacity-100">
+                        <Maximize2 className="size-5 text-white" />
+                      </span>
+                    </button>
+                    <span className="text-muted-foreground text-[10px] font-medium whitespace-nowrap">
+                      {t('info.scanToRedeem')}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
@@ -555,20 +638,52 @@ export function CourseInfoStep({
                 {t('info.price')}
               </label>
               <div className="border-border bg-card flex overflow-hidden rounded-lg border transition focus-within:border-blue-900 focus-within:ring-1 focus-within:ring-blue-900/20 dark:focus-within:border-amber-400 dark:focus-within:ring-amber-400/20">
-                <span className="border-border bg-muted/40 text-muted-foreground border-r px-3 py-2 text-sm">
-                  $
-                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border bg-muted/40 text-foreground hover:bg-muted flex shrink-0 items-center gap-1.5 border-r px-3 py-2 text-sm font-semibold transition-colors"
+                    >
+                      <currency.Flag className="h-3 w-4 shrink-0 rounded-[2px]" />
+                      {currency.code}
+                      <ChevronDown className="text-muted-foreground h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    theme="light"
+                    align="start"
+                    className="min-w-28 shadow-md"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <DropdownMenuItem
+                        key={c.code}
+                        theme="light"
+                        onSelect={() => onChange('currency', c.code)}
+                        className={cn(
+                          'gap-2',
+                          c.code === currency.code &&
+                            'text-brand-gold font-semibold',
+                        )}
+                      >
+                        <c.Flag className="h-3 w-4 shrink-0 rounded-[2px]" />
+                        {c.code}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <input
-                  type="number"
-                  placeholder="79"
-                  min={0}
-                  value={info.price}
-                  onChange={(e) => onChange('price', e.target.value)}
-                  className="text-foreground flex-1 [appearance:textfield] bg-transparent px-3 py-2 text-sm outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={currency.placeholder}
+                  value={formatThousands(info.price, ' ')}
+                  onChange={(e) =>
+                    onChange('price', e.target.value.replace(/\D/g, ''))
+                  }
+                  className="text-foreground flex-1 bg-transparent px-3 py-2 text-sm outline-none"
                 />
               </div>
               <p className="text-muted-foreground mt-1 text-[11px]">
-                {t('info.priceNote')}
+                {t('info.priceNote', { currency: currency.code })}
               </p>
             </div>
           )}
@@ -579,6 +694,14 @@ export function CourseInfoStep({
         info={info}
         onThumbnail={(dataUrl) => onChange('thumbnail', dataUrl)}
       />
+
+      {showQrModal && (
+        <PromoCodeQrModal
+          code={info.promoCode}
+          redeemUrl={redeemUrl}
+          onClose={() => setShowQrModal(false)}
+        />
+      )}
     </div>
   );
 }

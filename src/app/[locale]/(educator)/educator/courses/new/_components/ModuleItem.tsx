@@ -1,6 +1,12 @@
 'use client';
 
-import { ChevronDown, Plus } from 'lucide-react';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { ChevronDown, GripVertical, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useCreateCourseT } from '@/i18n';
 import type { ContentSection, CourseModule, Lesson } from '../_lib/types';
@@ -8,11 +14,14 @@ import { makeLesson, makeSection, moveItem } from '../_lib/builder';
 import { FormField, inputCls } from './form';
 import { LessonItem } from './LessonItem';
 import { RowControls } from './RowControls';
+import { DropIndicatorLine } from './DropIndicatorLine';
+import type { DropIndicator } from './CourseContentStep';
 
 export function ModuleItem({
   module,
   moduleIndex,
   totalModules,
+  dropIndicator,
   onUpdate,
   onDelete,
   onMove,
@@ -21,12 +30,28 @@ export function ModuleItem({
   module: CourseModule;
   moduleIndex: number;
   totalModules: number;
+  dropIndicator: DropIndicator | null;
   onUpdate: (m: CourseModule) => void;
   onDelete: () => void;
   onMove: (dir: 'up' | 'down') => void;
   onAddModule: () => void;
 }) {
   const t = useCreateCourseT();
+
+  const displayTitle =
+    module.title || t('content.module.defaultTitle', { n: moduleIndex + 1 });
+
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: module.id,
+    data: { type: 'module', module, title: displayTitle },
+  });
 
   const addLesson = () =>
     onUpdate({
@@ -60,30 +85,50 @@ export function ModuleItem({
       ? t('content.module.lessonCountOne', { count: lessonCount })
       : t('content.module.lessonCountOther', { count: lessonCount });
 
+  const showBefore =
+    dropIndicator?.id === module.id && dropIndicator.position === 'before';
+  const showAfter =
+    dropIndicator?.id === module.id && dropIndicator.position === 'after';
+  const showInside =
+    dropIndicator?.id === module.id && dropIndicator.position === 'inside';
+
   return (
-    <div className="group/module animate-fade-in relative">
-      <div className="border-border bg-card overflow-hidden rounded-2xl border transition-shadow group-hover/module:shadow-sm">
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        'group/module animate-fade-in relative',
+        isDragging && 'z-10 opacity-50',
+      )}
+    >
+      {showBefore && <DropIndicatorLine />}
+      <div
+        className={cn(
+          'border-border bg-card rounded-2xl border transition-colors group-hover/module:border-blue-900/40 dark:group-hover/module:border-amber-400/40',
+          showInside && 'border-brand-gold ring-brand-gold/20 ring-2',
+        )}
+      >
         {/* Header — hover it to reveal the move / delete controls */}
         <div
           className={cn(
-            'group/head flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
+            'group/head flex cursor-grab items-center gap-3 rounded-t-2xl px-4 py-3 transition-colors active:cursor-grabbing',
             module.expanded ? 'bg-muted/30' : 'hover:bg-muted/30',
+            !module.expanded && 'rounded-b-2xl',
           )}
           onClick={() => onUpdate({ ...module, expanded: !module.expanded })}
+          {...attributes}
+          {...listeners}
         >
-          <ChevronDown
-            className={cn(
-              'text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200',
-              module.expanded && 'rotate-180',
-            )}
+          <ModuleHeaderIcon
+            expanded={module.expanded}
+            isDragging={isDragging}
           />
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/10 text-xs font-bold text-blue-950 dark:bg-amber-400/10 dark:text-amber-400">
             {moduleIndex + 1}
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-foreground truncate text-sm font-bold">
-              {module.title ||
-                t('content.module.defaultTitle', { n: moduleIndex + 1 })}
+              {displayTitle}
             </p>
             <p className="text-muted-foreground text-[11px]">
               {lessonCountLabel}
@@ -94,7 +139,7 @@ export function ModuleItem({
             total={totalModules}
             onMove={onMove}
             onDelete={onDelete}
-            className="opacity-0 transition-opacity duration-200 group-hover/head:opacity-100 focus-within:opacity-100"
+            className="scale-95 opacity-0 transition-all duration-200 group-hover/head:scale-100 group-hover/head:opacity-100 focus-within:scale-100 focus-within:opacity-100"
           />
         </div>
 
@@ -111,24 +156,33 @@ export function ModuleItem({
             </FormField>
 
             {module.lessons.length > 0 && (
-              <div className="space-y-3">
-                {module.lessons.map((lesson, li) => (
-                  <LessonItem
-                    key={lesson.id}
-                    lesson={lesson}
-                    lessonIndex={li}
-                    totalLessons={module.lessons.length}
-                    onUpdate={(updated) => updateLesson(li, updated)}
-                    onDelete={() => deleteLesson(li)}
-                    onMove={(dir) => moveLesson(li, dir)}
-                    onAddSection={(type) => addSection(li, type)}
-                  />
-                ))}
-              </div>
+              <SortableContext
+                id={module.id}
+                items={module.lessons.map((l) => l.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {module.lessons.map((lesson, li) => (
+                    <LessonItem
+                      key={lesson.id}
+                      lesson={lesson}
+                      moduleId={module.id}
+                      lessonIndex={li}
+                      totalLessons={module.lessons.length}
+                      dropIndicator={dropIndicator}
+                      onUpdate={(updated) => updateLesson(li, updated)}
+                      onDelete={() => deleteLesson(li)}
+                      onMove={(dir) => moveLesson(li, dir)}
+                      onAddSection={(type) => addSection(li, type)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
             )}
           </div>
         )}
       </div>
+      {showAfter && <DropIndicatorLine />}
 
       {/* Insert bar — hover the bottom border to add a lesson or another module.
           Sits over the bottom edge; hidden until the module is hovered (or
@@ -146,6 +200,33 @@ export function ModuleItem({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Chevron by default; swaps to a grip on header hover (or mid-drag) as the drag affordance. */
+function ModuleHeaderIcon({
+  expanded,
+  isDragging,
+}: {
+  expanded: boolean;
+  isDragging: boolean;
+}) {
+  return (
+    <span className="relative flex h-4 w-4 shrink-0 items-center justify-center">
+      <ChevronDown
+        className={cn(
+          'text-muted-foreground absolute h-4 w-4 transition-all duration-150 group-hover/head:opacity-0',
+          expanded && 'rotate-180',
+          isDragging && 'opacity-0',
+        )}
+      />
+      <GripVertical
+        className={cn(
+          'text-muted-foreground absolute h-4 w-4 opacity-0 transition-opacity duration-150 group-hover/head:opacity-100',
+          isDragging && 'opacity-100',
+        )}
+      />
+    </span>
   );
 }
 

@@ -4,18 +4,24 @@ import { UserCircle } from 'lucide-react';
 import { useEducatorSettingsT } from '@/i18n';
 import TopBar from '@/components/common/TopBar';
 import { Button } from '@/components/ui/button';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProfileForm } from './_lib/useProfileForm';
 import { ProfileHeader } from './_components/ProfileHeader';
 import { ProfileFields } from './_components/ProfileFields';
 
 export default function EducatorSettingsPage() {
   const t = useEducatorSettingsT();
-  const { form, setField, setAvatar, avatarUrl, dirty, save, reset } =
+  const currentUser = useCurrentUser();
+  const { form, setField, setAvatar, avatarUrl, initials, dirty, save, reset } =
     useProfileForm();
 
   return (
     <div className="bg-background flex min-h-full flex-col">
-      <TopBar role="educator" title={t('title')} />
+      <TopBar
+        role="educator"
+        title={t('title')}
+        subtitle={t('subtitle', { email: currentUser.email })}
+      />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <section className="border-border bg-card rounded-2xl border p-6">
@@ -36,6 +42,7 @@ export default function EducatorSettingsPage() {
           <ProfileHeader
             fullName={form.fullName}
             email={form.email}
+            initials={initials}
             avatarUrl={avatarUrl}
             onAvatarChange={setAvatar}
           />

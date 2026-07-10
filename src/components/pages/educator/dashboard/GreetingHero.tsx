@@ -9,6 +9,7 @@ import {
   EDUCATOR_STAT_CONFIG,
   MONTHLY_ENROLLMENTS,
 } from '@/constants/educator';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 // ── Sparkline geometry ────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ const RING_DASH = (RATING_VALUE / 5) * RING_CIRC;
 export function GreetingHero() {
   const t = useEducatorGreetingHeroT();
   const locale = useLocale();
+  const currentUser = useCurrentUser();
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -79,7 +81,7 @@ export function GreetingHero() {
               </p>
             </div>
             <p className="text-foreground mt-1 text-lg font-bold">
-              {EDUCATOR_USER.name}
+              {currentUser.fullName}
             </p>
             <span className="border-brand-gold/30 bg-brand-gold/10 text-brand-gold mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold">
               {EDUCATOR_USER.role}

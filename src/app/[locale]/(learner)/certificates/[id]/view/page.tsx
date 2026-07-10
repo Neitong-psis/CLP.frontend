@@ -16,9 +16,11 @@ import { useToast } from '@/components/ui/toast';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import Logo from '@/components/common/Logo';
-import { MOCK_USER, type Certificate } from '@/config/learner';
+import { type Certificate } from '@/config/learner';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { getCertById } from '../_lib/cert';
 import { readVerifiedCertName } from '@/lib/utils/certStorage';
+import { exportCertificateToPdf } from '@/lib/utils/certificatePdf';
 
 // ── QR placeholder ────────────────────────────────────────────────────────────
 
@@ -51,15 +53,18 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
   const t = useLearnerCertificatesT();
   const router = useRouter();
   const { toast } = useToast();
+  const currentUser = useCurrentUser();
   const [copied, setCopied] = useState(false);
-  const [certName, setCertName] = useState(MOCK_USER.name);
+  const [certName, setCertName] = useState(currentUser.fullName);
 
   useEffect(() => {
     const stored = readVerifiedCertName(cert.id);
-    if (!stored) return;
-    const timer = setTimeout(() => setCertName(stored), 0);
+    const timer = setTimeout(
+      () => setCertName(stored || currentUser.fullName),
+      0,
+    );
     return () => clearTimeout(timer);
-  }, [cert.id]);
+  }, [cert.id, currentUser.fullName]);
 
   const verifyUrl =
     typeof window !== 'undefined'
@@ -70,6 +75,17 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
     navigator.clipboard.writeText(verifyUrl).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function handleDownload() {
+    exportCertificateToPdf({
+      learnerName: certName,
+      courseTitle: cert.courseTitle,
+      completedDate: cert.completedDate,
+      instructor: cert.instructor,
+      certificateId: cert.certificateId,
+      verifyUrl,
+    });
   }
 
   function handleShare() {
@@ -88,7 +104,7 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
       <TopBar
         role="learner"
         title={t('title')}
-        subtitle={t('subtitle', { email: MOCK_USER.email })}
+        subtitle={t('subtitle', { email: currentUser.email })}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -213,7 +229,7 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
             {/* Action buttons — stacked in sidebar */}
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => {}}
+                onClick={handleDownload}
                 className="bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-gold dark:text-brand-navy flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors"
               >
                 <Download className="size-4" />

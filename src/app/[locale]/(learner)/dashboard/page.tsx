@@ -1,6 +1,8 @@
-import { getTranslations } from 'next-intl/server';
-import { NS } from '@/i18n/namespaces';
-import { MOCK_USER } from '@/constants/learner';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useLearnerDashboardT } from '@/i18n';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import ContinueLearningCard from './_components/ContinueLearningCard';
@@ -11,25 +13,35 @@ import TodaysPlan from './_components/TodaysPlan';
 import UpNextPanel from './_components/UpNextPanel';
 import RecentAchievements from './_components/RecentAchievements';
 
-function greetingKey(
-  hour: number,
-): 'greetingMorning' | 'greetingAfternoon' | 'greetingEvening' {
+type GreetingKey = 'greetingMorning' | 'greetingAfternoon' | 'greetingEvening';
+
+function greetingKey(hour: number): GreetingKey {
   if (hour < 12) return 'greetingMorning';
   if (hour < 18) return 'greetingAfternoon';
   return 'greetingEvening';
 }
 
-export default async function DashboardPage() {
-  const t = await getTranslations(NS.learner.dashboard);
-  const now = new Date();
-  const firstName = MOCK_USER.name.split(' ')[0];
+export default function DashboardPage() {
+  const t = useLearnerDashboardT();
+  const { firstName } = useCurrentUser();
+  // Default to the morning greeting for the first paint so SSR and the
+  // client's pre-mount render match; the real local-time greeting swaps in
+  // once mounted (same hydration-safety pattern as ContinueLearningCard).
+  const [greeting, setGreeting] = useState<GreetingKey>('greetingMorning');
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setGreeting(greetingKey(new Date().getHours()));
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
 
   return (
     <div className="bg-background min-h-full">
       <TopBar
         role="learner"
         title={t('greetingTitle', {
-          greeting: t(greetingKey(now.getHours())),
+          greeting: t(greeting),
           name: firstName,
         })}
         subtitle={t('dashboardSubtitle')}

@@ -31,6 +31,7 @@ export default function AdminNewCoursePage() {
               onChange={builder.setInfoField}
               assignedEducator={builder.assignedEducator}
               onEducatorChange={builder.setAssignedEducator}
+              educators={builder.educators}
             />
           )}
           {builder.step === 2 && (
@@ -40,6 +41,7 @@ export default function AdminNewCoursePage() {
               onUpdateModule={builder.updateModule}
               onDeleteModule={builder.deleteModule}
               onMoveModule={builder.moveModule}
+              onModulesChange={builder.setModules}
             />
           )}
           {builder.step === 3 && (
@@ -47,7 +49,7 @@ export default function AdminNewCoursePage() {
               info={builder.info}
               modules={builder.modules}
               missing={builder.missing}
-              instructor={builder.assignedEducator || undefined}
+              instructor={builder.educatorName || undefined}
             />
           )}
         </div>
@@ -62,6 +64,7 @@ export default function AdminNewCoursePage() {
         onSaveDraft={builder.saveDraft}
         onSubmit={builder.submit}
         submitLabel={t('footer.createCourse')}
+        submitting={builder.submitting}
       />
     </div>
   );

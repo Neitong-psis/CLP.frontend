@@ -5,7 +5,7 @@ import Sidebar from '@/components/common/sidebar/Sidebar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import { MobileSidebarProvider } from '@/context/MobileSidebarContext';
 import { MobileSidebarDrawer } from '@/components/common/sidebar/MobileSidebarDrawer';
-import { ADMIN_USER } from '@/constants/admin';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function AdminShell({
   children,
@@ -14,11 +14,12 @@ export default function AdminShell({
 }) {
   const pathname = usePathname();
   const isLogin = pathname === '/admin/login';
+  const currentUser = useCurrentUser();
 
   if (isLogin) return <>{children}</>;
 
   return (
-    <MobileSidebarProvider userInitials={ADMIN_USER.initials}>
+    <MobileSidebarProvider userInitials={currentUser.initials}>
       <div className="bg-background flex h-screen overflow-hidden">
         <div className="hidden lg:flex lg:h-full lg:shrink-0">
           <Sidebar role="admin" />

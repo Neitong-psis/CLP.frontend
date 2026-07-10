@@ -1,22 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEducatorReviewT } from '@/i18n';
 import {
   ArrowLeft,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  FileText,
   Play,
-  ClipboardList,
-  ClipboardCheck,
-  Folder,
-  Check,
-  Layers,
-  BookOpen,
+  Lock,
   MoreVertical,
   PencilLine,
   Send,
@@ -25,9 +17,7 @@ import {
   CheckCircle2,
   Clock,
   Lightbulb,
-  PanelLeftClose,
-  PanelLeftOpen,
-  X,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -36,46 +26,42 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { PillTabs } from '@/components/common/list/PillTabs';
-import Logo from '@/components/common/Logo';
 import { EDUCATOR_USER, type CourseTask } from '@/constants/educator';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { exportCourseToPdf } from '@/lib/utils/courseExportPdf';
 import {
   REVIEW_MODULES,
   flattenItems,
   lessonCount,
   type ReviewItem,
-  type ReviewItemKind,
-  type ReviewLesson,
-  type ReviewModule,
   type DocumentItem,
   type VideoItem,
   type QuizItem,
   type QuizQuestion,
   type AssignmentItem,
 } from '../_lib/content';
-
-const KIND_ICON: Record<ReviewItemKind, typeof Play> = {
-  document: FileText,
-  video: Play,
-  quiz: ClipboardList,
-  assignment: ClipboardCheck,
-};
-
-type TFn = ReturnType<typeof useEducatorReviewT>;
+import { CourseContentSidebar } from '@/components/course-content/CourseContentSidebar';
+import { CourseContentSheet } from '@/components/course-content/CourseContentSheet';
+import {
+  KIND_ICON,
+  type SidebarLabels,
+} from '@/components/course-content/types';
+import { computeLocks, type ItemDone } from '@/lib/course-progress';
 
 export function CourseReview({ task }: { task: CourseTask }) {
   const router = useRouter();
   const t = useEducatorReviewT();
   const { toast } = useToast();
+  const currentUser = useCurrentUser();
   const modules = REVIEW_MODULES;
   const items = useMemo(() => flattenItems(modules), [modules]);
-  const firstVideo = items.find((i) => i.kind === 'video') ?? items[0];
 
-  const [activeId, setActiveId] = useState(firstVideo?.id ?? '');
+  const [activeId, setActiveId] = useState(items[0]?.id ?? '');
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set(modules.map((m) => m.id)),
   );
   const [viewed, setViewed] = useState<Set<string>>(
-    () => new Set([firstVideo?.id]),
+    () => new Set([items[0]?.id]),
   );
   const [showResubmit, setShowResubmit] = useState(false);
   const isArchived = task.status === 'Archived';
@@ -84,7 +70,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const [mobileModuleId, setMobileModuleId] = useState<string>(
     () =>
       modules.find((m) =>
-        flattenItems([m]).some((item) => item.id === (firstVideo?.id ?? '')),
+        flattenItems([m]).some((item) => item.id === (items[0]?.id ?? '')),
       )?.id ??
       modules[0]?.id ??
       '',
@@ -100,19 +86,39 @@ export function CourseReview({ task }: { task: CourseTask }) {
     [mobileModule],
   );
 
+  // Reviewer completion: opening an item counts; preview quizzes are non-scored
+  // so they never block. Locking is still enforced (all-three-surfaces policy).
+  const isItemDone = useMemo<ItemDone>(
+    () => (item) => (item.kind === 'quiz' ? true : viewed.has(item.id)),
+    [viewed],
+  );
+  const locks = useMemo(
+    () => computeLocks(modules, isItemDone, true),
+    [modules, isItemDone],
+  );
+
   const active = items.find((i) => i.id === activeId) ?? items[0];
   const currentIndex = items.findIndex((i) => i.id === activeId);
   const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem =
     currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+  const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
 
-  function select(id: string) {
+  function goTo(id: string) {
     setActiveId(id);
     setViewed((prev) => new Set(prev).add(id));
     const newMod = modules.find((m) =>
       flattenItems([m]).some((item) => item.id === id),
     );
     if (newMod) setMobileModuleId(newMod.id);
+  }
+
+  function select(id: string) {
+    if (locks.lockedItemIds.has(id)) {
+      toast(t('lockedToast'), 'info');
+      return;
+    }
+    goTo(id);
   }
 
   function toggleModule(id: string) {
@@ -135,23 +141,50 @@ export function CourseReview({ task }: { task: CourseTask }) {
     router.push('/educator/courses');
   }
 
+  function handleExportPdf() {
+    exportCourseToPdf(
+      {
+        title: task.title,
+        category: task.category,
+        description: task.description,
+      },
+      modules,
+    );
+  }
+
+  const totalLessons = modules.reduce((s, m) => s + lessonCount(m), 0);
+  const labels: SidebarLabels = {
+    courseContent: t('courseContent'),
+    moduleCount: t('modules', { count: modules.length }),
+    lessonCount: t('lessons', { count: totalLessons }),
+    formatProgress: (done, total) =>
+      t('itemsReviewed', { reviewed: done, total }),
+    backAria: t('backToCourses'),
+    collapseAria: t('collapseSidebar'),
+    expandAria: t('expandSidebar'),
+    lockedHint: (lesson) => t('lockedHint', { lesson }),
+    lockedShort: t('locked'),
+  };
+
   return (
     <div className="bg-background fixed inset-0 z-50 flex overflow-hidden">
       {/* ── Body: sidebar | main column ────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Review sidebar (owns its brand header) */}
-        <ReviewSidebar
+        {/* Shared course-content sidebar (owns its brand header) */}
+        <CourseContentSidebar
           courseTitle={task.title}
           modules={modules}
           activeId={activeId}
-          reviewedCount={viewed.size}
-          totalCount={items.length}
           expanded={expanded}
+          onToggleModule={toggleModule}
+          isItemDone={isItemDone}
+          lockingEnabled
+          onSelect={select}
+          onLockedSelect={() => toast(t('lockedToast'), 'info')}
           collapsed={sidebarCollapsed}
           onCollapse={() => setSidebarCollapsed((v) => !v)}
-          onToggleModule={toggleModule}
-          onSelect={select}
-          t={t}
+          backHref="/educator/courses"
+          labels={labels}
         />
 
         {/* Main column: header + content + footer nav */}
@@ -200,6 +233,17 @@ export function CourseReview({ task }: { task: CourseTask }) {
                         <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
                         {t('editCourse')}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          handleExportPdf();
+                        }}
+                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                      >
+                        <Download className="text-muted-foreground h-4 w-4 shrink-0" />
+                        {t('exportPdf')}
+                      </button>
                       <div className="border-border/60 border-t" />
                       {isArchived ? (
                         <button
@@ -238,13 +282,22 @@ export function CourseReview({ task }: { task: CourseTask }) {
                 {t('heading')}
               </h1>
               <p className="text-muted-foreground truncate text-[11px]">
-                Live workspace synced for {EDUCATOR_USER.email}
+                Live workspace synced for {currentUser.email}
               </p>
             </div>
             <div className="hidden items-center gap-1.5 lg:flex">
               <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-0.5 text-xs font-semibold text-emerald-500">
                 {EDUCATOR_USER.role}
               </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleExportPdf}
+              >
+                <Download className="h-4 w-4" />
+                {t('exportPdf')}
+              </Button>
               <ThemeToggle className="size-8" />
               <NotificationBell />
               <LanguageSwitcher />
@@ -270,6 +323,8 @@ export function CourseReview({ task }: { task: CourseTask }) {
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
+                const locked = locks.lockedItemIds.has(item.id);
+                const done = isItemDone(item);
                 return (
                   <button
                     key={item.id}
@@ -277,12 +332,20 @@ export function CourseReview({ task }: { task: CourseTask }) {
                     onClick={() => select(item.id)}
                     className={cn(
                       'border-border flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
-                      isActive
-                        ? 'bg-brand-gold border-brand-gold text-brand-navy'
-                        : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
+                      locked
+                        ? 'bg-muted/30 text-muted-foreground/60 cursor-not-allowed'
+                        : isActive
+                          ? 'bg-brand-gold border-brand-gold text-brand-navy'
+                          : done
+                            ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
                     )}
                   >
-                    <Icon className="h-3 w-3 shrink-0" />
+                    {locked ? (
+                      <Lock className="h-3 w-3 shrink-0" />
+                    ) : (
+                      <Icon className="h-3 w-3 shrink-0" />
+                    )}
                     <span>{item.title}</span>
                   </button>
                 );
@@ -302,7 +365,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
               <button
                 type="button"
                 disabled={!prevItem}
-                onClick={() => prevItem && select(prevItem.id)}
+                onClick={() => prevItem && goTo(prevItem.id)}
                 className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-25"
               >
                 <ChevronLeft className="h-4 w-4 shrink-0" />
@@ -314,14 +377,23 @@ export function CourseReview({ task }: { task: CourseTask }) {
               </button>
               <button
                 type="button"
-                disabled={!nextItem}
-                onClick={() => nextItem && select(nextItem.id)}
+                disabled={!nextItem || nextLocked}
+                onClick={() => nextItem && !nextLocked && goTo(nextItem.id)}
+                title={nextLocked ? t('lockedNextHint') : undefined}
                 className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 flex min-w-0 flex-1 items-center justify-end gap-1.5 rounded-xl px-3 py-2.5 text-right font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-25"
               >
-                {nextItem && (
-                  <span className="truncate text-[11px]">{nextItem.title}</span>
+                {nextLocked ? (
+                  <Lock className="h-4 w-4 shrink-0" />
+                ) : (
+                  <>
+                    {nextItem && (
+                      <span className="truncate text-[11px]">
+                        {nextItem.title}
+                      </span>
+                    )}
+                    <ChevronRight className="h-4 w-4 shrink-0" />
+                  </>
                 )}
-                <ChevronRight className="h-4 w-4 shrink-0" />
               </button>
             </div>
 
@@ -380,650 +452,23 @@ export function CourseReview({ task }: { task: CourseTask }) {
       )}
 
       {showContents && (
-        <MobileContentsSheet
+        <CourseContentSheet
           modules={modules}
           activeId={activeId}
           expanded={expanded}
-          reviewedCount={viewed.size}
-          totalCount={items.length}
+          onToggleModule={toggleModule}
+          isItemDone={isItemDone}
+          lockingEnabled
           onSelect={(id) => {
             select(id);
             setShowContents(false);
           }}
-          onToggleModule={toggleModule}
+          onLockedSelect={() => toast(t('lockedToast'), 'info')}
+          labels={labels}
           onClose={() => setShowContents(false)}
-          t={t}
         />
       )}
     </div>
-  );
-}
-
-// ── ModuleCard ────────────────────────────────────────────────────────────────
-
-function ModuleCard({
-  module,
-  isOpen,
-  activeId,
-  onToggle,
-  onSelect,
-}: {
-  module: ReviewModule;
-  isOpen: boolean;
-  activeId: string;
-  onToggle: () => void;
-  onSelect: (id: string) => void;
-}) {
-  return (
-    <div className="mb-0.5">
-      {/* Module header */}
-      <button
-        onClick={onToggle}
-        aria-expanded={isOpen}
-        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors"
-      >
-        <span className="bg-brand-gold/20 flex size-7 shrink-0 items-center justify-center rounded-full">
-          <Layers className="text-brand-gold size-3.5" />
-        </span>
-        <span className="text-foreground min-w-0 flex-1 truncate text-sm font-bold">
-          {module.title}
-        </span>
-        <ChevronDown
-          className={cn(
-            'text-muted-foreground h-3.5 w-3.5 shrink-0 transition-transform duration-200',
-            isOpen && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {/* Lessons — flat, indented */}
-      <div
-        className={cn(
-          'grid transition-[grid-template-rows] duration-200 ease-in-out',
-          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="pb-1 pl-2">
-            {module.lessons.map((lesson) => (
-              <LessonCard
-                key={lesson.id}
-                lesson={lesson}
-                activeId={activeId}
-                onSelect={onSelect}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── LessonCard ────────────────────────────────────────────────────────────────
-
-function LessonCard({
-  lesson,
-  activeId,
-  onSelect,
-}: {
-  lesson: ReviewLesson;
-  activeId: string;
-  onSelect: (id: string) => void;
-}) {
-  const [open, setOpen] = useState(true);
-  const allItems: ReviewItem[] = [
-    ...lesson.documents,
-    ...lesson.videos,
-    ...lesson.quizzes,
-    ...lesson.assignments,
-  ];
-
-  return (
-    <div className="py-0.5">
-      {/* Lesson header */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="hover:bg-muted/40 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors"
-      >
-        <span className="bg-brand-gold/15 flex size-6 shrink-0 items-center justify-center rounded-full">
-          <Folder className="text-brand-gold size-3" />
-        </span>
-        <span className="text-foreground min-w-0 flex-1 truncate text-xs font-semibold">
-          {lesson.title}
-        </span>
-        <ChevronDown
-          className={cn(
-            'text-muted-foreground h-3 w-3 shrink-0 transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-
-      {/* Items — flat list */}
-      {allItems.length > 0 && (
-        <div
-          className={cn(
-            'grid transition-[grid-template-rows] duration-200 ease-in-out',
-            open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-          )}
-        >
-          <div className="overflow-hidden">
-            <div className="pb-1 pl-2">
-              {allItems.map((item) => (
-                <TreeItemRow
-                  key={item.id}
-                  item={item}
-                  isActive={item.id === activeId}
-                  onSelect={onSelect}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── TreeItemRow — icon + status overlay ───────────────────────────────────────
-
-function TreeItemRow({
-  item,
-  isActive,
-  onSelect,
-}: {
-  item: ReviewItem;
-  isActive: boolean;
-  onSelect: (id: string) => void;
-}) {
-  const Icon = KIND_ICON[item.kind];
-  const status =
-    item.kind === 'quiz' || item.kind === 'assignment' ? item.status : null;
-
-  return (
-    <button
-      onClick={() => onSelect(item.id)}
-      className={cn(
-        'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
-        isActive ? 'bg-brand-gold/10' : 'hover:bg-muted/40',
-      )}
-    >
-      <div className="relative shrink-0">
-        <Icon
-          className={cn(
-            'size-4',
-            isActive ? 'text-brand-gold' : 'text-brand-gold/70',
-          )}
-        />
-        {status && (
-          <span className="absolute -top-1.5 -right-1.5">
-            {status === 'Ready' && (
-              <Check className="size-2.5 text-green-500" strokeWidth={3} />
-            )}
-            {status === 'Draft' && (
-              <Clock className="size-2.5 text-amber-500" />
-            )}
-          </span>
-        )}
-      </div>
-
-      <span
-        className={cn(
-          'min-w-0 flex-1 truncate text-xs font-medium',
-          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground',
-        )}
-      >
-        {item.title}
-      </span>
-    </button>
-  );
-}
-
-// ── Mobile contents sheet ─────────────────────────────────────────────────────
-
-function MobileContentsSheet({
-  modules,
-  activeId,
-  expanded,
-  reviewedCount,
-  totalCount,
-  onSelect,
-  onToggleModule,
-  onClose,
-  t,
-}: {
-  modules: ReviewModule[];
-  activeId: string;
-  expanded: Set<string>;
-  reviewedCount: number;
-  totalCount: number;
-  onSelect: (id: string) => void;
-  onToggleModule: (id: string) => void;
-  onClose: () => void;
-  t: TFn;
-}) {
-  const pct =
-    totalCount === 0 ? 0 : Math.round((reviewedCount / totalCount) * 100);
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('keydown', handler);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-[60] sm:hidden">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden
-      />
-      <div className="bg-background absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col rounded-t-2xl shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
-        <div className="flex shrink-0 justify-center pt-3 pb-1">
-          <div className="bg-muted-foreground/25 h-1 w-10 rounded-full" />
-        </div>
-        <div className="border-border/60 flex shrink-0 items-center justify-between border-b px-4 pt-1 pb-3">
-          <div>
-            <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
-              {t('courseContent')}
-            </p>
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <Layers className="h-3 w-3" />
-                {t('modules', { count: modules.length })}
-              </span>
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <BookOpen className="h-3 w-3" />
-                {t('lessons', {
-                  count: modules.reduce((s, m) => s + lessonCount(m), 0),
-                })}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 flex size-8 items-center justify-center rounded-lg transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="shrink-0 px-4 py-3">
-          <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-            <div
-              className="bg-brand-gold h-full rounded-full transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="mt-1 flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">
-              {t('itemsReviewed', {
-                reviewed: reviewedCount,
-                total: totalCount,
-              })}
-            </span>
-            <span className="text-brand-gold text-[11px] font-bold">
-              {pct}%
-            </span>
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto px-3 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => (
-            <ModuleCard
-              key={module.id}
-              module={module}
-              isOpen={expanded.has(module.id)}
-              activeId={activeId}
-              onToggle={() => onToggleModule(module.id)}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-
-function ReviewSidebar({
-  courseTitle,
-  modules,
-  activeId,
-  reviewedCount,
-  totalCount,
-  expanded,
-  collapsed,
-  onToggleModule,
-  onCollapse,
-  onSelect,
-  t,
-}: {
-  courseTitle: string;
-  modules: ReviewModule[];
-  activeId: string;
-  reviewedCount: number;
-  totalCount: number;
-  expanded: Set<string>;
-  collapsed: boolean;
-  onCollapse: () => void;
-  onToggleModule: (id: string) => void;
-  onSelect: (id: string) => void;
-  t: TFn;
-}) {
-  const lessons = modules.reduce((sum, m) => sum + lessonCount(m), 0);
-  const pct =
-    totalCount === 0 ? 0 : Math.round((reviewedCount / totalCount) * 100);
-
-  const [manualExpanded, setManualExpanded] = useState<Set<string>>(() => {
-    const active = modules.find((m) =>
-      flattenItems([m]).some((i) => i.id === activeId),
-    );
-    return active ? new Set([active.id]) : new Set();
-  });
-
-  // all lessons open by default in mini view
-  const [miniLessonExpanded, setMiniLessonExpanded] = useState<Set<string>>(
-    () => new Set(modules.flatMap((m) => m.lessons.map((l) => l.id))),
-  );
-
-  const activeModuleId = useMemo(
-    () =>
-      modules.find((m) => flattenItems([m]).some((i) => i.id === activeId))?.id,
-    [activeId, modules],
-  );
-
-  const expandedMini = useMemo(
-    () =>
-      activeModuleId
-        ? new Set([...manualExpanded, activeModuleId])
-        : manualExpanded,
-    [manualExpanded, activeModuleId],
-  );
-
-  return (
-    <aside
-      className={cn(
-        'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
-        collapsed ? 'lg:w-18' : 'lg:w-72 xl:w-80',
-      )}
-    >
-      {/* ── EXPANDED layout ─────────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          'absolute inset-0 flex flex-col transition-opacity duration-200',
-          collapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
-        )}
-      >
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 sm:h-16 dark:border-white/10 dark:bg-transparent">
-          <Link
-            href="/educator/courses"
-            aria-label={t('backToCourses')}
-            className="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-          >
-            <Logo size="md" variant="default" showText />
-          </Link>
-          <button
-            onClick={onCollapse}
-            aria-label="Collapse sidebar"
-            className="ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white/70"
-          >
-            <PanelLeftClose className="size-4" />
-          </button>
-        </div>
-
-        <div className="border-border/60 shrink-0 border-b px-4 py-4">
-          <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
-            {t('courseContent')}
-          </p>
-          <h2 className="text-foreground mt-1.5 text-sm leading-snug font-bold">
-            {courseTitle}
-          </h2>
-          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <Layers className="h-3 w-3" />
-              {t('modules', { count: modules.length })}
-            </span>
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <BookOpen className="h-3 w-3" />
-              {t('lessons', { count: lessons })}
-            </span>
-          </div>
-          <div className="mt-3">
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-brand-gold h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-muted-foreground text-[11px]">
-                {t('itemsReviewed', {
-                  reviewed: reviewedCount,
-                  total: totalCount,
-                })}
-              </p>
-              <span className="text-brand-gold text-[11px] font-bold">
-                {pct}%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tree — scrollable */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {modules.map((module) => (
-            <ModuleCard
-              key={module.id}
-              module={module}
-              isOpen={expanded.has(module.id)}
-              activeId={activeId}
-              onToggle={() => onToggleModule(module.id)}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* ── COLLAPSED — icon tree ────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          'absolute inset-0 flex w-18 flex-col transition-opacity duration-200',
-          collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
-        )}
-      >
-        <div className="group/mini relative flex h-14 shrink-0 items-center justify-center border-b border-black/10 bg-white sm:h-16 dark:border-white/10 dark:bg-transparent">
-          <button
-            onClick={onCollapse}
-            aria-label="Expand sidebar"
-            className="relative flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
-          >
-            <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover/mini:opacity-0">
-              <Logo size="sm" variant="default" />
-            </span>
-            <span className="absolute inset-0 flex items-center justify-center text-slate-400 opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100 dark:text-white/40">
-              <PanelLeftOpen className="size-4" />
-            </span>
-          </button>
-        </div>
-
-        {/* Icon tree — staggered per level, leaf ticks reach the *edge* of each icon's ring
-            (not its center — the tick's length equals that row's own left padding, so it
-            stops exactly where the circle begins). Offsets are fixed pixel values chosen so
-            the deepest (item) icon still lands inside the 60px content area:
-              module center = 4(pl) + 14(half of size-7)      = 18px absolute
-              lesson center = 18 + 4(pl) + 12(half of size-6) = 34px absolute
-              item circle   = 34 + 4(pl) .. 34 + 4 + 20(size-5) = 38..58px absolute (fits, 60 max)
-            Every level shares the same "circle node" treatment (sized down per level) for a
-            consistent, cohesive look instead of mixing bare icons with circled ones. */}
-        <div className="flex-1 overflow-y-auto px-1.5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {modules.map((module, mIdx) => {
-            const hasActive = flattenItems([module]).some(
-              (i) => i.id === activeId,
-            );
-            const isMiniOpen = expandedMini.has(module.id);
-            return (
-              <div key={module.id} className="relative py-1">
-                {mIdx > 0 && (
-                  <div className="bg-muted-foreground/25 mx-auto mb-2 h-px w-8" />
-                )}
-
-                {/* Rail — from the module icon's center down through its open lessons/items */}
-                {isMiniOpen && (
-                  <div className="bg-muted-foreground/30 absolute top-6 bottom-0 left-[18px] w-px" />
-                )}
-
-                {/* Module button — icon fixed at x=18px (pl-1 + half of size-7) */}
-                <button
-                  onClick={() =>
-                    setManualExpanded((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(module.id)) next.delete(module.id);
-                      else next.add(module.id);
-                      return next;
-                    })
-                  }
-                  title={module.title}
-                  className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1.5 pl-1 transition-colors"
-                >
-                  <span
-                    className={cn(
-                      'flex size-7 shrink-0 items-center justify-center rounded-full',
-                      hasActive ? 'bg-brand-gold/30' : 'bg-brand-gold/15',
-                    )}
-                  >
-                    <Layers className="text-brand-gold size-3.5" />
-                  </span>
-                </button>
-
-                {isMiniOpen && (
-                  <div className="relative ml-[18px]">
-                    {module.lessons.map((lesson) => {
-                      const lessonItems: ReviewItem[] = [
-                        ...lesson.documents,
-                        ...lesson.videos,
-                        ...lesson.quizzes,
-                        ...lesson.assignments,
-                      ];
-                      const lessonHasActive = lessonItems.some(
-                        (i) => i.id === activeId,
-                      );
-                      const isLessonOpen = miniLessonExpanded.has(lesson.id);
-                      return (
-                        <div key={lesson.id} className="py-1">
-                          {/* Row wrapper — holds ONLY the leaf + button, so top-1/2 below
-                              measures just this row's height, not the items rendered after it. */}
-                          <div className="relative">
-                            {/* Leaf — reaches from the module trunk to the edge of this lesson icon's ring */}
-                            <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
-
-                            {/* Lesson button — icon fixed at x=16px relative to this wrapper */}
-                            <button
-                              onClick={() =>
-                                setMiniLessonExpanded((prev) => {
-                                  const next = new Set(prev);
-                                  if (next.has(lesson.id))
-                                    next.delete(lesson.id);
-                                  else next.add(lesson.id);
-                                  return next;
-                                })
-                              }
-                              title={lesson.title}
-                              className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-1 pl-1 transition-colors"
-                            >
-                              <span
-                                className={cn(
-                                  'flex size-6 shrink-0 items-center justify-center rounded-full',
-                                  lessonHasActive
-                                    ? 'bg-brand-gold/30'
-                                    : 'bg-brand-gold/15',
-                                )}
-                              >
-                                <Folder className="text-brand-gold size-3.5" />
-                              </span>
-                            </button>
-                          </div>
-
-                          {/* Items — indented so the trunk aligns under the lesson icon's center */}
-                          {isLessonOpen && lessonItems.length > 0 && (
-                            <div className="relative ml-4">
-                              {/* Trunk — was missing, so item leaves pointed at nothing to branch from */}
-                              <div className="bg-muted-foreground/30 absolute inset-y-0 left-0 w-px" />
-                              {lessonItems.map((item) => {
-                                const Icon = KIND_ICON[item.kind];
-                                const isActive = item.id === activeId;
-                                const status =
-                                  item.kind === 'quiz' ||
-                                  item.kind === 'assignment'
-                                    ? item.status
-                                    : null;
-                                return (
-                                  <div
-                                    key={item.id}
-                                    className="relative py-1.5"
-                                  >
-                                    {/* Leaf — reaches from the lesson trunk to the edge of this item icon's ring */}
-                                    <div className="bg-muted-foreground/30 absolute top-1/2 left-0 h-px w-1 -translate-y-1/2" />
-                                    <button
-                                      onClick={() => onSelect(item.id)}
-                                      title={item.title}
-                                      className="hover:bg-muted/40 relative z-10 flex w-full items-center rounded-lg py-0.5 pl-1 transition-colors"
-                                    >
-                                      <span
-                                        className={cn(
-                                          'relative flex size-5 shrink-0 items-center justify-center rounded-full',
-                                          isActive
-                                            ? 'bg-brand-gold/25'
-                                            : 'bg-brand-gold/10',
-                                        )}
-                                      >
-                                        <Icon
-                                          className={cn(
-                                            'size-3',
-                                            isActive
-                                              ? 'text-brand-gold'
-                                              : 'text-brand-gold/70',
-                                          )}
-                                        />
-                                        {status && (
-                                          <span className="absolute -top-0.5 -right-0.5">
-                                            {status === 'Ready' && (
-                                              <Check
-                                                className="size-2.5 text-green-500"
-                                                strokeWidth={3}
-                                              />
-                                            )}
-                                            {status === 'Draft' && (
-                                              <Clock className="size-2.5 text-amber-500" />
-                                            )}
-                                          </span>
-                                        )}
-                                      </span>
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </aside>
   );
 }
 

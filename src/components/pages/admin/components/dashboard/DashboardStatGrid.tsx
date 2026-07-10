@@ -1,10 +1,13 @@
 'use client';
 
-import { TrendingUp, DollarSign, Users, BookOpen } from 'lucide-react';
+import { TrendingUp, DollarSign, Users, BookOpen, Award } from 'lucide-react';
 import { DASHBOARD_STATS, MONTHLY_REVENUE } from '@/constants/admin';
 import { useAdminDashboardT } from '@/i18n';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useCourseStats } from '@/hooks/useCourseStats';
+import { useEnrollmentStats } from '@/hooks/useEnrollmentStats';
+import { useCertificateStats } from '@/hooks/useCertificateStats';
+import { formatCurrencyCompact } from '@/lib/utils/stats';
 import { cn } from '@/lib/utils/cn';
 import { StatCard } from './StatCard';
 
@@ -45,15 +48,38 @@ export function DashboardStatGrid({
   const revenue = stat('Monthly Revenue');
   const users = stat('Total Users');
   const courses = stat('Active Courses');
+  const certificates = stat('Total Issued Certificates');
 
   const { data: userStats, loading: usersLoading } = useUserStats();
   const { data: courseStats, loading: coursesLoading } = useCourseStats();
+  const { data: enrollmentStats, loading: enrollmentsLoading } =
+    useEnrollmentStats();
+  const { data: certificateStats, loading: certificatesLoading } =
+    useCertificateStats();
 
   const usersValue = userStats ? userStats.total.toLocaleString() : users.value;
   const usersChange = userStats ? formatTrend(userStats.trend) : users.change;
   const coursesValue = courseStats
     ? courseStats.activeCourses.toString()
     : courses.value;
+  const enrollmentsValue = enrollmentStats
+    ? enrollmentStats.total.toLocaleString()
+    : enrollments.value;
+  const enrollmentsChange = enrollmentStats
+    ? formatTrend(enrollmentStats.trend)
+    : enrollments.change;
+  const revenueValue = enrollmentStats
+    ? formatCurrencyCompact(enrollmentStats.monthlyRevenue.value)
+    : revenue.value;
+  const revenueChange = enrollmentStats
+    ? formatTrend(enrollmentStats.monthlyRevenue.trend)
+    : revenue.change;
+  const certificatesValue = certificateStats
+    ? certificateStats.total.toLocaleString()
+    : certificates.value;
+  const certificatesChange = certificateStats
+    ? formatTrend(certificateStats.trend)
+    : certificates.change;
 
   // Animate-in class only fires on return visits. On first visit the page-level
   // opacity transition handles the reveal, so we skip it here.
@@ -62,25 +88,23 @@ export function DashboardStatGrid({
     : '';
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Static cards — always visible immediately */}
-      <StatCard
-        label={t('totalEnrollments')}
-        value={enrollments.value}
-        change={enrollments.change}
-        href="/admin/courses"
-        icon={TrendingUp}
-      />
-      <StatCard
-        label={t('monthlyRevenue')}
-        value={revenue.value}
-        change={revenue.change}
-        href="/admin/revenue"
-        icon={DollarSign}
-        spark={MONTHLY_REVENUE.map((m) => m.amount)}
-      />
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {/* Active Courses */}
+      {coursesLoading ? (
+        <StatCardSkeleton />
+      ) : (
+        <div className={cn(cardEntrance)}>
+          <StatCard
+            label={t('activeCourses')}
+            value={coursesValue}
+            change={courses.change}
+            href="/admin/courses"
+            icon={BookOpen}
+          />
+        </div>
+      )}
 
-      {/* Total Users — per-card skeleton on every data load */}
+      {/* Total Users */}
       {usersLoading ? (
         <StatCardSkeleton />
       ) : (
@@ -95,17 +119,48 @@ export function DashboardStatGrid({
         </div>
       )}
 
-      {/* Active Courses — per-card skeleton on every data load */}
-      {coursesLoading ? (
+      {/* Monthly Revenue */}
+      {enrollmentsLoading ? (
         <StatCardSkeleton />
       ) : (
         <div className={cn(cardEntrance)}>
           <StatCard
-            label={t('activeCourses')}
-            value={coursesValue}
-            change={courses.change}
+            label={t('monthlyRevenue')}
+            value={revenueValue}
+            change={revenueChange}
+            href="/admin/revenue"
+            icon={DollarSign}
+            spark={MONTHLY_REVENUE.map((m) => m.amount)}
+          />
+        </div>
+      )}
+
+      {/* Total Enrollments */}
+      {enrollmentsLoading ? (
+        <StatCardSkeleton />
+      ) : (
+        <div className={cn(cardEntrance)}>
+          <StatCard
+            label={t('totalEnrollments')}
+            value={enrollmentsValue}
+            change={enrollmentsChange}
             href="/admin/courses"
-            icon={BookOpen}
+            icon={TrendingUp}
+          />
+        </div>
+      )}
+
+      {/* Total Issued Certificates */}
+      {certificatesLoading ? (
+        <StatCardSkeleton />
+      ) : (
+        <div className={cn(cardEntrance)}>
+          <StatCard
+            label={t('totalCertificates')}
+            value={certificatesValue}
+            change={certificatesChange}
+            href="/admin/certifications"
+            icon={Award}
           />
         </div>
       )}

@@ -23,9 +23,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import { useCourseTasks } from '@/context/CourseTasksContext';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   COURSE_TASK_STATUSES,
-  EDUCATOR_USER,
   type CourseTask,
   type CourseTaskStatus,
   type ReviewState,
@@ -97,11 +97,11 @@ export function CourseWorkspace() {
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     return tasks.filter(
-      (t) =>
-        t.status === activeTab &&
+      (task) =>
+        task.status === activeTab &&
         (q === '' ||
-          t.title.toLowerCase().includes(q) ||
-          t.category.toLowerCase().includes(q)),
+          task.title.toLowerCase().includes(q) ||
+          task.category.toLowerCase().includes(q)),
     );
   }, [tasks, activeTab, search]);
 
@@ -145,6 +145,7 @@ export function CourseWorkspace() {
         value={activeTab}
         onChange={setActiveTab}
         ariaLabel="Course status"
+        fullWidth
       />
 
       {/* Cards */}
@@ -186,12 +187,13 @@ function TaskCard({
   onDelete: () => void;
   t: TFn;
 }) {
+  const currentUser = useCurrentUser();
   const isToDo = task.status === 'To Do';
   const showPrice = task.status !== 'Archived';
   // To Do is the only stage assigned by an admin; afterwards the educator owns it.
   const author = isToDo
     ? `${t('assignedBy')} ${task.assignedBy}`
-    : EDUCATOR_USER.name;
+    : currentUser.fullName;
 
   return (
     <article

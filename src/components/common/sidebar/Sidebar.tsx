@@ -10,14 +10,13 @@ import {
   Compass,
   Award,
   Users,
-  BarChart3,
   DollarSign,
+  PlusCircle,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
   ShieldCheck,
   GraduationCap,
-  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Logo from '@/components/common/Logo';
@@ -26,6 +25,7 @@ import { MOCK_USER } from '@/constants/learner';
 import { ADMIN_USER } from '@/constants/admin';
 import { EDUCATOR_USER } from '@/constants/educator';
 import { Button } from '@/components/ui/button';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 export type SidebarRole = 'learner' | 'educator' | 'admin';
 
@@ -50,6 +50,7 @@ interface RoleConfig {
 export default function Sidebar({ role }: { role: SidebarRole }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const currentUser = useCurrentUser();
 
   const tNav = useNavT();
   const tEducator = useEducatorT();
@@ -71,9 +72,9 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
       rootHref: '/dashboard',
       roleChip: { label: MOCK_USER.role },
       user: {
-        name: MOCK_USER.name,
-        email: MOCK_USER.email,
-        initials: MOCK_USER.initials,
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
         level: MOCK_USER.level,
       },
       settingsHref: '/settings',
@@ -85,18 +86,17 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
         {
           href: '/educator',
           icon: LayoutDashboard,
-          label: tNav('dashboard'),
+          label: tNav('overview'),
         },
         {
           href: '/educator/courses',
           icon: BookOpen,
           label: tEducator('myCourses'),
-          badge: 2,
         },
         {
           href: '/educator/courses/new',
-          icon: Plus,
-          label: tEducator('newCourse'),
+          icon: PlusCircle,
+          label: tEducator('createCourseNav'),
         },
         {
           href: '/educator/students',
@@ -104,14 +104,18 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
           label: tEducator('learners'),
         },
         {
-          href: '/educator/analytics',
-          icon: BarChart3,
+          href: '/educator/earnings',
+          icon: DollarSign,
           label: tEducator('earnings'),
         },
       ],
       rootHref: '/educator',
       roleChip: { label: EDUCATOR_USER.role, icon: GraduationCap },
-      user: EDUCATOR_USER,
+      user: {
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
+      },
       learnMoreHref: '/educator/learn-more',
     },
     admin: {
@@ -133,7 +137,11 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
       ],
       rootHref: '/admin',
       roleChip: { label: ADMIN_USER.role, icon: ShieldCheck },
-      user: ADMIN_USER,
+      user: {
+        name: currentUser.fullName,
+        email: currentUser.email,
+        initials: currentUser.initials,
+      },
       learnMoreHref: '/admin/learn-more',
       logoutHref: '/admin/login',
     },
@@ -151,17 +159,6 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
   } = ROLE_CONFIG[role];
   const settingsHref = settingsHrefOverride ?? `${rootHref}/settings`;
   const profileHref = profileHrefOverride ?? `${rootHref}/profile`;
-
-  /** Only the most specific (longest) matching href is active — prevents a
-   * parent route like `/educator/courses` and a nested one like
-   * `/educator/courses/new` from both lighting up at once. */
-  const activeHref = navItems.reduce<string | null>((best, item) => {
-    const isMatch =
-      pathname === item.href ||
-      (item.href !== rootHref && pathname.startsWith(`${item.href}/`));
-    if (!isMatch) return best;
-    return !best || item.href.length > best.length ? item.href : best;
-  }, null);
 
   return (
     <aside
@@ -217,73 +214,82 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
 
       {/* Nav */}
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
-        {navItems.map(({ href, icon: Icon, label, badge }) => {
-          const active = href === activeHref;
+        {(() => {
+          const bestMatchHref = navItems
+            .filter(({ href }) =>
+              href === rootHref
+                ? pathname === href
+                : pathname === href || pathname.startsWith(href + '/'),
+            )
+            .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              title={collapsed ? label : undefined}
-              className={cn(
-                'group relative flex items-center rounded-lg py-2.5 text-sm font-semibold transition-colors',
-                collapsed ? 'justify-center px-0' : 'gap-3 px-3',
-                active
-                  ? 'bg-brand-gold text-brand-navy'
-                  : 'text-white/60 hover:bg-white/[0.07] hover:text-white',
-              )}
-            >
-              <Icon
+          return navItems.map(({ href, icon: Icon, label, badge }) => {
+            const active = href === bestMatchHref;
+
+            return (
+              <Link
+                key={href}
+                href={href}
+                title={collapsed ? label : undefined}
                 className={cn(
-                  'h-4.5 w-4.5 shrink-0',
+                  'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
                   active
-                    ? 'text-brand-navy'
-                    : 'text-white/60 group-hover:text-white',
-                )}
-              />
-
-              <span
-                className={cn(
-                  'flex-1 overflow-hidden whitespace-nowrap transition-[opacity,max-width] duration-300',
-                  collapsed ? 'max-w-0 opacity-0' : 'max-w-50 opacity-100',
+                    ? 'bg-brand-gold text-brand-navy'
+                    : 'text-white/60 hover:bg-white/[0.07] hover:text-white',
                 )}
               >
-                {label}
-              </span>
-
-              {badge != null && (
-                <span
+                <Icon
                   className={cn(
-                    'flex items-center justify-center overflow-hidden rounded-full text-[10px] font-bold transition-[opacity,max-width] duration-300',
+                    'h-4.5 w-4.5 shrink-0',
                     active
-                      ? 'bg-brand-navy/20 text-brand-navy'
-                      : 'bg-white/10 text-white/70',
-                    collapsed
-                      ? 'max-w-0 opacity-0'
-                      : 'h-5 max-w-8 min-w-5 px-1.5 opacity-100',
-                  )}
-                >
-                  {badge}
-                </span>
-              )}
-
-              {active && (
-                <ChevronRight
-                  className={cn(
-                    'text-brand-navy overflow-hidden transition-[opacity,max-width] duration-300',
-                    collapsed
-                      ? 'max-w-0 opacity-0'
-                      : 'size-4 max-w-4 shrink-0 opacity-100',
+                      ? 'text-brand-navy'
+                      : 'text-white/60 group-hover:text-white',
                   )}
                 />
-              )}
 
-              {collapsed && badge != null && (
-                <span className="bg-brand-gold absolute top-1 right-1.5 size-2 rounded-full" />
-              )}
-            </Link>
-          );
-        })}
+                <span
+                  className={cn(
+                    'flex-1 overflow-hidden whitespace-nowrap transition-[opacity,max-width] duration-300',
+                    collapsed ? 'max-w-0 opacity-0' : 'max-w-50 opacity-100',
+                  )}
+                >
+                  {label}
+                </span>
+
+                {badge != null && (
+                  <span
+                    className={cn(
+                      'flex items-center justify-center overflow-hidden rounded-full text-[10px] font-bold transition-[opacity,max-width] duration-300',
+                      active
+                        ? 'bg-brand-navy/20 text-brand-navy'
+                        : 'bg-white/10 text-white/70',
+                      collapsed
+                        ? 'max-w-0 opacity-0'
+                        : 'h-5 max-w-8 min-w-5 px-1.5 opacity-100',
+                    )}
+                  >
+                    {badge}
+                  </span>
+                )}
+
+                {active && (
+                  <ChevronRight
+                    className={cn(
+                      'text-brand-navy overflow-hidden transition-[opacity,max-width] duration-300',
+                      collapsed
+                        ? 'max-w-0 opacity-0'
+                        : 'size-4 max-w-4 shrink-0 opacity-100',
+                    )}
+                  />
+                )}
+
+                {collapsed && badge != null && (
+                  <span className="bg-brand-gold absolute top-1 right-1.5 size-2 rounded-full" />
+                )}
+              </Link>
+            );
+          });
+        })()}
       </nav>
 
       <div className="shrink-0 border-t border-white/[0.07] px-3 py-1">

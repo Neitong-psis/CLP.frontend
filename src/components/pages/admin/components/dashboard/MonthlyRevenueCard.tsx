@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useId, useState } from 'react';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+  TrendingUp,
+} from 'lucide-react';
 import { useAdminMonthlyRevenueT } from '@/i18n';
 import { MONTHLY_REVENUE } from '@/constants/admin';
+import { formatCurrencyCompact } from '@/lib/utils/stats';
 import { cn } from '@/lib/utils/cn';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,55 +29,98 @@ interface MonthlyRevenueCardProps {
 
 const W = 620;
 const H = 220;
-const PAD = { t: 12, r: 16, b: 28, l: 48 };
+const PAD = { t: 14, r: 16, b: 30, l: 46 };
 const IW = W - PAD.l - PAD.r;
 const IH = H - PAD.t - PAD.b;
 const BASELINE = PAD.t + IH;
-const Y_MAX = 100;
-const Y_TICKS = [25, 50, 75, 100];
+const BAR_RADIUS = 4;
 
-const BAR_DEFAULT = 'var(--chart-bar-neutral)';
-const BAR_HOVER = 'var(--chart-bar-neutral-hover)';
+const BAR_NEUTRAL = 'var(--chart-bar-neutral)';
 const ACCENT = 'var(--chart-bar)';
+const ACCENT_HOVER = 'var(--chart-bar-hover)';
 const LABEL = 'var(--chart-axis-text)';
 const GRID = 'var(--chart-grid)';
 
-const fmt = (v: number) => `$${v}k`;
+const fmt = formatCurrencyCompact;
+
+// Smallest "1/2/5 x 10^n" value at or above `value` — keeps the y-axis
+// readable whether monthly revenue is in the tens or the hundreds of
+// thousands, instead of a fixed $100k ceiling that flattens small datasets.
+function niceCeiling(value: number): number {
+  if (value <= 0) return 10;
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const fraction = value / magnitude;
+  const niceFraction =
+    fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
+  return niceFraction * magnitude;
+}
 
 // ─── BarChart ─────────────────────────────────────────────────────────────────
 
-function BarChart({
-  data,
-  highlightIndex,
-}: {
-  data: MonthlyRevenueDatum[];
-  highlightIndex: number;
-}) {
+function BarChart({ data }: { data: MonthlyRevenueDatum[] }) {
+  const uid = useId();
   const [hovered, setHovered] = useState<number | null>(null);
 
-  const activeIndex = hovered ?? highlightIndex;
+  const yMax = niceCeiling(Math.max(...data.map((d) => d.amount)));
+  const yTicks = [1, 2, 3, 4].map((n) => Math.round((yMax * n) / 4));
+
   const slotW = IW / data.length;
-  const barW = slotW * 0.5;
+  const barW = slotW * 0.42;
 
-  const hi = data[activeIndex];
-  const hiX = PAD.l + activeIndex * slotW + slotW / 2;
-  const hiBarTopY = BASELINE - ((hi?.amount ?? 0) / Y_MAX) * IH;
+  const hi = hovered !== null ? data[hovered] : null;
+  const hiX = hovered !== null ? PAD.l + hovered * slotW + slotW / 2 : 0;
+  const hiBarTopY = hi ? BASELINE - (hi.amount / yMax) * IH : 0;
+  const latest = data[data.length - 1];
 
-  const boxW = 74;
-  const boxH = 38;
-  const boxY = 8;
+  const boxW = 78;
+  const boxH = 40;
+  const boxY = 6;
   const boxX = Math.min(Math.max(hiX - boxW / 2, 4), W - boxW - 4);
+
+  const accentGradientId = `revenue-accent-${uid}`;
+  const neutralGradientId = `revenue-neutral-${uid}`;
+  const plotClipId = `revenue-plot-${uid}`;
+  const shadowFilterId = `revenue-shadow-${uid}`;
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className="h-auto w-full"
       role="img"
-      aria-label={`Monthly revenue. ${hi?.month ?? ''}: ${fmt(hi?.amount ?? 0)}.`}
+      aria-label={`Monthly revenue over the last ${data.length} months. Most recent, ${latest.month}: ${fmt(latest.amount)}.`}
     >
+      <defs>
+        <linearGradient id={accentGradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={ACCENT} stopOpacity={1} />
+          <stop offset="100%" stopColor={ACCENT} stopOpacity={0.68} />
+        </linearGradient>
+        <linearGradient id={neutralGradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={BAR_NEUTRAL} stopOpacity={1} />
+          <stop offset="100%" stopColor={BAR_NEUTRAL} stopOpacity={0.55} />
+        </linearGradient>
+        <clipPath id={plotClipId}>
+          <rect x={PAD.l} y={PAD.t} width={IW} height={IH} />
+        </clipPath>
+        <filter
+          id={shadowFilterId}
+          x="-40%"
+          y="-40%"
+          width="180%"
+          height="180%"
+        >
+          <feDropShadow
+            dx="0"
+            dy="2"
+            stdDeviation="4"
+            floodColor="#0f172a"
+            floodOpacity={0.18}
+          />
+        </filter>
+      </defs>
+
       {/* Y-axis gridlines + labels */}
-      {Y_TICKS.map((tick) => {
-        const y = BASELINE - (tick / Y_MAX) * IH;
+      {yTicks.map((tick) => {
+        const y = BASELINE - (tick / yMax) * IH;
         return (
           <g key={tick}>
             <line
@@ -81,56 +130,81 @@ function BarChart({
               y2={y}
               stroke={GRID}
               strokeWidth={1}
+              strokeDasharray="2 4"
             />
             <text
-              x={PAD.l - 6}
+              x={PAD.l - 8}
               y={y}
               textAnchor="end"
               dominantBaseline="middle"
               fontSize={10}
               fill={LABEL}
             >
-              ${tick}k
+              {fmt(tick)}
             </text>
           </g>
         );
       })}
+      {/* Baseline — solid, grounds the columns */}
+      <line
+        x1={PAD.l}
+        x2={PAD.l + IW}
+        y1={BASELINE}
+        y2={BASELINE}
+        stroke={GRID}
+        strokeWidth={1}
+      />
 
       {/* Bars + month labels */}
-      {data.map(({ month, amount }, i) => {
-        const barH = (amount / Y_MAX) * IH;
+      <g clipPath={`url(#${plotClipId})`}>
+        {data.map(({ amount }, i) => {
+          const barH = (amount / yMax) * IH;
+          const x = PAD.l + i * slotW + (slotW - barW) / 2;
+          const isHovered = i === hovered;
+          const dimmed = hovered !== null && !isHovered;
+          return (
+            <rect
+              key={i}
+              x={x}
+              y={BASELINE - barH}
+              width={barW}
+              height={barH + BAR_RADIUS}
+              rx={BAR_RADIUS}
+              fill={
+                dimmed
+                  ? `url(#${neutralGradientId})`
+                  : isHovered
+                    ? ACCENT_HOVER
+                    : `url(#${accentGradientId})`
+              }
+              style={{ transition: 'fill 120ms ease' }}
+            />
+          );
+        })}
+      </g>
+      {data.map(({ month }, i) => {
         const x = PAD.l + i * slotW + (slotW - barW) / 2;
-        const isActive = i === activeIndex;
+        const isHovered = i === hovered;
         return (
-          <g
-            key={month}
-            style={{ cursor: 'pointer' }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <g key={month}>
             <rect
               x={PAD.l + i * slotW}
               y={PAD.t}
               width={slotW}
               height={IH + 20}
               fill="transparent"
-            />
-            <rect
-              x={x}
-              y={BASELINE - barH}
-              width={barW}
-              height={barH}
-              rx={5}
-              fill={isActive ? ACCENT : hovered === i ? BAR_HOVER : BAR_DEFAULT}
-              style={{ transition: 'fill 120ms ease' }}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
             />
             <text
               x={x + barW / 2}
-              y={H - 8}
+              y={H - 9}
               textAnchor="middle"
-              fontSize={11}
-              fill={isActive ? ACCENT : LABEL}
-              style={{ transition: 'fill 120ms ease' }}
+              fontSize={10.5}
+              fontWeight={isHovered ? 600 : 400}
+              fill={isHovered ? ACCENT : LABEL}
+              style={{ transition: 'fill 120ms ease', pointerEvents: 'none' }}
             >
               {month}
             </text>
@@ -138,7 +212,7 @@ function BarChart({
         );
       })}
 
-      {/* Callout for active bar */}
+      {/* Callout — only while actively hovering a bar */}
       {hi && (
         <g style={{ pointerEvents: 'none' }}>
           <line
@@ -148,12 +222,12 @@ function BarChart({
             y2={hiBarTopY}
             stroke="var(--chart-grid)"
             strokeWidth={1}
-            strokeDasharray="3 3"
+            strokeDasharray="2 3"
           />
           <circle
             cx={hiX}
             cy={hiBarTopY}
-            r={4}
+            r={3.5}
             fill={ACCENT}
             stroke="var(--chart-dot-halo)"
             strokeWidth={2}
@@ -163,29 +237,31 @@ function BarChart({
             y={boxY}
             width={boxW}
             height={boxH}
-            rx={8}
+            rx={9}
             fill="var(--card)"
             stroke="var(--border)"
             strokeWidth={1}
+            filter={`url(#${shadowFilterId})`}
           />
           <text
             x={boxX + boxW / 2}
-            y={boxY + 16}
+            y={boxY + 17}
             textAnchor="middle"
-            fontSize={13}
-            fontWeight={500}
+            fontSize={13.5}
+            fontWeight={600}
             fill="var(--foreground)"
           >
             {fmt(hi.amount)}
           </text>
           <text
             x={boxX + boxW / 2}
-            y={boxY + 30}
+            y={boxY + 31}
             textAnchor="middle"
-            fontSize={10}
+            fontSize={9.5}
+            letterSpacing={0.3}
             fill={LABEL}
           >
-            {hi.month}
+            {hi.month.toUpperCase()}
           </text>
         </g>
       )}
@@ -201,6 +277,7 @@ export function MonthlyRevenueCard({
   className,
 }: MonthlyRevenueCardProps) {
   const t = useAdminMonthlyRevenueT();
+  const isEmpty = data.length === 0 || data.every((d) => d.amount === 0);
   const hi = highlightIndex ?? data.length - 1;
   const current = data[hi];
   const prev = data[hi - 1];
@@ -220,37 +297,70 @@ export function MonthlyRevenueCard({
     >
       {/* Header */}
       <div className="border-border flex items-start justify-between gap-4 border-b px-6 py-5">
-        <div>
-          <h3 className="text-foreground text-[14px] font-medium">
-            {t('title')}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-[13px]">
-            {t('last12')}
-          </p>
+        <div className="flex items-center gap-3">
+          <span
+            className="bg-accent-blue/10 text-accent-blue dark:bg-accent-blue/20 flex size-8 shrink-0 items-center justify-center rounded-full"
+            aria-hidden="true"
+          >
+            <DollarSign className="size-4" />
+          </span>
+          <div>
+            <h3 className="text-foreground text-[14px] font-semibold">
+              {t('title')}
+            </h3>
+            <p className="text-muted-foreground mt-0.5 text-[12.5px]">
+              {t('last12')}
+            </p>
+          </div>
         </div>
-        {current && (
+        {current && !isEmpty && (
           <div className="text-right">
-            <p className="text-foreground text-[26px] leading-none font-semibold tabular-nums">
+            <p className="text-foreground text-[28px] leading-none font-semibold tabular-nums">
               {fmt(current.amount)}
             </p>
             {pctChange !== null && (
-              <span
-                className={cn(
-                  'mt-1.5 inline-flex items-center gap-0.5 text-[12px] font-medium tabular-nums',
-                  isPositive ? 'text-emerald-600' : 'text-rose-600',
-                )}
-              >
-                <ChangeIcon className="size-3.5" aria-hidden="true" />
-                {Math.abs(pctChange).toFixed(1)}% {t('vsPrevMonth')}
-              </span>
+              <p className="mt-2 flex items-center justify-end gap-1.5">
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums',
+                    isPositive
+                      ? 'bg-emerald-500/10 text-emerald-500'
+                      : 'bg-rose-500/10 text-rose-500',
+                  )}
+                >
+                  <ChangeIcon className="size-3" aria-hidden="true" />
+                  {Math.abs(pctChange).toFixed(1)}%
+                </span>
+                <span className="text-muted-foreground text-[11px]">
+                  {t('vsPrevMonth')}
+                </span>
+              </p>
             )}
           </div>
         )}
       </div>
 
       {/* Chart */}
-      <div className="px-4 pt-2 pb-4">
-        <BarChart data={data} highlightIndex={hi} />
+      <div className="px-4 pt-3 pb-4">
+        {isEmpty ? (
+          <div
+            className="flex flex-col items-center justify-center gap-2 text-center"
+            style={{ height: H }}
+          >
+            <TrendingUp
+              className="text-muted-foreground/40 size-6"
+              aria-hidden="true"
+            />
+            <p className="text-foreground text-[13px] font-medium">
+              {t('emptyTitle')}
+            </p>
+            <p className="text-muted-foreground max-w-64 text-[12px]">
+              {t('emptyDesc')}
+            </p>
+          </div>
+        ) : (
+          <BarChart data={data} />
+        )}
       </div>
     </section>
   );

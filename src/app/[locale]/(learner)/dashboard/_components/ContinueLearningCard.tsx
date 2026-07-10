@@ -3,12 +3,120 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Play, BookOpen, GraduationCap, Calendar } from 'lucide-react';
-import { CONTINUE_LEARNING } from '@/config/learner';
+import {
+  ENROLLED_COURSES,
+  EXPLORE_COURSES,
+  type Course,
+} from '@/config/learner';
 import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/slugify';
+import {
+  readCourseProgress,
+  calcCourseProgressPercent,
+} from '@/lib/utils/courseStorage';
+import {
+  COURSE_MODULES_MAP,
+  type ReviewLesson,
+  type ReviewModule,
+} from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
+
+const LS_ENROLLED = 'qb_enrolled_courses';
+
+function readEnrolledIds(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(LS_ENROLLED) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
+
+interface FeaturedCourse {
+  courseTitle: string;
+  lessonNumber: number;
+  lessonTitle: string;
+  progress: number;
+}
+
+function lessonItems(lesson: ReviewLesson) {
+  return [
+    ...lesson.documents,
+    ...lesson.videos,
+    ...lesson.quizzes,
+    ...lesson.assignments,
+  ];
+}
+
+function computeFeatured(
+  course: Course,
+  modules: ReviewModule[],
+  viewed: Set<string>,
+): FeaturedCourse | null {
+  const lessons = modules.flatMap((m) => m.lessons);
+  if (lessons.length === 0) return null;
+
+  let currentLessonIndex = -1;
+  lessons.forEach((lesson, i) => {
+    const items = lessonItems(lesson);
+    if (
+      currentLessonIndex === -1 &&
+      !items.every((item) => viewed.has(item.id))
+    ) {
+      currentLessonIndex = i;
+    }
+  });
+  if (currentLessonIndex === -1) currentLessonIndex = lessons.length - 1;
+
+  return {
+    courseTitle: course.title,
+    lessonNumber: currentLessonIndex + 1,
+    lessonTitle: lessons[currentLessonIndex]?.title ?? '',
+    progress: calcCourseProgressPercent(modules, viewed),
+  };
+}
+
+function pickFeaturedCourse(): FeaturedCourse | null {
+  const enrolledIds = new Set(readEnrolledIds());
+  const candidates = [
+    ...ENROLLED_COURSES,
+    ...EXPLORE_COURSES.filter((c) => enrolledIds.has(c.id)),
+  ];
+
+  const featured = candidates
+    .map((course) => {
+      const modules = COURSE_MODULES_MAP[course.id];
+      if (!modules) return null;
+      return computeFeatured(
+        course,
+        modules,
+        new Set(readCourseProgress(course.id)),
+      );
+    })
+    .filter((c): c is FeaturedCourse => c !== null);
+
+  if (featured.length === 0) return null;
+
+  const inProgress = featured.filter((c) => c.progress > 0 && c.progress < 100);
+  if (inProgress.length > 0) {
+    return inProgress.reduce((best, c) =>
+      c.progress > best.progress ? c : best,
+    );
+  }
+  return (
+    featured.find((c) => c.progress === 0) ?? featured[featured.length - 1]
+  );
+}
+
+const DEFAULT_FEATURED: FeaturedCourse | null = (() => {
+  const seed = ENROLLED_COURSES[0];
+  const modules = seed && COURSE_MODULES_MAP[seed.id];
+  return seed && modules ? computeFeatured(seed, modules, new Set()) : null;
+})();
+
+// ── Live clock ────────────────────────────────────────────────────────────────
 
 function LiveClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -53,6 +161,17 @@ export default function ContinueLearningCard() {
   const t = useLearnerDashboardT();
   const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const [barVisible, setBarVisible] = useState(false);
+  const [featured, setFeatured] = useState<FeaturedCourse | null>(
+    DEFAULT_FEATURED,
+  );
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const picked = pickFeaturedCourse();
+      if (picked) setFeatured(picked);
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     if (!inView) return;
@@ -60,8 +179,9 @@ export default function ContinueLearningCard() {
     return () => clearTimeout(id);
   }, [inView]);
 
-  const { courseTitle, lessonNumber, lessonTitle, progress } =
-    CONTINUE_LEARNING;
+  if (!featured) return null;
+
+  const { courseTitle, lessonNumber, lessonTitle, progress } = featured;
 
   return (
     <div
@@ -115,7 +235,7 @@ export default function ContinueLearningCard() {
         {/* ── Actions ── */}
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={`/learn/${slugify(CONTINUE_LEARNING.courseTitle)}?mode=resume`}
+            href={`/learn/${slugify(courseTitle)}?mode=${progress === 100 ? 'replay' : 'resume'}`}
             className="bg-brand-gold text-brand-navy hover:bg-brand-gold-dark inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm transition-all duration-150 hover:-translate-y-px hover:shadow-md active:scale-95"
           >
             <Play className="h-3.5 w-3.5 fill-current" aria-hidden />

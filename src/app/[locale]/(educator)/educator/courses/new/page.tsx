@@ -12,7 +12,6 @@ import { PreviewPublishStep } from './_components/PreviewPublishStep';
 import { WizardFooter } from './_components/WizardFooter';
 
 export default function NewCoursePage() {
-  // useSearchParams must sit under a Suspense boundary in the App Router.
   return (
     <Suspense fallback={null}>
       <NewCourseWizard />
@@ -50,6 +49,7 @@ function NewCourseWizard() {
               onUpdateModule={builder.updateModule}
               onDeleteModule={builder.deleteModule}
               onMoveModule={builder.moveModule}
+              onModulesChange={builder.setModules}
             />
           )}
           {builder.step === 3 && (

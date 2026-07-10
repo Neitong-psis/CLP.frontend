@@ -21,14 +21,7 @@ interface CourseTasksCtxValue {
 const CourseTasksContext = createContext<CourseTasksCtxValue | null>(null);
 
 export function CourseTasksProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<CourseTask[]>(() => {
-    if (typeof window === 'undefined') return [...EDUCATOR_COURSE_TASKS];
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as CourseTask[];
-    } catch {}
-    return [...EDUCATOR_COURSE_TASKS];
-  });
+  const [tasks, setTasks] = useState<CourseTask[]>([...EDUCATOR_COURSE_TASKS]);
 
   useEffect(() => {
     try {

@@ -41,7 +41,6 @@ export const courseSchema = z.object({
     .number({ message: 'Must be a number' })
     .min(0, 'Price cannot be negative'),
   duration: z.string().min(1, 'Duration is required'),
-  tags: z.array(z.string()).min(1, 'Add at least one tag'),
   visibility: z.enum(VISIBILITY),
 });
 

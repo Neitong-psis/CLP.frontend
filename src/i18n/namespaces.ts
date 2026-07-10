@@ -72,6 +72,7 @@ export const NS = {
     myLearning: 'learner.myLearning',
     certificates: 'learner.certificates',
     explore: 'learner.explore',
+    checkout: 'learner.checkout',
   },
 } as const;
 

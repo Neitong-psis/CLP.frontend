@@ -1,7 +1,7 @@
-export default function AdminRootLayout({
+export default function AdminGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="bg-brand-navy min-h-screen">{children}</div>;
+  return <>{children}</>;
 }

@@ -1,4 +1,3 @@
-import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { DASHBOARD_TOP_COURSES, COMPLETION_RATES } from '@/constants/educator';
 
@@ -32,36 +31,17 @@ function InsightCard({
   );
 }
 
-const RANK_STYLES = [
-  'bg-brand-gold text-white',
-  'bg-brand-navy text-white',
-  'bg-muted text-muted-foreground',
-];
-
-function TopCourseRow({ course, rank }: { course: TopCourse; rank: number }) {
+function TopCourseRow({ course }: { course: TopCourse }) {
   return (
-    <li className="group hover:bg-muted -mx-2 flex items-center justify-between gap-4 rounded-lg px-2 py-1.5 transition-colors">
-      <div className="flex min-w-0 items-center gap-3">
-        <span
-          className={cn(
-            'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold',
-            RANK_STYLES[rank] ?? RANK_STYLES[2],
-          )}
-        >
-          {rank + 1}
-        </span>
-        <div className="min-w-0">
-          <p className="text-foreground truncate text-sm font-semibold">
-            {course.title}
-          </p>
-          <p className="text-muted-foreground mt-0.5 text-[11px]">
-            {course.students.toLocaleString()} students
-          </p>
-        </div>
+    <li className="border-border flex items-center justify-between gap-4 border-b py-3 last:border-0">
+      <div className="min-w-0">
+        <p className="text-foreground text-sm font-semibold">{course.title}</p>
+        <p className="text-muted-foreground mt-0.5 text-[11px]">
+          {course.students.toLocaleString()} students
+        </p>
       </div>
-      <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-[11px] font-semibold">
-        <Star className="fill-brand-gold text-brand-gold h-3 w-3" />
-        {course.rating}
+      <span className="text-muted-foreground shrink-0 text-[11px] font-medium">
+        {course.rating} rating
       </span>
     </li>
   );
@@ -109,16 +89,16 @@ export function CourseInsightsGrid({
   return (
     <div className={cn('grid gap-6 lg:grid-cols-2', className)}>
       <InsightCard title="Top Courses">
-        <ul className="max-h-65 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {topCourses.map((course, i) => (
-            <TopCourseRow key={course.title} course={course} rank={i} />
+        <ul>
+          {topCourses.slice(0, 4).map((course) => (
+            <TopCourseRow key={course.title} course={course} />
           ))}
         </ul>
       </InsightCard>
 
       <InsightCard title="Completion Rates">
-        <ul className="max-h-65 space-y-4 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {completionRates.map((item, i) => (
+        <ul className="space-y-4">
+          {completionRates.slice(0, 4).map((item, i) => (
             <CompletionRateRow key={item.title} item={item} index={i} />
           ))}
         </ul>

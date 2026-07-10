@@ -8,7 +8,7 @@ import { useLearnerCertificatesT } from '@/i18n';
 import { useToast } from '@/components/ui/toast';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { MOCK_USER } from '@/constants/learner';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { getCertById } from '../_lib/cert';
 import {
   markCertVerified,
@@ -55,7 +55,15 @@ function validateStep(step: VerifyStep, data: VerifyData): Errors {
 
 // ── Step indicator ────────────────────────────────────────────────────────────
 
-function StepIndicator({ current, t }: { current: VerifyStep; t: TFn }) {
+function StepIndicator({
+  current,
+  t,
+  onSelect,
+}: {
+  current: VerifyStep;
+  t: TFn;
+  onSelect: (step: VerifyStep) => void;
+}) {
   const steps: { key: VerifyStep; label: string; desc: string }[] = [
     { key: 1, label: t('step1'), desc: t('step1Desc') },
     { key: 2, label: t('step2'), desc: t('step2Desc') },
@@ -67,16 +75,24 @@ function StepIndicator({ current, t }: { current: VerifyStep; t: TFn }) {
       {steps.map((step) => {
         const active = step.key === current;
         const done = step.key < current;
+        // Stepping back to an already-completed section is always allowed;
+        // jumping ahead still has to go through Next's validation.
+        const clickable = done;
         return (
-          <div
+          <button
             key={step.key}
+            type="button"
+            onClick={() => clickable && onSelect(step.key)}
+            disabled={!clickable}
+            aria-current={active ? 'step' : undefined}
             className={cn(
-              'rounded-xl border px-4 py-3 transition-colors',
+              'rounded-xl border px-4 py-3 text-left transition-colors',
+              'focus-visible:ring-brand-gold/40 outline-none focus-visible:ring-2',
               active
                 ? 'border-brand-gold bg-brand-gold/5'
                 : done
-                  ? 'border-border bg-muted/30'
-                  : 'border-border bg-card',
+                  ? 'border-border bg-muted/30 hover:bg-muted/50'
+                  : 'border-border bg-card cursor-default',
             )}
           >
             <div className="flex items-center gap-2.5">
@@ -106,7 +122,7 @@ function StepIndicator({ current, t }: { current: VerifyStep; t: TFn }) {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -240,6 +256,7 @@ export default function VerifyPage() {
   const t = useLearnerCertificatesT();
   const router = useRouter();
   const { toast } = useToast();
+  const currentUser = useCurrentUser();
 
   const [step, setStep] = useState<VerifyStep>(1);
   const [showModal, setShowModal] = useState(false);
@@ -248,8 +265,8 @@ export default function VerifyPage() {
     const draft = readCertDraft(id);
     return (
       draft || {
-        fullName: MOCK_USER.name,
-        email: MOCK_USER.email,
+        fullName: currentUser.fullName,
+        email: currentUser.email,
         phone: '',
         studentId: '',
         institution: '',
@@ -271,20 +288,28 @@ export default function VerifyPage() {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   }
 
+  /** Jump directly to a step — errors belong to the step being left, not the
+   *  one being entered, so they're cleared on every transition. */
+  function goToStep(target: VerifyStep) {
+    setErrors({});
+    setStep(target);
+  }
+
   function handleNext() {
     const errs = validateStep(step, data);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    setErrors({});
-    if (step < 3) setStep((s) => (s + 1) as VerifyStep);
-    else setShowModal(true);
+    if (step < 3) goToStep((step + 1) as VerifyStep);
+    else {
+      setErrors({});
+      setShowModal(true);
+    }
   }
 
   function handleBack() {
-    setErrors({});
-    if (step > 1) setStep((s) => (s - 1) as VerifyStep);
+    if (step > 1) goToStep((step - 1) as VerifyStep);
     else router.push('/certificates');
   }
 
@@ -310,7 +335,7 @@ export default function VerifyPage() {
       <TopBar
         role="learner"
         title={t('title')}
-        subtitle={t('subtitle', { email: MOCK_USER.email })}
+        subtitle={t('subtitle', { email: currentUser.email })}
       />
 
       <div className="flex flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
@@ -326,7 +351,7 @@ export default function VerifyPage() {
           </div>
 
           {/* Step indicator */}
-          <StepIndicator current={step} t={t} />
+          <StepIndicator current={step} t={t} onSelect={goToStep} />
 
           {/* Form card */}
           <div className="border-border bg-card flex flex-1 flex-col rounded-2xl border p-6">
@@ -411,7 +436,7 @@ export default function VerifyPage() {
                       key={f.label}
                       label={f.label}
                       value={f.value}
-                      onEdit={() => setStep(f.step as VerifyStep)}
+                      onEdit={() => goToStep(f.step as VerifyStep)}
                       t={t}
                     />
                   ))}

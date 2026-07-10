@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { UserCircle, Upload, ChevronDown } from 'lucide-react';
-import { MOCK_USER } from '@/config/learner';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import { useToast } from '@/components/ui/toast';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { useCurrentUser } from '@/hooks/use-current-user';
+
+const LEARNER_ROLE_LABEL = 'Learner';
 
 // ── Field styling (theme-token based, matches educator/admin settings) ──────────
 
@@ -31,24 +33,39 @@ interface ProfileForm {
   bio: string;
 }
 
-const INITIAL: ProfileForm = {
-  fullName: MOCK_USER.name,
-  username: 'sopheaktra',
-  email: MOCK_USER.email,
-  phone: '+855 12 345 678',
-  gender: '',
-  dob: '',
-  nationality: 'Cambodian',
-  address: 'Phnom Penh, Cambodia',
-  bio: '',
-};
-
 export default function LearnerSettingsPage() {
   const { toast } = useToast();
+  const currentUser = useCurrentUser();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState<ProfileForm>(INITIAL);
+  // The authenticated profile only loads after the silent auth bootstrap
+  // resolves, so the form seeds itself as soon as real data is available.
+  const initial = useMemo<ProfileForm>(
+    () => ({
+      fullName: currentUser.fullName,
+      username: currentUser.email.split('@')[0] ?? '',
+      email: currentUser.email,
+      phone: '',
+      gender: '',
+      dob: '',
+      nationality: '',
+      address: '',
+      bio: '',
+    }),
+    [currentUser],
+  );
+
+  const [form, setForm] = useState<ProfileForm>(initial);
   const [avatar, setAvatar] = useState<File | null>(null);
+  // Once the learner edits a field, stop re-syncing from `initial` so their
+  // in-progress edits aren't clobbered when the auth bootstrap resolves.
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (touched) return;
+    const id = setTimeout(() => setForm(initial), 0);
+    return () => clearTimeout(id);
+  }, [initial, touched]);
 
   const avatarUrl = useMemo(
     () => (avatar ? URL.createObjectURL(avatar) : null),
@@ -60,12 +77,14 @@ export default function LearnerSettingsPage() {
   }, [avatarUrl]);
 
   const dirty = useMemo(
-    () => JSON.stringify(form) !== JSON.stringify(INITIAL) || avatar !== null,
-    [form, avatar],
+    () => JSON.stringify(form) !== JSON.stringify(initial) || avatar !== null,
+    [form, initial, avatar],
   );
 
-  const setField = (key: keyof ProfileForm, value: string) =>
+  const setField = (key: keyof ProfileForm, value: string) => {
+    setTouched(true);
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   function handleAvatarFile(file: File | undefined | null) {
     if (!file) return;
@@ -82,8 +101,9 @@ export default function LearnerSettingsPage() {
   }
 
   function reset() {
-    setForm(INITIAL);
+    setForm(initial);
     setAvatar(null);
+    setTouched(false);
   }
 
   return (
@@ -91,7 +111,7 @@ export default function LearnerSettingsPage() {
       <TopBar
         role="learner"
         title="Settings"
-        subtitle={`Live workspace synced for ${MOCK_USER.email}`}
+        subtitle={`Live workspace synced for ${currentUser.email}`}
       />
 
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -125,7 +145,7 @@ export default function LearnerSettingsPage() {
                   />
                 ) : (
                   <div className="bg-brand-gold flex h-full w-full items-center justify-center text-xl font-bold text-white">
-                    {MOCK_USER.initials}
+                    {currentUser.initials}
                   </div>
                 )}
               </div>
@@ -137,7 +157,7 @@ export default function LearnerSettingsPage() {
                   {form.email}
                 </p>
                 <span className="border-border bg-card text-muted-foreground mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-                  {MOCK_USER.role}
+                  {LEARNER_ROLE_LABEL}
                 </span>
               </div>
             </div>
@@ -240,7 +260,7 @@ export default function LearnerSettingsPage() {
             <div>
               <label className={labelCls}>User Role</label>
               <input
-                value={MOCK_USER.role}
+                value={LEARNER_ROLE_LABEL}
                 readOnly
                 aria-readonly
                 className={`${inputCls} bg-muted text-muted-foreground cursor-not-allowed`}

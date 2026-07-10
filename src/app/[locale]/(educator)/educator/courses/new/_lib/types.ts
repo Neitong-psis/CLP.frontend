@@ -4,6 +4,13 @@ export interface QuizOption {
   correct: boolean;
 }
 
+/** A single question within a quiz section — a section can hold many. */
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: QuizOption[];
+}
+
 export type SectionType = 'text' | 'image' | 'video' | 'quiz' | 'assignment';
 
 export interface ContentSection {
@@ -13,9 +20,9 @@ export interface ContentSection {
   imageUrl: string;
   videoTitle: string;
   videoUrl: string;
-  question: string;
-  answerFormat: 'single' | 'multiple';
-  options: QuizOption[];
+  videoFileName: string;
+  videoDescription: string;
+  quizQuestions: QuizQuestion[];
   assignmentDesc: string;
   dueDate: string;
   submissionType: string;
@@ -43,6 +50,7 @@ export interface CourseInfo {
   level: string;
   pricingType: string;
   price: string;
+  currency: string;
   promoCode: string;
   thumbnail: string;
 }
