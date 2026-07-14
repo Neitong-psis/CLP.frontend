@@ -74,4 +74,6 @@ export const BFF_ENDPOINTS = {
   oauth: '/api/auth/oauth',
   refresh: '/api/auth/refresh',
   logout: '/api/auth/logout',
+  /** Mock-mode-only profile endpoint — see `app/api/auth/me/route.ts`. */
+  me: '/api/auth/me',
 } as const;
