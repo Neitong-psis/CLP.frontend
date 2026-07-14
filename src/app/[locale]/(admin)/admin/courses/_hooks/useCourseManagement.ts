@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/toast';
-import type { AdminCourseRow } from '@/constants/admin';
+import { ADMIN_COURSES, type AdminCourseRow } from '@/constants/admin';
 import {
   fetchRawCourses,
   saveAdminCourseRow,
@@ -11,6 +11,7 @@ import {
   toAdminCourseRow,
 } from '@/services/courses';
 import { fetchAllCategories } from '@/services/categories';
+import { isMockModeEnabled } from '@/lib/mock/mock-mode';
 
 export interface CourseManagement {
   courses: AdminCourseRow[];
@@ -22,14 +23,20 @@ export interface CourseManagement {
 }
 
 export function useCourseManagement(): CourseManagement {
-  const [courses, setCourses] = useState<AdminCourseRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<AdminCourseRow[]>(() =>
+    isMockModeEnabled() ? ADMIN_COURSES : [],
+  );
+  const [loading, setLoading] = useState(() => !isMockModeEnabled());
   const [categoryIdByName, setCategoryIdByName] = useState<
     Record<string, string>
   >({});
   const { toast } = useToast();
 
   useEffect(() => {
+    if (isMockModeEnabled()) {
+      return;
+    }
+
     let cancelled = false;
 
     Promise.all([fetchRawCourses(), fetchAllCategories()])
@@ -54,6 +61,13 @@ export function useCourseManagement(): CourseManagement {
 
   const saveEdit = useCallback(
     async (updated: AdminCourseRow) => {
+      if (isMockModeEnabled()) {
+        setCourses((prev) =>
+          prev.map((c) => (c.id === updated.id ? updated : c)),
+        );
+        toast(`"${updated.title}" has been updated.`, 'success');
+        return;
+      }
       try {
         const saved = await saveAdminCourseRow(
           updated,
@@ -72,6 +86,11 @@ export function useCourseManagement(): CourseManagement {
   const remove = useCallback(
     async (id: string) => {
       const target = courses.find((c) => c.id === id);
+      if (isMockModeEnabled()) {
+        setCourses((prev) => prev.filter((c) => c.id !== id));
+        toast(`"${target?.title ?? 'Course'}" was deleted.`, 'error');
+        return;
+      }
       try {
         await deleteCourse(id);
         setCourses((prev) => prev.filter((c) => c.id !== id));
@@ -86,6 +105,22 @@ export function useCourseManagement(): CourseManagement {
   const publish = useCallback(
     async (id: string) => {
       const title = courses.find((c) => c.id === id)?.title ?? 'Course';
+      if (isMockModeEnabled()) {
+        setCourses((prev) =>
+          prev.map((c) =>
+            c.id === id
+              ? {
+                  ...c,
+                  status: 'Public',
+                  workStatus: 'published',
+                  workProgress: 100,
+                }
+              : c,
+          ),
+        );
+        toast(`"${title}" published successfully.`, 'success');
+        return;
+      }
       try {
         const saved = await publishCourse(id);
         const row = toAdminCourseRow(saved);
