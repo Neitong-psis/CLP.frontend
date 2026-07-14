@@ -43,7 +43,7 @@ interface ModuleItemProps {
  *  module ever reads as "loud". */
 const BADGE_CLASS: Record<ModuleState, string> = {
   completed: 'bg-course-done border-course-done text-white',
-  active: 'bg-course-accent border-course-accent text-white',
+  active: 'bg-course-accent border-course-accent text-course-accent-foreground',
   available: 'bg-transparent border-border text-muted-foreground',
   locked: 'bg-muted border-transparent text-muted-foreground/70',
   disabled: 'bg-muted border-transparent text-muted-foreground/50',

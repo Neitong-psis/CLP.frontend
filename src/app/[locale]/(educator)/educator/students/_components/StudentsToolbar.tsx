@@ -60,7 +60,7 @@ export function StudentsToolbar({
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="focus:border-brand-gold focus:ring-brand-gold/10 border-border bg-card text-foreground placeholder:text-muted-foreground h-10 w-full rounded-xl border pr-8 pl-9 text-sm transition-colors outline-none focus:ring-2 [&::-webkit-search-cancel-button]:hidden"
+            className="focus:border-brand-gold focus:ring-brand-gold/10 border-border bg-card text-foreground placeholder:text-muted-foreground h-10 w-full rounded-xl border pr-8 pl-9 text-sm transition-colors outline-none focus:ring-2"
           />
           {search && (
             <button

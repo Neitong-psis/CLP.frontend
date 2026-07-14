@@ -101,7 +101,6 @@ export default function CreateCourseWizard({
           <StepBar current={step} />
 
           <form
-            // @ts-expect-error - react-hook-form resolver type compatibility
             onSubmit={form.handleSubmit(onSubmit, onInvalid)}
             noValidate
             className="space-y-6"
@@ -159,7 +158,6 @@ export default function CreateCourseWizard({
                   className="gap-2 border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                   disabled={isSubmittingActive}
                   onClick={form.handleSubmit(
-                    // @ts-expect-error - react-hook-form resolver type compatibility
                     (data) => onSubmit({ ...data, visibility: 'draft' }),
                     onInvalid,
                   )}

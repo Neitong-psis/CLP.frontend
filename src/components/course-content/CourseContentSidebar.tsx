@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
-import { BookOpen, Layers, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Logo from '@/components/common/Logo';
 import { flattenLessons } from '@/lib/course-progress';
@@ -15,15 +15,21 @@ export interface CourseContentSidebarProps extends CourseTreeProps {
   collapsed: boolean;
   onCollapse: () => void;
   backHref: string;
+  /** An export/download action or similar — scoped to this course, so it
+   *  sits directly beside the course title (matches the learner sidebar). */
+  titleAction?: ReactNode;
 }
 
 /**
- * Reusable desktop content sidebar for the learner player and the educator/
- * admin previews. Crossfades between a full Module→Lesson→Content tree and a
- * compact icon rail; both convey completion + locking at every level.
+ * Reusable desktop content sidebar for the educator/admin course review
+ * surfaces. Crossfades between a full Module→Lesson→Content tree and a
+ * compact icon rail; both convey completion + locking at every level. Visual
+ * language (colors, progress bar, header layout) mirrors the learner's
+ * `CourseSidebar` so the pattern reads the same across all three roles.
  */
 export function CourseContentSidebar(props: CourseContentSidebarProps) {
-  const { courseTitle, collapsed, onCollapse, backHref, labels } = props;
+  const { courseTitle, collapsed, onCollapse, backHref, titleAction, labels } =
+    props;
   const { modules, isItemDone } = props;
 
   const { done, total } = useMemo(() => {
@@ -31,11 +37,12 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
     return { done: items.filter(isItemDone).length, total: items.length };
   }, [modules, isItemDone]);
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const isComplete = total > 0 && done === total;
 
   return (
     <aside
       className={cn(
-        'border-border bg-background relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
+        'border-border/60 bg-card relative hidden shrink-0 overflow-hidden border-r transition-[width] duration-300 ease-in-out lg:flex',
         collapsed ? 'lg:w-18' : 'lg:w-72 xl:w-80',
       )}
     >
@@ -47,7 +54,7 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
         )}
       >
         {/* Brand header */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 sm:h-16 dark:border-white/10 dark:bg-transparent">
+        <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-3 sm:h-16">
           <Link
             href={backHref}
             aria-label={labels.backAria}
@@ -59,50 +66,62 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
             type="button"
             onClick={onCollapse}
             aria-label={labels.collapseAria}
-            className="ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white/70"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground ml-3 flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors"
           >
             <PanelLeftClose className="size-4" />
           </button>
         </div>
 
         {/* Course info + progress */}
-        <div className="border-border/60 shrink-0 border-b px-4 py-4">
-          <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
+        <div className="border-border/60 shrink-0 border-b px-3 pt-3 pb-3">
+          <p className="text-muted-foreground/70 mb-0.5 text-[10px] font-medium tracking-wider uppercase">
             {labels.courseContent}
           </p>
-          <h2 className="text-foreground mt-1.5 text-sm leading-snug font-bold">
-            {courseTitle}
-          </h2>
-          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <Layers className="h-3 w-3" />
-              {labels.moduleCount}
-            </span>
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-              <BookOpen className="h-3 w-3" />
-              {labels.lessonCount}
-            </span>
+          <div className="mb-2.5 flex items-start gap-2">
+            <h2
+              className="text-foreground min-w-0 flex-1 truncate text-sm leading-snug font-semibold"
+              title={courseTitle}
+            >
+              {courseTitle}
+            </h2>
+            {titleAction && (
+              <div className="-my-0.5 shrink-0">{titleAction}</div>
+            )}
           </div>
-          <div className="mt-3">
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-brand-gold h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-muted-foreground text-[11px]">
+
+          <div
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={labels.courseContent}
+            aria-valuetext={labels.formatProgress(done, total)}
+          >
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <span className="text-muted-foreground text-[11px]">
                 {labels.formatProgress(done, total)}
-              </p>
-              <span className="text-brand-gold text-[11px] font-bold">
+              </span>
+              <span className="text-foreground text-[11px] font-semibold tabular-nums">
                 {pct}%
               </span>
+            </div>
+            <div
+              aria-hidden
+              className="bg-border/70 h-0.5 w-full overflow-hidden rounded-full"
+            >
+              <div
+                className={cn(
+                  'h-full rounded-full transition-[width] duration-300 ease-out',
+                  isComplete ? 'bg-course-done' : 'bg-course-accent',
+                )}
+                style={{ width: `${pct}%` }}
+              />
             </div>
           </div>
         </div>
 
         {/* Tree */}
-        <div className="scrollbar-none flex-1 overflow-y-auto px-2.5 py-2 [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-2 py-2 [&::-webkit-scrollbar]:hidden">
           <CourseContentTree {...props} />
         </div>
       </div>
@@ -114,17 +133,17 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
           collapsed ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >
-        <div className="group/mini relative flex h-14 shrink-0 items-center justify-center border-b border-black/10 bg-white sm:h-16 dark:border-white/10 dark:bg-transparent">
+        <div className="group/mini border-border/60 relative flex h-14 shrink-0 items-center justify-center border-b sm:h-16">
           <button
             type="button"
             onClick={onCollapse}
             aria-label={labels.expandAria}
-            className="relative flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+            className="hover:bg-muted relative flex size-10 items-center justify-center rounded-lg transition-colors"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover/mini:opacity-0">
               <Logo size="sm" variant="default" />
             </span>
-            <span className="absolute inset-0 flex items-center justify-center text-slate-400 opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100 dark:text-white/40">
+            <span className="text-muted-foreground absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover/mini:opacity-100">
               <PanelLeftOpen className="size-4" />
             </span>
           </button>

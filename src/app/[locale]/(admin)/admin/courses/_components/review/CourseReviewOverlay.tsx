@@ -5,15 +5,10 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Play,
   Lock,
   MoreVertical,
   X,
   Check,
-  CheckCircle2,
-  Clock,
-  Lightbulb,
-  FileUp,
   Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -24,32 +19,51 @@ import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { PillTabs } from '@/components/common/list/PillTabs';
 import { useAdminReviewOverlayT } from '@/i18n';
 import type { AdminCourseRow } from '@/constants/admin';
+import type { ReviewFeedbackItem } from '@/constants/educator';
 import { exportCourseToPdf } from '@/lib/utils/courseExportPdf';
 import {
   REVIEW_MODULES,
   flattenItems,
   lessonCount,
   type ReviewItem,
-  type DocumentItem,
-  type VideoItem,
-  type QuizItem,
-  type QuizQuestion,
-  type AssignmentItem,
 } from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
-import { ApproveDialog, RejectDialog } from './ReviewDialogs';
+import {
+  ApproveDialog,
+  RejectDialog,
+  ItemApproveDialog,
+  ItemRejectDialog,
+} from './ReviewDialogs';
 import { CourseContentSidebar } from '@/components/course-content/CourseContentSidebar';
 import {
   KIND_ICON,
+  type ItemBadge,
   type SidebarLabels,
 } from '@/components/course-content/types';
-import { computeLocks, type ItemDone } from '@/lib/course-progress';
+import {
+  VideoPanel,
+  DocumentPanel,
+  QuizPanel,
+  AssignmentPanel,
+} from '@/components/course-content/panels';
+import {
+  computeLocks,
+  flattenLessons,
+  type ItemDone,
+} from '@/lib/course-progress';
 
 type DialogKind = 'approve' | 'reject' | null;
 
+/** Per-item admin decision, keyed by `ReviewItem.id`. A rejection carries the
+ *  reviewer's note; that note is what the educator eventually sees. */
+interface ItemDecision {
+  status: 'approved' | 'rejected';
+  note?: string;
+}
+
 interface CourseReviewOverlayProps {
   course: AdminCourseRow;
-  onApprove: (course: AdminCourseRow) => void;
-  onReject: (course: AdminCourseRow, feedback: string) => void;
+  onApprove: (course: AdminCourseRow, feedback: ReviewFeedbackItem[]) => void;
+  onReject: (course: AdminCourseRow, feedback: ReviewFeedbackItem[]) => void;
   onClose: () => void;
 }
 
@@ -71,6 +85,10 @@ export function CourseReviewOverlay({
     () => new Set([items[0]?.id]),
   );
   const [dialog, setDialog] = useState<DialogKind>(null);
+  const [itemDialog, setItemDialog] = useState<'approve' | 'reject' | null>(
+    null,
+  );
+  const [decisions, setDecisions] = useState<Record<string, ItemDecision>>({});
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileModuleId, setMobileModuleId] = useState<string>(
     () =>
@@ -92,15 +110,25 @@ export function CourseReviewOverlay({
   );
 
   // Reviewer completion: opening an item counts; preview quizzes are non-scored
-  // so they never block. Locking is still enforced (all-three-surfaces policy).
+  // so they never block.
   const isItemDone = useMemo<ItemDone>(
     () => (item) => (item.kind === 'quiz' ? true : viewed.has(item.id)),
     [viewed],
   );
+  // Sequential locking never made sense for a reviewer — admin approves every
+  // item regardless of order, so nothing is ever gated here.
   const locks = useMemo(
-    () => computeLocks(modules, isItemDone, true),
+    () => computeLocks(modules, isItemDone, false),
     [modules, isItemDone],
   );
+
+  function getItemBadge(item: ReviewItem): ItemBadge {
+    return decisions[item.id]?.status ?? null;
+  }
+
+  const allDecided = items.length > 0 && items.every((i) => decisions[i.id]);
+  const anyRejected = items.some((i) => decisions[i.id]?.status === 'rejected');
+  const pendingCount = items.filter((i) => !decisions[i.id]).length;
 
   const active = items.find((i) => i.id === activeId) ?? items[0];
   const currentIndex = items.findIndex((i) => i.id === activeId);
@@ -144,11 +172,37 @@ export function CourseReviewOverlay({
     });
   }
 
+  /** Every item carrying a note — required for rejections, optional for
+   *  approvals — surfaced to the educator as feedback regardless of verdict. */
+  function gatherFeedback(
+    decisionMap: Record<string, ItemDecision>,
+  ): ReviewFeedbackItem[] {
+    return flattenLessons(modules).flatMap(
+      ({ lesson, items: lessonItemsList }) =>
+        lessonItemsList
+          .filter((i) => decisionMap[i.id]?.note)
+          .map((i) => ({
+            itemId: i.id,
+            lessonTitle: lesson.title,
+            itemTitle: i.title,
+            status: decisionMap[i.id]!.status,
+            note: decisionMap[i.id]!.note ?? '',
+          })),
+    );
+  }
+
+  function decideActiveItem(status: 'approved' | 'rejected', note?: string) {
+    if (!active) return;
+    setDecisions((prev) => ({ ...prev, [active.id]: { status, note } }));
+    setItemDialog(null);
+  }
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (dialog) setDialog(null);
+      else if (itemDialog) setItemDialog(null);
       else onClose();
     };
     window.addEventListener('keydown', onKey);
@@ -156,13 +210,10 @@ export function CourseReviewOverlay({
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
-  }, [dialog, onClose]);
+  }, [dialog, itemDialog, onClose]);
 
-  const totalLessons = modules.reduce((s, m) => s + lessonCount(m), 0);
   const labels: SidebarLabels = {
     courseContent: t('courseContent'),
-    moduleCount: t('modules', { count: modules.length }),
-    lessonCount: t('lessons', { count: totalLessons }),
     formatProgress: (done, total) =>
       t('itemsReviewed', { reviewed: done, total }),
     backAria: t('backToCourses'),
@@ -188,11 +239,23 @@ export function CourseReviewOverlay({
           expanded={expanded}
           onToggleModule={toggleModule}
           isItemDone={isItemDone}
-          lockingEnabled
+          lockingEnabled={false}
+          getItemBadge={getItemBadge}
           onSelect={select}
           collapsed={sidebarCollapsed}
           onCollapse={() => setSidebarCollapsed((v) => !v)}
           backHref="/admin/courses"
+          titleAction={
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              aria-label={t('exportPdf')}
+              title={t('exportPdf')}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-course-accent flex size-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2"
+            >
+              <Download aria-hidden className="size-4" />
+            </button>
+          }
           labels={labels}
         />
 
@@ -244,26 +307,15 @@ export function CourseReviewOverlay({
                       <div className="border-border/60 border-t" />
                       <button
                         type="button"
+                        disabled={!allDecided}
                         onClick={() => {
                           setShowMobileActions(false);
-                          setDialog('approve');
+                          setDialog(anyRejected ? 'reject' : 'approve');
                         }}
-                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Check className="h-4 w-4 shrink-0 text-emerald-500" />
-                        {t('approve')}
-                      </button>
-                      <div className="border-border/60 border-t" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setDialog('reject');
-                        }}
-                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
-                      >
-                        <X className="h-4 w-4 shrink-0 text-rose-500" />
-                        {t('reject')}
+                        {t('submitReview')}
                       </button>
                     </div>
                   </>
@@ -285,13 +337,18 @@ export function CourseReviewOverlay({
                 {t('pendingReview')}
               </span>
               <Button
-                variant="outline"
                 size="sm"
-                className="gap-1.5"
-                onClick={handleExportPdf}
+                className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                disabled={!allDecided}
+                title={
+                  !allDecided
+                    ? t('gateHint', { count: pendingCount })
+                    : undefined
+                }
+                onClick={() => setDialog(anyRejected ? 'reject' : 'approve')}
               >
-                <Download className="h-4 w-4" />
-                {t('exportPdf')}
+                <Check className="h-4 w-4" />
+                {t('submitReview')}
               </Button>
               <ThemeToggle className="size-8" />
               <NotificationBell />
@@ -391,7 +448,9 @@ export function CourseReviewOverlay({
               </button>
             </div>
 
-            {/* Desktop: back | reject | approve */}
+            {/* Desktop: back | reject | approve — acts on the currently
+                open item (not the whole course); course-level submit lives
+                in the header once every item has a decision. */}
             <div className="hidden items-center justify-between gap-2 px-6 py-3 lg:flex">
               <Button
                 variant="outline"
@@ -407,7 +466,7 @@ export function CourseReviewOverlay({
                   variant="outline"
                   size="sm"
                   className="gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
-                  onClick={() => setDialog('reject')}
+                  onClick={() => setItemDialog('reject')}
                 >
                   <X className="h-4 w-4" />
                   {t('reject')}
@@ -415,7 +474,7 @@ export function CourseReviewOverlay({
                 <Button
                   size="sm"
                   className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                  onClick={() => setDialog('approve')}
+                  onClick={() => setItemDialog('approve')}
                 >
                   <Check className="h-4 w-4" />
                   {t('approve')}
@@ -429,15 +488,33 @@ export function CourseReviewOverlay({
       {dialog === 'approve' && (
         <ApproveDialog
           courseTitle={course.title}
-          onConfirm={() => onApprove(course)}
+          onConfirm={() => onApprove(course, gatherFeedback(decisions))}
           onClose={() => setDialog(null)}
         />
       )}
       {dialog === 'reject' && (
         <RejectDialog
-          courseTitle={course.title}
-          onConfirm={(feedback) => onReject(course, feedback)}
+          flaggedCount={
+            items.filter((i) => decisions[i.id]?.status === 'rejected').length
+          }
+          onConfirm={() => onReject(course, gatherFeedback(decisions))}
           onClose={() => setDialog(null)}
+        />
+      )}
+      {itemDialog === 'approve' && active && (
+        <ItemApproveDialog
+          itemTitle={active.title}
+          initialNote={decisions[active.id]?.note}
+          onConfirm={(note) => decideActiveItem('approved', note)}
+          onClose={() => setItemDialog(null)}
+        />
+      )}
+      {itemDialog === 'reject' && active && (
+        <ItemRejectDialog
+          itemTitle={active.title}
+          initialNote={decisions[active.id]?.note}
+          onConfirm={(note) => decideActiveItem('rejected', note)}
+          onClose={() => setItemDialog(null)}
         />
       )}
     </div>
@@ -449,478 +526,17 @@ export function CourseReviewOverlay({
 function PreviewPanel({ item }: { item: ReviewItem }) {
   switch (item.kind) {
     case 'video':
-      return <VideoPanel item={item} />;
+      return (
+        <VideoPanel
+          item={item}
+          placeholderNote="Admin preview — learners watch the full video"
+        />
+      );
     case 'document':
       return <DocumentPanel item={item} />;
     case 'quiz':
-      return <QuizPanel item={item} />;
+      return <QuizPanel item={item} role="review" />;
     case 'assignment':
-      return <AssignmentPanel item={item} />;
+      return <AssignmentPanel item={item} role="review" />;
   }
-}
-
-function VideoPanel({ item }: { item: VideoItem }) {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
-      {/* ── Main column: player + title/meta ──────────────────────────────── */}
-      <div className="min-w-0 space-y-4">
-        {/* Player */}
-        <div className="border-border relative aspect-video w-full overflow-hidden rounded-2xl border bg-black shadow-sm">
-          {item.youtubeId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${item.youtubeId}?rel=0&modestbranding=1`}
-              title={item.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            <div className="bg-brand-navy absolute inset-0 flex flex-col items-center justify-center gap-4 dark:bg-[#071225]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,163,0,0.08)_0%,transparent_70%)]" />
-              <div className="bg-brand-gold relative flex h-16 w-16 items-center justify-center rounded-full shadow-[0_0_32px_rgba(244,163,0,0.4)]">
-                <Play className="text-brand-navy ml-1 h-7 w-7 fill-current" />
-              </div>
-              <div className="relative text-center">
-                <p className="text-base font-bold text-white">{item.title}</p>
-                <p className="mt-1 text-xs text-white/50">
-                  Admin preview — learners watch the full video
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Title + meta — below the video, YouTube-style */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-              <Play className="h-3 w-3" />
-              Video Lesson
-            </span>
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-              <Clock className="h-3 w-3" />
-              {item.duration}
-            </span>
-          </div>
-          <h2 className="text-foreground mt-3 text-xl font-bold sm:text-2xl">
-            {item.title}
-          </h2>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {item.intro}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Side column: lesson resources ─────────────────────────────────── */}
-      <aside className="space-y-4 xl:sticky xl:top-0 xl:self-start">
-        {/* In This Video */}
-        <div className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
-            <Lightbulb className="text-brand-gold h-4 w-4" />
-            In This Video
-          </h3>
-          <ul className="mt-3 space-y-2.5">
-            {item.topics.map((topic, i) => (
-              <li
-                key={i}
-                className="text-muted-foreground flex items-start gap-2.5 text-sm leading-snug"
-              >
-                <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
-                  ▸
-                </span>
-                {topic}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Key Moments — click to jump */}
-        <div className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
-            <Clock className="text-brand-gold h-4 w-4" />
-            Key Moments
-          </h3>
-          <div className="mt-3 space-y-1">
-            {item.moments.map((moment, i) => (
-              <button
-                key={i}
-                type="button"
-                disabled={!item.youtubeId}
-                onClick={() =>
-                  item.youtubeId &&
-                  window.open(
-                    `https://www.youtube.com/watch?v=${item.youtubeId}&t=${timeToSeconds(moment.time)}s`,
-                    '_blank',
-                    'noopener,noreferrer',
-                  )
-                }
-                className="hover:bg-muted/60 -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
-              >
-                <span className="bg-brand-gold/10 text-brand-gold shrink-0 rounded-md px-2 py-0.5 font-mono text-xs font-semibold">
-                  {moment.time}
-                </span>
-                <span className="text-muted-foreground text-sm leading-snug">
-                  {moment.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-/** Convert a "m:ss" or "h:mm:ss" timestamp to total seconds. */
-function timeToSeconds(time: string): number {
-  const parts = time.split(':').map(Number);
-  return parts.reduce((acc, part) => acc * 60 + part, 0);
-}
-
-function DocumentPanel({ item }: { item: DocumentItem }) {
-  return (
-    <div className="space-y-4">
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <div className="flex items-center justify-between">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-            Document Lesson
-          </span>
-          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Clock className="h-3.5 w-3.5" />
-            {item.readTime}
-          </span>
-        </div>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-          {item.intro}
-        </p>
-      </div>
-
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground mb-3 text-sm font-bold">
-          What You&apos;ll Learn
-        </h3>
-        <ul className="space-y-2">
-          {item.objectives.map((obj, i) => (
-            <li
-              key={i}
-              className="text-muted-foreground flex items-start gap-2.5 text-sm"
-            >
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-              {obj}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {item.sections.map((section, i) => (
-        <div key={i} className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground text-base font-bold">
-            {section.heading}
-          </h3>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {section.text}
-          </p>
-          {section.tip && (
-            <div className="border-brand-gold/20 bg-brand-gold/[0.06] mt-4 flex items-start gap-2.5 rounded-xl border px-4 py-3">
-              <Lightbulb className="text-brand-gold mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-brand-gold/90 text-sm">{section.tip}</p>
-            </div>
-          )}
-        </div>
-      ))}
-
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground mb-3 text-sm font-bold">
-          Key Takeaways
-        </h3>
-        <ul className="space-y-2">
-          {item.takeaways.map((point, i) => (
-            <li
-              key={i}
-              className="text-foreground/75 flex items-start gap-2.5 text-sm"
-            >
-              <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
-                ✓
-              </span>
-              {point}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-// ── Interactive quiz ──────────────────────────────────────────────────────────
-
-function QuizOption({
-  option,
-  index,
-  selected,
-  revealed,
-  correctIndex,
-  onSelect,
-}: {
-  option: string;
-  index: number;
-  selected: number | null;
-  revealed: boolean;
-  correctIndex: number;
-  onSelect: (i: number) => void;
-}) {
-  const isSelected = selected === index;
-  const isCorrect = index === correctIndex;
-
-  let ring = 'border-border hover:border-brand-gold/40 hover:bg-muted/40';
-  let dot = 'border-border';
-  let text = 'text-foreground/80';
-
-  if (revealed) {
-    if (isCorrect) {
-      ring = 'border-emerald-400/60 bg-emerald-50 dark:bg-emerald-500/10';
-      dot = 'border-emerald-500 bg-emerald-500';
-      text = 'text-emerald-700 dark:text-emerald-400 font-semibold';
-    } else if (isSelected) {
-      ring = 'border-rose-400/60 bg-rose-50 dark:bg-rose-500/10';
-      dot = 'border-rose-500 bg-rose-500';
-      text = 'text-rose-600 dark:text-rose-400';
-    }
-  } else if (isSelected) {
-    ring = 'border-brand-gold bg-brand-gold/8';
-    dot = 'border-brand-gold bg-brand-gold';
-    text = 'text-foreground font-semibold';
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(index)}
-      disabled={revealed}
-      className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all duration-150',
-        ring,
-      )}
-    >
-      <span
-        className={cn(
-          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
-          dot,
-        )}
-      >
-        {isSelected && !revealed && (
-          <span className="h-2 w-2 rounded-full bg-white" />
-        )}
-        {revealed && isCorrect && (
-          <CheckCircle2 className="h-3.5 w-3.5 text-white" />
-        )}
-      </span>
-      <span className={cn('text-sm', text)}>{option}</span>
-    </button>
-  );
-}
-
-function QuizPanel({ item }: { item: QuizItem }) {
-  const [currentQ, setCurrentQ] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [revealed, setRevealed] = useState(false);
-
-  const question: QuizQuestion = item.questions[currentQ];
-  const pct = Math.round(((currentQ + 1) / item.totalQuestions) * 100);
-  const isLast = currentQ === item.questions.length - 1;
-
-  function goNext() {
-    if (!isLast) {
-      setCurrentQ((q) => q + 1);
-      setSelected(null);
-      setRevealed(false);
-    }
-  }
-
-  function goBack() {
-    if (currentQ > 0) {
-      setCurrentQ((q) => q - 1);
-      setSelected(null);
-      setRevealed(false);
-    }
-  }
-
-  return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border">
-      <div className="border-border/60 border-b px-6 pt-6 pb-4">
-        <p className="text-muted-foreground text-sm">
-          Quiz for {item.forLesson}
-        </p>
-        <h2 className="text-foreground mt-1 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            Question {currentQ + 1} of {item.totalQuestions}
-          </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            {item.estimatedMinutes} Minutes
-          </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            Single Choice
-          </span>
-        </div>
-      </div>
-
-      <div className="bg-muted/40 h-1.5 w-full">
-        <div
-          className="bg-brand-gold h-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-
-      <div className="px-6 pt-6 pb-4">
-        <h3 className="text-foreground text-xl font-bold">
-          {question.question}
-        </h3>
-        <p className="text-muted-foreground mt-1 text-sm">Choose one answer.</p>
-
-        <div className="mt-5 space-y-3">
-          {question.options.map((opt, i) => (
-            <QuizOption
-              key={i}
-              option={opt}
-              index={i}
-              selected={selected}
-              revealed={revealed}
-              correctIndex={question.correctIndex}
-              onSelect={(idx) => {
-                setSelected(idx);
-                setRevealed(true);
-              }}
-            />
-          ))}
-        </div>
-
-        {revealed && (
-          <p
-            className={cn(
-              'mt-4 text-xs font-semibold',
-              selected === question.correctIndex
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-rose-600 dark:text-rose-400',
-            )}
-          >
-            {selected === question.correctIndex
-              ? '✓ Correct!'
-              : `✗ Correct answer: ${question.options[question.correctIndex]}`}
-          </p>
-        )}
-      </div>
-
-      <div className="border-border/60 flex items-center justify-between border-t px-6 py-4">
-        <button
-          type="button"
-          onClick={goBack}
-          disabled={currentQ === 0}
-          className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground rounded-xl border px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={isLast}
-          className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {isLast ? 'End of Preview' : 'Next'}
-        </button>
-      </div>
-
-      {isLast && (
-        <p className="text-muted-foreground border-border/40 border-t px-6 py-3 text-center text-[11px]">
-          Previewing {item.questions.length} of {item.totalQuestions} questions
-          · Admin preview only
-        </p>
-      )}
-    </div>
-  );
-}
-
-function AssignmentPanel({ item }: { item: AssignmentItem }) {
-  return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border">
-      <div className="border-border/60 border-b px-6 pt-6 pb-5">
-        <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-          Assignment
-        </span>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Assigned after {item.forLesson}
-        </p>
-      </div>
-
-      <div className="space-y-5 px-6 py-5">
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { label: 'Lesson', value: item.forLesson },
-            { label: 'Due date', value: `Due ${item.dueDate}` },
-            { label: 'Submission', value: item.submission },
-          ].map(({ label, value }) => (
-            <div key={label} className="border-border rounded-xl border p-4">
-              <p className="text-muted-foreground text-xs">{label}</p>
-              <p className="text-foreground mt-1 text-sm font-semibold">
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="border-border rounded-xl border p-4">
-          <h3 className="text-foreground text-sm font-semibold">
-            Instructions
-          </h3>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {item.instructions}
-          </p>
-        </div>
-
-        <div className="border-border rounded-xl border p-4">
-          <h3 className="text-foreground mb-3 text-sm font-semibold">
-            Requirements
-          </h3>
-          <ul className="space-y-2">
-            {item.requirements.map((req, i) => (
-              <li
-                key={i}
-                className="text-muted-foreground flex items-start gap-2.5 text-sm"
-              >
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                {req}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="border-border rounded-xl border-2 border-dashed p-8 text-center">
-          <FileUp className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
-          <p className="text-foreground text-sm font-semibold">
-            Learner submission area
-          </p>
-          <p className="text-muted-foreground mt-1 text-xs">
-            PDF, document, or shareable link accepted
-          </p>
-          <button
-            type="button"
-            disabled
-            className="bg-brand-gold/40 text-brand-navy mt-4 cursor-not-allowed rounded-xl px-6 py-2.5 text-sm font-semibold"
-          >
-            Submit Assignment
-          </button>
-          <p className="text-muted-foreground mt-2 text-[11px]">
-            Admin preview only
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 }

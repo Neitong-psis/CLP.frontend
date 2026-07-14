@@ -17,7 +17,6 @@ import {
   Trash2,
   ClipboardCheck,
   Plus,
-  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { type CourseStatus, type AdminCourseRow } from '@/constants/admin';
@@ -32,16 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TopBar from '@/components/common/TopBar';
-import { Popover, PopoverTrigger } from '@/components/ui/Popover';
-import {
-  FilterPanel,
-  FilterTrigger,
-  FilterDivider,
-} from '@/components/pages/admin/filters/FilterPanelShell';
-import {
-  FilterSectionLabel,
-  FilterOptionList,
-} from '@/components/pages/admin/filters/FilterOptionList';
+import { SimpleFilterDropdown } from '@/components/pages/admin/filters/SimpleFilterDropdown';
 import { EditModal } from './_components/EditModal';
 import { DeleteModal } from './_components/DeleteModal';
 import { RowContextMenu } from './_components/RowContextMenu';
@@ -75,25 +65,6 @@ const CATEGORY_DOT: Record<string, string> = {
   Design: 'bg-violet-500',
 };
 
-const LEVEL_FILL = { Beginner: 1, Intermediate: 2, Advanced: 3 } as const;
-
-function LevelDots({ level }: { level: string }) {
-  const filled = LEVEL_FILL[level as keyof typeof LEVEL_FILL] ?? 0;
-  return (
-    <span className="flex gap-0.5">
-      {[1, 2, 3].map((n) => (
-        <span
-          key={n}
-          className={cn(
-            'h-1.5 w-1.5 rounded-full',
-            n <= filled ? 'bg-brand-accent' : 'bg-muted-foreground/20',
-          )}
-        />
-      ))}
-    </span>
-  );
-}
-
 export default function AdminCoursesPage() {
   const t = useAdminCoursesT();
   const locale = useLocale();
@@ -105,7 +76,6 @@ export default function AdminCoursesPage() {
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [levelFilter, setLevelFilter] = useState<string>('All');
-  const [filterOpen, setFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
@@ -155,18 +125,6 @@ export default function AdminCoursesPage() {
     setLevelFilter(val);
     setPage(1);
   }
-  function clearFilters() {
-    setStatusFilter('All');
-    setCategoryFilter('All');
-    setLevelFilter('All');
-    setPage(1);
-  }
-
-  const activeFilterCount =
-    (statusFilter !== 'All' ? 1 : 0) +
-    (categoryFilter !== 'All' ? 1 : 0) +
-    (levelFilter !== 'All' ? 1 : 0);
-
   const allCourses = [...localCourses, ...courses];
 
   const filtered = allCourses.filter((c) => {
@@ -187,38 +145,6 @@ export default function AdminCoursesPage() {
   const pageStart =
     filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const pageEnd = Math.min(currentPage * PAGE_SIZE, filtered.length);
-
-  // ── Faceted counts — each option counted against the OTHER active filters,
-  //    so numbers reflect what you'd actually get if you toggled it. ──────────
-  const matchSearch = (c: AdminCourseRow) =>
-    !search || c.title.toLowerCase().includes(search.toLowerCase());
-
-  const statusCount = (s: CourseStatus | 'All') =>
-    allCourses.filter(
-      (c) =>
-        matchSearch(c) &&
-        (s === 'All' || c.status === s) &&
-        (categoryFilter === 'All' || c.category === categoryFilter) &&
-        (levelFilter === 'All' || c.level === levelFilter),
-    ).length;
-
-  const categoryCount = (cat: string) =>
-    allCourses.filter(
-      (c) =>
-        matchSearch(c) &&
-        (statusFilter === 'All' || c.status === statusFilter) &&
-        (cat === 'All' || c.category === cat) &&
-        (levelFilter === 'All' || c.level === levelFilter),
-    ).length;
-
-  const levelCount = (level: string) =>
-    allCourses.filter(
-      (c) =>
-        matchSearch(c) &&
-        (statusFilter === 'All' || c.status === statusFilter) &&
-        (categoryFilter === 'All' || c.category === categoryFilter) &&
-        (level === 'All' || c.level === level),
-    ).length;
 
   const statusOptions = STATUS_FILTERS.filter(
     (s): s is CourseStatus => s !== 'All',
@@ -280,97 +206,30 @@ export default function AdminCoursesPage() {
             </div>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              {/* Filter popover */}
-              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-                <PopoverTrigger className="border-border hover:bg-muted text-foreground inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors sm:px-4">
-                  <FilterTrigger
-                    label={t('filterBtn')}
-                    activeFilterCount={activeFilterCount}
-                  />
-                </PopoverTrigger>
-                <FilterPanel
-                  title={t('filterBtn')}
-                  activeFilterCount={activeFilterCount}
-                  clearLabel={t('filterClearAll')}
-                  onClear={clearFilters}
-                  resultCount={filtered.length}
-                  noResultsLabel={t('filterNoResults')}
-                  oneResultLabel={t('filterShowResult')}
-                  manyResultsLabel={(count) =>
-                    t('filterShowResults', { count })
-                  }
-                  onApply={() => setFilterOpen(false)}
-                >
-                  <div className="px-4 pt-3.5 pb-3">
-                    <FilterSectionLabel>{t('filterStatus')}</FilterSectionLabel>
-                    <FilterOptionList
-                      allLabel={t('filterAll')}
-                      options={statusOptions}
-                      value={statusFilter}
-                      onSelect={handleStatusFilter}
-                      dot={STATUS_DOT}
-                      count={statusCount}
-                    />
-                  </div>
-
-                  <FilterDivider />
-
-                  <div className="px-4 pt-3 pb-3">
-                    <FilterSectionLabel>
-                      {t('filterCategory')}
-                    </FilterSectionLabel>
-                    <FilterOptionList
-                      allLabel={t('filterAll')}
-                      options={ALL_CATEGORIES}
-                      value={categoryFilter}
-                      onSelect={handleCategoryFilter}
-                      dot={CATEGORY_DOT}
-                      count={categoryCount}
-                    />
-                  </div>
-
-                  <FilterDivider />
-
-                  {/* Level — kept as a compact card row: difficulty has an
-                      inherent order a plain checklist would flatten. */}
-                  <div className="px-4 pt-3 pb-4">
-                    <FilterSectionLabel>{t('filterLevel')}</FilterSectionLabel>
-                    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-                      {(['All', ...ALL_LEVELS] as const).map((lvl) => {
-                        const isActive = levelFilter === lvl;
-                        const count = levelCount(lvl);
-                        return (
-                          <button
-                            key={lvl}
-                            type="button"
-                            onClick={() => handleLevelFilter(lvl)}
-                            className={cn(
-                              'flex flex-col items-center gap-1.5 rounded-xl border py-2.5 text-[11px] font-medium transition-all',
-                              isActive
-                                ? 'border-foreground bg-muted text-foreground'
-                                : 'border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground',
-                            )}
-                          >
-                            {lvl !== 'All' ? (
-                              <LevelDots level={lvl} />
-                            ) : (
-                              <span className="text-muted-foreground text-sm leading-none">
-                                —
-                              </span>
-                            )}
-                            <span className="leading-none">
-                              {lvl === 'All' ? t('filterAll') : lvl}
-                            </span>
-                            <span className="text-muted-foreground/60 text-[10px] leading-none tabular-nums">
-                              {count}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </FilterPanel>
-              </Popover>
+              {/* Filter dropdowns — one facet each, applies on click */}
+              <SimpleFilterDropdown
+                label={t('filterStatus')}
+                allLabel={t('filterAll')}
+                options={statusOptions}
+                value={statusFilter}
+                onSelect={handleStatusFilter}
+                dot={STATUS_DOT}
+              />
+              <SimpleFilterDropdown
+                label={t('filterCategory')}
+                allLabel={t('filterAll')}
+                options={ALL_CATEGORIES}
+                value={categoryFilter}
+                onSelect={handleCategoryFilter}
+                dot={CATEGORY_DOT}
+              />
+              <SimpleFilterDropdown
+                label={t('filterLevel')}
+                allLabel={t('filterAll')}
+                options={ALL_LEVELS}
+                value={levelFilter}
+                onSelect={handleLevelFilter}
+              />
 
               {/* Create Course */}
               <Link href={`/${locale}/admin/courses/new`}>
@@ -385,73 +244,6 @@ export default function AdminCoursesPage() {
               </Link>
             </div>
           </div>
-
-          {/* Active filter chips */}
-          {activeFilterCount > 0 && (
-            <div className="-mt-1 mb-4 flex flex-wrap items-center gap-1.5">
-              {statusFilter !== 'All' && (
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
-                    STATUS_STYLE[statusFilter],
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'h-1.5 w-1.5 rounded-full',
-                      STATUS_DOT[statusFilter],
-                    )}
-                  />
-                  {statusFilter}
-                  <button
-                    type="button"
-                    onClick={() => handleStatusFilter('All')}
-                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-              {categoryFilter !== 'All' && (
-                <span className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
-                  <span
-                    className={cn(
-                      'h-1.5 w-1.5 rounded-full',
-                      CATEGORY_DOT[categoryFilter] ?? 'bg-muted-foreground/60',
-                    )}
-                  />
-                  {categoryFilter}
-                  <button
-                    type="button"
-                    onClick={() => handleCategoryFilter('All')}
-                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-              {levelFilter !== 'All' && (
-                <span className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
-                  <LevelDots level={levelFilter} />
-                  {levelFilter}
-                  <button
-                    type="button"
-                    onClick={() => handleLevelFilter('All')}
-                    className="ml-0.5 opacity-60 transition-opacity hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-muted-foreground ml-0.5 text-xs transition-colors hover:text-rose-500"
-              >
-                {t('filterClearAll')}
-              </button>
-            </div>
-          )}
 
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">

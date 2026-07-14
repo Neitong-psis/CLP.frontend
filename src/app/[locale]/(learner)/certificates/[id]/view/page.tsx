@@ -230,7 +230,7 @@ function ViewPageContent({ cert }: { cert: Certificate }) {
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleDownload}
-                className="bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-gold dark:text-brand-navy flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors"
+                className="bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-gold dark:text-brand-navy dark:hover:bg-brand-gold/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors"
               >
                 <Download className="size-4" />
                 {t('downloadPdf')}

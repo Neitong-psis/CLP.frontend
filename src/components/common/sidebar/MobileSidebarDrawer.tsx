@@ -86,7 +86,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         email: currentUser.email,
         initials: currentUser.initials,
       },
-      logoutHref: '/auth',
+      logoutHref: '/auth?tab=login&role=learner',
       settingsHref: '/settings',
       learnMoreHref: '/learn-more',
     },
@@ -119,7 +119,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         initials: currentUser.initials,
       },
       learnMoreHref: '/educator/learn-more',
-      logoutHref: '/auth',
+      logoutHref: '/auth?tab=login&role=educator',
     },
     admin: {
       navItems: [

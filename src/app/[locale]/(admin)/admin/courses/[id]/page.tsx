@@ -5,6 +5,7 @@ import { ArrowLeft, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import type { AdminCourseRow } from '@/constants/admin';
+import type { ReviewFeedbackItem } from '@/constants/educator';
 import { CourseReviewOverlay } from '../_components/review/CourseReviewOverlay';
 
 export default function AdminCourseReviewPage() {
@@ -57,17 +58,21 @@ export default function AdminCourseReviewPage() {
     createdAt: '',
   };
 
-  function handleApprove(c: AdminCourseRow) {
-    toast(`"${c.title}" approved and published.`, 'success');
+  function handleApprove(c: AdminCourseRow, feedback: ReviewFeedbackItem[]) {
+    toast(
+      feedback.length > 0
+        ? `"${c.title}" approved and published, with feedback on ${feedback.length} item(s).`
+        : `"${c.title}" approved and published.`,
+      'success',
+    );
     router.push('/admin/courses');
   }
 
-  function handleReject(c: AdminCourseRow, feedback: string) {
+  function handleReject(c: AdminCourseRow, feedback: ReviewFeedbackItem[]) {
     toast(
-      `Feedback sent to ${c.instructor}. "${c.title}" stays pending.`,
+      `Feedback on ${feedback.length} item(s) sent to ${c.instructor}. "${c.title}" stays pending.`,
       'error',
     );
-    void feedback;
     router.push('/admin/courses');
   }
 

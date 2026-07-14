@@ -16,6 +16,7 @@ interface CourseTasksCtxValue {
   tasks: CourseTask[];
   addTask: (task: CourseTask) => void;
   removeTask: (id: string) => void;
+  updateTask: (id: string, patch: Partial<CourseTask>) => void;
 }
 
 const CourseTasksContext = createContext<CourseTasksCtxValue | null>(null);
@@ -37,8 +38,14 @@ export function CourseTasksProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const updateTask = useCallback((id: string, patch: Partial<CourseTask>) => {
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  }, []);
+
   return (
-    <CourseTasksContext.Provider value={{ tasks, addTask, removeTask }}>
+    <CourseTasksContext.Provider
+      value={{ tasks, addTask, removeTask, updateTask }}
+    >
       {children}
     </CourseTasksContext.Provider>
   );

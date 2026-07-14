@@ -63,7 +63,7 @@ export default function LogInForm() {
 
   return (
     <form
-      className="3xl:space-y-7 space-y-5 2xl:space-y-6"
+      className="space-y-4 lg:space-y-[clamp(0.5rem,1.5vh,1.25rem)]"
       onSubmit={(e) => {
         e.preventDefault();
         if (form.state.isSubmitting) return;

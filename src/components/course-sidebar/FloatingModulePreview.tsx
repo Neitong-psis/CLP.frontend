@@ -1,5 +1,6 @@
 'use client';
 
+import type { RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Lock } from 'lucide-react';
@@ -35,6 +36,9 @@ interface FloatingModulePreviewProps {
   readonly anchorRect: DOMRect;
   readonly currentItemId: string | null;
   readonly labels: CourseSidebarLabels;
+  /** Root node ref — lets `useHoverPreview` tell scrolling the panel's own
+   *  content apart from the page scrolling behind it. */
+  readonly panelRef: RefObject<HTMLDivElement | null>;
   readonly onSelectItem: (
     item: ContentItem,
     lesson: Lesson,
@@ -61,6 +65,7 @@ export function FloatingModulePreview({
   anchorRect,
   currentItemId,
   labels,
+  panelRef,
   onSelectItem,
   onRetain,
   onRelease,
@@ -79,6 +84,7 @@ export function FloatingModulePreview({
 
   return createPortal(
     <motion.div
+      ref={panelRef}
       // Not `dialog`: it is non-modal and traps nothing. `group` labels the
       // subtree without promising focus management it doesn't do.
       role="group"

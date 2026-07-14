@@ -1,6 +1,9 @@
 // Compact curriculum model for the educator course-review experience.
 // Hierarchy mirrors the Create Course flow: Module → Lesson → Content items.
 
+import type { JSONContent } from '@tiptap/react';
+import { richDoc } from '@/lib/utils/richDoc';
+
 export type ReviewItemKind = 'document' | 'video' | 'quiz' | 'assignment';
 export type ReviewItemStatus = 'Ready' | 'Draft';
 
@@ -12,10 +15,18 @@ interface BaseItem {
 export interface DocumentItem extends BaseItem {
   kind: 'document';
   readTime: string;
-  intro: string;
-  objectives: string[];
-  sections: { heading: string; text: string; tip?: string }[];
-  takeaways: string[];
+  /** Tiptap document JSON — the same shape the RichEditor authoring tool
+   *  produces, rendered read-only via `RichContentViewer`. Preferred for new
+   *  content; takes priority over the legacy fields below when present. */
+  content?: JSONContent;
+  /** Legacy plain-structure fields, still used by the existing course
+   *  catalog (course-modules.ts / explore-modules.ts) — `DocumentPanel`
+   *  converts these into equivalent rich-text rendering at render time via
+   *  `legacyDocumentToRichDoc`, so that catalog doesn't need a mass rewrite. */
+  intro?: string;
+  objectives?: string[];
+  sections?: { heading: string; text: string; tip?: string }[];
+  takeaways?: string[];
 }
 
 export interface VideoItem extends BaseItem {
@@ -110,34 +121,65 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'document',
             title: 'Responsive Design Guide',
             readTime: '3 – 8 min read',
-            intro:
-              'A concise reading guide for mobile-first layouts, breakpoints, and readable content blocks.',
-            objectives: [
-              'Understand mobile-first design principles and why they matter',
-              'Apply CSS media queries to build layouts that adapt across screens',
-              'Structure content blocks for readability at every viewport size',
-            ],
-            sections: [
-              {
-                heading: 'What is Mobile-First Design?',
-                text: "Mobile-first design means starting with the smallest screen in mind and progressively enhancing for larger screens. Begin by asking: does this content serve the learner on a phone? Strip away anything that doesn't. A page that works on mobile nearly always scales up to desktop gracefully.",
-                tip: 'Sketch the mobile layout fully before opening any design tool. Constraints drive clarity.',
-              },
-              {
-                heading: 'Working with Breakpoints',
-                text: 'Breakpoints define where your layout shifts. Common values are 640 px (sm), 768 px (md), 1024 px (lg), and 1280 px (xl). Resist adding a breakpoint every time the design looks off — instead, let the content determine where the layout naturally needs to change.',
-              },
-              {
-                heading: 'Readable Content Blocks',
-                text: 'Limit line length to 60 – 80 characters for comfortable reading. Use a base font size of at least 16 px on body text. When reviewing, slow down at each heading and ask what changed from the previous idea — this habit improves both writing and proofreading.',
-                tip: "Key takeaway: finish the reading before opening the quiz. The question wording assumes you've read every section.",
-              },
-            ],
-            takeaways: [
-              'Start every layout from the smallest viewport and enhance upward',
-              'Breakpoints should follow content needs, not arbitrary pixel values',
-              'Comfortable line lengths (60 – 80 chars) significantly reduce eye fatigue',
-            ],
+            content: richDoc.doc(
+              richDoc.paragraph(
+                'A concise reading guide for ',
+                { text: 'mobile-first layouts', bold: true },
+                ', breakpoints, and readable content blocks.',
+              ),
+              richDoc.heading(2, "What You'll Learn"),
+              richDoc.bulletList([
+                [
+                  'Understand mobile-first design principles and why they matter',
+                ],
+                [
+                  'Apply CSS media queries to build layouts that adapt across screens',
+                ],
+                [
+                  'Structure content blocks for readability at every viewport size',
+                ],
+              ]),
+              richDoc.heading(2, 'What is Mobile-First Design?'),
+              richDoc.paragraph(
+                'Mobile-first design means starting with the ',
+                { text: 'smallest screen', bold: true },
+                " in mind and progressively enhancing for larger screens. Begin by asking: does this content serve the learner on a phone? Strip away anything that doesn't. A page that works on mobile nearly always scales up to desktop gracefully.",
+              ),
+              richDoc.blockquote(
+                'Sketch the mobile layout fully before opening any design tool. Constraints drive clarity.',
+              ),
+              richDoc.heading(2, 'Working with Breakpoints'),
+              richDoc.paragraph(
+                'Breakpoints define where your layout shifts. Common values are ',
+                {
+                  text: '640 px (sm), 768 px (md), 1024 px (lg), and 1280 px (xl)',
+                  bold: true,
+                },
+                '. Resist adding a breakpoint every time the design looks off — instead, let the content determine where the layout naturally needs to change.',
+              ),
+              richDoc.heading(2, 'Readable Content Blocks'),
+              richDoc.paragraph(
+                'Limit line length to ',
+                { text: '60 – 80 characters', bold: true },
+                ' for comfortable reading. Use a base font size of at least 16 px on body text. When reviewing, slow down at each heading and ask what changed from the previous idea — this habit improves both writing and proofreading.',
+              ),
+              richDoc.blockquote(
+                { text: 'Key takeaway:', italic: true },
+                " finish the reading before opening the quiz. The question wording assumes you've read every section.",
+              ),
+              richDoc.heading(2, 'Key Takeaways'),
+              richDoc.bulletList([
+                [
+                  'Start every layout from the smallest viewport and enhance upward',
+                ],
+                [
+                  'Breakpoints should follow content needs, not arbitrary pixel values',
+                ],
+                [
+                  'Comfortable line lengths (60 – 80 chars) significantly reduce eye fatigue',
+                ],
+              ]),
+            ),
           },
         ],
         videos: [],
@@ -519,34 +561,63 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'document',
             title: 'Accessibility Notes',
             readTime: '4 – 6 min read',
-            intro:
-              'Quick reference for colour contrast, focus order, and labelling interactive elements to meet WCAG 2.1 AA.',
-            objectives: [
-              'Identify common accessibility barriers in digital interfaces',
-              'Apply WCAG contrast and keyboard focus standards correctly',
-              'Label interactive elements for screen reader compatibility',
-            ],
-            sections: [
-              {
-                heading: 'Colour Contrast & Typography',
-                text: 'Text on a background must pass WCAG AA contrast ratio: 4.5:1 for normal text, 3:1 for large text (18 pt or 14 pt bold). Never rely on colour alone to convey meaning — always pair it with a shape, icon, or text label for users with colour blindness.',
-                tip: "Use the browser's accessibility inspector to check contrast instantly without leaving the dev environment.",
-              },
-              {
-                heading: 'Focus & Keyboard Navigation',
-                text: 'Every interactive element — buttons, links, form fields — must be reachable with the Tab key and operable with Enter or Space. Never remove the focus ring without providing a clearly visible custom alternative.',
-              },
-              {
-                heading: 'Semantic Markup & Labels',
-                text: 'Use the correct HTML element for the job: <button> for actions, <a> for navigation, <nav> and <main> for landmarks. Label every input with a <label> element.',
-                tip: "Accessibility is far easier when it's part of the first draft. Retrofitting a finished product is costly.",
-              },
-            ],
-            takeaways: [
-              'Accessibility starts with semantic HTML — ARIA is a patch, not a foundation',
-              'Contrast ratio minimum: 4.5:1 for normal body text (WCAG AA)',
-              'Every interactive element must be fully operable with the keyboard alone',
-            ],
+            content: richDoc.doc(
+              richDoc.paragraph(
+                'Quick reference for colour contrast, focus order, and labelling interactive elements to meet ',
+                { text: 'WCAG 2.1 AA', bold: true },
+                '.',
+              ),
+              richDoc.heading(2, "What You'll Learn"),
+              richDoc.bulletList([
+                [
+                  'Identify common accessibility barriers in digital interfaces',
+                ],
+                ['Apply WCAG contrast and keyboard focus standards correctly'],
+                ['Label interactive elements for screen reader compatibility'],
+              ]),
+              richDoc.heading(2, 'Colour Contrast & Typography'),
+              richDoc.paragraph(
+                'Text on a background must pass WCAG AA contrast ratio: ',
+                {
+                  text: '4.5:1 for normal text, 3:1 for large text',
+                  bold: true,
+                },
+                ' (18 pt or 14 pt bold). Never rely on colour alone to convey meaning — always pair it with a shape, icon, or text label for users with colour blindness.',
+              ),
+              richDoc.blockquote(
+                "Use the browser's accessibility inspector to check contrast instantly without leaving the dev environment.",
+              ),
+              richDoc.heading(2, 'Focus & Keyboard Navigation'),
+              richDoc.paragraph(
+                'Every interactive element — buttons, links, form fields — must be reachable with the ',
+                { text: 'Tab key', bold: true },
+                ' and operable with Enter or Space. ',
+                {
+                  text: 'Never remove the focus ring',
+                  italic: true,
+                },
+                ' without providing a clearly visible custom alternative.',
+              ),
+              richDoc.heading(2, 'Semantic Markup & Labels'),
+              richDoc.paragraph(
+                'Use the correct HTML element for the job: <button> for actions, <a> for navigation, <nav> and <main> for landmarks. Label every input with a <label> element.',
+              ),
+              richDoc.blockquote(
+                "Accessibility is far easier when it's part of the first draft. Retrofitting a finished product is costly.",
+              ),
+              richDoc.heading(2, 'Key Takeaways'),
+              richDoc.bulletList([
+                [
+                  'Accessibility starts with semantic HTML — ARIA is a patch, not a foundation',
+                ],
+                [
+                  'Contrast ratio minimum: 4.5:1 for normal body text (WCAG AA)',
+                ],
+                [
+                  'Every interactive element must be fully operable with the keyboard alone',
+                ],
+              ]),
+            ),
           },
         ],
         videos: [],
@@ -913,34 +984,59 @@ export const REVIEW_MODULES: ReviewModule[] = [
             kind: 'document',
             title: 'Effective Communication',
             readTime: '5 – 7 min read',
-            intro:
-              'A practical guide to active listening, clear messaging, and giving feedback that builds — not breaks — relationships.',
-            objectives: [
-              'Apply active listening techniques in workplace conversations',
-              'Structure clear, concise messages for different audiences',
-              'Deliver and receive constructive feedback using a structured model',
-            ],
-            sections: [
-              {
-                heading: 'Active Listening',
-                text: 'Listening is not waiting for your turn to speak. True active listening means paying full attention, suspending judgment, and confirming understanding before responding. Use verbal affirmations ("I see", "Go on") and paraphrase what you heard before adding your own point.',
-                tip: 'Put away your phone during one-on-one conversations. Undivided attention is the most visible signal of respect.',
-              },
-              {
-                heading: 'Structuring Clear Messages',
-                text: 'Before sending any written or spoken message, identify: what action or decision is needed, by whom, and by when. Lead with the most important point (bottom-line up front), then provide context and supporting detail. Avoid jargon when communicating cross-functionally.',
-              },
-              {
-                heading: 'Giving & Receiving Feedback',
-                text: 'Use the SBI model — Situation, Behaviour, Impact. Describe the specific situation ("In yesterday\'s meeting"), the observable behaviour ("when you interrupted twice"), and the impact ("the speaker lost their train of thought and the team missed key information"). End by inviting a response.',
-                tip: 'When receiving feedback, resist the urge to defend immediately. Write it down, say thank you, then reflect before responding.',
-              },
-            ],
-            takeaways: [
-              'Active listening requires deliberate attention — it is a skill, not a default state',
-              'Lead every message with the most important point, then add context',
-              'Feedback is most effective when tied to specific behaviours, not personality',
-            ],
+            content: richDoc.doc(
+              richDoc.paragraph(
+                'A practical guide to ',
+                { text: 'active listening', bold: true },
+                ', clear messaging, and giving feedback that builds — not breaks — relationships.',
+              ),
+              richDoc.heading(2, "What You'll Learn"),
+              richDoc.bulletList([
+                [
+                  'Apply active listening techniques in workplace conversations',
+                ],
+                ['Structure clear, concise messages for different audiences'],
+                [
+                  'Deliver and receive constructive feedback using a structured model',
+                ],
+              ]),
+              richDoc.heading(2, 'Active Listening'),
+              richDoc.paragraph(
+                'Listening is not waiting for your turn to speak. True active listening means paying full attention, suspending judgment, and confirming understanding before responding. Use verbal affirmations (',
+                { text: '"I see", "Go on"', italic: true },
+                ') and paraphrase what you heard before adding your own point.',
+              ),
+              richDoc.blockquote(
+                'Put away your phone during one-on-one conversations. Undivided attention is the most visible signal of respect.',
+              ),
+              richDoc.heading(2, 'Structuring Clear Messages'),
+              richDoc.paragraph(
+                'Before sending any written or spoken message, identify: what action or decision is needed, by whom, and by when. Lead with the most important point (',
+                { text: 'bottom-line up front', bold: true },
+                '), then provide context and supporting detail. Avoid jargon when communicating cross-functionally.',
+              ),
+              richDoc.heading(2, 'Giving & Receiving Feedback'),
+              richDoc.paragraph(
+                'Use the ',
+                { text: 'SBI model', bold: true },
+                ' — Situation, Behaviour, Impact. Describe the specific situation ("In yesterday\'s meeting"), the observable behaviour ("when you interrupted twice"), and the impact ("the speaker lost their train of thought and the team missed key information"). End by inviting a response.',
+              ),
+              richDoc.blockquote(
+                'When receiving feedback, resist the urge to defend immediately. Write it down, say thank you, then reflect before responding.',
+              ),
+              richDoc.heading(2, 'Key Takeaways'),
+              richDoc.bulletList([
+                [
+                  'Active listening requires deliberate attention — it is a skill, not a default state',
+                ],
+                [
+                  'Lead every message with the most important point, then add context',
+                ],
+                [
+                  'Feedback is most effective when tied to specific behaviours, not personality',
+                ],
+              ]),
+            ),
           },
         ],
         videos: [],

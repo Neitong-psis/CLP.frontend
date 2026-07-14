@@ -13,6 +13,13 @@ export function setDemoCookie(): void {
   document.cookie = `${COOKIE_NAME}=1; path=/; sameSite=lax`;
 }
 
+/** Returns true when the demo cookie is set. Safe to call on the server (returns false). */
+export function isDemoCookieActive(): boolean {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') return true;
+  if (typeof document === 'undefined') return false;
+  return document.cookie.split('; ').some((c) => c === `${COOKIE_NAME}=1`);
+}
+
 /** Clears the demo cookie. */
 export function clearDemoCookie(): void {
   document.cookie = `${COOKIE_NAME}=; path=/; sameSite=lax; expires=Thu, 01 Jan 1970 00:00:00 GMT`;

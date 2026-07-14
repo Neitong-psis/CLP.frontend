@@ -2,14 +2,15 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, SearchX } from 'lucide-react';
-import { EDUCATOR_COURSE_TASKS } from '@/constants/educator';
 import { Button } from '@/components/ui/button';
+import { useCourseTasks } from '@/context/CourseTasksContext';
 import { CourseReview } from './_components/CourseReview';
 
 export default function CourseReviewPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const task = EDUCATOR_COURSE_TASKS.find((t) => t.id === params.id);
+  const { tasks } = useCourseTasks();
+  const task = tasks.find((t) => t.id === params.id);
 
   if (!task) {
     return (

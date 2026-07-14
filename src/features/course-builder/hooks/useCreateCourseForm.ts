@@ -51,7 +51,6 @@ export function useCreateCourseForm({
   );
 
   const form = useForm<WizardCourseFormValues>({
-    // @ts-expect-error - zod resolver type mismatch with coerce number field
     resolver: zodResolver(wizardCourseSchema),
     defaultValues: {
       title: '',

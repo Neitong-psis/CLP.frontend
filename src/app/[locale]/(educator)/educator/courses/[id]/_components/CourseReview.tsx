@@ -5,28 +5,34 @@ import { useRouter } from 'next/navigation';
 import { useEducatorReviewT } from '@/i18n';
 import {
   ArrowLeft,
+  AlertTriangle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Play,
   Lock,
+  MessageSquare,
   MoreVertical,
   PencilLine,
   Send,
   RotateCcw,
-  FileUp,
-  CheckCircle2,
-  Clock,
-  Lightbulb,
   Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { PillTabs } from '@/components/common/list/PillTabs';
 import { EDUCATOR_USER, type CourseTask } from '@/constants/educator';
+import { useCourseTasks } from '@/context/CourseTasksContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { exportCourseToPdf } from '@/lib/utils/courseExportPdf';
 import {
@@ -34,18 +40,20 @@ import {
   flattenItems,
   lessonCount,
   type ReviewItem,
-  type DocumentItem,
-  type VideoItem,
-  type QuizItem,
-  type QuizQuestion,
-  type AssignmentItem,
 } from '../_lib/content';
 import { CourseContentSidebar } from '@/components/course-content/CourseContentSidebar';
 import { CourseContentSheet } from '@/components/course-content/CourseContentSheet';
 import {
   KIND_ICON,
+  type ItemBadge,
   type SidebarLabels,
 } from '@/components/course-content/types';
+import {
+  VideoPanel,
+  DocumentPanel,
+  QuizPanel,
+  AssignmentPanel,
+} from '@/components/course-content/panels';
 import { computeLocks, type ItemDone } from '@/lib/course-progress';
 
 export function CourseReview({ task }: { task: CourseTask }) {
@@ -53,8 +61,18 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const t = useEducatorReviewT();
   const { toast } = useToast();
   const currentUser = useCurrentUser();
+  const { updateTask } = useCourseTasks();
   const modules = REVIEW_MODULES;
   const items = useMemo(() => flattenItems(modules), [modules]);
+
+  const isUnderReview = task.status === 'Under Review';
+  const isDecidedApproved = isUnderReview && task.reviewState === 'Approved';
+  const isDecidedRejected = isUnderReview && task.reviewState === 'Reject';
+  const hasDecision = isDecidedApproved || isDecidedRejected;
+  const feedback = task.reviewFeedback ?? [];
+  const rejectedFeedbackCount = feedback.filter(
+    (f) => f.status === 'rejected',
+  ).length;
 
   const [activeId, setActiveId] = useState(items[0]?.id ?? '');
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -64,6 +82,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
     () => new Set([items[0]?.id]),
   );
   const [showResubmit, setShowResubmit] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const isArchived = task.status === 'Archived';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showContents, setShowContents] = useState(false);
@@ -92,10 +111,24 @@ export function CourseReview({ task }: { task: CourseTask }) {
     () => (item) => (item.kind === 'quiz' ? true : viewed.has(item.id)),
     [viewed],
   );
+  // Sequential locking never made sense for a reviewer (every item unlocks
+  // itself the instant it's opened) — reviewers see all content, always.
   const locks = useMemo(
-    () => computeLocks(modules, isItemDone, true),
+    () => computeLocks(modules, isItemDone, false),
     [modules, isItemDone],
   );
+
+  /** Admin's per-item decision, once one exists — replaces the old fake lock
+   *  with something that actually means something. */
+  function getItemBadge(item: ReviewItem): ItemBadge {
+    if (!isUnderReview) return null;
+    if (task.reviewState === 'Approved') return 'approved';
+    if (task.reviewState === 'Reject') {
+      const entry = task.reviewFeedback?.find((f) => f.itemId === item.id);
+      return entry?.status === 'rejected' ? 'rejected' : 'approved';
+    }
+    return null;
+  }
 
   const active = items.find((i) => i.id === activeId) ?? items[0];
   const currentIndex = items.findIndex((i) => i.id === activeId);
@@ -132,6 +165,10 @@ export function CourseReview({ task }: { task: CourseTask }) {
 
   function handleResubmit() {
     setShowResubmit(false);
+    updateTask(task.id, {
+      reviewState: 'Under Review',
+      reviewFeedback: undefined,
+    });
     toast(t('resubmittedToast', { title: task.title }), 'success');
     router.push('/educator/courses');
   }
@@ -139,6 +176,11 @@ export function CourseReview({ task }: { task: CourseTask }) {
   function handleRestore() {
     toast(t('restoredToast', { title: task.title }), 'success');
     router.push('/educator/courses');
+  }
+
+  function handleEditCourse() {
+    toast(t('openingEditor'), 'info');
+    router.push(`/educator/courses/new?draft=${task.id}`);
   }
 
   function handleExportPdf() {
@@ -152,11 +194,8 @@ export function CourseReview({ task }: { task: CourseTask }) {
     );
   }
 
-  const totalLessons = modules.reduce((s, m) => s + lessonCount(m), 0);
   const labels: SidebarLabels = {
     courseContent: t('courseContent'),
-    moduleCount: t('modules', { count: modules.length }),
-    lessonCount: t('lessons', { count: totalLessons }),
     formatProgress: (done, total) =>
       t('itemsReviewed', { reviewed: done, total }),
     backAria: t('backToCourses'),
@@ -178,12 +217,24 @@ export function CourseReview({ task }: { task: CourseTask }) {
           expanded={expanded}
           onToggleModule={toggleModule}
           isItemDone={isItemDone}
-          lockingEnabled
+          lockingEnabled={false}
+          getItemBadge={getItemBadge}
           onSelect={select}
           onLockedSelect={() => toast(t('lockedToast'), 'info')}
           collapsed={sidebarCollapsed}
           onCollapse={() => setSidebarCollapsed((v) => !v)}
           backHref="/educator/courses"
+          titleAction={
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              aria-label={t('exportPdf')}
+              title={t('exportPdf')}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-course-accent flex size-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2"
+            >
+              <Download aria-hidden className="size-4" />
+            </button>
+          }
           labels={labels}
         />
 
@@ -216,17 +267,32 @@ export function CourseReview({ task }: { task: CourseTask }) {
                 {showMobileActions && (
                   <>
                     <div
-                      className="fixed inset-0 z-[55]"
+                      className="fixed inset-0 z-55"
                       onClick={() => setShowMobileActions(false)}
                       aria-hidden
                     />
                     <div className="bg-card ring-border absolute top-full right-0 z-[56] mt-1 min-w-48 overflow-hidden rounded-xl shadow-xl ring-1 dark:ring-white/10">
+                      {hasDecision && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowMobileActions(false);
+                              setShowFeedback(true);
+                            }}
+                            className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                          >
+                            <MessageSquare className="text-muted-foreground h-4 w-4 shrink-0" />
+                            {t('feedbackButton')}
+                          </button>
+                          <div className="border-border/60 border-t" />
+                        </>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
                           setShowMobileActions(false);
-                          toast(t('openingEditor'), 'info');
-                          router.push('/educator/courses/new');
+                          handleEditCourse();
                         }}
                         className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
                       >
@@ -258,17 +324,19 @@ export function CourseReview({ task }: { task: CourseTask }) {
                           {t('restoreBtn')}
                         </button>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowMobileActions(false);
-                            setShowResubmit(true);
-                          }}
-                          className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
-                        >
-                          <Send className="text-muted-foreground h-4 w-4 shrink-0" />
-                          {t('resubmitBtn')}
-                        </button>
+                        !isDecidedApproved && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowMobileActions(false);
+                              setShowResubmit(true);
+                            }}
+                            className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                          >
+                            <Send className="text-muted-foreground h-4 w-4 shrink-0" />
+                            {t('resubmitBtn')}
+                          </button>
+                        )
                       )}
                     </div>
                   </>
@@ -286,18 +354,22 @@ export function CourseReview({ task }: { task: CourseTask }) {
               </p>
             </div>
             <div className="hidden items-center gap-1.5 lg:flex">
+              {hasDecision && (
+                <button
+                  type="button"
+                  onClick={() => setShowFeedback(true)}
+                  className="border-border text-foreground/80 hover:bg-muted/60 relative flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  {t('feedbackButton')}
+                  {isDecidedRejected && (
+                    <span className="absolute -top-1 -right-1 flex size-2.5 rounded-full bg-rose-500" />
+                  )}
+                </button>
+              )}
               <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-0.5 text-xs font-semibold text-emerald-500">
                 {EDUCATOR_USER.role}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleExportPdf}
-              >
-                <Download className="h-4 w-4" />
-                {t('exportPdf')}
-              </Button>
               <ThemeToggle className="size-8" />
               <NotificationBell />
               <LanguageSwitcher />
@@ -319,7 +391,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
               />
             </div>
             {/* Lesson chips — horizontal scroll for selected module */}
-            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="scrollbar-none flex gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
@@ -414,10 +486,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
-                  onClick={() => {
-                    toast(t('openingEditor'), 'info');
-                    router.push('/educator/courses/new');
-                  }}
+                  onClick={handleEditCourse}
                 >
                   <PencilLine className="h-4 w-4" />
                   {t('editCourse')}
@@ -428,14 +497,16 @@ export function CourseReview({ task }: { task: CourseTask }) {
                     {t('restoreBtn')}
                   </Button>
                 ) : (
-                  <Button
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setShowResubmit(true)}
-                  >
-                    <Send className="h-4 w-4" />
-                    {t('resubmitBtn')}
-                  </Button>
+                  !isDecidedApproved && (
+                    <Button
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => setShowResubmit(true)}
+                    >
+                      <Send className="h-4 w-4" />
+                      {t('resubmitBtn')}
+                    </Button>
+                  )
                 )}
               </div>
             </div>
@@ -451,6 +522,93 @@ export function CourseReview({ task }: { task: CourseTask }) {
         />
       )}
 
+      <Sheet open={showFeedback} onOpenChange={setShowFeedback}>
+        <SheetContent side="right" className="w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{t('feedbackSheetTitle')}</SheetTitle>
+            <SheetDescription>
+              {isDecidedApproved
+                ? t('decisionApprovedBody')
+                : t('decisionRejectedBody', { count: rejectedFeedbackCount })}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <div
+              className={cn(
+                'mb-4 flex items-center gap-2.5 rounded-xl border px-3.5 py-3',
+                isDecidedApproved
+                  ? 'border-emerald-400/30 bg-emerald-500/10'
+                  : 'border-rose-400/30 bg-rose-500/10',
+              )}
+            >
+              {isDecidedApproved ? (
+                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
+              ) : (
+                <AlertTriangle className="h-4.5 w-4.5 shrink-0 text-rose-500" />
+              )}
+              <p
+                className={cn(
+                  'text-sm font-bold',
+                  isDecidedApproved
+                    ? 'text-emerald-700 dark:text-emerald-400'
+                    : 'text-rose-700 dark:text-rose-400',
+                )}
+              >
+                {isDecidedApproved
+                  ? t('decisionApprovedTitle')
+                  : t('decisionRejectedTitle')}
+              </p>
+            </div>
+
+            {feedback.length === 0 ? (
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {t('feedbackEmptyApproved')}
+              </p>
+            ) : (
+              <ul className="space-y-2.5">
+                {feedback.map((f) => (
+                  <li
+                    key={f.itemId}
+                    className="border-border bg-muted/40 rounded-xl border px-3.5 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-foreground min-w-0 truncate text-sm font-semibold">
+                        {f.itemTitle}
+                      </p>
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
+                          f.status === 'approved'
+                            ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-600'
+                            : 'border-rose-400/30 bg-rose-500/10 text-rose-600',
+                        )}
+                      >
+                        {f.status === 'approved'
+                          ? t('feedbackApprovedTag')
+                          : t('feedbackRejectedTag')}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
+                      {f.note}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        select(f.itemId);
+                        setShowFeedback(false);
+                      }}
+                      className="text-brand-gold mt-2 text-[11px] font-semibold underline underline-offset-2 hover:no-underline"
+                    >
+                      {t('feedbackViewItem')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {showContents && (
         <CourseContentSheet
           modules={modules}
@@ -458,7 +616,8 @@ export function CourseReview({ task }: { task: CourseTask }) {
           expanded={expanded}
           onToggleModule={toggleModule}
           isItemDone={isItemDone}
-          lockingEnabled
+          lockingEnabled={false}
+          getItemBadge={getItemBadge}
           onSelect={(id) => {
             select(id);
             setShowContents(false);
@@ -477,491 +636,19 @@ export function CourseReview({ task }: { task: CourseTask }) {
 function PreviewPanel({ item }: { item: ReviewItem }) {
   switch (item.kind) {
     case 'video':
-      return <VideoPanel item={item} />;
+      return (
+        <VideoPanel
+          item={item}
+          placeholderNote="Educator preview — learners watch the full video"
+        />
+      );
     case 'document':
       return <DocumentPanel item={item} />;
     case 'quiz':
-      return <QuizPanel item={item} />;
+      return <QuizPanel item={item} role="review" />;
     case 'assignment':
-      return <AssignmentPanel item={item} />;
+      return <AssignmentPanel item={item} role="review" />;
   }
-}
-
-function VideoPanel({ item }: { item: VideoItem }) {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
-      {/* ── Main column: player + title/meta ──────────────────────────────── */}
-      <div className="min-w-0 space-y-4">
-        {/* Player */}
-        <div className="border-border relative aspect-video w-full overflow-hidden rounded-2xl border bg-black shadow-sm">
-          {item.youtubeId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${item.youtubeId}?rel=0&modestbranding=1`}
-              title={item.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            <div className="bg-brand-navy absolute inset-0 flex flex-col items-center justify-center gap-4 dark:bg-[#071225]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,163,0,0.08)_0%,transparent_70%)]" />
-              <div className="bg-brand-gold relative flex h-16 w-16 items-center justify-center rounded-full shadow-[0_0_32px_rgba(244,163,0,0.4)]">
-                <Play className="text-brand-navy ml-1 h-7 w-7 fill-current" />
-              </div>
-              <div className="relative text-center">
-                <p className="text-base font-bold text-white">{item.title}</p>
-                <p className="mt-1 text-xs text-white/50">
-                  Educator preview — learners watch the full video
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Title + meta — below the video, YouTube-style */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-              <Play className="h-3 w-3" />
-              Video Lesson
-            </span>
-            <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-              <Clock className="h-3 w-3" />
-              {item.duration}
-            </span>
-          </div>
-          <h2 className="text-foreground mt-3 text-xl font-bold sm:text-2xl">
-            {item.title}
-          </h2>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {item.intro}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Side column: lesson resources ─────────────────────────────────── */}
-      <aside className="space-y-4 xl:sticky xl:top-0 xl:self-start">
-        {/* In This Video */}
-        <div className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
-            <Lightbulb className="text-brand-gold h-4 w-4" />
-            In This Video
-          </h3>
-          <ul className="mt-3 space-y-2.5">
-            {item.topics.map((topic, i) => (
-              <li
-                key={i}
-                className="text-muted-foreground flex items-start gap-2.5 text-sm leading-snug"
-              >
-                <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
-                  ▸
-                </span>
-                {topic}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Key Moments — click to jump */}
-        <div className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground flex items-center gap-2 text-sm font-bold">
-            <Clock className="text-brand-gold h-4 w-4" />
-            Key Moments
-          </h3>
-          <div className="mt-3 space-y-1">
-            {item.moments.map((moment, i) => (
-              <button
-                key={i}
-                type="button"
-                disabled={!item.youtubeId}
-                onClick={() =>
-                  item.youtubeId &&
-                  window.open(
-                    `https://www.youtube.com/watch?v=${item.youtubeId}&t=${timeToSeconds(moment.time)}s`,
-                    '_blank',
-                    'noopener,noreferrer',
-                  )
-                }
-                className="hover:bg-muted/60 -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
-              >
-                <span className="bg-brand-gold/10 text-brand-gold shrink-0 rounded-md px-2 py-0.5 font-mono text-xs font-semibold">
-                  {moment.time}
-                </span>
-                <span className="text-muted-foreground text-sm leading-snug">
-                  {moment.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-/** Convert a "m:ss" or "h:mm:ss" timestamp to total seconds. */
-function timeToSeconds(time: string): number {
-  const parts = time.split(':').map(Number);
-  return parts.reduce((acc, part) => acc * 60 + part, 0);
-}
-
-function DocumentPanel({ item }: { item: DocumentItem }) {
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <div className="flex items-center justify-between">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-            Document Lesson
-          </span>
-          <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Clock className="h-3.5 w-3.5" />
-            {item.readTime}
-          </span>
-        </div>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-          {item.intro}
-        </p>
-      </div>
-
-      {/* Objectives */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground mb-3 text-sm font-bold">
-          What You&apos;ll Learn
-        </h3>
-        <ul className="space-y-2">
-          {item.objectives.map((obj, i) => (
-            <li
-              key={i}
-              className="text-muted-foreground flex items-start gap-2.5 text-sm"
-            >
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-              {obj}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Content sections */}
-      {item.sections.map((section, i) => (
-        <div key={i} className="border-border bg-card rounded-2xl border p-5">
-          <h3 className="text-foreground text-base font-bold">
-            {section.heading}
-          </h3>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {section.text}
-          </p>
-          {section.tip && (
-            <div className="border-brand-gold/20 bg-brand-gold/[0.06] mt-4 flex items-start gap-2.5 rounded-xl border px-4 py-3">
-              <Lightbulb className="text-brand-gold mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-brand-gold/90 text-sm">{section.tip}</p>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {/* Takeaways */}
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <h3 className="text-foreground mb-3 text-sm font-bold">
-          Key Takeaways
-        </h3>
-        <ul className="space-y-2">
-          {item.takeaways.map((point, i) => (
-            <li
-              key={i}
-              className="text-foreground/75 flex items-start gap-2.5 text-sm"
-            >
-              <span className="text-brand-gold mt-0.5 shrink-0 font-bold">
-                ✓
-              </span>
-              {point}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-// ── Interactive quiz preview ──────────────────────────────────────────────────
-
-function QuizOption({
-  option,
-  index,
-  selected,
-  revealed,
-  correctIndex,
-  onSelect,
-}: {
-  option: string;
-  index: number;
-  selected: number | null;
-  revealed: boolean;
-  correctIndex: number;
-  onSelect: (i: number) => void;
-}) {
-  const isSelected = selected === index;
-  const isCorrect = index === correctIndex;
-
-  let ring = 'border-border hover:border-brand-gold/40 hover:bg-muted/40';
-  let dot = 'border-border';
-  let text = 'text-foreground/80';
-
-  if (revealed) {
-    if (isCorrect) {
-      ring = 'border-emerald-400/60 bg-emerald-50 dark:bg-emerald-500/10';
-      dot = 'border-emerald-500 bg-emerald-500';
-      text = 'text-emerald-700 dark:text-emerald-400 font-semibold';
-    } else if (isSelected) {
-      ring = 'border-rose-400/60 bg-rose-50 dark:bg-rose-500/10';
-      dot = 'border-rose-500 bg-rose-500';
-      text = 'text-rose-600 dark:text-rose-400';
-    }
-  } else if (isSelected) {
-    ring = 'border-brand-gold bg-brand-gold/8';
-    dot = 'border-brand-gold bg-brand-gold';
-    text = 'text-foreground font-semibold';
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(index)}
-      disabled={revealed}
-      className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all duration-150',
-        ring,
-      )}
-    >
-      <span
-        className={cn(
-          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all',
-          dot,
-        )}
-      >
-        {isSelected && !revealed && (
-          <span className="h-2 w-2 rounded-full bg-white" />
-        )}
-        {revealed && isCorrect && (
-          <CheckCircle2 className="h-3.5 w-3.5 text-white" />
-        )}
-      </span>
-      <span className={cn('text-sm', text)}>{option}</span>
-    </button>
-  );
-}
-
-function QuizPanel({ item }: { item: QuizItem }) {
-  const t = useEducatorReviewT();
-  const [currentQ, setCurrentQ] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [revealed, setRevealed] = useState(false);
-
-  const question: QuizQuestion = item.questions[currentQ];
-  const pct = Math.round(((currentQ + 1) / item.totalQuestions) * 100);
-  const isLast = currentQ === item.questions.length - 1;
-
-  function goNext() {
-    if (!isLast) {
-      setCurrentQ((q) => q + 1);
-      setSelected(null);
-      setRevealed(false);
-    }
-  }
-
-  function goBack() {
-    if (currentQ > 0) {
-      setCurrentQ((q) => q - 1);
-      setSelected(null);
-      setRevealed(false);
-    }
-  }
-
-  return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border">
-      {/* Header */}
-      <div className="border-border/60 border-b px-6 pt-6 pb-4">
-        <p className="text-muted-foreground text-sm">
-          {t('quizFor')} {item.forLesson}
-        </p>
-        <h2 className="text-foreground mt-1 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            Question {currentQ + 1} of {item.totalQuestions}
-          </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            {item.estimatedMinutes} Minutes
-          </span>
-          <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-3 py-1 text-xs font-medium">
-            Single Choice
-          </span>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="bg-muted/40 h-1.5 w-full">
-        <div
-          className="bg-brand-gold h-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-
-      {/* Question */}
-      <div className="px-6 pt-6 pb-4">
-        <h3 className="text-foreground text-xl font-bold">
-          {question.question}
-        </h3>
-        <p className="text-muted-foreground mt-1 text-sm">Choose one answer.</p>
-
-        <div className="mt-5 space-y-3">
-          {question.options.map((opt, i) => (
-            <QuizOption
-              key={i}
-              option={opt}
-              index={i}
-              selected={selected}
-              revealed={revealed}
-              correctIndex={question.correctIndex}
-              onSelect={(idx) => {
-                setSelected(idx);
-                setRevealed(true);
-              }}
-            />
-          ))}
-        </div>
-
-        {revealed && (
-          <p
-            className={cn(
-              'mt-4 text-xs font-semibold',
-              selected === question.correctIndex
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-rose-600 dark:text-rose-400',
-            )}
-          >
-            {selected === question.correctIndex
-              ? '✓ Correct!'
-              : `✗ Correct answer: ${question.options[question.correctIndex]}`}
-          </p>
-        )}
-      </div>
-
-      {/* Nav footer */}
-      <div className="border-border/60 flex items-center justify-between border-t px-6 py-4">
-        <button
-          type="button"
-          onClick={goBack}
-          disabled={currentQ === 0}
-          className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground rounded-xl border px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={isLast}
-          className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {isLast ? 'End of Preview' : 'Next'}
-        </button>
-      </div>
-
-      {isLast && (
-        <p className="text-muted-foreground border-border/40 border-t px-6 py-3 text-center text-[11px]">
-          Previewing {item.questions.length} of {item.totalQuestions} questions
-          · Educator preview only
-        </p>
-      )}
-    </div>
-  );
-}
-
-function AssignmentPanel({ item }: { item: AssignmentItem }) {
-  const t = useEducatorReviewT();
-  return (
-    <div className="border-border bg-card overflow-hidden rounded-2xl border">
-      {/* Header */}
-      <div className="border-border/60 border-b px-6 pt-6 pb-5">
-        <span className="border-border bg-muted/40 text-foreground/70 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold">
-          {t('assignment')}
-        </span>
-        <h2 className="text-foreground mt-3 text-2xl font-bold">
-          {item.title}
-        </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Assigned after {item.forLesson}
-        </p>
-      </div>
-
-      <div className="space-y-5 px-6 py-5">
-        {/* Meta row */}
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { label: 'Lesson', value: item.forLesson },
-            { label: 'Due date', value: `Due ${item.dueDate}` },
-            { label: 'Submission', value: item.submission },
-          ].map(({ label, value }) => (
-            <div key={label} className="border-border rounded-xl border p-4">
-              <p className="text-muted-foreground text-xs">{label}</p>
-              <p className="text-foreground mt-1 text-sm font-semibold">
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Instructions */}
-        <div className="border-border rounded-xl border p-4">
-          <h3 className="text-foreground text-sm font-semibold">
-            Instructions
-          </h3>
-          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-            {item.instructions}
-          </p>
-        </div>
-
-        {/* Requirements */}
-        <div className="border-border rounded-xl border p-4">
-          <h3 className="text-foreground mb-3 text-sm font-semibold">
-            Requirements
-          </h3>
-          <ul className="space-y-2">
-            {item.requirements.map((req, i) => (
-              <li
-                key={i}
-                className="text-muted-foreground flex items-start gap-2.5 text-sm"
-              >
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                {req}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Upload zone */}
-        <div className="border-border rounded-xl border-2 border-dashed p-8 text-center">
-          <FileUp className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
-          <p className="text-foreground text-sm font-semibold">
-            Upload your assignment
-          </p>
-          <p className="text-muted-foreground mt-1 text-xs">
-            PDF, document, or shareable link accepted
-          </p>
-          <button
-            type="button"
-            className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 mt-4 rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors"
-          >
-            Submit Assignment
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ── Resubmit dialog ───────────────────────────────────────────────────────────

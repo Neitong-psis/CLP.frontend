@@ -59,7 +59,7 @@ export default function Logo({
           <Image
             src={config.lightLogo}
             alt="AYLA logo"
-            className={cn(image, 'dark:hidden')}
+            className={cn(image, className, 'dark:hidden')}
             width={0}
             height={0}
             sizes="100vw"
@@ -67,7 +67,7 @@ export default function Logo({
           <Image
             src={config.darkLogo}
             alt="AYLA logo"
-            className={cn(image, 'hidden dark:block')}
+            className={cn(image, className, 'hidden dark:block')}
             width={0}
             height={0}
             sizes="100vw"
@@ -77,7 +77,7 @@ export default function Logo({
         <Image
           src={config.lightLogo}
           alt="AYLA logo"
-          className={image}
+          className={cn(image, className)}
           width={0}
           height={0}
           sizes="100vw"

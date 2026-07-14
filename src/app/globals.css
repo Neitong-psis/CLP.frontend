@@ -4,6 +4,7 @@
    is handled by Hanuman / Battambang. */
 @import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Hanuman:wght@400;700&display=swap');
 @import 'tailwindcss';
+@plugin 'tailwindcss-animate';
 
 /* Class-based dark mode — add/remove .dark on <html> */
 @variant dark (&:where(.dark, .dark *));
@@ -110,11 +111,15 @@
   --chart-warn: #f59e0b; /* pass-rate 60–79% (theme-stable) */
   --chart-bad: #f43f5e; /* pass-rate < 60% (theme-stable) */
 
-  /* Course sidebar. `course-accent` is the "active / current" blue and
+  /* Course sidebar. `course-accent` is the "active / current" color and
      `course-done` the completion green. Both are declared here (not in @theme)
-     because the raw hues are too dark to read against the dark navy surface and
-     need the .dark lift below. */
-  --course-accent: var(--color-accent-blue);
+     because the raw hues need a .dark override below. `course-accent` is
+     brand navy on light; dark mode flips it to gold (same reasoning as
+     `--brand-accent`) rather than literal navy, which would be invisible
+     against the dark navy dashboard background. `-foreground` is the text
+     color that sits on a *solid* course-accent fill, so it flips alongside it. */
+  --course-accent: var(--color-brand-navy);
+  --course-accent-foreground: #ffffff;
   --course-done: var(--chart-emerald);
 
   /* Checkout. A deliberately distinct register from the rest of the app —
@@ -159,8 +164,13 @@
   --chart-blue: #60a5fa;
   --chart-indigo: #818cf8;
 
-  /* #3b5bfd sits at ~3.4:1 on the dark surface — lift both sidebar hues. */
-  --course-accent: #5b78ff;
+  /* Brand navy (#00003e) is unreadable on the dark surface. The previous fix
+     (a lifted, fully-saturated blue #5b78ff) read as an off-brand, mismatched
+     pop of color against the app's otherwise muted dark palette — flip to
+     brand gold instead, exactly like `--brand-accent` does, so the sidebar's
+     active states read as on-brand rather than an arbitrary accent blue. */
+  --course-accent: var(--color-brand-gold);
+  --course-accent-foreground: var(--color-brand-navy);
   --course-done: var(--chart-emerald);
 
   /* #2563eb reads fine on dark too, but blue-500 has a touch more pop. */
@@ -210,6 +220,7 @@
   --color-chart-indigo: var(--chart-indigo);
 
   --color-course-accent: var(--course-accent);
+  --color-course-accent-foreground: var(--course-accent-foreground);
   --color-course-done: var(--course-done);
 
   --color-checkout-accent: var(--checkout-accent);
@@ -232,6 +243,11 @@
   input[type='password']::-ms-clear,
   input[type='password']::-webkit-credentials-auto-fill-button,
   input[type='password']::-webkit-strong-password-auto-fill-button {
+    display: none !important;
+  }
+
+  /* Suppress the native search-input clear ("x") button — we render our own. */
+  input[type='search']::-webkit-search-cancel-button {
     display: none !important;
   }
 }

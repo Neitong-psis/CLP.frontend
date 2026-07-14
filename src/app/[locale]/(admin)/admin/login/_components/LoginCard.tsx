@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import AdminLoginForm from '@/app/[locale]/(admin)/admin/login/_components/AdminLoginForm';
 import Logo from '@/components/common/Logo';
 
@@ -9,7 +10,13 @@ export default async function LoginCard() {
       <div className="3xl:max-w-[640px] w-full max-w-100 sm:max-w-115 lg:max-w-[26rem] xl:max-w-[30rem] 2xl:max-w-135">
         {/* Mobile-only logo */}
         <div className="mb-6 flex justify-center lg:hidden">
-          <Logo variant="light" size="md" className="w-35! sm:w-45!" />
+          <Link
+            href="/"
+            className="transition-opacity hover:opacity-80"
+            aria-label={t('logoHomeAriaLabel')}
+          >
+            <Logo variant="light" size="md" className="h-14 sm:h-16" />
+          </Link>
         </div>
 
         <div className="3xl:px-16 3xl:py-14 rounded-xl bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-8 lg:py-8 xl:px-12 xl:py-10 2xl:px-14 2xl:py-12">

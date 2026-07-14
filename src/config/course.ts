@@ -37,7 +37,7 @@ export const courseSchema = z.object({
   level: z.enum(LEVELS, {
     message: 'Please select a level',
   }),
-  price: z.coerce
+  price: z
     .number({ message: 'Must be a number' })
     .min(0, 'Price cannot be negative'),
   duration: z.string().min(1, 'Duration is required'),

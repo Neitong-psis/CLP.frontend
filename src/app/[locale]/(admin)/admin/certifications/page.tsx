@@ -17,12 +17,21 @@ import {
   Share2,
   Copy,
   Upload,
+  ExternalLink,
 } from 'lucide-react';
 import { useAdminCertificationsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
 import { exportCertificateToPdf } from '@/lib/utils/certificatePdf';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const CANVA_URL_PATTERN = /^https:\/\/(www\.)?canva\.com\//i;
 
 type Tab = 'dashboard' | 'templates' | 'issuance';
 type IssuanceStatus = 'Verify' | 'Pending';
@@ -135,6 +144,10 @@ interface CertTemplate {
   /** Set when the uploaded file wasn't an image (e.g. a PDF) — there's no
    *  thumbnail to show, but the card can still name the attached file. */
   fileName?: string;
+  /** Canva design link for this template. When present, "Open Canva
+   *  Editor" / "Edit Template" jump straight to it; otherwise they prompt
+   *  the admin to link one. */
+  canvaUrl?: string;
 }
 
 const CERT_TEMPLATES: CertTemplate[] = [
@@ -529,7 +542,7 @@ function TemplateCard({
   editTemplateLabel,
 }: {
   tpl: CertTemplate;
-  onEdit: (name: string) => void;
+  onEdit: (tpl: CertTemplate) => void;
   issuedTimesLabel: string;
   editTemplateLabel: string;
 }) {
@@ -584,7 +597,7 @@ function TemplateCard({
           {issuedTimesLabel}
         </p>
         <button
-          onClick={() => onEdit(tpl.name)}
+          onClick={() => onEdit(tpl)}
           className="border-border text-foreground hover:bg-muted mt-3 w-full rounded-lg border py-1.5 text-xs font-semibold transition-colors"
         >
           {editTemplateLabel}
@@ -772,6 +785,158 @@ function UploadTemplateModal({
   );
 }
 
+// ─── Canva design link modal ─────────────────────────────────────────────────
+
+/** Canva has no client-only "create and return the design URL" API, so this
+ *  modal just opens canva.com in a new tab and lets the admin paste the
+ *  resulting share/edit link back in — the same link-out-and-paste-back
+ *  pattern used for the rest of this (fully mocked, backend-less) page. */
+function CanvaTemplateModal({
+  mode,
+  templateName,
+  onClose,
+  onSave,
+}: {
+  mode: 'link' | 'create';
+  templateName?: string;
+  onClose: () => void;
+  onSave: (input: { url: string; name?: string; category?: string }) => void;
+}) {
+  const t = useAdminCertificationsT();
+  const [url, setUrl] = useState('');
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('Custom');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const trimmedUrl = url.trim();
+  const isValidUrl = CANVA_URL_PATTERN.test(trimmedUrl);
+  const canSubmit = isValidUrl && (mode === 'link' || name.trim().length > 0);
+
+  function handleSubmit() {
+    if (!canSubmit) return;
+    onSave({
+      url: trimmedUrl,
+      name: mode === 'create' ? name.trim() : undefined,
+      category: mode === 'create' ? category.trim() || 'Custom' : undefined,
+    });
+    onClose();
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card ring-border w-full max-w-md rounded-2xl shadow-2xl ring-1"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-border flex items-center justify-between border-b px-6 py-4">
+          <h2 className="text-foreground text-base font-bold">
+            {mode === 'create' ? t('designInCanva') : t('linkCanvaDesign')}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4 px-6 py-5">
+          <p className="text-muted-foreground text-xs">
+            {mode === 'create'
+              ? t('designInCanvaDesc')
+              : t('linkCanvaDesignDesc', { name: templateName ?? '' })}
+          </p>
+
+          <a
+            href="https://www.canva.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-border text-foreground hover:bg-muted flex w-full items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-semibold transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {t('openCanvaToDesign')}
+          </a>
+
+          {mode === 'create' && (
+            <div>
+              <label className="text-muted-foreground mb-1 block text-xs font-semibold">
+                {t('templateName')}
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('templateNamePlaceholder')}
+                className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+              />
+            </div>
+          )}
+
+          {mode === 'create' && (
+            <div>
+              <label className="text-muted-foreground mb-1 block text-xs font-semibold">
+                {t('templateCategory')}
+              </label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Corporate, Specialized, Standard…"
+                className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
+              {t('canvaLinkLabel')}
+            </label>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={t('canvaLinkPlaceholder')}
+              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+            />
+            {trimmedUrl.length > 0 && !isValidUrl && (
+              <p className="mt-1 text-[11px] text-rose-500">
+                {t('canvaLinkInvalid')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="border-border flex items-center justify-end gap-2 border-t px-6 py-4">
+          <button
+            onClick={onClose}
+            className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('saveLink')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminCertificationsPage() {
@@ -781,6 +946,10 @@ export default function AdminCertificationsPage() {
   const [viewCert, setViewCert] = useState<CertRecord | null>(null);
   const [templates, setTemplates] = useState<CertTemplate[]>(CERT_TEMPLATES);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [canvaModal, setCanvaModal] = useState<{
+    mode: 'link' | 'create';
+    template?: CertTemplate;
+  } | null>(null);
   const { toast } = useToast();
 
   // Uploaded thumbnails are blob: object URLs — release them when the page
@@ -800,6 +969,40 @@ export default function AdminCertificationsPage() {
 
   function handleCreateTemplate(template: CertTemplate) {
     setTemplates((prev) => [template, ...prev]);
+  }
+
+  function handleOpenCanvaEditor(tpl: CertTemplate) {
+    if (tpl.canvaUrl) {
+      window.open(tpl.canvaUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setCanvaModal({ mode: 'link', template: tpl });
+  }
+
+  function handleSaveCanvaLink(input: {
+    url: string;
+    name?: string;
+    category?: string;
+  }) {
+    if (canvaModal?.mode === 'create') {
+      const newTpl: CertTemplate = {
+        name: input.name || 'Untitled template',
+        category: input.category || 'Custom',
+        status: 'Draft',
+        issued: 0,
+        canvaUrl: input.url,
+      };
+      setTemplates((prev) => [newTpl, ...prev]);
+      toast(t('canvaTemplateCreated', { name: newTpl.name }), 'success');
+    } else if (canvaModal?.template) {
+      const targetName = canvaModal.template.name;
+      setTemplates((prev) =>
+        prev.map((tpl) =>
+          tpl.name === targetName ? { ...tpl, canvaUrl: input.url } : tpl,
+        ),
+      );
+      toast(t('canvaLinkSaved', { name: targetName }), 'success');
+    }
   }
 
   const TABS: { key: Tab; label: string }[] = [
@@ -862,6 +1065,14 @@ export default function AdminCertificationsPage() {
           onCreate={handleCreateTemplate}
         />
       )}
+      {canvaModal && (
+        <CanvaTemplateModal
+          mode={canvaModal.mode}
+          templateName={canvaModal.template?.name}
+          onClose={() => setCanvaModal(null)}
+          onSave={handleSaveCanvaLink}
+        />
+      )}
 
       <TopBar role="admin" title={t('title')} />
 
@@ -884,13 +1095,30 @@ export default function AdminCertificationsPage() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            {t('createTemplate')}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow transition-colors">
+                <Plus className="h-4 w-4" />
+                {t('createTemplate')}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent theme="light" align="end">
+              <DropdownMenuItem
+                theme="light"
+                onSelect={() => setUploadOpen(true)}
+              >
+                <Upload className="h-4 w-4" />
+                {t('uploadFile')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                theme="light"
+                onSelect={() => setCanvaModal({ mode: 'create' })}
+              >
+                <ExternalLink className="h-4 w-4" />
+                {t('designInCanva')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Dashboard tab */}
@@ -1050,12 +1278,7 @@ export default function AdminCertificationsPage() {
                       thumbnailUrl={tpl.thumbnailUrl}
                     />
                     <button
-                      onClick={() =>
-                        toast(
-                          `Launching Canva Editor for "${tpl.name}"…`,
-                          'info',
-                        )
-                      }
+                      onClick={() => handleOpenCanvaEditor(tpl)}
                       className="bg-brand-gold w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
                     >
                       {t('openCanva')}
@@ -1077,9 +1300,7 @@ export default function AdminCertificationsPage() {
                   <TemplateCard
                     key={tpl.name}
                     tpl={tpl}
-                    onEdit={(name) =>
-                      toast(`Opening editor for "${name}"…`, 'info')
-                    }
+                    onEdit={handleOpenCanvaEditor}
                     issuedTimesLabel={t('issuedTimes', {
                       count: tpl.issued.toLocaleString(),
                     })}

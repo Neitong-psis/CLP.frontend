@@ -1,15 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useAdminSettingsT } from '@/i18n';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/TextArea';
-import { ComboField } from '@/components/ui/ComboField';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { AvatarCard } from './AvatarCard';
-import { SettingsField } from './SettingsField';
 import { SettingsSection } from './SettingsSection';
+
+// Field styling (theme-token based, matches educator/learner settings).
+const inputCls =
+  'w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/10';
+const labelCls = 'mb-1.5 block text-sm font-medium text-foreground/80';
+const sectionLabelCls =
+  'sm:col-span-2 border-b border-border/50 pb-2 pt-1 text-[11px] font-semibold tracking-widest text-muted-foreground uppercase';
 
 export function PersonalInfoSection() {
   const t = useAdminSettingsT();
@@ -18,6 +22,7 @@ export function PersonalInfoSection() {
   const [username, setUsername] = useState('admin');
   const [email, setEmail] = useState(currentUser.email);
   const [phone, setPhone] = useState('+855 12 345 678');
+  const [gender, setGender] = useState('');
   const [nationality, setNationality] = useState('Khmer');
   const [address, setAddress] = useState('Phnom Penh, Cambodia');
   const [bio, setBio] = useState('');
@@ -40,29 +45,35 @@ export function PersonalInfoSection() {
       <AvatarCard name={name} email={email} />
 
       <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
-        <SettingsField label={t('fullName')}>
-          <Input
+        {/* Identity */}
+        <div className={sectionLabelCls}>{t('identity')}</div>
+        <div>
+          <label className={labelCls}>{t('fullName')}</label>
+          <input
             value={name}
             onChange={(e) => {
               setTouched(true);
               setName(e.target.value);
             }}
             placeholder={t('fullName')}
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
-
-        <SettingsField label={t('username')}>
-          <Input
+        </div>
+        <div>
+          <label className={labelCls}>{t('username')}</label>
+          <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="admin"
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
+        </div>
 
-        <SettingsField label={t('email')}>
-          <Input
+        {/* Contact Info */}
+        <div className={sectionLabelCls}>{t('contactInfo')}</div>
+        <div>
+          <label className={labelCls}>{t('email')}</label>
+          <input
             type="email"
             value={email}
             onChange={(e) => {
@@ -70,64 +81,88 @@ export function PersonalInfoSection() {
               setEmail(e.target.value);
             }}
             placeholder="admin@gmail.com"
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
-
-        <SettingsField label={t('phoneNumber')}>
-          <Input
+        </div>
+        <div>
+          <label className={labelCls}>{t('phoneNumber')}</label>
+          <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+855 12 345 678"
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
+        </div>
 
-        <ComboField label={t('gender')} items={['Male', 'Female', 'Other']} />
-
-        <SettingsField label={t('dateOfBirth')}>
+        {/* Personal Details */}
+        <div className={sectionLabelCls}>{t('personalDetails')}</div>
+        <div>
+          <label className={labelCls}>{t('gender')}</label>
+          <div className="relative">
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className={`${inputCls} cursor-pointer appearance-none pr-9`}
+            >
+              <option value="">{t('selectGender')}</option>
+              <option>{t('female')}</option>
+              <option>{t('male')}</option>
+              <option>{t('preferNotToSay')}</option>
+            </select>
+            <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>{t('dateOfBirth')}</label>
           <DatePicker
             value={dob}
             onChange={setDob}
             placeholder={t('selectDate')}
             clearLabel={t('pickerClear')}
             todayLabel={t('pickerToday')}
-            className="h-9"
           />
-        </SettingsField>
-
-        <SettingsField label={t('nationality')}>
-          <Input
+        </div>
+        <div>
+          <label className={labelCls}>{t('nationality')}</label>
+          <input
             value={nationality}
             onChange={(e) => setNationality(e.target.value)}
             placeholder="Khmer"
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
-
-        <ComboField
-          label={t('userRole')}
-          items={['Admin', 'Educator', 'Learner']}
-        />
-
-        <SettingsField label={t('address')} className="sm:col-span-2">
-          <Input
+        </div>
+        <div>
+          <label className={labelCls}>{t('userRole')}</label>
+          <input
+            value={t('adminLabel')}
+            readOnly
+            aria-readonly
+            className={`${inputCls} bg-muted text-muted-foreground cursor-not-allowed`}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={labelCls}>{t('address')}</label>
+          <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Phnom Penh, Cambodia"
-            className="h-9"
+            className={inputCls}
           />
-        </SettingsField>
+        </div>
 
-        <SettingsField label={t('bioAboutMe')} className="sm:col-span-2">
-          <Textarea
+        {/* About Me */}
+        <div className={sectionLabelCls}>{t('aboutMe')}</div>
+        <div className="sm:col-span-2">
+          <label className={labelCls}>{t('bio')}</label>
+          <textarea
+            rows={4}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder={t('bioPlaceholder')}
-            className="min-h-20 resize-none"
+            className={`${inputCls} resize-none`}
           />
-        </SettingsField>
+        </div>
       </div>
     </SettingsSection>
   );

@@ -24,11 +24,6 @@ export interface UserFilter {
   setRoleFilter: (value: RoleFilter) => void;
   setStatusFilter: (value: StatusFilter) => void;
   setInviteFilter: (value: InviteFilter) => void;
-  clearFilters: () => void;
-  activeFilterCount: number;
-  roleCount: (value: RoleFilter) => number;
-  statusCount: (value: StatusFilter) => number;
-  inviteCount: (value: InviteFilter) => number;
 
   // ── Pagination ───────────────────────────────────────────────────────────
   currentPage: number;
@@ -76,39 +71,6 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
       (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
   );
 
-  // ── Faceted counts — exclude the dimension being counted ───────────────────
-  const roleCount = (value: RoleFilter) =>
-    users.filter(
-      (u) =>
-        matchSearch(u) &&
-        (value === 'All' || u.role === value) &&
-        (statusFilter === 'All' || u.status === statusFilter) &&
-        (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
-    ).length;
-
-  const statusCount = (value: StatusFilter) =>
-    users.filter(
-      (u) =>
-        matchSearch(u) &&
-        (roleFilter === 'All' || u.role === roleFilter) &&
-        (value === 'All' || u.status === value) &&
-        (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
-    ).length;
-
-  const inviteCount = (value: InviteFilter) =>
-    users.filter(
-      (u) =>
-        matchSearch(u) &&
-        (roleFilter === 'All' || u.role === roleFilter) &&
-        (statusFilter === 'All' || u.status === statusFilter) &&
-        (value === 'All' || u.inviteStatus === value),
-    ).length;
-
-  const activeFilterCount =
-    (roleFilter !== 'All' ? 1 : 0) +
-    (statusFilter !== 'All' ? 1 : 0) +
-    (inviteFilter !== 'All' ? 1 : 0);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
@@ -140,13 +102,6 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
     setPage(1);
   }
 
-  function clearFilters() {
-    setRoleFilterRaw('All');
-    setStatusFilterRaw('All');
-    setInviteFilterRaw('All');
-    setPage(1);
-  }
-
   function goToPage(p: number) {
     setPage(p);
   }
@@ -168,11 +123,6 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
     setRoleFilter,
     setStatusFilter,
     setInviteFilter,
-    clearFilters,
-    activeFilterCount,
-    roleCount,
-    statusCount,
-    inviteCount,
     currentPage,
     totalPages,
     pageStart,

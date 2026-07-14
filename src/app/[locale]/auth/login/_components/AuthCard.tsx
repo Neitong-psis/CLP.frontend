@@ -87,7 +87,7 @@ export default function AuthCard() {
   return (
     <div>
       {/* Heading */}
-      <div className="mb-5 2xl:mb-6">
+      <div className="mb-4 lg:mb-[clamp(0.5rem,1.5vh,1.5rem)]">
         <h2 className="3xl:text-4xl text-brand-navy text-xl leading-tight font-bold sm:text-[1.6rem] 2xl:text-3xl">
           {copy.heading}
         </h2>
@@ -97,7 +97,7 @@ export default function AuthCard() {
       </div>
 
       {/* Tab switcher */}
-      <div className="mb-4 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 2xl:mb-5 2xl:rounded-2xl">
+      <div className="mb-3 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 lg:mb-[clamp(0.4rem,1.2vh,1.25rem)] 2xl:rounded-2xl">
         {(['login', 'signup'] as Tab[]).map((t) => (
           <button
             key={t}
@@ -126,7 +126,7 @@ export default function AuthCard() {
       {/* OAuth — hidden for educator sign-up */}
       {!isEducatorSignup && (
         <>
-          <div className="my-5 flex items-center gap-3 2xl:my-6">
+          <div className="my-4 flex items-center gap-3 lg:my-[clamp(0.5rem,1.5vh,1.5rem)]">
             <span className="h-px flex-1 bg-slate-200" />
             <span className="3xl:text-sm text-[11px] font-semibold tracking-widest text-slate-400 uppercase 2xl:text-xs">
               Or

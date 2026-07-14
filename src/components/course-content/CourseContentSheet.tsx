@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { BookOpen, Layers, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 import { flattenLessons } from '@/lib/course-progress';
 import { CourseContentTree } from './CourseContentTree';
 import type { CourseTreeProps } from './types';
@@ -20,6 +21,7 @@ export function CourseContentSheet(props: CourseContentSheetProps) {
     return { done: items.filter(isItemDone).length, total: items.length };
   }, [modules, isItemDone]);
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const isComplete = total > 0 && done === total;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -49,21 +51,9 @@ export function CourseContentSheet(props: CourseContentSheetProps) {
 
         {/* Header */}
         <div className="border-border/60 flex shrink-0 items-center justify-between border-b px-4 pt-1 pb-3">
-          <div>
-            <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
-              {labels.courseContent}
-            </p>
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <Layers className="h-3 w-3" />
-                {labels.moduleCount}
-              </span>
-              <span className="border-border bg-muted/40 text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                <BookOpen className="h-3 w-3" />
-                {labels.lessonCount}
-              </span>
-            </div>
-          </div>
+          <p className="text-muted-foreground/70 text-[10px] font-medium tracking-wider uppercase">
+            {labels.courseContent}
+          </p>
           <button
             type="button"
             onClick={onClose}
@@ -76,17 +66,23 @@ export function CourseContentSheet(props: CourseContentSheetProps) {
 
         {/* Progress */}
         <div className="shrink-0 px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="mb-1.5 flex items-baseline justify-between gap-2">
             <span className="text-muted-foreground text-[11px]">
               {labels.formatProgress(done, total)}
             </span>
-            <span className="text-brand-gold text-[11px] font-bold">
+            <span className="text-foreground text-[11px] font-semibold tabular-nums">
               {pct}%
             </span>
           </div>
-          <div className="bg-muted mt-1.5 h-1.5 overflow-hidden rounded-full">
+          <div
+            aria-hidden
+            className="bg-border/70 h-0.5 w-full overflow-hidden rounded-full"
+          >
             <div
-              className="bg-brand-gold h-full rounded-full transition-all duration-500"
+              className={cn(
+                'h-full rounded-full transition-[width] duration-300 ease-out',
+                isComplete ? 'bg-course-done' : 'bg-course-accent',
+              )}
               style={{ width: `${pct}%` }}
             />
           </div>

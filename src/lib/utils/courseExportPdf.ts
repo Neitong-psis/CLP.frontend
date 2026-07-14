@@ -166,12 +166,14 @@ function writeItem(w: PdfWriter, item: ReviewItem): void {
         size: 9,
         color: COLOR_MUTED,
       });
-      w.paragraph(item.intro);
-      if (item.objectives.length) {
+      // `content` (Tiptap JSON) documents don't have a plain-text export path
+      // yet — the legacy fields below still export fully.
+      if (item.intro) w.paragraph(item.intro);
+      if (item.objectives?.length) {
         w.paragraph('What you will learn', { bold: true });
         w.bulletList(item.objectives);
       }
-      item.sections.forEach((section) => {
+      (item.sections ?? []).forEach((section) => {
         w.paragraph(section.heading, { size: 10.5, bold: true });
         w.paragraph(section.text);
         if (section.tip) {
@@ -181,7 +183,7 @@ function writeItem(w: PdfWriter, item: ReviewItem): void {
           });
         }
       });
-      if (item.takeaways.length) {
+      if (item.takeaways?.length) {
         w.paragraph('Key takeaways', { bold: true });
         w.bulletList(item.takeaways);
       }

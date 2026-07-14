@@ -1,29 +1,52 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Check, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import {
   computeLocks,
   flattenLessons,
-  isLessonDone,
   isModuleDone,
   lessonItems,
 } from '@/lib/course-progress';
-import { KIND_ICON, type CourseTreeProps } from './types';
+import { DURATION, EASE } from '@/components/course-sidebar/constants';
+import { useHoverPreview } from '@/components/course-sidebar/hooks/useHoverPreview';
+import { CourseContentModulePreview } from './CourseContentModulePreview';
+import { CourseContentLessonPreview } from './CourseContentLessonPreview';
+import type { CourseTreeProps } from './types';
+import type {
+  ReviewLesson,
+  ReviewModule,
+} from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
+
+/** Finds a lesson by id across every module, along with its 1-based index
+ *  within that module (the number its rail node shows). */
+function findLessonById(
+  modules: readonly ReviewModule[],
+  id: string | undefined,
+): { lesson: ReviewLesson; lessonIndex: number } | null {
+  if (!id) return null;
+  for (const mod of modules) {
+    const lessonIndex = mod.lessons.findIndex((l) => l.id === id);
+    if (lessonIndex >= 0)
+      return { lesson: mod.lessons[lessonIndex], lessonIndex };
+  }
+  return null;
+}
 
 /**
  * Collapsed icon rail. Shapes carry the hierarchy so a glance is enough:
- *   module = rounded SQUARE numbered badge · lesson = round node · item = small dot.
- * Completion (emerald check) and locking (lock glyph) render at every level, and
- * `title=` tooltips name each node.
+ *   module = rounded SQUARE numbered badge · lesson = round numbered node.
+ * Only that much is visible inline — content items no longer render here.
+ * Hovering (or focusing) a module opens a floating preview of every lesson
+ * and item; hovering a lesson narrows that to just its own items.
  */
 export function CourseContentRail({
   modules,
   activeId,
   isItemDone,
   onSelect,
-  onLockedSelect,
   getItemBadge,
   lockingEnabled,
   labels,
@@ -33,15 +56,25 @@ export function CourseContentRail({
   | 'activeId'
   | 'isItemDone'
   | 'onSelect'
-  | 'onLockedSelect'
   | 'getItemBadge'
   | 'lockingEnabled'
   | 'labels'
 >) {
+  const reduceMotion = useReducedMotion();
   const locks = useMemo(
     () => computeLocks(modules, isItemDone, lockingEnabled),
     [modules, isItemDone, lockingEnabled],
   );
+
+  const modulePreview = useHoverPreview();
+  const previewModuleIndex = modules.findIndex(
+    (m) => m.id === modulePreview.target?.id,
+  );
+  const previewModule =
+    previewModuleIndex >= 0 ? modules[previewModuleIndex] : undefined;
+
+  const lessonPreview = useHoverPreview();
+  const previewLesson = findLessonById(modules, lessonPreview.target?.id);
 
   const activeModuleId = useMemo(
     () =>
@@ -55,13 +88,21 @@ export function CourseContentRail({
   const [manualExpanded, setManualExpanded] = useState<Set<string>>(() =>
     activeModuleId ? new Set([activeModuleId]) : new Set(),
   );
-  const expanded = useMemo(
-    () =>
-      activeModuleId
-        ? new Set([...manualExpanded, activeModuleId])
-        : manualExpanded,
-    [manualExpanded, activeModuleId],
-  );
+
+  // Auto-reveal the module holding the active item whenever it *changes*
+  // (e.g. selecting an item in another module via a hover preview) — but only
+  // that once, adjusted during render rather than re-unioned on every render
+  // (the old approach), which meant the active item's module could never be
+  // manually collapsed at all.
+  const [lastActiveModuleId, setLastActiveModuleId] = useState(activeModuleId);
+  if (activeModuleId !== lastActiveModuleId) {
+    setLastActiveModuleId(activeModuleId);
+    if (activeModuleId && !manualExpanded.has(activeModuleId)) {
+      setManualExpanded(new Set(manualExpanded).add(activeModuleId));
+    }
+  }
+
+  const expanded = manualExpanded;
 
   function toggle(id: string) {
     setManualExpanded((prev) => {
@@ -73,154 +114,188 @@ export function CourseContentRail({
   }
 
   return (
-    <div className="space-y-2">
-      {modules.map((mod, mIdx) => {
-        const isOpen = expanded.has(mod.id);
-        const complete = isModuleDone(mod, isItemDone);
-        const locked = locks.lockedModuleIds.has(mod.id);
-        const hasActive = flattenLessons([mod]).some((f) =>
-          f.items.some((i) => i.id === activeId),
-        );
+    <>
+      <div className="space-y-2">
+        {modules.map((mod, mIdx) => {
+          const isOpen = expanded.has(mod.id);
+          const complete = isModuleDone(mod, isItemDone);
+          const locked = locks.lockedModuleIds.has(mod.id);
+          const hasActive = flattenLessons([mod]).some((f) =>
+            f.items.some((i) => i.id === activeId),
+          );
 
-        return (
-          <div key={mod.id} className="relative">
-            {mIdx > 0 && <div className="bg-border mx-auto mb-2 h-px w-6" />}
+          return (
+            <div key={mod.id} className="relative">
+              {mIdx > 0 && <div className="bg-border mx-auto mb-2 h-px w-6" />}
 
-            {/* Trunk from module badge down through open children */}
-            {isOpen && (
-              <div className="bg-border absolute top-8 bottom-0 left-1/2 w-px -translate-x-1/2" />
-            )}
-
-            {/* Module badge — SQUARE */}
-            <button
-              type="button"
-              onClick={() => toggle(mod.id)}
-              title={mod.title}
-              className="relative z-10 mx-auto flex w-full items-center justify-center rounded-lg py-0.5 transition-colors"
-            >
-              <span
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-lg text-xs font-bold transition-colors',
-                  complete
-                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                    : locked
-                      ? 'bg-muted text-muted-foreground'
-                      : 'bg-brand-gold/15 text-brand-gold',
-                  hasActive && !complete && 'ring-brand-gold/50 ring-2',
+              {/* Trunk from module badge down through open children */}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { duration: DURATION.hover }
+                    }
+                    className="bg-border absolute top-8 bottom-0 left-1/2 w-px -translate-x-1/2"
+                  />
                 )}
+              </AnimatePresence>
+
+              {/* Module badge — SQUARE. Hovering (or focusing) opens a floating
+                preview of its lessons, mirroring the learner sidebar's mini
+                rail — a native `title=` tooltip can't hold a lesson list. */}
+              <button
+                type="button"
+                onClick={() => toggle(mod.id)}
+                onPointerEnter={(e) =>
+                  modulePreview.open(mod.id, e.currentTarget)
+                }
+                onPointerLeave={modulePreview.scheduleClose}
+                onFocus={(e) => modulePreview.open(mod.id, e.currentTarget)}
+                onBlur={modulePreview.scheduleClose}
+                aria-label={mod.title}
+                className="relative z-10 mx-auto flex w-full items-center justify-center rounded-lg py-0.5 transition-colors"
               >
-                {complete ? (
-                  <Check className="size-4" strokeWidth={3} />
-                ) : locked ? (
-                  <Lock className="size-3.5" />
-                ) : (
-                  mIdx + 1
-                )}
-              </span>
-            </button>
+                <span
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-md border text-xs font-bold tabular-nums transition-colors duration-150',
+                    complete
+                      ? 'bg-course-done border-course-done text-white'
+                      : locked
+                        ? 'bg-muted text-muted-foreground/70 border-transparent'
+                        : hasActive
+                          ? 'bg-course-accent border-course-accent text-course-accent-foreground'
+                          : 'border-border text-muted-foreground bg-transparent',
+                  )}
+                >
+                  {complete ? (
+                    <Check className="size-4" strokeWidth={3} />
+                  ) : locked ? (
+                    <Lock className="size-3.5" />
+                  ) : (
+                    mIdx + 1
+                  )}
+                </span>
+              </button>
 
-            {isOpen && (
-              <div className="relative mt-1 space-y-1">
-                {mod.lessons.map((lesson) => {
-                  const items = lessonItems(lesson);
-                  const lessonDone = isLessonDone(lesson, isItemDone);
-                  const lessonLocked = locks.lockedLessonIds.has(lesson.id);
-                  const lessonActive = items.some((i) => i.id === activeId);
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="lessons"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { duration: DURATION.accordion, ease: EASE }
+                    }
+                    className="overflow-hidden"
+                  >
+                    <div className="relative mt-1 space-y-1">
+                      {mod.lessons.map((lesson, lIdx) => {
+                        const lessonLocked = locks.lockedLessonIds.has(
+                          lesson.id,
+                        );
+                        const lessonActive = lessonItems(lesson).some(
+                          (i) => i.id === activeId,
+                        );
 
-                  return (
-                    <div key={lesson.id}>
-                      {/* Lesson node — ROUND */}
-                      <div
-                        title={lesson.title}
-                        className="relative z-10 mx-auto flex w-full items-center justify-center py-0.5"
-                      >
-                        <span
-                          className={cn(
-                            'flex size-6 items-center justify-center rounded-full',
-                            lessonDone
-                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                              : lessonLocked
-                                ? 'bg-muted text-muted-foreground'
-                                : lessonActive
-                                  ? 'bg-brand-gold/20 text-brand-gold'
-                                  : 'bg-muted text-muted-foreground',
-                          )}
-                        >
-                          {lessonDone ? (
-                            <Check className="size-3" strokeWidth={3} />
-                          ) : lessonLocked ? (
-                            <Lock className="size-2.5" />
-                          ) : (
-                            <span className="size-1.5 rounded-full bg-current" />
-                          )}
-                        </span>
-                      </div>
-
-                      {/* Items — tiny dots */}
-                      <div className="flex flex-col items-center gap-1 py-0.5">
-                        {items.map((item) => {
-                          const Icon = KIND_ICON[item.kind];
-                          const isActive = item.id === activeId;
-                          const done = isItemDone(item);
-                          const itemLocked = locks.lockedItemIds.has(item.id);
-                          const badge = getItemBadge?.(item) ?? null;
-                          const blockingTitle =
-                            locks.blockedBy.get(lesson.id) ?? lesson.title;
-
-                          return (
+                        return (
+                          <div
+                            key={lesson.id}
+                            className="relative z-10 mx-auto flex w-full items-center justify-center py-0.5"
+                          >
+                            {/* Lesson node — ROUND, numbered like the expanded
+                            tree. Plain lesson order, not a completion check.
+                            Hovering (or focusing) opens a floating preview of
+                            just its own items — content no longer renders
+                            inline in the collapsed rail. */}
                             <button
-                              key={item.id}
                               type="button"
-                              onClick={() =>
-                                itemLocked
-                                  ? onLockedSelect?.(blockingTitle)
-                                  : onSelect(item.id)
+                              onPointerEnter={(e) =>
+                                lessonPreview.open(lesson.id, e.currentTarget)
                               }
-                              title={
-                                itemLocked
-                                  ? labels.lockedHint(blockingTitle)
-                                  : item.title
+                              onPointerLeave={lessonPreview.scheduleClose}
+                              onFocus={(e) =>
+                                lessonPreview.open(lesson.id, e.currentTarget)
                               }
+                              onBlur={lessonPreview.scheduleClose}
+                              aria-label={lesson.title}
                               className={cn(
-                                'relative flex size-5 items-center justify-center rounded-full transition-colors',
-                                itemLocked
-                                  ? 'bg-muted text-muted-foreground/70 cursor-not-allowed'
-                                  : done
-                                    ? 'bg-emerald-500 text-white'
-                                    : isActive
-                                      ? 'bg-brand-gold/20 text-brand-gold ring-brand-gold/40 ring-1'
-                                      : 'text-muted-foreground border-border hover:bg-muted border',
+                                'flex size-6 items-center justify-center rounded-full border text-[10px] font-bold tabular-nums transition-colors',
+                                lessonLocked
+                                  ? 'bg-muted text-muted-foreground border-transparent'
+                                  : lessonActive
+                                    ? 'bg-course-accent border-course-accent text-course-accent-foreground'
+                                    : 'border-border text-muted-foreground bg-transparent',
                               )}
                             >
-                              {done ? (
-                                <Check className="size-2.5" strokeWidth={3} />
-                              ) : itemLocked ? (
+                              {lessonLocked ? (
                                 <Lock className="size-2.5" />
                               ) : (
-                                <Icon className="size-2.5" />
-                              )}
-                              {!done && !itemLocked && badge && (
-                                <span
-                                  className={cn(
-                                    'absolute -top-0.5 -right-0.5 size-1.5 rounded-full',
-                                    badge === 'failed'
-                                      ? 'bg-rose-500'
-                                      : 'bg-brand-gold',
-                                  )}
-                                />
+                                lIdx + 1
                               )}
                             </button>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+
+      <AnimatePresence>
+        {previewModule && modulePreview.target && (
+          <CourseContentModulePreview
+            key={previewModule.id}
+            module={previewModule}
+            moduleIndex={previewModuleIndex}
+            anchorRect={modulePreview.target.rect}
+            activeId={activeId}
+            locks={locks}
+            getItemBadge={getItemBadge}
+            labels={labels}
+            panelRef={modulePreview.panelRef}
+            onSelectItem={(itemId) => {
+              modulePreview.closeNow();
+              onSelect(itemId);
+            }}
+            onRetain={modulePreview.cancelClose}
+            onRelease={modulePreview.scheduleClose}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {previewLesson && lessonPreview.target && (
+          <CourseContentLessonPreview
+            key={previewLesson.lesson.id}
+            lesson={previewLesson.lesson}
+            lessonIndex={previewLesson.lessonIndex}
+            anchorRect={lessonPreview.target.rect}
+            activeId={activeId}
+            locked={locks.lockedLessonIds.has(previewLesson.lesson.id)}
+            getItemBadge={getItemBadge}
+            labels={labels}
+            panelRef={lessonPreview.panelRef}
+            onSelectItem={(itemId) => {
+              lessonPreview.closeNow();
+              onSelect(itemId);
+            }}
+            onRetain={lessonPreview.cancelClose}
+            onRelease={lessonPreview.scheduleClose}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 }

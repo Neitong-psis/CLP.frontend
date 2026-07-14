@@ -49,7 +49,7 @@ export function MiniRail({
   const { closeNow } = preview;
 
   const activeModule = modules.find(
-    (module) => module.id === preview.target?.moduleId,
+    (module) => module.id === preview.target?.id,
   );
   const activeMeta = activeModule ? moduleMeta.get(activeModule.id) : undefined;
 
@@ -150,6 +150,7 @@ export function MiniRail({
             anchorRect={preview.target.rect}
             currentItemId={currentItemId}
             labels={labels}
+            panelRef={preview.panelRef}
             onSelectItem={selectAndClose}
             onRetain={preview.cancelClose}
             onRelease={preview.scheduleClose}

@@ -235,7 +235,18 @@
       "dialogDesc": "\"{title}\" will be sent to an admin for approval. You can keep editing until it is approved.",
       "dialogCancel": "Cancel",
       "dialogConfirm": "Resubmit",
-      "resubmittedToast": "\"{title}\" was resubmitted for review."
+      "resubmittedToast": "\"{title}\" was resubmitted for review.",
+      "decisionApprovedTitle": "Approved by admin",
+      "decisionApprovedBody": "This course is on its way to publishing — no further action needed.",
+      "decisionRejectedTitle": "Changes requested by admin",
+      "decisionRejectedBody": "Admin flagged {count} item(s) below. Fix the content, then resubmit for another review.",
+      "feedbackViewItem": "View this item",
+      "feedbackButton": "Feedback",
+      "feedbackSheetTitle": "Admin Feedback",
+      "feedbackNoteLabel": "Note",
+      "feedbackApprovedTag": "Approved",
+      "feedbackRejectedTag": "Rejected",
+      "feedbackEmptyApproved": "No notes were left on any content — this course is fully approved."
     },
 
     "createCourse": {

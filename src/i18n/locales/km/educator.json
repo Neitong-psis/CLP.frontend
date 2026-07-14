@@ -235,7 +235,18 @@
       "dialogDesc": "\"{title}\" នឹងត្រូវបញ្ជូនទៅអ្នកគ្រប់គ្រងសុំការអនុម័ត។ អ្នកអាចបន្តកែសម្រួលរហូតទាល់វាត្រូវបានអនុម័ត។",
       "dialogCancel": "បោះបង់",
       "dialogConfirm": "ដាក់ស្នើឡើងវិញ",
-      "resubmittedToast": "\"{title}\" ត្រូវបានដាក់ស្នើឡើងវិញសុំពិនិត្យ។"
+      "resubmittedToast": "\"{title}\" ត្រូវបានដាក់ស្នើឡើងវិញសុំពិនិត្យ។",
+      "decisionApprovedTitle": "បានអនុម័តដោយអ្នកគ្រប់គ្រង",
+      "decisionApprovedBody": "ថ្នាក់នេះកំពុងត្រូវបានរៀបចំដើម្បីបោះផ្សាយ — មិនចាំបាច់ធ្វើសកម្មភាពបន្ថែមទេ។",
+      "decisionRejectedTitle": "អ្នកគ្រប់គ្រងស្នើសុំការកែប្រែ",
+      "decisionRejectedBody": "អ្នកគ្រប់គ្រងបានសម្គាល់ធាតុចំនួន {count} ខាងក្រោម។ សូមកែសម្រួលមាតិកា រួចដាក់ស្នើឡើងវិញសុំពិនិត្យម្ដងទៀត។",
+      "feedbackViewItem": "មើលធាតុនេះ",
+      "feedbackButton": "មតិកែលម្អ",
+      "feedbackSheetTitle": "មតិកែលម្អពីអ្នកគ្រប់គ្រង",
+      "feedbackNoteLabel": "ចំណាំ",
+      "feedbackApprovedTag": "បានអនុម័ត",
+      "feedbackRejectedTag": "បានបដិសេធ",
+      "feedbackEmptyApproved": "គ្មានចំណាំនៅលើមាតិកាណាមួយទេ — ថ្នាក់នេះត្រូវបានអនុម័តពេញលេញ។"
     },
 
     "createCourse": {

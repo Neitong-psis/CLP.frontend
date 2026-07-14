@@ -1,11 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Search,
   Plus,
   BookOpen,
+  ImageOff,
   PencilLine,
   CalendarDays,
   Flag,
@@ -44,8 +46,8 @@ const STATUS_BADGE: Record<CourseTaskStatus, string> = {
 
 /** Under Review shows the admin decision instead of the raw status. */
 const REVIEW_BADGE: Record<ReviewState, string> = {
-  Approved: 'border-transparent bg-emerald-500 text-white',
-  Reject: 'border-transparent bg-red-500 text-white',
+  Approved: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-600',
+  Reject: 'border-red-400/30 bg-red-500/10 text-red-600',
   'Under Review': 'border-amber-400/40 bg-amber-500/10 text-amber-600',
 };
 
@@ -61,6 +63,45 @@ const PRIORITY_STYLE: Record<TaskPriority, string> = {
   Medium: 'text-amber-600',
   Low: 'text-muted-foreground',
 };
+
+/** Course cover thumbnail — a fixed landscape frame so it reads as a proper
+ *  photo regardless of how tall the card grows with its content, instead of
+ *  stretching (and badly cropping) to match the row's full height. To Do
+ *  shows an empty-cover placeholder since nothing has been written yet; the
+ *  data model has no per-course image otherwise, so every other card shares
+ *  this placeholder — swap in `task.thumbnailUrl` once course creation
+ *  actually captures one. */
+function CardThumbnail({ title, isToDo }: { title: string; isToDo: boolean }) {
+  if (isToDo) {
+    return (
+      <div className="border-border/70 text-muted-foreground/40 flex aspect-3/2 w-28 shrink-0 items-center justify-center rounded-xl border border-dashed sm:w-40">
+        <ImageOff className="h-6 w-6" strokeWidth={1.5} />
+      </div>
+    );
+  }
+  return (
+    <div className="border-border relative aspect-3/2 w-28 shrink-0 overflow-hidden rounded-xl border sm:w-40">
+      <Image
+        src="/image/web_design_poster.png"
+        alt={title}
+        fill
+        sizes="(max-width: 640px) 7rem, 10rem"
+        quality={85}
+        className="object-cover"
+      />
+    </div>
+  );
+}
+
+/** First letter of up to two words — "Sarah Wilson" → "SW". */
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
 
 /** Where a card leads, per the course lifecycle:
  *  To Do → start writing (blank wizard); In Writing → continue the draft;
@@ -191,35 +232,33 @@ function TaskCard({
   const isToDo = task.status === 'To Do';
   const showPrice = task.status !== 'Archived';
   // To Do is the only stage assigned by an admin; afterwards the educator owns it.
-  const author = isToDo
-    ? `${t('assignedBy')} ${task.assignedBy}`
-    : currentUser.fullName;
+  const personName = isToDo ? task.assignedBy : currentUser.fullName;
+  const author = isToDo ? `${t('assignedBy')} ${personName}` : personName;
 
   return (
     <article
       onClick={onOpen}
-      className="group border-border bg-card hover:border-brand-navy/20 cursor-pointer rounded-2xl border p-4 transition-all duration-200 hover:shadow-md dark:hover:border-white/12 dark:hover:shadow-none"
+      className="group border-border bg-card hover:border-brand-navy/20 flex cursor-pointer items-start gap-4 rounded-2xl border p-3 transition-all duration-200 hover:shadow-md sm:p-4 dark:hover:border-white/12 dark:hover:shadow-none"
     >
-      {/* Header: title + status badge */}
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-foreground text-sm leading-snug font-bold sm:text-base">
-          {task.title}
-        </h3>
-        <StatusBadge task={task} t={t} />
-      </div>
+      <CardThumbnail title={task.title} isToDo={isToDo} />
 
-      {/* Description */}
-      <p className="text-muted-foreground mt-1.5 line-clamp-2 text-xs leading-relaxed sm:text-[13px]">
-        {task.description}
-      </p>
+      <div className="min-w-0 flex-1">
+        {/* Header: title + status badge */}
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-foreground text-sm leading-snug font-bold sm:text-base">
+            {task.title}
+          </h3>
+          <StatusBadge task={task} t={t} />
+        </div>
 
-      {/* Meta row: icon + chips + author (left) · actions (right) */}
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div className="bg-brand-gold/10 flex size-9 shrink-0 items-center justify-center rounded-xl">
-            <BookOpen className="text-brand-gold h-4.5 w-4.5" />
-          </div>
-          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        {/* Description */}
+        <p className="text-muted-foreground mt-1.5 line-clamp-2 text-xs leading-relaxed sm:text-[13px]">
+          {task.description}
+        </p>
+
+        {/* Meta row: chips + educator avatar/author (left) · actions (right) */}
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
             <span className="border-border bg-muted/50 text-muted-foreground rounded-md border px-2 py-0.5 text-[11px] font-medium">
               {task.category}
             </span>
@@ -235,17 +274,22 @@ function TaskCard({
                 {task.price}
               </span>
             )}
-            <span className="text-muted-foreground truncate text-[11px] font-medium">
-              {author}
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="bg-brand-gold flex size-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white">
+                {getInitials(personName)}
+              </span>
+              <span className="text-muted-foreground truncate text-[11px] font-medium">
+                {author}
+              </span>
             </span>
           </div>
+
+          <CardActions task={task} onOpen={onOpen} onDelete={onDelete} t={t} />
         </div>
 
-        <CardActions task={task} onOpen={onOpen} onDelete={onDelete} t={t} />
+        {/* Note / stats box */}
+        <NoteBox task={task} t={t} />
       </div>
-
-      {/* Note / stats box */}
-      <NoteBox task={task} t={t} />
     </article>
   );
 }

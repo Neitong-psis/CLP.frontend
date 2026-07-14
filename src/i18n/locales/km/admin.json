@@ -13,8 +13,6 @@
     "pending": "កំពុងរង់ចាំពិនិត្យ",
 
     "common": {
-      "loading": "កំពុងផ្ទុក…",
-      "noAdminAccess": "មិនមានការអនុញ្ញាតជាអ្នកគ្រប់គ្រង។",
       "vsLastMonth": "បើប្រៀបខែមុន",
       "search": "ស្វែងរក",
       "cancel": "បោះបង់",
@@ -145,6 +143,7 @@
       "backToCourses": "ត្រឡប់ទៅវគ្គ",
       "reject": "បដិសេធ",
       "approve": "អនុម័ត",
+      "submitReview": "ដាក់ស្នើការពិនិត្យ",
       "exportPdf": "នាំចេញជា PDF",
       "courseContent": "មាតិកាវគ្គ",
       "modules": "{count} ម៉ូឌុល",
@@ -191,13 +190,25 @@
       },
       "rejectDialog": {
         "title": "បដិសេធវគ្គនេះ?",
-        "description": "ប្រាប់គ្រូអំពីអ្វីដែលត្រូវផ្លាស់ប្តូរមុននឹងដាក់ស្នើ \"{title}\" ឡើងវិញ។",
-        "feedbackLabel": "មតិប្រតិកម្មសម្រាប់គ្រូ",
-        "feedbackPlaceholder": "ពន្យល់អ្វីដែលគួរផ្លាស់ប្តូរមុននឹងដាក់ស្នើឡើងវិញ…",
-        "feedbackNote": "មតិប្រតិកម្មនេះភ្ជាប់ជាមួយការដាក់ស្នើវគ្គ។",
+        "description": "បានសម្គាល់ធាតុចំនួន {count}។ គ្រូនឹងឃើញមតិប្រតិកម្មរបស់អ្នក ហើយអាចដាក់ស្នើឡើងវិញបន្ទាប់ពីធ្វើការផ្លាស់ប្តូរ។",
         "back": "ក្រោយ",
         "sendFeedback": "ផ្ញើមតិប្រតិកម្ម"
-      }
+      },
+      "itemApproveDialog": {
+        "title": "អនុម័ត \"{title}\"?",
+        "description": "បន្ថែមចំណាំសម្រាប់គ្រូ (មិនចាំបាច់)។",
+        "notePlaceholder": "បន្ថែមចំណាំសម្រាប់គ្រូ (មិនចាំបាច់)…",
+        "cancel": "បោះបង់",
+        "confirm": "បញ្ជាក់ការអនុម័ត"
+      },
+      "itemRejectDialog": {
+        "title": "បដិសេធ \"{title}\"?",
+        "description": "ពន្យល់ពីអ្វីដែលត្រូវផ្លាស់ប្តូរ — គ្រូនឹងឃើញចំណាំនេះ។",
+        "notePlaceholder": "ពន្យល់ពីបញ្ហានៃធាតុនេះ…",
+        "cancel": "បោះបង់",
+        "confirm": "បញ្ជាក់ការបដិសេធ"
+      },
+      "gateHint": "ពិនិត្យធាតុទាំង {count} មុននឹងដាក់ស្នើការសម្រេចចិត្ត។"
     },
 
     "usersPage": {
@@ -319,6 +330,7 @@
       "tabTemplates": "គំរូ",
       "tabIssuance": "ប្រវត្តិការចេញ",
       "createTemplate": "បង្កើតគំរូ",
+      "uploadFile": "អាប់ឡូតឯកសារ",
       "uploadTemplate": "អាប់ឡូតគំរូ",
       "uploadTemplateDesc": "អាប់ឡូតការរចនាវិញ្ញាបនបត្រ (រូបភាព ឬ PDF) ដើម្បីបន្ថែមជាគំរូព្រាងថ្មី។",
       "uploadInvalidFile": "សូមជ្រើសរើសឯកសាររូបភាព ឬ PDF។",
@@ -329,6 +341,17 @@
       "templateName": "ឈ្មោះគំរូ",
       "templateNamePlaceholder": "ឧ. Corporate Bootcamp",
       "templateCategory": "ប្រភេទ",
+      "designInCanva": "រចនានៅក្នុង Canva",
+      "designInCanvaDesc": "បើក Canva ក្នុងផ្ទាំងថ្មីដើម្បីរចនាវិញ្ញាបនបត្ររបស់អ្នក បន្ទាប់មកបិទភ្ជាប់តំណចែករំលែក ឬតំណកែសម្រួលខាងក្រោមដើម្បីរក្សាទុកជាគំរូ។",
+      "linkCanvaDesign": "ភ្ជាប់ការរចនា Canva",
+      "linkCanvaDesignDesc": "បិទភ្ជាប់តំណការរចនា Canva សម្រាប់ \"{name}\" ដើម្បីឱ្យប៊ូតុងនេះបើកវាដោយផ្ទាល់នៅពេលក្រោយ។",
+      "openCanvaToDesign": "បើក Canva",
+      "canvaLinkLabel": "តំណការរចនា Canva",
+      "canvaLinkPlaceholder": "https://www.canva.com/design/...",
+      "canvaLinkInvalid": "សូមបញ្ចូលតំណ canva.com ត្រឹមត្រូវ។",
+      "saveLink": "រក្សាទុកតំណ",
+      "canvaLinkSaved": "ការរចនា Canva ត្រូវបានភ្ជាប់ទៅ \"{name}\"។",
+      "canvaTemplateCreated": "គំរូ \"{name}\" ត្រូវបានបង្កើតពីការរចនា Canva។",
       "cancel": "បោះបង់",
       "statTotalIssued": "វិញ្ញាបនបត្រចេញសរុប",
       "statVerifiedClaims": "ការទាមទារដែលបានផ្ទៀងផ្ទាត់",
@@ -391,11 +414,18 @@
       "subtitle": "កន្លែងធ្វើការបន្តផ្ទាល់ពី {email}",
       "personalInfo": "ព័ត៌មានផ្ទាល់ខ្លួន",
       "personalInfoDesc": "គ្រប់គ្រងព័ត៌មានប្រវត្តិរូបដែលប្រើក្នុងកន្លែងធ្វើការ CLP របស់អ្នក។",
+      "identity": "អត្តសញ្ញាណ",
       "fullName": "ឈ្មោះពេញ",
       "username": "ឈ្មោះអ្នកប្រើប្រាស់",
+      "contactInfo": "ព័ត៌មានទំនាក់ទំនង",
       "email": "អ៊ីម៉ែល",
       "phoneNumber": "លេខទូរស័ព្ទ",
+      "personalDetails": "ព័ត៌មានលម្អិតផ្ទាល់ខ្លួន",
       "gender": "ភេទ",
+      "selectGender": "ជ្រើសរើសភេទ",
+      "female": "ស្រី",
+      "male": "ប្រុស",
+      "preferNotToSay": "មិនចង់ប្រាប់",
       "dateOfBirth": "ថ្ងៃខែឆ្នាំកំណើត",
       "selectDate": "ជ្រើសរើសកាលបរិច្ឆេទ",
       "pickerClear": "សម្អាត",
@@ -403,7 +433,8 @@
       "nationality": "សញ្ជាតិ",
       "userRole": "តួនាទីអ្នកប្រើប្រាស់",
       "address": "អាសយដ្ឋាន",
-      "bioAboutMe": "ប្រវត្តិរូប / អំពីខ្ញុំ",
+      "aboutMe": "អំពីខ្ញុំ",
+      "bio": "ប្រវត្តិរូបសង្ខេប",
       "bioPlaceholder": "បន្ថែមចំណាំប្រវត្តិរូបខ្លី...",
       "adminLabel": "អ្នកគ្រប់គ្រង",
       "uploadPicture": "បញ្ចូលរូបភាព",
@@ -500,7 +531,8 @@
       "adminPortal": "ច្រកចូលអ្នកគ្រប់គ្រង",
       "platformAdministration": "ការគ្រប់គ្រង\nប្លាតហ្វម",
       "brandDesc": "គ្រប់គ្រងវគ្គ អ្នកប្រើប្រាស់ និងការកំណត់ប្លាតហ្វមពីកន្លែងតែមួយ។",
-      "copyright": "© {year} QBTech។ រក្សាសិទ្ធិគ្រប់យ៉ាង។"
+      "copyright": "© {year} QBTech។ រក្សាសិទ្ធិគ្រប់យ៉ាង។",
+      "logoHomeAriaLabel": "ទៅកាន់គេហទំព័រដើម"
     },
 
     "statCard": {

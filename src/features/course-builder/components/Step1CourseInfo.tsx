@@ -247,7 +247,7 @@ export function Step1CourseInfo({
                 <DollarSign className="h-3.5 w-3.5" />
               </span>
               <input
-                {...register('price')}
+                {...register('price', { valueAsNumber: true })}
                 type="number"
                 min={0}
                 step={0.01}

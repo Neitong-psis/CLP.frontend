@@ -80,6 +80,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
       settingsHref: '/settings',
       profileHref: '/settings',
       learnMoreHref: '/learn-more',
+      logoutHref: '/auth?tab=login&role=learner',
     },
     educator: {
       navItems: [
@@ -117,6 +118,7 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
         initials: currentUser.initials,
       },
       learnMoreHref: '/educator/learn-more',
+      logoutHref: '/auth?tab=login&role=educator',
     },
     admin: {
       navItems: [

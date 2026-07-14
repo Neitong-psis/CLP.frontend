@@ -13,8 +13,6 @@
     "pending": "Pending review",
 
     "common": {
-      "loading": "Loading…",
-      "noAdminAccess": "No admin access.",
       "vsLastMonth": "vs last month",
       "search": "Search",
       "cancel": "Cancel",
@@ -145,6 +143,7 @@
       "backToCourses": "Back to courses",
       "reject": "Reject",
       "approve": "Approve",
+      "submitReview": "Submit review",
       "exportPdf": "Export PDF",
       "courseContent": "Course Content",
       "modules": "{count} Modules",
@@ -191,13 +190,25 @@
       },
       "rejectDialog": {
         "title": "Reject this course?",
-        "description": "Tell the educator what to change before resubmitting \"{title}\".",
-        "feedbackLabel": "Feedback for educator",
-        "feedbackPlaceholder": "Explain what should be changed before resubmitting…",
-        "feedbackNote": "This feedback is attached to the course submission.",
+        "description": "{count} item(s) flagged. The educator will see your feedback and can resubmit after making changes.",
         "back": "Back",
         "sendFeedback": "Send feedback"
-      }
+      },
+      "itemApproveDialog": {
+        "title": "Approve \"{title}\"?",
+        "description": "Add an optional note for the educator.",
+        "notePlaceholder": "Add a note for the educator (optional)…",
+        "cancel": "Cancel",
+        "confirm": "Confirm approve"
+      },
+      "itemRejectDialog": {
+        "title": "Reject \"{title}\"?",
+        "description": "Explain what needs to change — the educator will see this note.",
+        "notePlaceholder": "Explain what's wrong with this item…",
+        "cancel": "Cancel",
+        "confirm": "Confirm reject"
+      },
+      "gateHint": "Review all {count} items before submitting a decision."
     },
 
     "usersPage": {
@@ -319,6 +330,7 @@
       "tabTemplates": "Templates",
       "tabIssuance": "Issuance History",
       "createTemplate": "Create Template",
+      "uploadFile": "Upload File",
       "uploadTemplate": "Upload Template",
       "uploadTemplateDesc": "Upload a certificate design (image or PDF) to add it as a new draft template.",
       "uploadInvalidFile": "Please choose an image or PDF file.",
@@ -329,6 +341,17 @@
       "templateName": "Template name",
       "templateNamePlaceholder": "e.g. Corporate Bootcamp",
       "templateCategory": "Category",
+      "designInCanva": "Design in Canva",
+      "designInCanvaDesc": "Open Canva in a new tab to design your certificate, then paste the share or edit link below to save it as a template.",
+      "linkCanvaDesign": "Link Canva Design",
+      "linkCanvaDesignDesc": "Paste the Canva design link for \"{name}\" so this button opens it directly next time.",
+      "openCanvaToDesign": "Open Canva",
+      "canvaLinkLabel": "Canva design link",
+      "canvaLinkPlaceholder": "https://www.canva.com/design/...",
+      "canvaLinkInvalid": "Enter a valid canva.com link.",
+      "saveLink": "Save Link",
+      "canvaLinkSaved": "Canva design linked to \"{name}\".",
+      "canvaTemplateCreated": "Template \"{name}\" created from Canva design.",
       "cancel": "Cancel",
       "statTotalIssued": "Total Issued Certificates",
       "statVerifiedClaims": "Verified Claims",
@@ -391,11 +414,18 @@
       "subtitle": "Live workspace synced from {email}",
       "personalInfo": "Personal Information",
       "personalInfoDesc": "Manage the profile details used across your CLP workspace.",
+      "identity": "Identity",
       "fullName": "Full Name",
       "username": "Username",
+      "contactInfo": "Contact Info",
       "email": "Email",
       "phoneNumber": "Phone Number",
+      "personalDetails": "Personal Details",
       "gender": "Gender",
+      "selectGender": "Select gender",
+      "female": "Female",
+      "male": "Male",
+      "preferNotToSay": "Prefer not to say",
       "dateOfBirth": "Date of Birth",
       "selectDate": "Select date",
       "pickerClear": "Clear",
@@ -403,7 +433,8 @@
       "nationality": "Nationality",
       "userRole": "User Role",
       "address": "Address",
-      "bioAboutMe": "Bio / About Me",
+      "aboutMe": "About Me",
+      "bio": "Bio",
       "bioPlaceholder": "Add a short profile note...",
       "adminLabel": "Admin",
       "uploadPicture": "Upload picture",
@@ -500,7 +531,8 @@
       "adminPortal": "Admin Portal",
       "platformAdministration": "Platform\nAdministration",
       "brandDesc": "Manage courses, users, and platform settings from one place.",
-      "copyright": "© {year} QBTech. All rights reserved."
+      "copyright": "© {year} QBTech. All rights reserved.",
+      "logoHomeAriaLabel": "Go to homepage"
     },
 
     "statCard": {

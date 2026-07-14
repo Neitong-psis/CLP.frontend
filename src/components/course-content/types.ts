@@ -1,8 +1,8 @@
 import {
   FileText,
-  Play,
+  PlayCircle,
   ClipboardList,
-  ClipboardCheck,
+  PenLine,
   type LucideIcon,
 } from 'lucide-react';
 import type {
@@ -12,23 +12,23 @@ import type {
 } from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
 import type { ItemDone } from '@/lib/course-progress';
 
-/** Icon per content kind — single source of truth for all three surfaces. */
+/** Icon per content kind — single source of truth for all three surfaces.
+ *  Matches the learner course-sidebar's icon choices for visual consistency. */
 export const KIND_ICON: Record<ReviewItemKind, LucideIcon> = {
   document: FileText,
-  video: Play,
+  video: PlayCircle,
   quiz: ClipboardList,
-  assignment: ClipboardCheck,
+  assignment: PenLine,
 };
 
-/** Optional per-item overlay glyph (learner only): a failed quiz or a submitted
- *  assignment gets a small corner badge on top of its normal state. */
-export type ItemBadge = 'failed' | 'submitted' | null;
+/** The admin's per-item review decision — the *only* thing an item's status
+ *  token shows. `null` means "not decided yet" (admin/educator opening an
+ *  item to look at it is not a verdict, so viewing never affects this). */
+export type ItemBadge = 'approved' | 'rejected' | null;
 
 /** Pre-resolved i18n strings so the shared component stays translation-agnostic. */
 export interface SidebarLabels {
   courseContent: string;
-  moduleCount: string;
-  lessonCount: string;
   /** Progress caption under the bar, e.g. "2 / 24 completed" — completion count
    *  is computed by the sidebar (via `isItemDone`) so it can't drift from the tree. */
   formatProgress: (done: number, total: number) => string;

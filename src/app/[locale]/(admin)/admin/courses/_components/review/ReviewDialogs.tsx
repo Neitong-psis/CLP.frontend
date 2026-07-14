@@ -93,19 +93,19 @@ export function ApproveDialog({
 
 // -- Reject -------------------------------------------------------------------
 
+/** Confirms submitting a rejection — per-item notes are already captured via
+ *  the item-level dialogs as the admin reviews each piece of content, so
+ *  this is just a final summary + confirm. */
 export function RejectDialog({
-  courseTitle,
+  flaggedCount,
   onConfirm,
   onClose,
 }: {
-  courseTitle: string;
-  onConfirm: (feedback: string) => void;
+  flaggedCount: number;
+  onConfirm: () => void;
   onClose: () => void;
 }) {
   const t = useAdminReviewOverlayT();
-  const [feedback, setFeedback] = useState('');
-  const trimmed = feedback.trim();
-
   return (
     <CenterDialog
       icon={
@@ -114,7 +114,7 @@ export function RejectDialog({
         </span>
       }
       title={t('rejectDialog.title')}
-      description={t('rejectDialog.description', { title: courseTitle })}
+      description={t('rejectDialog.description', { count: flaggedCount })}
       footer={
         <>
           <button
@@ -124,36 +124,124 @@ export function RejectDialog({
             {t('rejectDialog.back')}
           </button>
           <button
-            onClick={() => onConfirm(trimmed)}
-            disabled={trimmed.length === 0}
-            className="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onConfirm}
+            className="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
           >
             {t('rejectDialog.sendFeedback')}
           </button>
         </>
       }
       onClose={onClose}
+    />
+  );
+}
+
+// -- Per-item approve -----------------------------------------------------------
+
+export function ItemApproveDialog({
+  itemTitle,
+  initialNote,
+  onConfirm,
+  onClose,
+}: {
+  itemTitle: string;
+  initialNote?: string;
+  onConfirm: (note?: string) => void;
+  onClose: () => void;
+}) {
+  const t = useAdminReviewOverlayT();
+  const [note, setNote] = useState(initialNote ?? '');
+  return (
+    <CenterDialog
+      icon={
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+        </span>
+      }
+      title={t('itemApproveDialog.title', { title: itemTitle })}
+      description={t('itemApproveDialog.description')}
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            {t('itemApproveDialog.cancel')}
+          </button>
+          <button
+            onClick={() => onConfirm(note.trim() || undefined)}
+            className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+          >
+            {t('itemApproveDialog.confirm')}
+          </button>
+        </>
+      }
     >
-      <div className="mt-4 text-left">
-        <label
-          htmlFor="reject-feedback"
-          className="text-xs font-semibold text-slate-700"
-        >
-          {t('rejectDialog.feedbackLabel')}
-        </label>
-        <textarea
-          id="reject-feedback"
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          rows={3}
-          autoFocus
-          placeholder={t('rejectDialog.feedbackPlaceholder')}
-          className="focus:border-brand-gold/50 focus:ring-brand-gold/10 mt-1.5 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2"
-        />
-        <p className="mt-1.5 text-[11px] text-slate-400">
-          {t('rejectDialog.feedbackNote')}
-        </p>
-      </div>
+      <textarea
+        autoFocus
+        rows={3}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder={t('itemApproveDialog.notePlaceholder')}
+        className="mt-4 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-left text-sm text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+      />
+    </CenterDialog>
+  );
+}
+
+// -- Per-item reject --------------------------------------------------------------
+
+export function ItemRejectDialog({
+  itemTitle,
+  initialNote,
+  onConfirm,
+  onClose,
+}: {
+  itemTitle: string;
+  initialNote?: string;
+  onConfirm: (note: string) => void;
+  onClose: () => void;
+}) {
+  const t = useAdminReviewOverlayT();
+  const [note, setNote] = useState(initialNote ?? '');
+  const trimmed = note.trim();
+  return (
+    <CenterDialog
+      icon={
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50">
+          <XCircle className="h-6 w-6 text-rose-500" />
+        </span>
+      }
+      title={t('itemRejectDialog.title', { title: itemTitle })}
+      description={t('itemRejectDialog.description')}
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            {t('itemRejectDialog.cancel')}
+          </button>
+          <button
+            onClick={() => trimmed && onConfirm(trimmed)}
+            disabled={!trimmed}
+            className="rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('itemRejectDialog.confirm')}
+          </button>
+        </>
+      }
+    >
+      <textarea
+        autoFocus
+        rows={3}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder={t('itemRejectDialog.notePlaceholder')}
+        className="mt-4 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-left text-sm text-slate-700 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
+      />
     </CenterDialog>
   );
 }

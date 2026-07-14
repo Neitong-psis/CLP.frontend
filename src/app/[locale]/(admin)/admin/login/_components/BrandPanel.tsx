@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 
 export default async function BrandPanel() {
@@ -15,12 +16,18 @@ export default async function BrandPanel() {
       />
 
       {/* Main content — flex-1 fills remaining height, justify-center vertically centers it */}
-      <div className="relative flex flex-1 flex-col items-center justify-center space-y-6 text-center xl:space-y-10 2xl:space-y-12">
-        <Logo
-          variant="light"
-          size="lg"
-          className="3xl:!w-[400px] w-52! xl:w-72! 2xl:w-85!"
-        />
+      <div className="relative flex flex-1 flex-col items-center justify-center space-y-6 text-center lg:space-y-[clamp(1rem,4vh,2.5rem)] 2xl:space-y-12">
+        <Link
+          href="/"
+          className="transition-opacity hover:opacity-80"
+          aria-label={t('logoHomeAriaLabel')}
+        >
+          <Logo
+            variant="light"
+            size="lg"
+            className="3xl:h-28 h-16 xl:h-20 2xl:h-24"
+          />
+        </Link>
         <div className="space-y-4 xl:space-y-6 2xl:space-y-8">
           <div className="inline-flex items-center justify-center gap-2">
             <span className="bg-brand-gold h-px w-8" />

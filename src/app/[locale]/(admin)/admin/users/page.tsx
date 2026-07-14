@@ -22,7 +22,7 @@ import {
 } from './_components/RowContextMenu';
 import { SkeletonRow, UserTableRow } from './_components/UserTableRow';
 import { TablePagination } from './_components/TablePagination';
-import { UsersActiveChips, UsersFilter } from './_components/UsersFilter';
+import { UsersFilter } from './_components/UsersFilter';
 
 export default function AdminUsersPage() {
   const t = useAdminUsersT();
@@ -152,8 +152,6 @@ export default function AdminUsersPage() {
               </Button>
             </div>
           </div>
-
-          <UsersActiveChips filter={filter} />
 
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {filtered.length === 0

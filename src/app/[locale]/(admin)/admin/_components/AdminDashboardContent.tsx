@@ -35,7 +35,7 @@ export function AdminDashboardContent() {
       {isFirstVisit && (
         <div
           className={cn(
-            'absolute inset-0 z-10 transition-opacity duration-500',
+            'absolute inset-0 z-10 overflow-hidden transition-opacity duration-500',
             showPageSkeleton ? 'opacity-100' : 'pointer-events-none opacity-0',
           )}
         >

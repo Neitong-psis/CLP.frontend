@@ -119,6 +119,18 @@ export type TaskPriority = 'High' | 'Medium' | 'Low';
 /** Admin decision on a submitted course, surfaced as the status badge under review. */
 export type ReviewState = 'Approved' | 'Reject' | 'Under Review';
 
+/** One admin note on a content item — which item, in which lesson, the
+ *  admin's per-item verdict, and why. `itemId` matches a `ReviewItem.id`
+ *  from `_lib/content.ts`. Rejected items always carry a note (required at
+ *  entry); approved items only appear here if the admin left an optional one. */
+export interface ReviewFeedbackItem {
+  itemId: string;
+  lessonTitle: string;
+  itemTitle: string;
+  status: 'approved' | 'rejected';
+  note: string;
+}
+
 export interface CourseTask {
   id: string;
   title: string;
@@ -133,6 +145,8 @@ export interface CourseTask {
   reviewState?: ReviewState;
   /** Under Review — relative time since submission (e.g. "1 day ago"). */
   submittedAgo?: string;
+  /** Under Review + Reject — the specific content items admin flagged. */
+  reviewFeedback?: ReviewFeedbackItem[];
   /** Published — enrolled learner count. */
   students?: number;
   /** Published — gross revenue label (e.g. "$163,938"). */
@@ -304,6 +318,22 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
     dueDate: 'May 25, 2026',
     reviewState: 'Reject',
     submittedAgo: '2 days ago',
+    reviewFeedback: [
+      {
+        itemId: 'd1',
+        lessonTitle: 'Responsive Design Guide',
+        itemTitle: 'Responsive Design Guide',
+        status: 'rejected',
+        note: 'This reads as generic web-design theory, not a Figma-to-developer handoff lesson. Rewrite it around actual handoff artifacts — spacing tokens, component specs, redlines.',
+      },
+      {
+        itemId: 'v1',
+        lessonTitle: 'HTML Introduction',
+        itemTitle: 'HTML Introduction',
+        status: 'rejected',
+        note: 'Wrong audience — this assumes the viewer has never written HTML. Replace with a walkthrough of translating a Figma component into markup/CSS.',
+      },
+    ],
   },
   {
     id: 'ct13',
