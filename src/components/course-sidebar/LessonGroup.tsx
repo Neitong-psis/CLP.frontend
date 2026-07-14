@@ -173,7 +173,7 @@ function MultiItemLesson({
             }
             className="overflow-hidden"
           >
-            <ul className="border-border/60 divide-border/60 divide-y border-t pl-7">
+            <ul className="border-border/60 divide-border/60 divide-y border-t">
               {lesson.items.map((item) => (
                 <ContentItemRow
                   key={item.id}
