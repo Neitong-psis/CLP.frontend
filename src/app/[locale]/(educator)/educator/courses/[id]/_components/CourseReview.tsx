@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   AlertTriangle,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Lock,
@@ -16,6 +17,7 @@ import {
   Send,
   RotateCcw,
   Download,
+  Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -28,11 +30,16 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { PillTabs } from '@/components/common/list/PillTabs';
 import { EDUCATOR_USER, type CourseTask } from '@/constants/educator';
-import { useCourseTasks } from '@/context/CourseTasksContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { exportCourseToPdf } from '@/lib/utils/courseExportPdf';
 import {
@@ -40,6 +47,7 @@ import {
   flattenItems,
   lessonCount,
   type ReviewItem,
+  type ReviewModule,
 } from '../_lib/content';
 import { CourseContentSidebar } from '@/components/course-content/CourseContentSidebar';
 import { CourseContentSheet } from '@/components/course-content/CourseContentSheet';
@@ -54,15 +62,71 @@ import {
   QuizPanel,
   AssignmentPanel,
 } from '@/components/course-content/panels';
+import { AssignmentSubmission } from '@/components/pages/learner/learn/AssignmentSubmission';
 import { computeLocks, type ItemDone } from '@/lib/course-progress';
+import { ItemEditModal } from './ItemEditModal';
+
+/** Immutably patches one item inside the nested module → lesson → item tree. */
+function replaceItemInModules(
+  modules: ReviewModule[],
+  updated: ReviewItem,
+): ReviewModule[] {
+  return modules.map((mod) => ({
+    ...mod,
+    lessons: mod.lessons.map((lesson) => {
+      switch (updated.kind) {
+        case 'document':
+          return lesson.documents.some((d) => d.id === updated.id)
+            ? {
+                ...lesson,
+                documents: lesson.documents.map((d) =>
+                  d.id === updated.id ? updated : d,
+                ),
+              }
+            : lesson;
+        case 'video':
+          return lesson.videos.some((v) => v.id === updated.id)
+            ? {
+                ...lesson,
+                videos: lesson.videos.map((v) =>
+                  v.id === updated.id ? updated : v,
+                ),
+              }
+            : lesson;
+        case 'quiz':
+          return lesson.quizzes.some((q) => q.id === updated.id)
+            ? {
+                ...lesson,
+                quizzes: lesson.quizzes.map((q) =>
+                  q.id === updated.id ? updated : q,
+                ),
+              }
+            : lesson;
+        case 'assignment':
+          return lesson.assignments.some((a) => a.id === updated.id)
+            ? {
+                ...lesson,
+                assignments: lesson.assignments.map((a) =>
+                  a.id === updated.id ? updated : a,
+                ),
+              }
+            : lesson;
+      }
+    }),
+  }));
+}
 
 export function CourseReview({ task }: { task: CourseTask }) {
   const router = useRouter();
   const t = useEducatorReviewT();
   const { toast } = useToast();
   const currentUser = useCurrentUser();
-  const { updateTask } = useCourseTasks();
-  const modules = REVIEW_MODULES;
+  // Local copy so per-item edits can flow through immutably — Course Review's
+  // content is a shared demo dataset with no per-course storage of its own,
+  // so edits live only in this session (see ItemEditModal's doc comment).
+  const [modules, setModules] = useState<ReviewModule[]>(() =>
+    structuredClone(REVIEW_MODULES),
+  );
   const items = useMemo(() => flattenItems(modules), [modules]);
 
   const isUnderReview = task.status === 'Under Review';
@@ -73,6 +137,26 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const rejectedFeedbackCount = feedback.filter(
     (f) => f.status === 'rejected',
   ).length;
+  const rejectedIds = useMemo(
+    () =>
+      new Set(
+        (task.reviewFeedback ?? [])
+          .filter((f) => f.status === 'rejected')
+          .map((f) => f.itemId),
+      ),
+    [task.reviewFeedback],
+  );
+  // Items fixed via the edit modal this session — resolves them out of the
+  // "rejected, needs edit" state without a real admin re-review.
+  const [resolvedItemIds, setResolvedItemIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [editModalItem, setEditModalItem] = useState<ReviewItem | null>(null);
+  // Assignment submissions made this session, while previewing a published
+  // course as a learner would experience it (upload UI only shows there).
+  const [submittedIds, setSubmittedIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const [activeId, setActiveId] = useState(items[0]?.id ?? '');
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -81,7 +165,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const [viewed, setViewed] = useState<Set<string>>(
     () => new Set([items[0]?.id]),
   );
-  const [showResubmit, setShowResubmit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const isArchived = task.status === 'Archived';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -119,9 +202,12 @@ export function CourseReview({ task }: { task: CourseTask }) {
   );
 
   /** Admin's per-item decision, once one exists — replaces the old fake lock
-   *  with something that actually means something. */
+   *  with something that actually means something. A locally-resolved item
+   *  (fixed via the edit modal this session) reads as approved regardless of
+   *  the original decision, since it's no longer what the admin flagged. */
   function getItemBadge(item: ReviewItem): ItemBadge {
     if (!isUnderReview) return null;
+    if (resolvedItemIds.has(item.id)) return 'approved';
     if (task.reviewState === 'Approved') return 'approved';
     if (task.reviewState === 'Reject') {
       const entry = task.reviewFeedback?.find((f) => f.itemId === item.id);
@@ -136,6 +222,36 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const nextItem =
     currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
   const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
+
+  // A published course is live for learners — reviewing it should feel like
+  // taking it as one, right down to the footer button, just without the
+  // sequential locking a real learner would hit (the educator can always
+  // jump anywhere; `lockingEnabled={false}` below already guarantees that).
+  const isPublishedView = task.status === 'Published';
+
+  // One rule drives the single footer/menu action slot everywhere it
+  // appears (desktop button, mobile menu): a still-rejected active item asks
+  // for an edit before anything else; otherwise it's plain click-through
+  // navigation that only becomes "Resubmit" once there's nowhere left to go.
+  // None of this applies once the course is actually published — see
+  // `isPublishedView` above instead.
+  const activeNeedsEdit = Boolean(
+    active && rejectedIds.has(active.id) && !resolvedItemIds.has(active.id),
+  );
+  const showEditAction =
+    !isArchived && !isPublishedView && !isDecidedApproved && activeNeedsEdit;
+  const showNextAction =
+    !isArchived &&
+    !isPublishedView &&
+    !isDecidedApproved &&
+    !activeNeedsEdit &&
+    Boolean(nextItem);
+  const showResubmitAction =
+    !isArchived &&
+    !isPublishedView &&
+    !isDecidedApproved &&
+    !activeNeedsEdit &&
+    !nextItem;
 
   function goTo(id: string) {
     setActiveId(id);
@@ -163,16 +279,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
     });
   }
 
-  function handleResubmit() {
-    setShowResubmit(false);
-    updateTask(task.id, {
-      reviewState: 'Under Review',
-      reviewFeedback: undefined,
-    });
-    toast(t('resubmittedToast', { title: task.title }), 'success');
-    router.push('/educator/courses');
-  }
-
   function handleRestore() {
     toast(t('restoredToast', { title: task.title }), 'success');
     router.push('/educator/courses');
@@ -181,6 +287,27 @@ export function CourseReview({ task }: { task: CourseTask }) {
   function handleEditCourse() {
     toast(t('openingEditor'), 'info');
     router.push(`/educator/courses/new?draft=${task.id}`);
+  }
+
+  /** From the per-item "Edit" split button — the whole-course option jumps
+   *  straight to Step 2 (Course Content) instead of starting over at Step 1. */
+  function handleEditWholeCourse() {
+    toast(t('openingEditor'), 'info');
+    router.push(`/educator/courses/new?draft=${task.id}&step=2`);
+  }
+
+  /** Fast-path resubmit, reached once the educator has clicked through every
+   *  item — jumps straight to Step 3 (Preview & Publish), ready to submit,
+   *  instead of the full wizard from Step 1. */
+  function handleResubmitFast() {
+    toast(t('openingEditor'), 'info');
+    router.push(`/educator/courses/new?draft=${task.id}&step=3`);
+  }
+
+  function handleSaveEdit(updated: ReviewItem) {
+    setModules((prev) => replaceItemInModules(prev, updated));
+    setResolvedItemIds((prev) => new Set(prev).add(updated.id));
+    setEditModalItem(null);
   }
 
   function handleExportPdf() {
@@ -219,6 +346,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
           isItemDone={isItemDone}
           lockingEnabled={false}
           getItemBadge={getItemBadge}
+          showTypeIcon={isPublishedView}
           onSelect={select}
           onLockedSelect={() => toast(t('lockedToast'), 'info')}
           collapsed={sidebarCollapsed}
@@ -288,17 +416,19 @@ export function CourseReview({ task }: { task: CourseTask }) {
                           <div className="border-border/60 border-t" />
                         </>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          handleEditCourse();
-                        }}
-                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
-                      >
-                        <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
-                        {t('editCourse')}
-                      </button>
+                      {!isPublishedView && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMobileActions(false);
+                            handleEditCourse();
+                          }}
+                          className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                        >
+                          <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
+                          {t('editCourse')}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -311,7 +441,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
                         {t('exportPdf')}
                       </button>
                       <div className="border-border/60 border-t" />
-                      {isArchived ? (
+                      {isArchived && (
                         <button
                           type="button"
                           onClick={() => {
@@ -323,20 +453,58 @@ export function CourseReview({ task }: { task: CourseTask }) {
                           <RotateCcw className="text-muted-foreground h-4 w-4 shrink-0" />
                           {t('restoreBtn')}
                         </button>
-                      ) : (
-                        !isDecidedApproved && (
+                      )}
+                      {showEditAction && (
+                        <>
                           <button
                             type="button"
                             onClick={() => {
                               setShowMobileActions(false);
-                              setShowResubmit(true);
+                              if (active) setEditModalItem(active);
                             }}
                             className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
                           >
-                            <Send className="text-muted-foreground h-4 w-4 shrink-0" />
-                            {t('resubmitBtn')}
+                            <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
+                            {t('editThisItem')}
                           </button>
-                        )
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowMobileActions(false);
+                              handleEditWholeCourse();
+                            }}
+                            className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                          >
+                            <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
+                            {t('editWholeCourse')}
+                          </button>
+                        </>
+                      )}
+                      {showNextAction && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMobileActions(false);
+                            if (nextItem) goTo(nextItem.id);
+                          }}
+                          className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                        >
+                          <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
+                          {t('nextButton')}
+                        </button>
+                      )}
+                      {showResubmitAction && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMobileActions(false);
+                            handleResubmitFast();
+                          }}
+                          className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
+                        >
+                          <Send className="text-muted-foreground h-4 w-4 shrink-0" />
+                          {t('resubmitBtn')}
+                        </button>
                       )}
                     </div>
                   </>
@@ -427,7 +595,16 @@ export function CourseReview({ task }: { task: CourseTask }) {
 
           {/* Content */}
           <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-            {active && <PreviewPanel item={active} />}
+            {active && (
+              <PreviewPanel
+                item={active}
+                asLearner={isPublishedView}
+                isSubmitted={submittedIds.has(active.id)}
+                onSubmitted={() =>
+                  setSubmittedIds((prev) => new Set(prev).add(active.id))
+                }
+              />
+            )}
           </main>
 
           {/* Footer nav */}
@@ -449,9 +626,20 @@ export function CourseReview({ task }: { task: CourseTask }) {
               </button>
               <button
                 type="button"
-                disabled={!nextItem || nextLocked}
-                onClick={() => nextItem && !nextLocked && goTo(nextItem.id)}
-                title={nextLocked ? t('lockedNextHint') : undefined}
+                disabled={!nextItem || nextLocked || activeNeedsEdit}
+                onClick={() =>
+                  nextItem &&
+                  !nextLocked &&
+                  !activeNeedsEdit &&
+                  goTo(nextItem.id)
+                }
+                title={
+                  nextLocked
+                    ? t('lockedNextHint')
+                    : activeNeedsEdit
+                      ? t('editRequiredHint')
+                      : undefined
+                }
                 className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 flex min-w-0 flex-1 items-center justify-end gap-1.5 rounded-xl px-3 py-2.5 text-right font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-25"
               >
                 {nextLocked ? (
@@ -482,45 +670,92 @@ export function CourseReview({ task }: { task: CourseTask }) {
               </Button>
 
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleEditCourse}
-                >
-                  <PencilLine className="h-4 w-4" />
-                  {t('editCourse')}
-                </Button>
-                {isArchived ? (
+                {!isPublishedView && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={handleEditCourse}
+                  >
+                    <PencilLine className="h-4 w-4" />
+                    {t('editCourse')}
+                  </Button>
+                )}
+                {isArchived && (
                   <Button size="sm" className="gap-1.5" onClick={handleRestore}>
                     <RotateCcw className="h-4 w-4" />
                     {t('restoreBtn')}
                   </Button>
-                ) : (
-                  !isDecidedApproved && (
-                    <Button
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => setShowResubmit(true)}
-                    >
-                      <Send className="h-4 w-4" />
-                      {t('resubmitBtn')}
-                    </Button>
-                  )
+                )}
+                {showEditAction && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" className="gap-1.5">
+                        <PencilLine className="h-4 w-4" />
+                        {t('editButton')}
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent theme="light" align="end">
+                      <DropdownMenuItem
+                        theme="light"
+                        onSelect={() => active && setEditModalItem(active)}
+                      >
+                        {t('editThisItem')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        theme="light"
+                        onSelect={handleEditWholeCourse}
+                      >
+                        {t('editWholeCourse')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {showNextAction && (
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => nextItem && goTo(nextItem.id)}
+                  >
+                    {t('nextButton')}
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
+                {showResubmitAction && (
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={handleResubmitFast}
+                  >
+                    <Send className="h-4 w-4" />
+                    {t('resubmitBtn')}
+                  </Button>
+                )}
+                {isPublishedView && (
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => nextItem && goTo(nextItem.id)}
+                  >
+                    {!nextItem ? (
+                      <>
+                        <Trophy className="h-4 w-4" />
+                        {t('finishCourse')}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t('markComplete')}
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
             </div>
           </footer>
         </div>
       </div>
-
-      {showResubmit && (
-        <ResubmitDialog
-          courseTitle={task.title}
-          onConfirm={handleResubmit}
-          onClose={() => setShowResubmit(false)}
-        />
-      )}
 
       <Sheet open={showFeedback} onOpenChange={setShowFeedback}>
         <SheetContent side="right" className="w-full sm:max-w-md">
@@ -618,6 +853,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
           isItemDone={isItemDone}
           lockingEnabled={false}
           getItemBadge={getItemBadge}
+          showTypeIcon={isPublishedView}
           onSelect={(id) => {
             select(id);
             setShowContents(false);
@@ -627,13 +863,35 @@ export function CourseReview({ task }: { task: CourseTask }) {
           onClose={() => setShowContents(false)}
         />
       )}
+
+      {editModalItem && (
+        <ItemEditModal
+          item={editModalItem}
+          onSave={handleSaveEdit}
+          onClose={() => setEditModalItem(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ── Preview panels ────────────────────────────────────────────────────────────
 
-function PreviewPanel({ item }: { item: ReviewItem }) {
+function PreviewPanel({
+  item,
+  asLearner,
+  isSubmitted,
+  onSubmitted,
+}: {
+  item: ReviewItem;
+  /** A published course previews exactly as a learner experiences it — a
+   *  real quiz start-gate/timer and a working assignment upload, not the
+   *  review-only static preview. */
+  asLearner: boolean;
+  isSubmitted: boolean;
+  onSubmitted: () => void;
+}) {
+  const role = asLearner ? 'learner' : 'review';
   switch (item.kind) {
     case 'video':
       return (
@@ -645,52 +903,19 @@ function PreviewPanel({ item }: { item: ReviewItem }) {
     case 'document':
       return <DocumentPanel item={item} />;
     case 'quiz':
-      return <QuizPanel item={item} role="review" />;
+      return <QuizPanel item={item} role={role} />;
     case 'assignment':
-      return <AssignmentPanel item={item} role="review" />;
+      return (
+        <AssignmentPanel
+          item={item}
+          role={role}
+          submissionSlot={
+            <AssignmentSubmission
+              initiallySubmitted={isSubmitted}
+              onSubmitted={onSubmitted}
+            />
+          }
+        />
+      );
   }
-}
-
-// ── Resubmit dialog ───────────────────────────────────────────────────────────
-
-function ResubmitDialog({
-  courseTitle,
-  onConfirm,
-  onClose,
-}: {
-  courseTitle: string;
-  onConfirm: () => void;
-  onClose: () => void;
-}) {
-  const t = useEducatorReviewT();
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('dialogTitle')}
-    >
-      <div
-        className="bg-card w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl ring-1 ring-black/10 dark:ring-white/6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className="bg-brand-gold/15 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
-          <Send className="text-brand-gold h-6 w-6" />
-        </span>
-        <h2 className="text-foreground mt-4 text-lg font-bold">
-          {t('dialogTitle')}
-        </h2>
-        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-          {t('dialogDesc', { title: courseTitle })}
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button variant="outline" onClick={onClose}>
-            {t('dialogCancel')}
-          </Button>
-          <Button onClick={onConfirm}>{t('dialogConfirm')}</Button>
-        </div>
-      </div>
-    </div>
-  );
 }

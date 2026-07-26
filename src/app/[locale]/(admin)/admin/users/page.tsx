@@ -166,12 +166,12 @@ export default function AdminUsersPage() {
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-220 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">
                     <th
                       scope="col"
-                      className="text-muted-foreground w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide uppercase"
+                      className="text-muted-foreground w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase"
                     >
                       #
                     </th>
@@ -188,7 +188,7 @@ export default function AdminUsersPage() {
                         key={label}
                         scope="col"
                         className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase',
+                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
                           right ? 'text-right' : 'text-left',
                         )}
                       >

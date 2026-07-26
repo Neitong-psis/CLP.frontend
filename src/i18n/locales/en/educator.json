@@ -41,6 +41,13 @@
       "nothingInStatus": "Nothing in \"{status}\" yet",
       "tasksWillAppear": "Tasks will appear here as your courses move through this stage.",
       "deletedToast": "\"{title}\" was deleted.",
+      "deleteDialog": {
+        "title": "Delete this course?",
+        "subtitle": "This action can't be undone.",
+        "message": "Deleting removes all saved content, progress, and history for this course.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
       "statusHint": {
         "toDo": "Open task details to review requirements before starting.",
         "inWriting": "Keep drafting modules and lessons, then submit for review.",
@@ -65,7 +72,9 @@
         "reviewLabel": "Review:",
         "reviewBody": "submitted {ago}. Admin feedback: No revision notes yet.",
         "archivedLabel": "Archived:",
-        "archivedBody": "no price, public visibility, or progress tracking. Content remains editable for future resubmission."
+        "archivedBody": "no price, public visibility, or progress tracking. Content remains editable for future resubmission.",
+        "approvedLabel": "Approved:",
+        "approvedBody": "Published, with a note from Admin still attached. Open the course to read it."
       },
       "publishedStats": {
         "students": "{count} students",
@@ -217,6 +226,13 @@
       "lockedHint": "Complete {lesson} to unlock",
       "lockedToast": "Finish the earlier lessons before jumping ahead.",
       "lockedNextHint": "Complete this lesson to continue.",
+      "editRequiredHint": "Edit this item to continue.",
+      "nextButton": "Next",
+      "editButton": "Edit",
+      "editThisItem": "Edit this item",
+      "editWholeCourse": "Edit whole course",
+      "markComplete": "Mark Complete",
+      "finishCourse": "Finish Course",
       "lessonsCreatedBy": "lessons created by educator",
       "textImageLessons": "Text/Image Lessons",
       "videoLessons": "Video Lessons",
@@ -231,11 +247,6 @@
       "dueDate": "Due date",
       "dueDateValue": "Due {date}",
       "submission": "Submission",
-      "dialogTitle": "Resubmit for review?",
-      "dialogDesc": "\"{title}\" will be sent to an admin for approval. You can keep editing until it is approved.",
-      "dialogCancel": "Cancel",
-      "dialogConfirm": "Resubmit",
-      "resubmittedToast": "\"{title}\" was resubmitted for review.",
       "decisionApprovedTitle": "Approved by admin",
       "decisionApprovedBody": "This course is on its way to publishing — no further action needed.",
       "decisionRejectedTitle": "Changes requested by admin",
@@ -246,7 +257,34 @@
       "feedbackNoteLabel": "Note",
       "feedbackApprovedTag": "Approved",
       "feedbackRejectedTag": "Rejected",
-      "feedbackEmptyApproved": "No notes were left on any content — this course is fully approved."
+      "feedbackEmptyApproved": "No notes were left on any content — this course is fully approved.",
+      "editModal": {
+        "editing": "Editing: {title}",
+        "back": "Back",
+        "save": "Save",
+        "addTopic": "Add topic",
+        "addMoment": "Add moment",
+        "addOption": "Add option",
+        "addQuestion": "Add question",
+        "addRequirement": "Add requirement",
+        "questionPlaceholder": "Question {n}",
+        "fields": {
+          "title": "Title",
+          "readTime": "Read time",
+          "content": "Content",
+          "duration": "Duration",
+          "youtubeId": "YouTube ID",
+          "intro": "Intro",
+          "topics": "Topics",
+          "moments": "Key moments",
+          "description": "Description",
+          "questions": "Questions",
+          "dueDate": "Due date",
+          "submission": "Submission type",
+          "instructions": "Instructions",
+          "requirements": "Requirements"
+        }
+      }
     },
 
     "createCourse": {
@@ -267,7 +305,8 @@
         "continue": "Continue",
         "submitToAdmin": "Submit to Admin",
         "createCourse": "Create Course",
-        "completeRequired": "Complete required fields to submit"
+        "completeRequired": "Complete required fields to submit",
+        "setStatusToSubmit": "Set Current Status to \"Under Review\" to submit"
       },
       "toast": {
         "draftSaved": "Draft saved. You can finish it anytime.",
@@ -290,9 +329,7 @@
         "categoryLevel": "Category & Level",
         "categoryLevelDesc": "Help the right learners discover your course.",
         "category": "Category",
-        "newCategory": "New category",
         "level": "Level",
-        "newLevel": "New level",
         "pricing": "Pricing",
         "pricingDesc": "Set how learners pay for this course.",
         "free": "Free",
@@ -325,8 +362,7 @@
         "newBadge": "New",
         "selfPaced": "Self-paced",
         "enroll": "Enroll",
-        "uploadHint": "Click the cover to upload · Ratings appear after launch",
-        "add": "Add"
+        "uploadHint": "Click the cover to upload · Ratings appear after launch"
       },
       "content": {
         "curriculum": "Course Curriculum",
@@ -422,20 +458,18 @@
         "noModules": "No modules added.",
         "modulePrefix": "Module {n}:",
         "publishSettings": "3. Publish Settings",
-        "publishSettingsDesc": "Visibility, draft behavior, and final action.",
-        "visibility": "Visibility",
-        "public": "Public",
-        "private": "Private",
-        "unlisted": "Unlisted",
-        "draftBehavior": "Draft behavior",
-        "keepAsDraft": "Keep as draft until submitted",
+        "publishSettingsDesc": "Current status and authorship.",
+        "currentStatusLabel": "Current Status",
+        "currentStatusHint": "Only Admin can publish a course. Set this to \"Under Review\" to unlock Submit to Admin.",
+        "publishedLocked": "Published (Admin only)",
+        "authorLabel": "Author",
+        "authorLocked": "Can't be changed.",
         "reviewSummary": "4. Final Review Summary",
         "reviewSummaryDesc": "Module count, level, price, status, and warnings.",
         "modulesLabel": "Modules",
         "levelLabel": "Level",
         "priceLabel": "Price",
         "statusLabel": "Status",
-        "toDo": "To Do",
         "readyMessage": "Course is ready for the selected publish action.",
         "missingFields": "Missing required fields"
       },

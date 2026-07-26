@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  images: {
+    qualities: [75, 85],
+  },
 };
 
 export default withNextIntl(nextConfig);

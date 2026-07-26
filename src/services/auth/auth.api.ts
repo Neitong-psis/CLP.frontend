@@ -4,7 +4,6 @@ import { http } from '@/lib/api/http';
 import { ZodError } from 'zod';
 import { getAccessToken } from '@/lib/session/access-token-store';
 import { refreshSession } from '@/lib/session/refresh';
-import { isMockModeEnabled } from '@/lib/mock/mock-mode';
 import {
   loginResultSchema,
   type LoginRequest,
@@ -141,17 +140,6 @@ export async function confirmEmail(hash: string): Promise<void> {
  */
 export async function getMe(): Promise<User> {
   try {
-    if (isMockModeEnabled()) {
-      const token = getAccessToken();
-      const response = await fetch(BFF_ENDPOINTS.me, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data: unknown = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw fromResponseData(response.status, data);
-      }
-      return userSchema.parse(data);
-    }
     const { data } = await http.get<unknown>(`/${AUTH_ENDPOINTS.me}`);
     return userSchema.parse(data);
   } catch (error) {

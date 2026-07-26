@@ -1346,32 +1346,23 @@ export default function AdminCertificationsPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-180 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">
                     {(
                       [
-                        { key: 'colCertId', isRight: false, hide: '' },
-                        { key: 'colRecipient', isRight: false, hide: '' },
-                        {
-                          key: 'colCourse',
-                          isRight: false,
-                          hide: 'hidden sm:table-cell',
-                        },
-                        {
-                          key: 'colIssueDate',
-                          isRight: false,
-                          hide: 'hidden md:table-cell',
-                        },
-                        { key: 'colActions', isRight: true, hide: '' },
+                        { key: 'colCertId', isRight: false },
+                        { key: 'colRecipient', isRight: false },
+                        { key: 'colCourse', isRight: false },
+                        { key: 'colIssueDate', isRight: false },
+                        { key: 'colActions', isRight: true },
                       ] as const
-                    ).map(({ key, isRight, hide }) => (
+                    ).map(({ key, isRight }) => (
                       <th
                         key={key}
                         className={cn(
                           'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
                           isRight ? 'text-right' : 'text-left',
-                          hide,
                         )}
                       >
                         {t(key)}
@@ -1407,10 +1398,10 @@ export default function AdminCertificationsPage() {
                           {row.recipient}
                         </button>
                       </td>
-                      <td className="text-muted-foreground hidden px-5 py-4 sm:table-cell">
+                      <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
                         {row.course}
                       </td>
-                      <td className="text-muted-foreground hidden px-5 py-4 whitespace-nowrap md:table-cell">
+                      <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
                         {row.issued}
                       </td>
                       <td className="px-5 py-4">

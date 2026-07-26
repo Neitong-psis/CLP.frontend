@@ -19,7 +19,7 @@ import {
   type CourseLocks,
 } from '@/lib/course-progress';
 import { DURATION, EASE } from '@/components/course-sidebar/constants';
-import type { CourseTreeProps, ItemBadge } from './types';
+import { KIND_ICON, type CourseTreeProps, type ItemBadge } from './types';
 
 // ── Tree root ─────────────────────────────────────────────────────────────────
 
@@ -63,6 +63,7 @@ function ModuleRow({
   onSelect,
   onLockedSelect,
   getItemBadge,
+  showTypeIcon,
   labels,
 }: CourseTreeProps & {
   mod: ReviewModule;
@@ -175,6 +176,7 @@ function ModuleRow({
                   onSelect={onSelect}
                   onLockedSelect={onLockedSelect}
                   getItemBadge={getItemBadge}
+                  showTypeIcon={showTypeIcon}
                   labels={labels}
                 />
               ))}
@@ -197,6 +199,7 @@ function LessonRow({
   onSelect,
   onLockedSelect,
   getItemBadge,
+  showTypeIcon,
   labels,
 }: {
   lesson: ReviewLesson;
@@ -207,6 +210,7 @@ function LessonRow({
   onSelect: CourseTreeProps['onSelect'];
   onLockedSelect: CourseTreeProps['onLockedSelect'];
   getItemBadge: CourseTreeProps['getItemBadge'];
+  showTypeIcon: CourseTreeProps['showTypeIcon'];
   labels: CourseTreeProps['labels'];
 }) {
   const reduceMotion = useReducedMotion();
@@ -298,6 +302,8 @@ function LessonRow({
                     isActive={item.id === activeId}
                     locked={locks.lockedItemIds.has(item.id)}
                     badge={getItemBadge?.(item) ?? null}
+                    showTypeIcon={showTypeIcon}
+                    done={isItemDone(item)}
                     onSelect={onSelect}
                     onLocked={() =>
                       onLockedSelect?.(blockingTitle ?? lesson.title)
@@ -340,6 +346,8 @@ function ItemRow({
   isActive,
   locked,
   badge,
+  showTypeIcon,
+  done,
   onSelect,
   onLocked,
 }: {
@@ -347,10 +355,15 @@ function ItemRow({
   isActive: boolean;
   locked: boolean;
   badge: ItemBadge;
+  showTypeIcon?: boolean;
+  /** Only meaningful alongside `showTypeIcon` — a completed item gets the
+   *  same filled check the learner sidebar shows, instead of its type icon. */
+  done?: boolean;
   onSelect: (id: string) => void;
   onLocked: () => void;
 }) {
   const meta = `${TYPE_LABEL[item.kind]} · ${itemMetaDetail(item)}`;
+  const TypeIcon = KIND_ICON[item.kind];
 
   return (
     <li>
@@ -379,9 +392,12 @@ function ItemRow({
           )}
         />
 
-        {/* Status token — purely the admin's per-item verdict. Opening an
-            item to review it isn't a decision, so there's nothing to show
-            until admin actually approves or rejects it. */}
+        {/* Status token. With an admin verdict it's purely that verdict —
+            opening an item to review it isn't a decision, so there's nothing
+            to show until admin actually approves or rejects it. With no
+            verdict to show (e.g. previewing a published course as a
+            learner would experience it), a completed item gets the same
+            filled check the learner sidebar uses instead. */}
         <span
           className={cn(
             'flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150',
@@ -391,9 +407,11 @@ function ItemRow({
                 ? 'border-transparent bg-emerald-500 text-white'
                 : badge === 'rejected'
                   ? 'border-transparent bg-rose-500 text-white'
-                  : isActive
-                    ? 'border-course-accent bg-course-accent/10 text-course-accent'
-                    : 'border-border bg-transparent',
+                  : showTypeIcon && done
+                    ? 'border-transparent bg-emerald-500 text-white'
+                    : isActive
+                      ? 'border-course-accent bg-course-accent/10 text-course-accent'
+                      : 'border-border bg-transparent',
           )}
         >
           {locked ? (
@@ -402,6 +420,10 @@ function ItemRow({
             <Check className="size-3" strokeWidth={3} />
           ) : badge === 'rejected' ? (
             <X className="size-3" strokeWidth={3} />
+          ) : showTypeIcon && done ? (
+            <Check className="size-3" strokeWidth={3} />
+          ) : showTypeIcon ? (
+            <TypeIcon className="size-3" strokeWidth={2.25} />
           ) : null}
         </span>
 

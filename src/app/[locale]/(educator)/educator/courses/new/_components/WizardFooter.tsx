@@ -16,6 +16,7 @@ export function WizardFooter({
   step,
   canSubmit,
   missingCount,
+  statusBlocksSubmit = false,
   onBack,
   onNext,
   onSaveDraft,
@@ -26,6 +27,9 @@ export function WizardFooter({
   step: number;
   canSubmit: boolean;
   missingCount: number;
+  /** True when required fields are complete but Current Status isn't yet
+   *  set to "Under Review" — the other reason Submit can be disabled. */
+  statusBlocksSubmit?: boolean;
   onBack: () => void;
   onNext: () => void;
   onSaveDraft: () => void;
@@ -68,6 +72,11 @@ export function WizardFooter({
                 <Check className="h-4 w-4" />
                 {t('footer.readyToSubmit')}
               </p>
+            ) : statusBlocksSubmit ? (
+              <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
+                <TriangleAlert className="h-4 w-4" />
+                {t('footer.setStatusToSubmit')}
+              </p>
             ) : (
               <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
                 <TriangleAlert className="h-4 w-4" />
@@ -103,7 +112,13 @@ export function WizardFooter({
               className="gap-2 bg-blue-950 hover:bg-blue-900 focus-visible:ring-blue-950 disabled:opacity-50 dark:bg-amber-400 dark:text-gray-900 dark:hover:bg-amber-300 dark:focus-visible:ring-amber-400"
               onClick={onSubmit}
               disabled={!canSubmit || submitting}
-              title={canSubmit ? undefined : t('footer.completeRequired')}
+              title={
+                canSubmit
+                  ? undefined
+                  : statusBlocksSubmit
+                    ? t('footer.setStatusToSubmit')
+                    : t('footer.completeRequired')
+              }
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

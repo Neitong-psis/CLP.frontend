@@ -68,8 +68,7 @@ export function formatThousands(value: string, separator: string): string {
 
 export function priceLabel(info: CourseInfo): string {
   if (info.pricingType === 'free') return 'Free';
-  if (!info.price) return '—';
-  const formatted = formatThousands(info.price, ',');
+  const formatted = info.price ? formatThousands(info.price, ',') : '0';
   return info.currency === 'KHR' ? `${formatted} KHR` : `$${formatted}`;
 }
 

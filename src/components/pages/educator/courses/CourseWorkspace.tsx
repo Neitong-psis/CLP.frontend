@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
   Plus,
@@ -18,6 +18,8 @@ import {
   DollarSign,
   Star,
   Clock,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import { useEducatorCoursesT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
@@ -28,6 +30,8 @@ import { useCourseTasks } from '@/context/CourseTasksContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   COURSE_TASK_STATUSES,
+  SLUG_TO_STATUS,
+  STATUS_BADGE,
   type CourseTask,
   type CourseTaskStatus,
   type ReviewState,
@@ -35,14 +39,6 @@ import {
 } from '@/constants/educator';
 
 // ── Style maps ───────────────────────────────────────────────────────────────
-
-const STATUS_BADGE: Record<CourseTaskStatus, string> = {
-  'To Do': 'border-border bg-muted/40 text-muted-foreground',
-  'In Writing': 'border-blue-400/30 bg-blue-500/10 text-blue-500',
-  'Under Review': 'border-amber-400/30 bg-amber-500/10 text-amber-600',
-  Published: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-600',
-  Archived: 'border-border bg-muted text-muted-foreground',
-};
 
 /** Under Review shows the admin decision instead of the raw status. */
 const REVIEW_BADGE: Record<ReviewState, string> = {
@@ -104,12 +100,12 @@ function getInitials(name: string): string {
 }
 
 /** Where a card leads, per the course lifecycle:
- *  To Do → start writing (blank wizard); In Writing → continue the draft;
- *  Under Review / Published / Archived → the course preview. */
+ *  To Do / In Writing → the wizard, pinned to this task via `draft` so edits
+ *  patch the same record instead of creating a duplicate; Under Review /
+ *  Published / Archived → the course preview. */
 function routeForTask(task: CourseTask): string {
   switch (task.status) {
     case 'To Do':
-      return '/educator/courses/new';
     case 'In Writing':
       return `/educator/courses/new?draft=${task.id}`;
     default:
@@ -119,19 +115,51 @@ function routeForTask(task: CourseTask): string {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+/** Coerces a `?tab=` slug (e.g. "in-writing") into a real status, falling
+ *  back to "To Do" for anything missing or unrecognized. */
+function readTabParam(value: string | null): CourseTaskStatus {
+  return (value && SLUG_TO_STATUS[value]) || 'To Do';
+}
+
+function hasReviewFeedback(task: CourseTask): boolean {
+  return (task.reviewFeedback?.length ?? 0) > 0;
+}
+
+/** A course only lives in the tab matching its real status — except an
+ *  approved-and-published course that still carries an admin note also
+ *  cross-lists under "Under Review", so that note doesn't quietly vanish
+ *  the moment the course goes live. A clean approval (no note) shows only
+ *  in "Published". */
+function matchesTab(task: CourseTask, tab: CourseTaskStatus): boolean {
+  if (task.status === tab) return true;
+  return (
+    tab === 'Under Review' &&
+    task.status === 'Published' &&
+    task.reviewState === 'Approved' &&
+    hasReviewFeedback(task)
+  );
+}
+
 export function CourseWorkspace() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useEducatorCoursesT();
   const { toast } = useToast();
   const { tasks, removeTask } = useCourseTasks();
-  const [activeTab, setActiveTab] = useState<CourseTaskStatus>('To Do');
+  // The wizard sends the educator back here on the tab their course actually
+  // lands in (e.g. "In Writing" after Save Draft) instead of always "To Do".
+  const [activeTab, setActiveTab] = useState<CourseTaskStatus>(() =>
+    readTabParam(searchParams.get('tab')),
+  );
   const [search, setSearch] = useState('');
 
   const counts = useMemo(() => {
     const map = Object.fromEntries(
-      COURSE_TASK_STATUSES.map((s) => [s, 0]),
+      COURSE_TASK_STATUSES.map((s) => [
+        s,
+        tasks.filter((task) => matchesTab(task, s)).length,
+      ]),
     ) as Record<CourseTaskStatus, number>;
-    for (const task of tasks) map[task.status] += 1;
     return map;
   }, [tasks]);
 
@@ -139,7 +167,7 @@ export function CourseWorkspace() {
     const q = search.trim().toLowerCase();
     return tasks.filter(
       (task) =>
-        task.status === activeTab &&
+        matchesTab(task, activeTab) &&
         (q === '' ||
           task.title.toLowerCase().includes(q) ||
           task.category.toLowerCase().includes(q)),
@@ -150,9 +178,15 @@ export function CourseWorkspace() {
     (status) => ({ value: status, label: status, count: counts[status] }),
   );
 
-  function handleDelete(task: CourseTask) {
-    removeTask(task.id);
-    toast(t('deletedToast', { title: task.title }), 'success');
+  // Delete is destructive and irreversible (no undo, no trash) — confirm
+  // before it happens instead of deleting on the first click.
+  const [pendingDelete, setPendingDelete] = useState<CourseTask | null>(null);
+
+  function confirmDelete() {
+    if (!pendingDelete) return;
+    removeTask(pendingDelete.id);
+    toast(t('deletedToast', { title: pendingDelete.title }), 'success');
+    setPendingDelete(null);
   }
 
   return (
@@ -202,12 +236,24 @@ export function CourseWorkspace() {
             <TaskCard
               key={task.id}
               task={task}
+              crossListed={
+                activeTab === 'Under Review' && task.status !== 'Under Review'
+              }
               onOpen={() => router.push(routeForTask(task))}
-              onDelete={() => handleDelete(task)}
+              onDelete={() => setPendingDelete(task)}
               t={t}
             />
           ))}
         </div>
+      )}
+
+      {pendingDelete && (
+        <DeleteConfirmDialog
+          task={pendingDelete}
+          onConfirm={confirmDelete}
+          onClose={() => setPendingDelete(null)}
+          t={t}
+        />
       )}
     </div>
   );
@@ -219,11 +265,16 @@ type TFn = ReturnType<typeof useEducatorCoursesT>;
 
 function TaskCard({
   task,
+  crossListed,
   onOpen,
   onDelete,
   t,
 }: {
   task: CourseTask;
+  /** True when this card is showing under "Under Review" even though its
+   *  real status has moved on — an approved-and-published course that still
+   *  carries an admin note. */
+  crossListed: boolean;
   onOpen: () => void;
   onDelete: () => void;
   t: TFn;
@@ -248,7 +299,7 @@ function TaskCard({
           <h3 className="text-foreground text-sm leading-snug font-bold sm:text-base">
             {task.title}
           </h3>
-          <StatusBadge task={task} t={t} />
+          <StatusBadge task={task} crossListed={crossListed} t={t} />
         </div>
 
         {/* Description */}
@@ -288,7 +339,7 @@ function TaskCard({
         </div>
 
         {/* Note / stats box */}
-        <NoteBox task={task} t={t} />
+        <NoteBox task={task} crossListed={crossListed} t={t} />
       </div>
     </article>
   );
@@ -296,8 +347,19 @@ function TaskCard({
 
 // ── Status badge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ task, t }: { task: CourseTask; t: TFn }) {
-  if (task.status === 'Under Review' && task.reviewState) {
+function StatusBadge({
+  task,
+  crossListed,
+  t,
+}: {
+  task: CourseTask;
+  crossListed: boolean;
+  t: TFn;
+}) {
+  // Under Review shows the admin decision instead of the raw status — and so
+  // does a cross-listed Published card, since "Published" alone wouldn't
+  // explain why it's sitting in the Under Review list.
+  if ((task.status === 'Under Review' || crossListed) && task.reviewState) {
     return (
       <span
         className={cn(
@@ -353,11 +415,7 @@ function CardActions({
           <PencilLine className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{t('actions.edit')}</span>
         </button>
-        <button
-          type="button"
-          onClick={del}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-red-500 transition-colors hover:bg-red-500/10"
-        >
+        <button type="button" onClick={del} className={DELETE_BTN}>
           <Trash2 className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{t('actions.delete')}</span>
         </button>
@@ -383,11 +441,37 @@ function CardActions({
 const OUTLINE_BTN =
   'border-border bg-card text-foreground hover:border-brand-navy/25 hover:bg-brand-navy/8 hover:text-brand-navy inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors dark:hover:border-white/15 dark:hover:bg-white/6 dark:hover:text-white';
 
+/** Same shape as OUTLINE_BTN — bordered, same padding/radius — tinted red so
+ *  Delete reads as an equally deliberate action, not an afterthought. */
+const DELETE_BTN =
+  'border-red-500/25 bg-card text-red-500 hover:border-red-500/50 hover:bg-red-500/10 inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors dark:border-red-400/25 dark:text-red-400 dark:hover:border-red-400/45 dark:hover:bg-red-500/10';
+
 // ── Note / stats box ─────────────────────────────────────────────────────────
 
-function NoteBox({ task, t }: { task: CourseTask; t: TFn }) {
+function NoteBox({
+  task,
+  crossListed,
+  t,
+}: {
+  task: CourseTask;
+  crossListed: boolean;
+  t: TFn;
+}) {
   const box =
     'bg-muted/40 mt-3 rounded-xl px-3 py-2.5 text-[11px] leading-relaxed';
+
+  // Cross-listed under "Under Review" — call out the lingering note instead
+  // of the usual Published stats, which would otherwise explain nothing.
+  if (crossListed) {
+    return (
+      <div className={cn(box, 'text-muted-foreground')}>
+        <span className="text-foreground font-semibold">
+          {t('note.approvedLabel')}{' '}
+        </span>
+        {t('note.approvedBody')}
+      </div>
+    );
+  }
 
   if (task.status === 'To Do') {
     return (
@@ -482,6 +566,93 @@ function EmptyState({
       <p className="text-muted-foreground mt-1 text-xs">
         {hasSearch ? t('tryKeyword') : t('tasksWillAppear')}
       </p>
+    </div>
+  );
+}
+
+// ── Delete confirmation ──────────────────────────────────────────────────────
+
+function DeleteConfirmDialog({
+  task,
+  onConfirm,
+  onClose,
+  t,
+}: {
+  task: CourseTask;
+  onConfirm: () => void;
+  onClose: () => void;
+  t: TFn;
+}) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm duration-150"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('deleteDialog.title')}
+        className="animate-in fade-in-0 zoom-in-95 bg-card w-full max-w-sm rounded-2xl p-6 shadow-2xl duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
+              <AlertTriangle className="h-5 w-5 text-rose-500" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-foreground text-base font-bold">
+                {t('deleteDialog.title')}
+              </h2>
+              <p className="text-muted-foreground text-xs">
+                {t('deleteDialog.subtitle')}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t('deleteDialog.cancel')}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 rounded-lg p-1.5 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="border-border bg-muted/40 mt-4 rounded-xl border px-3.5 py-3">
+          <p className="text-foreground truncate text-sm font-semibold">
+            {task.title}
+          </p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            {task.category} · {task.status}
+          </p>
+        </div>
+
+        <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+          {t('deleteDialog.message')}
+        </p>
+
+        <div className="mt-6 flex items-center justify-end gap-2.5">
+          <Button variant="outline" onClick={onClose}>
+            {t('deleteDialog.cancel')}
+          </Button>
+          <Button
+            className="gap-1.5 bg-rose-500 text-white hover:bg-rose-600 focus-visible:ring-rose-500"
+            onClick={onConfirm}
+          >
+            <Trash2 className="h-4 w-4" />
+            {t('deleteDialog.confirm')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

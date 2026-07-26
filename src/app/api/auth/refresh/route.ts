@@ -11,33 +11,11 @@ import {
   clearAuthCookies,
   readRefreshToken,
 } from '@/lib/session/server-cookies';
-import { SESSION_MAX_AGE_SECONDS } from '@/lib/session/cookie-names';
-import { isMockModeEnabled } from '@/lib/mock/mock-mode';
-import { createMockToken, parseMockToken } from '@/lib/mock/mock-token';
 
 export async function POST(): Promise<NextResponse> {
   const refreshToken = await readRefreshToken();
   if (!refreshToken) {
     return NextResponse.json({ message: 'No session.' }, { status: 401 });
-  }
-
-  if (isMockModeEnabled()) {
-    const userId = parseMockToken(refreshToken);
-    if (!userId) {
-      const errRes = NextResponse.json(
-        { message: 'Session expired.' },
-        { status: 401 },
-      );
-      clearAuthCookies(errRes);
-      return errRes;
-    }
-    const newToken = createMockToken(userId);
-    const res = NextResponse.json({
-      accessToken: newToken,
-      tokenExpires: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
-    });
-    applyRefreshTokenRotation(res, newToken);
-    return res;
   }
 
   let backendResponse: Response;

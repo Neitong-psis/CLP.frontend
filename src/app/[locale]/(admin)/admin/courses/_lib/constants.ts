@@ -26,12 +26,7 @@ export const STATUS_STYLE: Record<CourseStatus, string> = {
   Archive: 'border border-border bg-muted text-muted-foreground',
 };
 
-export const CATEGORY_STYLE: Record<string, string> = {
-  'Web Development': 'border border-blue-500/20 bg-blue-500/10 text-blue-500',
-  'Data Science': 'border border-teal-500/20 bg-teal-500/10 text-teal-500',
-  'Cloud Computing': 'border border-border bg-muted text-muted-foreground',
-  Programming:
-    'border border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
-  DevOps: 'border border-orange-500/20 bg-orange-500/10 text-orange-500',
-  Design: 'border border-violet-500/20 bg-violet-500/10 text-violet-500',
-};
+/** Single neutral treatment for every category — category is a label, not a
+ *  status, so it shouldn't compete with the status column's semantic colors. */
+export const CATEGORY_BADGE_STYLE =
+  'border border-border bg-muted text-muted-foreground';

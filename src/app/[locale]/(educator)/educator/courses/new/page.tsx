@@ -22,7 +22,10 @@ export default function NewCoursePage() {
 function NewCourseWizard() {
   const t = useCreateCourseT();
   const searchParams = useSearchParams();
-  const builder = useCourseBuilder(searchParams.get('draft'));
+  const builder = useCourseBuilder(
+    searchParams.get('draft'),
+    searchParams.get('step'),
+  );
 
   return (
     <div className="bg-background flex min-h-full flex-col">
@@ -57,6 +60,9 @@ function NewCourseWizard() {
               info={builder.info}
               modules={builder.modules}
               missing={builder.missing}
+              instructor={builder.authorName}
+              status={builder.status}
+              onStatusChange={builder.setStatus}
             />
           )}
         </div>
@@ -66,6 +72,9 @@ function NewCourseWizard() {
         step={builder.step}
         canSubmit={builder.canSubmit}
         missingCount={builder.missing.length}
+        statusBlocksSubmit={
+          builder.missing.length === 0 && builder.status !== 'Under Review'
+        }
         onBack={builder.goBack}
         onNext={builder.goNext}
         onSaveDraft={builder.saveDraft}

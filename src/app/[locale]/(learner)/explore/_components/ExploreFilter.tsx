@@ -11,7 +11,6 @@ import {
   type Course,
   type CourseLevel,
   EXPLORE_CATEGORIES,
-  DEFAULT_COURSE_THUMBNAIL,
 } from '@/constants/learner';
 import { slugify } from '@/lib/utils/slugify';
 import { SortMenu, type SortOption } from '@/components/common/list/SortMenu';
@@ -80,10 +79,8 @@ const LEVEL_STYLE: Record<CourseLevel, string> = {
 
 const PAGE_SIZE = 9;
 
-const MIXED_BG =
-  'from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700';
-const TEXT_BG =
-  'from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900';
+const MIXED_PLACEHOLDER_BG = 'bg-slate-100 dark:bg-slate-800';
+const TEXT_PLACEHOLDER_BG = 'bg-emerald-50 dark:bg-emerald-950';
 
 // ── Course card ───────────────────────────────────────────────────────────────
 
@@ -127,32 +124,36 @@ function CourseCard({
       {/* Thumbnail — links through to the course's preview/enrollment page */}
       <Link
         href={previewHref}
-        className="relative flex h-28 shrink-0 flex-col items-center justify-center overflow-hidden sm:h-44"
+        className="relative flex aspect-video shrink-0 flex-col items-center justify-center overflow-hidden"
       >
-        {/* Gradient fallback — visible if the cover image is missing/slow */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-linear-to-br',
-            isMixed ? MIXED_BG : TEXT_BG,
-          )}
-        />
+        {course.thumbnail ? (
+          <>
+            {/* Cover image */}
+            <Image
+              src={course.thumbnail}
+              alt={course.title}
+              fill
+              sizes="(max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
 
-        {/* Cover image */}
-        <Image
-          src={course.thumbnail ?? DEFAULT_COURSE_THUMBNAIL}
-          alt={course.title}
-          fill
-          sizes="(max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-        />
-
-        {/* Legibility overlay so badges stay readable over the image */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/0 to-black/10 transition-colors duration-300 group-hover:from-black/50" />
+            {/* Flat tint so badges stay legible over any cover photo */}
+            <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
+          </>
+        ) : (
+          /* Flat placeholder for courses without a cover image */
+          <div
+            className={cn(
+              'absolute inset-0',
+              isMixed ? MIXED_PLACEHOLDER_BG : TEXT_PLACEHOLDER_BG,
+            )}
+          />
+        )}
 
         {/* Level badge */}
         <span
           className={cn(
-            'absolute top-3 left-3 z-10 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+            'absolute top-3 left-3 z-10 rounded-full border border-black/5 px-2.5 py-0.5 text-[11px] font-semibold dark:border-white/10',
             LEVEL_STYLE[course.level],
           )}
         >

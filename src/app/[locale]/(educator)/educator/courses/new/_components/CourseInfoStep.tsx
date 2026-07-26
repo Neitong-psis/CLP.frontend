@@ -9,7 +9,6 @@ import {
   Copy,
   ImageIcon,
   Maximize2,
-  Plus,
   RefreshCw,
   Star,
   Upload,
@@ -73,8 +72,8 @@ function FlagKH({ className }: { className?: string }) {
 }
 
 const CURRENCIES = [
-  { code: 'USD', Flag: FlagUS, placeholder: '79' },
-  { code: 'KHR', Flag: FlagKH, placeholder: '4000' },
+  { code: 'USD', Flag: FlagUS, placeholder: '0' },
+  { code: 'KHR', Flag: FlagKH, placeholder: '0' },
 ] as const;
 
 const CATEGORIES = [
@@ -134,80 +133,6 @@ function CountedLabel({
       >
         {value.length}/{max}
       </span>
-    </div>
-  );
-}
-
-function InlineAddButton({
-  placeholder,
-  onAdd,
-}: {
-  placeholder: string;
-  onAdd: (val: string) => void;
-}) {
-  const t = useCreateCourseT();
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState('');
-
-  function confirm() {
-    const val = draft.trim();
-    if (val) {
-      onAdd(val);
-      setDraft('');
-      setOpen(false);
-    }
-  }
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="border-border text-muted-foreground hover:bg-muted/40 flex shrink-0 items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold transition"
-      >
-        <Plus className="h-3 w-3" /> {t('info.add')}
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex shrink-0 items-center gap-1">
-      <input
-        autoFocus
-        type="text"
-        value={draft}
-        placeholder={placeholder}
-        onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            confirm();
-          }
-          if (e.key === 'Escape') {
-            setDraft('');
-            setOpen(false);
-          }
-        }}
-        className="text-foreground/80 w-24 rounded-lg border border-blue-900 px-2 py-1.75 text-xs ring-1 ring-blue-900/20 outline-none dark:border-amber-400 dark:ring-amber-400/20"
-      />
-      <button
-        type="button"
-        onClick={confirm}
-        disabled={!draft.trim()}
-        className="border-border flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border text-blue-950 transition hover:bg-blue-950/10 disabled:opacity-30 dark:text-amber-400 dark:hover:bg-amber-400/10"
-      >
-        <Check className="h-3.5 w-3.5" />
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          setDraft('');
-          setOpen(false);
-        }}
-        className="border-border text-muted-foreground hover:bg-muted flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border transition"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
     </div>
   );
 }
@@ -399,8 +324,6 @@ export function CourseInfoStep({
 }) {
   const t = useCreateCourseT();
   const { toast } = useToast();
-  const [extraCategories, setExtraCategories] = useState<string[]>([]);
-  const [extraLevels, setExtraLevels] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [spinning, setSpinning] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -498,45 +421,27 @@ export function CourseInfoStep({
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label={t('info.category')}>
-              <div className="flex gap-2">
-                <SelectField
-                  value={info.category}
-                  onChange={(v) => onChange('category', v)}
-                >
-                  <option value="" />
-                  {[...CATEGORIES, ...extraCategories].map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </SelectField>
-                <InlineAddButton
-                  placeholder={t('info.newCategory')}
-                  onAdd={(val) => {
-                    setExtraCategories((prev) => [...prev, val]);
-                    onChange('category', val);
-                  }}
-                />
-              </div>
+              <SelectField
+                value={info.category}
+                onChange={(v) => onChange('category', v)}
+              >
+                <option value="" />
+                {CATEGORIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </SelectField>
             </FormField>
 
             <FormField label={t('info.level')}>
-              <div className="flex gap-2">
-                <SelectField
-                  value={info.level}
-                  onChange={(v) => onChange('level', v)}
-                >
-                  <option value="" />
-                  {[...LEVELS, ...extraLevels].map((l) => (
-                    <option key={l}>{l}</option>
-                  ))}
-                </SelectField>
-                <InlineAddButton
-                  placeholder={t('info.newLevel')}
-                  onAdd={(val) => {
-                    setExtraLevels((prev) => [...prev, val]);
-                    onChange('level', val);
-                  }}
-                />
-              </div>
+              <SelectField
+                value={info.level}
+                onChange={(v) => onChange('level', v)}
+              >
+                <option value="" />
+                {LEVELS.map((l) => (
+                  <option key={l}>{l}</option>
+                ))}
+              </SelectField>
             </FormField>
           </div>
         </SectionCard>

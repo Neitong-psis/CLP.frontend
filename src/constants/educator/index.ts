@@ -165,6 +165,32 @@ export const COURSE_TASK_STATUSES: CourseTaskStatus[] = [
   'Archived',
 ];
 
+/** Clean, lowercase-kebab URL slugs for status — used for the board's
+ *  `?tab=` query param instead of the raw label (`In%20Writing`). */
+export const STATUS_SLUG: Record<CourseTaskStatus, string> = {
+  'To Do': 'todo',
+  'In Writing': 'in-writing',
+  'Under Review': 'under-review',
+  Published: 'published',
+  Archived: 'archived',
+};
+
+export const SLUG_TO_STATUS: Record<string, CourseTaskStatus> =
+  Object.fromEntries(
+    COURSE_TASK_STATUSES.map((status) => [STATUS_SLUG[status], status]),
+  );
+
+/** Shared status badge colors — the My Courses board and the course editor's
+ *  Step 3 "Current Status" preview both render the same status vocabulary
+ *  and should look identical wherever it shows up. */
+export const STATUS_BADGE: Record<CourseTaskStatus, string> = {
+  'To Do': 'border-border bg-muted/40 text-muted-foreground',
+  'In Writing': 'border-blue-400/30 bg-blue-500/10 text-blue-500',
+  'Under Review': 'border-amber-400/30 bg-amber-500/10 text-amber-600',
+  Published: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-600',
+  Archived: 'border-border bg-muted text-muted-foreground',
+};
+
 export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
   // ── To Do — assigned by admin, awaiting the educator to start writing ────────
   {
@@ -292,20 +318,6 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
 
   // ── Under Review — submitted, awaiting the admin decision ────────────────────
   {
-    id: 'ct11',
-    title: 'Cybersecurity Awareness for Teams',
-    description:
-      'Submitted for admin review with modules on phishing, passwords, device safety, and reporting incidents.',
-    category: 'Security',
-    price: '$19',
-    assignedBy: 'Sarah Wilson',
-    status: 'Under Review',
-    priority: 'High',
-    dueDate: 'May 26, 2026',
-    reviewState: 'Approved',
-    submittedAgo: '1 day ago',
-  },
-  {
     id: 'ct12',
     title: 'Figma to Developer Handoff',
     description:
@@ -379,6 +391,26 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
   },
 
   // ── Published — approved by admin, live for learners ─────────────────────────
+  // Approved with no lingering admin note (ct11) lives here only. Approved
+  // with a note still attached (ct16) also cross-lists under "Under Review"
+  // so the educator doesn't lose track of the feedback.
+  {
+    id: 'ct11',
+    title: 'Cybersecurity Awareness for Teams',
+    description:
+      'Approved and publicly available with modules on phishing, passwords, device safety, and reporting incidents.',
+    category: 'Security',
+    price: '$19',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'High',
+    dueDate: 'Published May 27',
+    reviewState: 'Approved',
+    students: 412,
+    revenue: '$7,828',
+    rating: 4.5,
+    updatedAgo: '1 day ago',
+  },
   {
     id: 'ct16',
     title: 'React Masterclass for Production Apps',
@@ -390,6 +422,16 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
     status: 'Published',
     priority: 'Low',
     dueDate: 'Published May 10',
+    reviewState: 'Approved',
+    reviewFeedback: [
+      {
+        itemId: 'a2',
+        lessonTitle: 'CSS Layout Basics',
+        itemTitle: 'Rebuild a Responsive Layout',
+        status: 'approved',
+        note: 'Solid handoff-ready assignment — nice pairing with the breakpoint checklist. No changes needed, just flagging it as a strong example for future courses.',
+      },
+    ],
     students: 1842,
     revenue: '$163,938',
     rating: 4.9,

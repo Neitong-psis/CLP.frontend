@@ -40,12 +40,7 @@ export function SimpleFilterDropdown<T extends string>({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={cn(
-            'inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors',
-            isActive
-              ? 'border-brand-gold/40 bg-brand-gold/10 text-foreground'
-              : 'border-border bg-card text-foreground hover:bg-muted',
-          )}
+          className="border-border bg-card text-foreground hover:bg-muted inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors"
         >
           {isActive && dot?.[value] && (
             <span className={cn('h-2 w-2 shrink-0 rounded-full', dot[value])} />

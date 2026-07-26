@@ -1,12 +1,40 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, ChevronDown } from 'lucide-react';
+import { BookOpen, ChevronDown, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useCreateCourseT } from '@/i18n';
+import { STATUS_BADGE, type CourseTaskStatus } from '@/constants/educator';
 import type { CourseInfo, CourseModule } from '../_lib/types';
 import { priceLabel } from '../_lib/builder';
-import { FormField, SelectField } from './form';
+import { FormField } from './form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+/** Statuses the educator may set directly from the wizard. "Published" is
+ *  admin-only and shown disabled so the full lifecycle stays visible. */
+const EDITABLE_STATUSES: CourseTaskStatus[] = [
+  'To Do',
+  'In Writing',
+  'Under Review',
+  'Archived',
+];
+
+/** Small solid-color dot per status for the dropdown's option rows — a
+ *  lighter touch than the full STATUS_BADGE pill, which is reserved for the
+ *  live preview badge next to the select. */
+const STATUS_DOT: Record<CourseTaskStatus, string> = {
+  'To Do': 'bg-muted-foreground/50',
+  'In Writing': 'bg-blue-500',
+  'Under Review': 'bg-amber-500',
+  Published: 'bg-emerald-500',
+  Archived: 'bg-muted-foreground/50',
+};
 
 function AccordionSection({
   title,
@@ -61,11 +89,17 @@ export function PreviewPublishStep({
   modules,
   missing,
   instructor,
+  status,
+  onStatusChange,
 }: {
   info: CourseInfo;
   modules: CourseModule[];
   missing: string[];
   instructor?: string;
+  /** Educator wizard only — the admin wizard has no To Do/In Writing/Under
+   *  Review pipeline, so it omits both and the status controls hide. */
+  status?: CourseTaskStatus;
+  onStatusChange?: (status: CourseTaskStatus) => void;
 }) {
   const t = useCreateCourseT();
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
@@ -175,22 +209,65 @@ export function PreviewPublishStep({
           desc={t('publish.publishSettingsDesc')}
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField label={t('publish.visibility')}>
-              <SelectField>
-                <option>{t('publish.public')}</option>
-                <option>{t('publish.private')}</option>
-                <option>{t('publish.unlisted')}</option>
-              </SelectField>
-            </FormField>
-            <FormField label={t('publish.draftBehavior')}>
-              <div className="flex items-center gap-3 pt-1.5">
-                <span className="relative inline-flex h-5 w-9 items-center rounded-full bg-blue-950 dark:bg-amber-400">
-                  <span className="absolute top-0.5 left-0.5 h-4 w-4 translate-x-4 rounded-full bg-white shadow transition-transform" />
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {t('publish.keepAsDraft')}
-                </span>
+            {status && onStatusChange && (
+              <FormField label={t('publish.currentStatusLabel')}>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={status}
+                    onValueChange={(v) =>
+                      v && onStatusChange(v as CourseTaskStatus)
+                    }
+                  >
+                    <SelectTrigger className="h-9 w-full rounded-lg text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      align="start"
+                      alignItemWithTrigger={false}
+                      className="w-full min-w-[var(--anchor-width)]"
+                    >
+                      {EDITABLE_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          <span
+                            className={cn(
+                              'size-1.5 shrink-0 rounded-full',
+                              STATUS_DOT[s],
+                            )}
+                          />
+                          {s}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="Published" disabled>
+                        <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
+                        {t('publish.publishedLocked')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold',
+                      STATUS_BADGE[status],
+                    )}
+                  >
+                    {status}
+                  </span>
+                </div>
+                <p className="text-muted-foreground mt-1.5 text-xs">
+                  {t('publish.currentStatusHint')}
+                </p>
+              </FormField>
+            )}
+            <FormField
+              label={t('publish.authorLabel')}
+              className={!status ? 'sm:col-span-2' : undefined}
+            >
+              <div className="border-border bg-muted/40 text-foreground flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm">
+                <Lock className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{instructor || '—'}</span>
               </div>
+              <p className="text-muted-foreground mt-1.5 text-xs">
+                {t('publish.authorLocked')}
+              </p>
             </FormField>
           </div>
         </AccordionSection>
@@ -213,10 +290,9 @@ export function PreviewPublishStep({
               label={t('publish.priceLabel')}
               value={priceLabel(info)}
             />
-            <SummaryStat
-              label={t('publish.statusLabel')}
-              value={t('publish.toDo')}
-            />
+            {status && (
+              <SummaryStat label={t('publish.statusLabel')} value={status} />
+            )}
           </div>
 
           <div

@@ -172,10 +172,12 @@ export function UserTableRow({
       <td className="px-5 py-4">
         <Chip color={ROLE_COLOR[user.role]}>{user.role}</Chip>
       </td>
-      <td className="text-muted-foreground px-5 py-4 text-sm">
+      <td className="text-muted-foreground px-5 py-4 text-sm whitespace-nowrap">
         {user.enrolled}
       </td>
-      <td className="text-muted-foreground px-5 py-4 text-sm">{user.joined}</td>
+      <td className="text-muted-foreground px-5 py-4 text-sm whitespace-nowrap">
+        {user.joined}
+      </td>
       <td className="px-5 py-4">
         <Chip color={STATUS_COLOR[user.status]}>{user.status}</Chip>
       </td>

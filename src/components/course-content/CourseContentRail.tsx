@@ -48,6 +48,7 @@ export function CourseContentRail({
   isItemDone,
   onSelect,
   getItemBadge,
+  showTypeIcon,
   lockingEnabled,
   labels,
 }: Pick<
@@ -57,6 +58,7 @@ export function CourseContentRail({
   | 'isItemDone'
   | 'onSelect'
   | 'getItemBadge'
+  | 'showTypeIcon'
   | 'lockingEnabled'
   | 'labels'
 >) {
@@ -262,7 +264,9 @@ export function CourseContentRail({
             anchorRect={modulePreview.target.rect}
             activeId={activeId}
             locks={locks}
+            isItemDone={isItemDone}
             getItemBadge={getItemBadge}
+            showTypeIcon={showTypeIcon}
             labels={labels}
             panelRef={modulePreview.panelRef}
             onSelectItem={(itemId) => {
@@ -284,7 +288,9 @@ export function CourseContentRail({
             anchorRect={lessonPreview.target.rect}
             activeId={activeId}
             locked={locks.lockedLessonIds.has(previewLesson.lesson.id)}
+            isItemDone={isItemDone}
             getItemBadge={getItemBadge}
+            showTypeIcon={showTypeIcon}
             labels={labels}
             panelRef={lessonPreview.panelRef}
             onSelectItem={(itemId) => {

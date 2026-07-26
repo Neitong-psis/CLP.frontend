@@ -8,7 +8,7 @@ import type {
   ReviewItem,
   ReviewLesson,
 } from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
-import { lessonItems } from '@/lib/course-progress';
+import { lessonItems, type ItemDone } from '@/lib/course-progress';
 import {
   clampPreviewTop,
   PREVIEW_GAP,
@@ -28,6 +28,8 @@ interface CourseContentLessonPreviewProps {
   activeId: string;
   locked: boolean;
   getItemBadge?: (item: ReviewItem) => ItemBadge;
+  showTypeIcon?: boolean;
+  isItemDone?: ItemDone;
   labels: SidebarLabels;
   /** Root node ref — lets `useHoverPreview` tell scrolling the panel's own
    *  content apart from the page scrolling behind it. */
@@ -52,6 +54,8 @@ export function CourseContentLessonPreview({
   activeId,
   locked,
   getItemBadge,
+  showTypeIcon,
+  isItemDone,
   labels,
   panelRef,
   onSelectItem,
@@ -117,6 +121,8 @@ export function CourseContentLessonPreview({
                 item={item}
                 isActive={item.id === activeId}
                 badge={getItemBadge?.(item) ?? null}
+                showTypeIcon={showTypeIcon}
+                done={isItemDone?.(item)}
                 onSelect={() => onSelectItem(item.id)}
               />
             ))}

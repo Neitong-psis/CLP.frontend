@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/slugify';
-import { type Course, DEFAULT_COURSE_THUMBNAIL } from '@/constants/learner';
+import { type Course } from '@/constants/learner';
 
 interface CourseCardProps {
   course: Course;
@@ -31,21 +31,25 @@ export default function CourseCard({ course, labels }: CourseCardProps) {
       )}
     >
       {/* ── Thumbnail ────────────────────────────────────────────────── */}
-      <div className="relative flex h-48 flex-col items-center justify-center overflow-hidden">
-        {/* Navy fallback — visible if the cover image is missing */}
-        <div className="bg-brand-navy absolute inset-0 dark:bg-[#071225]" />
+      <div className="relative flex aspect-video flex-col items-center justify-center overflow-hidden">
+        {course.thumbnail ? (
+          <>
+            {/* Cover image — zooms in on hover */}
+            <Image
+              src={course.thumbnail}
+              alt={course.title}
+              fill
+              sizes="(max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
 
-        {/* Cover image — zooms in on hover */}
-        <Image
-          src={course.thumbnail ?? DEFAULT_COURSE_THUMBNAIL}
-          alt={course.title}
-          fill
-          sizes="(max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-        />
-
-        {/* Legibility overlay so the badge + progress stay readable */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/0 to-black/10 transition-colors duration-300 group-hover:from-black/50" />
+            {/* Flat tint so the badge + progress stay legible over any cover photo */}
+            <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
+          </>
+        ) : (
+          /* Navy placeholder for courses without a cover image */
+          <div className="bg-brand-navy absolute inset-0 dark:bg-[#071225]" />
+        )}
 
         {/* Top-left badge */}
         <span className="absolute top-3 left-3 z-10 rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">

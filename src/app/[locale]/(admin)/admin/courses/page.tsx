@@ -39,7 +39,7 @@ import {
   PAGE_SIZE,
   STATUS_FILTERS,
   STATUS_STYLE,
-  CATEGORY_STYLE,
+  CATEGORY_BADGE_STYLE,
   ALL_CATEGORIES,
   ALL_LEVELS,
 } from './_lib/constants';
@@ -248,30 +248,29 @@ export default function AdminCoursesPage() {
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-240 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">
-                    <th className="text-muted-foreground w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide uppercase">
+                    <th className="text-muted-foreground w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
                       #
                     </th>
                     {(
                       [
-                        ['colCourse', false, ''],
-                        ['colEducator', false, 'hidden sm:table-cell'],
-                        ['colCategory', false, 'hidden sm:table-cell'],
-                        ['colEnrollments', false, 'hidden lg:table-cell'],
-                        ['colRating', false, 'hidden lg:table-cell'],
-                        ['colCreated', false, 'hidden xl:table-cell'],
-                        ['colStatus', false, ''],
-                        ['colActions', true, ''],
+                        ['colCourse', false],
+                        ['colEducator', false],
+                        ['colCategory', false],
+                        ['colEnrollments', false],
+                        ['colRating', false],
+                        ['colCreated', false],
+                        ['colStatus', false],
+                        ['colActions', true],
                       ] as const
-                    ).map(([key, isRight, hide]) => (
+                    ).map(([key, isRight]) => (
                       <th
                         key={key}
                         className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase',
+                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
                           isRight ? 'text-right' : 'text-left',
-                          hide,
                         )}
                       >
                         {t(key)}
@@ -294,23 +293,23 @@ export default function AdminCoursesPage() {
                           </div>
                         </td>
                         {/* EDUCATOR */}
-                        <td className="hidden px-5 py-4 sm:table-cell">
+                        <td className="px-5 py-4">
                           <div className="bg-muted h-3 w-24 rounded" />
                         </td>
                         {/* CATEGORY */}
-                        <td className="hidden px-5 py-4 sm:table-cell">
+                        <td className="px-5 py-4">
                           <div className="bg-muted h-5 w-20 rounded-full" />
                         </td>
                         {/* ENROLLMENTS */}
-                        <td className="hidden px-5 py-4 lg:table-cell">
+                        <td className="px-5 py-4">
                           <div className="bg-muted h-3 w-10 rounded" />
                         </td>
                         {/* RATING */}
-                        <td className="hidden px-5 py-4 lg:table-cell">
+                        <td className="px-5 py-4">
                           <div className="bg-muted h-3 w-8 rounded" />
                         </td>
                         {/* CREATED */}
-                        <td className="hidden px-5 py-4 xl:table-cell">
+                        <td className="px-5 py-4">
                           <div className="bg-muted h-3 w-20 rounded" />
                         </td>
                         {/* STATUS */}
@@ -358,30 +357,29 @@ export default function AdminCoursesPage() {
                             </p>
                           </Link>
                         </td>
-                        <td className="text-muted-foreground hidden px-5 py-4 text-sm sm:table-cell">
+                        <td className="text-muted-foreground px-5 py-4 text-sm whitespace-nowrap">
                           {course.instructor}
                         </td>
-                        <td className="hidden px-5 py-4 sm:table-cell">
+                        <td className="px-5 py-4">
                           <span
                             className={cn(
-                              'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                              CATEGORY_STYLE[course.category] ??
-                                'border-border bg-muted text-muted-foreground border',
+                              'inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                              CATEGORY_BADGE_STYLE,
                             )}
                           >
                             {course.category}
                           </span>
                         </td>
-                        <td className="text-foreground hidden px-5 py-4 text-sm lg:table-cell">
+                        <td className="text-foreground px-5 py-4 text-sm whitespace-nowrap">
                           {course.enrolled.toLocaleString()}
                         </td>
-                        <td className="hidden px-5 py-4 lg:table-cell">
-                          <span className="text-foreground flex items-center gap-1 text-sm font-semibold">
+                        <td className="px-5 py-4">
+                          <span className="text-foreground flex items-center gap-1 text-sm font-semibold whitespace-nowrap">
                             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                             {course.rating.toFixed(1)}
                           </span>
                         </td>
-                        <td className="text-muted-foreground hidden px-5 py-4 text-sm xl:table-cell">
+                        <td className="text-muted-foreground px-5 py-4 text-sm whitespace-nowrap">
                           {course.createdAt}
                         </td>
                         <td className="px-5 py-4">

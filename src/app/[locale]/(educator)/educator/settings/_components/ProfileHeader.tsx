@@ -29,7 +29,7 @@ export function ProfileHeader({
     <div className="border-border bg-muted/20 mb-6 flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between">
       {/* Avatar + info */}
       <div className="flex items-center gap-4">
-        <div className="ring-background size-18 shrink-0 overflow-hidden rounded-2xl shadow-lg ring-[3px]">
+        <div className="size-18 shrink-0 overflow-hidden rounded-full">
           {avatarUrl ? (
             <Image
               src={avatarUrl}

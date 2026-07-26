@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn';
 import type { AdminCourseRow } from '@/constants/admin';
 import { Button } from '@/components/ui/button/Button';
 import { Modal } from './Modal';
-import { STATUS_STYLE, CATEGORY_STYLE } from '../_lib/constants';
+import { STATUS_STYLE, CATEGORY_BADGE_STYLE } from '../_lib/constants';
 
 interface ViewModalProps {
   course: AdminCourseRow;
@@ -51,9 +51,8 @@ export function ViewModal({ course, onClose, onEdit }: ViewModalProps) {
         </span>
         <span
           className={cn(
-            'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-            CATEGORY_STYLE[course.category] ??
-              'border-border bg-muted text-muted-foreground border',
+            'rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+            CATEGORY_BADGE_STYLE,
           )}
         >
           {course.category}

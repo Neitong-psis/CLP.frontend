@@ -9,9 +9,6 @@ import {
   SESSION_MAX_AGE_SECONDS,
 } from '@/lib/session/cookie-names';
 import { ROLE_LABEL, type RoleId } from '@/constants/roles';
-import { isMockModeEnabled } from '@/lib/mock/mock-mode';
-import { findMockAccount } from '@/lib/mock/mock-users';
-import { createMockToken } from '@/lib/mock/mock-token';
 
 export const BACKEND_TIMEOUT_MS = 8_000;
 
@@ -103,31 +100,6 @@ export async function handleLogin(
       },
       { status: 422 },
     );
-  }
-
-  if (isMockModeEnabled()) {
-    const account = findMockAccount(parsed.data.email, parsed.data.password);
-    if (!account) {
-      return NextResponse.json(
-        {
-          status: 422,
-          message: 'The email or password is incorrect.',
-          errors: { password: 'The email or password is incorrect.' },
-        },
-        { status: 422 },
-      );
-    }
-    const token = createMockToken(account.user.id);
-    const mockResponse = new Response(
-      JSON.stringify({
-        token,
-        refreshToken: token,
-        tokenExpires: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
-        user: account.user,
-      }),
-      { status: 200 },
-    );
-    return establishSessionResponse(mockResponse, options);
   }
 
   let response: Response;

@@ -52,5 +52,10 @@ export interface CourseTreeProps {
   onLockedSelect?: (blockingLessonTitle: string) => void;
   getItemBadge?: (item: ReviewItem) => ItemBadge;
   lockingEnabled: boolean;
+  /** Renders the content-kind icon (document/video/quiz/assignment) inside an
+   *  undecided item's status circle instead of leaving it empty — matches the
+   *  learner sidebar's look for surfaces with no admin verdict to show (e.g.
+   *  a published course, previewed as a learner would see it). */
+  showTypeIcon?: boolean;
   labels: SidebarLabels;
 }
