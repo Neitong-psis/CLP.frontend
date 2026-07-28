@@ -26,9 +26,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { CourseInfo } from '../_lib/types';
 import { priceLabel, formatThousands } from '../_lib/builder';
-import { FormField, SelectField, inputCls } from './form';
+import { FormField, inputCls } from './form';
 import { PromoCodeQrModal } from './PromoCodeQrModal';
 
 const PROMO_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O, 1/I
@@ -420,27 +427,39 @@ export function CourseInfoStep({
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label={t('info.category')}>
-              <SelectField
-                value={info.category}
-                onChange={(v) => onChange('category', v)}
+              <Select
+                value={info.category || undefined}
+                onValueChange={(v) => onChange('category', v ?? '')}
               >
-                <option value="" />
-                {CATEGORIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </SelectField>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('info.category')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormField>
 
             <FormField label={t('info.level')}>
-              <SelectField
-                value={info.level}
-                onChange={(v) => onChange('level', v)}
+              <Select
+                value={info.level || undefined}
+                onValueChange={(v) => onChange('level', v ?? '')}
               >
-                <option value="" />
-                {LEVELS.map((l) => (
-                  <option key={l}>{l}</option>
-                ))}
-              </SelectField>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('info.level')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEVELS.map((l) => (
+                    <SelectItem key={l} value={l}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormField>
           </div>
         </SectionCard>

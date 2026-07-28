@@ -2,8 +2,14 @@
 
 import { User } from 'lucide-react';
 import { CourseInfoStep } from '@/app/[locale]/(educator)/educator/courses/new/_components/CourseInfoStep';
-import { SelectField } from '@/app/[locale]/(educator)/educator/courses/new/_components/form';
 import type { CourseInfo } from '@/app/[locale]/(educator)/educator/courses/new/_lib/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { AdminUserRow } from '@/constants/admin';
 import { useAdminCoursesAssignAuthorT } from '@/i18n';
 import { useAuth } from '@/hooks/use-auth';
@@ -39,16 +45,23 @@ export function AdminCourseInfoStep({
             <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">
               {t('label')}
             </label>
-            <SelectField value={assignedAuthor} onChange={onAuthorChange}>
-              <option value="">{t('placeholder')}</option>
-              {authorOptions.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.id === String(user?.id ?? '')
-                    ? `${a.name} ${t('you')}`
-                    : a.name}
-                </option>
-              ))}
-            </SelectField>
+            <Select
+              value={assignedAuthor || undefined}
+              onValueChange={(v) => onAuthorChange(v ?? '')}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('placeholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {authorOptions.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.id === String(user?.id ?? '')
+                      ? `${a.name} ${t('you')}`
+                      : a.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {selectedAuthor && (
