@@ -136,6 +136,7 @@ export function useCourseBuilder(
       category: info.category || seedTask?.category || 'General',
       price: priceLabel(info),
       status: nextStatus,
+      thumbnailUrl: info.thumbnail || seedTask?.thumbnailUrl,
     };
   }
 
@@ -151,6 +152,7 @@ export function useCourseBuilder(
       status: nextStatus,
       priority: 'Medium',
       dueDate: formatToday(),
+      thumbnailUrl: info.thumbnail || undefined,
     };
   }
 
