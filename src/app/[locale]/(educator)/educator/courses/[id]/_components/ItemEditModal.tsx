@@ -96,7 +96,7 @@ export function ItemEditModal({
           </button>
         </div>
 
-        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+        <div className="scrollbar-none flex-1 space-y-5 overflow-y-auto px-6 py-5 [&::-webkit-scrollbar]:hidden">
           {draft.kind === 'document' && (
             <DocumentFields draft={draft} onChange={setDraft} t={t} />
           )}
