@@ -20,11 +20,7 @@ import {
 import { type CourseStatus, type EducatorCourse } from '@/constants/educator';
 
 export type SortKey =
-  | 'title'
-  | 'enrolled'
-  | 'rating'
-  | 'completionRate'
-  | 'revenue';
+  'title' | 'enrolled' | 'rating' | 'completionRate' | 'revenue';
 export type SortDir = 'asc' | 'desc';
 
 export interface SortState {
@@ -50,12 +46,11 @@ const STATUS_STYLE: Record<
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Web Development': 'bg-blue-500',
-  Programming: 'bg-violet-500',
-  'Data Science': 'bg-emerald-500',
-  'Cloud Computing': 'bg-cyan-500',
-  DevOps: 'bg-orange-500',
-  Design: 'bg-pink-500',
+  'Khmer Literature': 'bg-blue-500',
+  'Leadership Development': 'bg-violet-500',
+  'Child Development': 'bg-emerald-500',
+  Leadership: 'bg-cyan-500',
+  'Innovative Learning': 'bg-orange-500',
 };
 
 function StatusBadge({ status }: { status: CourseStatus }) {

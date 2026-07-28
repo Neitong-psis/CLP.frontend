@@ -63,11 +63,18 @@ const PRIORITY_STYLE: Record<TaskPriority, string> = {
 /** Course cover thumbnail — a fixed landscape frame so it reads as a proper
  *  photo regardless of how tall the card grows with its content, instead of
  *  stretching (and badly cropping) to match the row's full height. To Do
- *  shows an empty-cover placeholder since nothing has been written yet; the
- *  data model has no per-course image otherwise, so every other card shares
- *  this placeholder — swap in `task.thumbnailUrl` once course creation
- *  actually captures one. */
-function CardThumbnail({ title, isToDo }: { title: string; isToDo: boolean }) {
+ *  shows an empty-cover placeholder since nothing has been written yet;
+ *  everything else falls back to the generic poster only if the course has
+ *  no `thumbnailUrl` of its own. */
+function CardThumbnail({
+  title,
+  isToDo,
+  thumbnailUrl,
+}: {
+  title: string;
+  isToDo: boolean;
+  thumbnailUrl?: string;
+}) {
   if (isToDo) {
     return (
       <div className="border-border/70 text-muted-foreground/40 flex aspect-3/2 w-28 shrink-0 items-center justify-center rounded-xl border border-dashed sm:w-40">
@@ -78,7 +85,7 @@ function CardThumbnail({ title, isToDo }: { title: string; isToDo: boolean }) {
   return (
     <div className="border-border relative aspect-3/2 w-28 shrink-0 overflow-hidden rounded-xl border sm:w-40">
       <Image
-        src="/image/web_design_poster.png"
+        src={thumbnailUrl || '/image/web_design_poster.png'}
         alt={title}
         fill
         sizes="(max-width: 640px) 7rem, 10rem"
@@ -291,7 +298,11 @@ function TaskCard({
       onClick={onOpen}
       className="group border-border bg-card hover:border-brand-navy/20 flex cursor-pointer items-start gap-4 rounded-2xl border p-3 transition-all duration-200 hover:shadow-md sm:p-4 dark:hover:border-white/12 dark:hover:shadow-none"
     >
-      <CardThumbnail title={task.title} isToDo={isToDo} />
+      <CardThumbnail
+        title={task.title}
+        isToDo={isToDo}
+        thumbnailUrl={task.thumbnailUrl}
+      />
 
       <div className="min-w-0 flex-1">
         {/* Header: title + status badge */}

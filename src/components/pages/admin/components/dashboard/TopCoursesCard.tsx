@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useAdminTopCoursesT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
@@ -8,6 +9,8 @@ export interface TopCourse {
   students: string;
   progress: number;
   instructor?: string;
+  /** Set when this row can link to the course's own admin review page. */
+  href?: string;
 }
 
 export interface TopCoursesCardProps {
@@ -49,6 +52,81 @@ function rankStyle(i: number): string {
   return 'text-muted-foreground font-medium';
 }
 
+function RowContent({
+  course,
+  i,
+  t,
+}: {
+  course: TopCourse;
+  i: number;
+  t: ReturnType<typeof useAdminTopCoursesT>;
+}) {
+  return (
+    <>
+      {/* Rank */}
+      <span
+        className={cn(
+          'w-4 shrink-0 text-center text-[13px] tabular-nums',
+          rankStyle(i),
+        )}
+        aria-label={`Rank ${i + 1}`}
+      >
+        {i + 1}
+      </span>
+
+      {/* Avatar */}
+      <span
+        className={cn(
+          'flex size-9 shrink-0 items-center justify-center rounded-full text-[12px] font-medium',
+          AVATAR_TONES[i % AVATAR_TONES.length],
+        )}
+        aria-hidden="true"
+      >
+        {initials(course.title)}
+      </span>
+
+      {/* Identity + inline progress */}
+      <div className="min-w-0 flex-1">
+        <p className="text-foreground truncate text-[13px] font-medium">
+          {course.title}
+        </p>
+        {course.instructor && (
+          <p className="text-muted-foreground mt-0.5 truncate text-[11px]">
+            {course.instructor}
+          </p>
+        )}
+        <div className="bg-muted mt-1.5 h-0.5 overflow-hidden rounded-full">
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${course.progress}%`,
+              backgroundColor: completionColor(course.progress),
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Enrollment */}
+      <div className="hidden shrink-0 text-right sm:block">
+        <p className="text-foreground text-[13px] font-medium tabular-nums">
+          {course.students}
+        </p>
+        <p className="text-muted-foreground text-[11px]">{t('enrolled')}</p>
+      </div>
+
+      {/* Completion pill */}
+      <span
+        className={cn(
+          'w-11 shrink-0 rounded-full py-1 text-center text-[12px] font-medium tabular-nums',
+          completionPill(course.progress),
+        )}
+      >
+        {course.progress}%
+      </span>
+    </>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
@@ -75,74 +153,21 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
           {t('noData')}
         </p>
       ) : (
-        <ul className="divide-border scrollbar-none flex-1 divide-y overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <ul className="divide-border flex-1 scrollbar-none divide-y overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {data.map((course, i) => (
-            <li
-              key={course.title}
-              className="hover:bg-muted flex cursor-pointer items-center gap-4 px-6 py-3.5 transition-colors duration-150"
-            >
-              {/* Rank */}
-              <span
-                className={cn(
-                  'w-4 shrink-0 text-center text-[13px] tabular-nums',
-                  rankStyle(i),
-                )}
-                aria-label={`Rank ${i + 1}`}
-              >
-                {i + 1}
-              </span>
-
-              {/* Avatar */}
-              <span
-                className={cn(
-                  'flex size-9 shrink-0 items-center justify-center rounded-full text-[12px] font-medium',
-                  AVATAR_TONES[i % AVATAR_TONES.length],
-                )}
-                aria-hidden="true"
-              >
-                {initials(course.title)}
-              </span>
-
-              {/* Identity + inline progress */}
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate text-[13px] font-medium">
-                  {course.title}
-                </p>
-                {course.instructor && (
-                  <p className="text-muted-foreground mt-0.5 truncate text-[11px]">
-                    {course.instructor}
-                  </p>
-                )}
-                <div className="bg-muted mt-1.5 h-0.5 overflow-hidden rounded-full">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${course.progress}%`,
-                      backgroundColor: completionColor(course.progress),
-                    }}
-                  />
+            <li key={course.title}>
+              {course.href ? (
+                <Link
+                  href={course.href}
+                  className="hover:bg-muted flex items-center gap-4 px-6 py-3.5 transition-colors duration-150"
+                >
+                  <RowContent course={course} i={i} t={t} />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-4 px-6 py-3.5">
+                  <RowContent course={course} i={i} t={t} />
                 </div>
-              </div>
-
-              {/* Enrollment */}
-              <div className="hidden shrink-0 text-right sm:block">
-                <p className="text-foreground text-[13px] font-medium tabular-nums">
-                  {course.students}
-                </p>
-                <p className="text-muted-foreground text-[11px]">
-                  {t('enrolled')}
-                </p>
-              </div>
-
-              {/* Completion pill */}
-              <span
-                className={cn(
-                  'w-11 shrink-0 rounded-full py-1 text-center text-[12px] font-medium tabular-nums',
-                  completionPill(course.progress),
-                )}
-              >
-                {course.progress}%
-              </span>
+              )}
             </li>
           ))}
         </ul>

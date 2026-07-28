@@ -31,7 +31,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TopBar from '@/components/common/TopBar';
-import { SimpleFilterDropdown } from '@/components/pages/admin/filters/SimpleFilterDropdown';
+import { SortableTh } from '@/components/common/table/SortableTh';
+import { FilterableTh } from '@/components/common/table/FilterableTh';
+import { useColumnSort } from '@/hooks/useColumnSort';
+import { parseDateLoose } from '@/lib/utils/sort';
 import { EditModal } from './_components/EditModal';
 import { DeleteModal } from './_components/DeleteModal';
 import { RowContextMenu } from './_components/RowContextMenu';
@@ -41,8 +44,8 @@ import {
   STATUS_STYLE,
   CATEGORY_BADGE_STYLE,
   ALL_CATEGORIES,
-  ALL_LEVELS,
 } from './_lib/constants';
+import { buildCourseReviewUrl } from './_lib/reviewUrl';
 
 interface ContextMenuState {
   course: AdminCourseRow;
@@ -57,13 +60,15 @@ const STATUS_DOT: Record<CourseStatus, string> = {
 };
 
 const CATEGORY_DOT: Record<string, string> = {
-  'Web Development': 'bg-blue-500',
-  'Data Science': 'bg-teal-500',
-  'Cloud Computing': 'bg-slate-400',
-  Programming: 'bg-emerald-500',
-  DevOps: 'bg-orange-500',
-  Design: 'bg-violet-500',
+  'Khmer Literature': 'bg-blue-500',
+  'Child Development': 'bg-teal-500',
+  Leadership: 'bg-emerald-500',
+  'Leadership Development': 'bg-orange-500',
+  'Innovative Learning': 'bg-violet-500',
 };
+
+type CourseSortKey =
+  'course' | 'educator' | 'enrollments' | 'rating' | 'created';
 
 export default function AdminCoursesPage() {
   const t = useAdminCoursesT();
@@ -75,22 +80,23 @@ export default function AdminCoursesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
-  const [levelFilter, setLevelFilter] = useState<string>('All');
   const [page, setPage] = useState(1);
   const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [localCourses] = useState<AdminCourseRow[]>([]);
+  const {
+    sortKey,
+    sortDir,
+    toggleSort: toggleSortRaw,
+  } = useColumnSort<CourseSortKey>();
+
+  function toggleSort(key: CourseSortKey) {
+    toggleSortRaw(key);
+    setPage(1);
+  }
 
   function reviewUrl(course: AdminCourseRow) {
-    const page = new URLSearchParams({
-      title: course.title,
-      instructor: course.instructor,
-      category: course.category,
-      level: course.level,
-      status: course.status,
-    });
-    return `/${locale}/admin/courses/${course.id}?${page.toString()}`;
+    return buildCourseReviewUrl(locale, course);
   }
 
   // Close context menu on outside click / Escape
@@ -121,20 +127,29 @@ export default function AdminCoursesPage() {
     setCategoryFilter(val);
     setPage(1);
   }
-  function handleLevelFilter(val: string) {
-    setLevelFilter(val);
-    setPage(1);
-  }
-  const allCourses = [...localCourses, ...courses];
-
-  const filtered = allCourses.filter((c) => {
+  const filtered = courses.filter((c) => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;
     if (categoryFilter !== 'All' && c.category !== categoryFilter) return false;
-    if (levelFilter !== 'All' && c.level !== levelFilter) return false;
     if (search && !c.title.toLowerCase().includes(search.toLowerCase()))
       return false;
     return true;
   });
+
+  if (sortKey) {
+    filtered.sort((a, b) => {
+      const cmp =
+        sortKey === 'course'
+          ? a.title.localeCompare(b.title)
+          : sortKey === 'educator'
+            ? a.instructor.localeCompare(b.instructor)
+            : sortKey === 'enrollments'
+              ? a.enrolled - b.enrolled
+              : sortKey === 'rating'
+                ? a.rating - b.rating
+                : parseDateLoose(a.createdAt) - parseDateLoose(b.createdAt);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -206,31 +221,6 @@ export default function AdminCoursesPage() {
             </div>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              {/* Filter dropdowns — one facet each, applies on click */}
-              <SimpleFilterDropdown
-                label={t('filterStatus')}
-                allLabel={t('filterAll')}
-                options={statusOptions}
-                value={statusFilter}
-                onSelect={handleStatusFilter}
-                dot={STATUS_DOT}
-              />
-              <SimpleFilterDropdown
-                label={t('filterCategory')}
-                allLabel={t('filterAll')}
-                options={ALL_CATEGORIES}
-                value={categoryFilter}
-                onSelect={handleCategoryFilter}
-                dot={CATEGORY_DOT}
-              />
-              <SimpleFilterDropdown
-                label={t('filterLevel')}
-                allLabel={t('filterAll')}
-                options={ALL_LEVELS}
-                value={levelFilter}
-                onSelect={handleLevelFilter}
-              />
-
               {/* Create Course */}
               <Link href={`/${locale}/admin/courses/new`}>
                 <Button
@@ -254,28 +244,53 @@ export default function AdminCoursesPage() {
                     <th className="text-muted-foreground w-10 px-4 py-3.5 text-left text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
                       #
                     </th>
-                    {(
-                      [
-                        ['colCourse', false],
-                        ['colEducator', false],
-                        ['colCategory', false],
-                        ['colEnrollments', false],
-                        ['colRating', false],
-                        ['colCreated', false],
-                        ['colStatus', false],
-                        ['colActions', true],
-                      ] as const
-                    ).map(([key, isRight]) => (
-                      <th
-                        key={key}
-                        className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
-                          isRight ? 'text-right' : 'text-left',
-                        )}
-                      >
-                        {t(key)}
-                      </th>
-                    ))}
+                    <SortableTh
+                      label={t('colCourse')}
+                      active={sortKey === 'course'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('course')}
+                    />
+                    <SortableTh
+                      label={t('colEducator')}
+                      active={sortKey === 'educator'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('educator')}
+                    />
+                    <FilterableTh
+                      label={t('colCategory')}
+                      options={ALL_CATEGORIES}
+                      value={categoryFilter}
+                      onSelect={handleCategoryFilter}
+                      dot={CATEGORY_DOT}
+                    />
+                    <SortableTh
+                      label={t('colEnrollments')}
+                      active={sortKey === 'enrollments'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('enrollments')}
+                    />
+                    <SortableTh
+                      label={t('colRating')}
+                      active={sortKey === 'rating'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('rating')}
+                    />
+                    <SortableTh
+                      label={t('colCreated')}
+                      active={sortKey === 'created'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('created')}
+                    />
+                    <FilterableTh
+                      label={t('colStatus')}
+                      options={statusOptions}
+                      value={statusFilter}
+                      onSelect={handleStatusFilter}
+                      dot={STATUS_DOT}
+                    />
+                    <th className="text-muted-foreground px-5 py-3.5 text-right text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
+                      {t('colActions')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-border divide-y">

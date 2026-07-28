@@ -29,9 +29,9 @@ export default function AdminNewCoursePage() {
             <AdminCourseInfoStep
               info={builder.info}
               onChange={builder.setInfoField}
-              assignedEducator={builder.assignedEducator}
-              onEducatorChange={builder.setAssignedEducator}
-              educators={builder.educators}
+              assignedAuthor={builder.assignedAuthor}
+              onAuthorChange={builder.setAssignedAuthor}
+              authorOptions={builder.authorOptions}
             />
           )}
           {builder.step === 2 && (
@@ -49,7 +49,10 @@ export default function AdminNewCoursePage() {
               info={builder.info}
               modules={builder.modules}
               missing={builder.missing}
-              instructor={builder.educatorName || undefined}
+              instructor={builder.authorName || undefined}
+              status={builder.status}
+              onStatusChange={builder.setStatus}
+              canPublish
             />
           )}
         </div>
@@ -59,11 +62,15 @@ export default function AdminNewCoursePage() {
         step={builder.step}
         canSubmit={builder.canSubmit}
         missingCount={builder.missing.length}
+        statusBlocksSubmit={
+          builder.missing.length === 0 && builder.status !== 'Published'
+        }
+        statusBlocksSubmitLabel={t('footer.setStatusToPublish')}
         onBack={builder.goBack}
         onNext={builder.goNext}
         onSaveDraft={builder.saveDraft}
         onSubmit={builder.submit}
-        submitLabel={t('footer.createCourse')}
+        submitLabel={t('footer.publishCourse')}
         submitting={builder.submitting}
       />
     </div>

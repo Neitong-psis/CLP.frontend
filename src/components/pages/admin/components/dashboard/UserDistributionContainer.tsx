@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAdminDashboardT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -91,13 +92,15 @@ export function UserDistributionContainer({
     : undefined;
 
   return (
-    <UserDistributionCard
-      data={segments}
-      period={t('liveUserRecords')}
-      className={cn(
-        !firstVisit && 'animate-in fade-in slide-in-from-bottom-2 duration-500',
-        className,
-      )}
-    />
+    <Link href="/admin/users" className={cn('block', className)}>
+      <UserDistributionCard
+        data={segments}
+        period={t('liveUserRecords')}
+        className={cn(
+          !firstVisit &&
+            'animate-in fade-in slide-in-from-bottom-2 duration-500',
+        )}
+      />
+    </Link>
   );
 }

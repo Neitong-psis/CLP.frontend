@@ -1,25 +1,25 @@
 import { useMemo, useState } from 'react';
-import { EDUCATOR_STUDENTS, type StudentRow } from '@/constants/educator';
+import {
+  EDUCATOR_STUDENTS,
+  type StudentActivity,
+  type StudentRow,
+} from '@/constants/educator';
+import { useColumnSort } from '@/hooks/useColumnSort';
+import { parseCurrency, parseRelativeTime } from '@/lib/utils/sort';
 import type { StatusFilter } from './constants';
 
-export type SortKey = 'name' | 'progress' | null;
-export type SortDir = 'asc' | 'desc';
+export type SortKey = 'name' | 'course' | 'progress' | 'lastSeen' | 'earnings';
 
-export interface NewStudentInput {
-  name: string;
-  email: string;
-  course: string;
-}
-
-/** Search, status filtering and sorting over the educator's learner roster. */
+/** Search, status/activity filtering and column sorting over the educator's
+ *  learner roster. */
 export function useStudentFilter() {
-  const [students, setStudents] = useState<StudentRow[]>([
-    ...EDUCATOR_STUDENTS,
-  ]);
+  const [students] = useState<StudentRow[]>([...EDUCATOR_STUDENTS]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
-  const [sortKey, setSortKey] = useState<SortKey>(null);
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [activityFilter, setActivityFilter] = useState<StudentActivity | 'All'>(
+    'All',
+  );
+  const { sortKey, sortDir, toggleSort } = useColumnSort<SortKey>();
 
   const counts = useMemo(() => {
     const c = {
@@ -36,34 +36,12 @@ export function useStudentFilter() {
     return c;
   }, [students]);
 
-  /** Adds a newly invited learner to the top of the roster (Inactive until they accept). */
-  function addStudent(input: NewStudentInput) {
-    const now = new Date();
-    const enrolled = now.toLocaleDateString('en-US', {
-      month: 'short',
-      year: 'numeric',
-    });
-    setStudents((prev) => [
-      {
-        id: `invited-${Date.now()}`,
-        name: input.name,
-        email: input.email,
-        course: input.course,
-        progress: 0,
-        activity: 'Active',
-        status: 'Inactive',
-        enrolled,
-        lastSeen: 'Just invited',
-        earnings: '$0',
-      },
-      ...prev,
-    ]);
-  }
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const rows = students.filter((s) => {
       if (statusFilter !== 'All' && s.status !== statusFilter) return false;
+      if (activityFilter !== 'All' && s.activity !== activityFilter)
+        return false;
       if (
         q &&
         !s.name.toLowerCase().includes(q) &&
@@ -79,37 +57,36 @@ export function useStudentFilter() {
         const cmp =
           sortKey === 'name'
             ? a.name.localeCompare(b.name)
-            : a.progress - b.progress;
+            : sortKey === 'course'
+              ? a.course.localeCompare(b.course)
+              : sortKey === 'progress'
+                ? a.progress - b.progress
+                : sortKey === 'lastSeen'
+                  ? parseRelativeTime(a.lastSeen) -
+                    parseRelativeTime(b.lastSeen)
+                  : parseCurrency(a.earnings) - parseCurrency(b.earnings);
         return sortDir === 'asc' ? cmp : -cmp;
       });
     }
     return rows;
-  }, [students, search, statusFilter, sortKey, sortDir]);
-
-  /** Cycle a column: asc → desc → off. */
-  function toggleSort(key: Exclude<SortKey, null>) {
-    if (sortKey !== key) {
-      setSortKey(key);
-      setSortDir('asc');
-    } else if (sortDir === 'asc') {
-      setSortDir('desc');
-    } else {
-      setSortKey(null);
-    }
-  }
+  }, [students, search, statusFilter, activityFilter, sortKey, sortDir]);
 
   function clearFilters() {
     setSearch('');
     setStatusFilter('All');
+    setActivityFilter('All');
   }
 
-  const hasFilters = search !== '' || statusFilter !== 'All';
+  const hasFilters =
+    search !== '' || statusFilter !== 'All' || activityFilter !== 'All';
 
   return {
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
+    activityFilter,
+    setActivityFilter,
     sortKey,
     sortDir,
     toggleSort,
@@ -117,7 +94,6 @@ export function useStudentFilter() {
     hasFilters,
     counts,
     filtered,
-    addStudent,
     total: students.length,
   };
 }

@@ -8,12 +8,10 @@ import {
   Lightbulb,
   MessageCircle,
   Calculator,
-  Code,
-  BarChart2,
-  Cloud,
-  Terminal,
-  Layers,
-  Palette,
+  BookMarked,
+  Baby,
+  TrendingUp,
+  Sparkles,
   Zap,
 } from 'lucide-react';
 import { ENROLLED_COURSES } from '@/config/learner';
@@ -34,28 +32,26 @@ const CATEGORY_META: Record<string, Meta> = {
     fg: 'text-brand-gold',
   },
   STEM: { icon: Calculator, bg: 'bg-brand-navy/10', fg: 'text-brand-navy' },
-  'Web Development': {
-    icon: Code,
+  'Khmer Literature': {
+    icon: BookMarked,
     bg: 'bg-brand-navy/10',
     fg: 'text-brand-navy',
   },
-  'Data Science': {
-    icon: BarChart2,
+  'Child Development': {
+    icon: Baby,
     bg: 'bg-brand-navy/10',
     fg: 'text-brand-navy',
   },
-  'Cloud Computing': {
-    icon: Cloud,
+  'Leadership Development': {
+    icon: TrendingUp,
     bg: 'bg-brand-navy/10',
     fg: 'text-brand-navy',
   },
-  Programming: {
-    icon: Terminal,
+  'Innovative Learning': {
+    icon: Sparkles,
     bg: 'bg-brand-navy/10',
     fg: 'text-brand-navy',
   },
-  DevOps: { icon: Layers, bg: 'bg-brand-navy/10', fg: 'text-brand-navy' },
-  Design: { icon: Palette, bg: 'bg-brand-gold/10', fg: 'text-brand-gold' },
   Innovation: { icon: Zap, bg: 'bg-brand-gold/10', fg: 'text-brand-gold' },
 };
 const FALLBACK_META: Meta = {

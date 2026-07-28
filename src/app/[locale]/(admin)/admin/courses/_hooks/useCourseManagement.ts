@@ -1,16 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useToast } from '@/components/ui/toast';
 import type { AdminCourseRow } from '@/constants/admin';
 import {
-  fetchRawCourses,
   saveAdminCourseRow,
   publishCourse,
   deleteCourse,
   toAdminCourseRow,
+  coursesStore,
 } from '@/services/courses';
-import { fetchAllCategories } from '@/services/categories';
+import { categoriesStore } from '@/services/categories';
+import { useResourceStore } from '@/lib/cache/createResourceStore';
+import { isMockModeEnabled } from '@/lib/mock/mock-mode';
 
 export interface CourseManagement {
   courses: AdminCourseRow[];
@@ -22,45 +24,39 @@ export interface CourseManagement {
 }
 
 export function useCourseManagement(): CourseManagement {
-  const [courses, setCourses] = useState<AdminCourseRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryIdByName, setCategoryIdByName] = useState<
-    Record<string, string>
-  >({});
+  const coursesState = useResourceStore(coursesStore);
+  const categoriesState = useResourceStore(categoriesStore);
   const { toast } = useToast();
 
-  useEffect(() => {
-    let cancelled = false;
+  const courses = useMemo(() => coursesState.data ?? [], [coursesState.data]);
+  const loading = coursesState.loading || categoriesState.loading;
 
-    Promise.all([fetchRawCourses(), fetchAllCategories()])
-      .then(([raw, categories]) => {
-        if (cancelled) return;
-        setCourses(raw.map(toAdminCourseRow));
-        setCategoryIdByName(
-          Object.fromEntries(categories.map((c) => [c.name, c.id])),
-        );
-      })
-      .catch(() => {
-        toast('Failed to load courses.', 'error');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [toast]);
+  const categoryIdByName = useMemo(
+    () =>
+      Object.fromEntries(
+        (categoriesState.data ?? []).map((c) => [c.name, c.id]),
+      ),
+    [categoriesState.data],
+  );
 
   const saveEdit = useCallback(
     async (updated: AdminCourseRow) => {
+      if (isMockModeEnabled()) {
+        coursesStore.mutate((prev) =>
+          prev ? prev.map((c) => (c.id === updated.id ? updated : c)) : prev,
+        );
+        toast(`"${updated.title}" has been updated.`, 'success');
+        return;
+      }
       try {
         const saved = await saveAdminCourseRow(
           updated,
           categoryIdByName[updated.category],
         );
         const row = toAdminCourseRow(saved);
-        setCourses((prev) => prev.map((c) => (c.id === row.id ? row : c)));
+        coursesStore.mutate((prev) =>
+          prev ? prev.map((c) => (c.id === row.id ? row : c)) : prev,
+        );
         toast(`"${row.title}" has been updated.`, 'success');
       } catch {
         toast(`Failed to update "${updated.title}".`, 'error');
@@ -72,9 +68,18 @@ export function useCourseManagement(): CourseManagement {
   const remove = useCallback(
     async (id: string) => {
       const target = courses.find((c) => c.id === id);
+      if (isMockModeEnabled()) {
+        coursesStore.mutate((prev) =>
+          prev ? prev.filter((c) => c.id !== id) : prev,
+        );
+        toast(`"${target?.title ?? 'Course'}" was deleted.`, 'error');
+        return;
+      }
       try {
         await deleteCourse(id);
-        setCourses((prev) => prev.filter((c) => c.id !== id));
+        coursesStore.mutate((prev) =>
+          prev ? prev.filter((c) => c.id !== id) : prev,
+        );
         toast(`"${target?.title ?? 'Course'}" was deleted.`, 'error');
       } catch {
         toast(`Failed to delete "${target?.title ?? 'course'}".`, 'error');
@@ -86,10 +91,30 @@ export function useCourseManagement(): CourseManagement {
   const publish = useCallback(
     async (id: string) => {
       const title = courses.find((c) => c.id === id)?.title ?? 'Course';
+      if (isMockModeEnabled()) {
+        coursesStore.mutate((prev) =>
+          prev
+            ? prev.map((c) =>
+                c.id === id
+                  ? {
+                      ...c,
+                      status: 'Public',
+                      workStatus: 'published',
+                      workProgress: 100,
+                    }
+                  : c,
+              )
+            : prev,
+        );
+        toast(`"${title}" published successfully.`, 'success');
+        return;
+      }
       try {
         const saved = await publishCourse(id);
         const row = toAdminCourseRow(saved);
-        setCourses((prev) => prev.map((c) => (c.id === id ? row : c)));
+        coursesStore.mutate((prev) =>
+          prev ? prev.map((c) => (c.id === id ? row : c)) : prev,
+        );
         toast(`"${title}" published successfully.`, 'success');
       } catch {
         toast(`Failed to publish "${title}".`, 'error');

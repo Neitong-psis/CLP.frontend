@@ -15,7 +15,6 @@ import {
   MoreVertical,
   PencilLine,
   Send,
-  RotateCcw,
   Download,
   Trophy,
 } from 'lucide-react';
@@ -121,9 +120,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const t = useEducatorReviewT();
   const { toast } = useToast();
   const currentUser = useCurrentUser();
-  // Local copy so per-item edits can flow through immutably — Course Review's
-  // content is a shared demo dataset with no per-course storage of its own,
-  // so edits live only in this session (see ItemEditModal's doc comment).
   const [modules, setModules] = useState<ReviewModule[]>(() =>
     structuredClone(REVIEW_MODULES),
   );
@@ -146,8 +142,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
       ),
     [task.reviewFeedback],
   );
-  // Items fixed via the edit modal this session — resolves them out of the
-  // "rejected, needs edit" state without a real admin re-review.
   const [resolvedItemIds, setResolvedItemIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -222,19 +216,12 @@ export function CourseReview({ task }: { task: CourseTask }) {
   const nextItem =
     currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
   const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
-
-  // A published course is live for learners — reviewing it should feel like
-  // taking it as one, right down to the footer button, just without the
-  // sequential locking a real learner would hit (the educator can always
-  // jump anywhere; `lockingEnabled={false}` below already guarantees that).
   const isPublishedView = task.status === 'Published';
 
-  // One rule drives the single footer/menu action slot everywhere it
-  // appears (desktop button, mobile menu): a still-rejected active item asks
-  // for an edit before anything else; otherwise it's plain click-through
-  // navigation that only becomes "Resubmit" once there's nowhere left to go.
-  // None of this applies once the course is actually published — see
-  // `isPublishedView` above instead.
+  // Show type icons in sidebar for both Published and Under Review statuses
+  const shouldShowTypeIcons =
+    task.status === 'Published' || task.status === 'Under Review';
+
   const activeNeedsEdit = Boolean(
     active && rejectedIds.has(active.id) && !resolvedItemIds.has(active.id),
   );
@@ -279,14 +266,9 @@ export function CourseReview({ task }: { task: CourseTask }) {
     });
   }
 
-  function handleRestore() {
-    toast(t('restoredToast', { title: task.title }), 'success');
-    router.push('/educator/courses');
-  }
-
-  function handleEditCourse() {
+  function handleRestoreArchived() {
     toast(t('openingEditor'), 'info');
-    router.push(`/educator/courses/new?draft=${task.id}`);
+    router.push(`/educator/courses/new?draft=${task.id}&step=3`);
   }
 
   /** From the per-item "Edit" split button — the whole-course option jumps
@@ -296,9 +278,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
     router.push(`/educator/courses/new?draft=${task.id}&step=2`);
   }
 
-  /** Fast-path resubmit, reached once the educator has clicked through every
-   *  item — jumps straight to Step 3 (Preview & Publish), ready to submit,
-   *  instead of the full wizard from Step 1. */
   function handleResubmitFast() {
     toast(t('openingEditor'), 'info');
     router.push(`/educator/courses/new?draft=${task.id}&step=3`);
@@ -336,7 +315,6 @@ export function CourseReview({ task }: { task: CourseTask }) {
     <div className="bg-background fixed inset-0 z-50 flex overflow-hidden">
       {/* ── Body: sidebar | main column ────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Shared course-content sidebar (owns its brand header) */}
         <CourseContentSidebar
           courseTitle={task.title}
           modules={modules}
@@ -346,7 +324,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
           isItemDone={isItemDone}
           lockingEnabled={false}
           getItemBadge={getItemBadge}
-          showTypeIcon={isPublishedView}
+          showTypeIcon={shouldShowTypeIcons}
           onSelect={select}
           onLockedSelect={() => toast(t('lockedToast'), 'info')}
           collapsed={sidebarCollapsed}
@@ -416,19 +394,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
                           <div className="border-border/60 border-t" />
                         </>
                       )}
-                      {!isPublishedView && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowMobileActions(false);
-                            handleEditCourse();
-                          }}
-                          className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
-                        >
-                          <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
-                          {t('editCourse')}
-                        </button>
-                      )}
+
                       <button
                         type="button"
                         onClick={() => {
@@ -446,12 +412,12 @@ export function CourseReview({ task }: { task: CourseTask }) {
                           type="button"
                           onClick={() => {
                             setShowMobileActions(false);
-                            handleRestore();
+                            handleRestoreArchived();
                           }}
                           className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors"
                         >
-                          <RotateCcw className="text-muted-foreground h-4 w-4 shrink-0" />
-                          {t('restoreBtn')}
+                          <PencilLine className="text-muted-foreground h-4 w-4 shrink-0" />
+                          {t('editCourse')}
                         </button>
                       )}
                       {showEditAction && (
@@ -559,7 +525,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
               />
             </div>
             {/* Lesson chips — horizontal scroll for selected module */}
-            <div className="scrollbar-none flex gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
+            <div className="flex scrollbar-none gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
@@ -670,21 +636,14 @@ export function CourseReview({ task }: { task: CourseTask }) {
               </Button>
 
               <div className="flex items-center gap-2">
-                {!isPublishedView && (
+                {isArchived && (
                   <Button
-                    variant="outline"
                     size="sm"
                     className="gap-1.5"
-                    onClick={handleEditCourse}
+                    onClick={handleRestoreArchived}
                   >
                     <PencilLine className="h-4 w-4" />
                     {t('editCourse')}
-                  </Button>
-                )}
-                {isArchived && (
-                  <Button size="sm" className="gap-1.5" onClick={handleRestore}>
-                    <RotateCcw className="h-4 w-4" />
-                    {t('restoreBtn')}
                   </Button>
                 )}
                 {showEditAction && (

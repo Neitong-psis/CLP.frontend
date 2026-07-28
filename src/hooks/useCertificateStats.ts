@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  createResourceStore,
+  useResourceStore,
+} from '@/lib/cache/createResourceStore';
 import {
   fetchCertificateStats,
   type CertificateStats,
@@ -12,34 +15,10 @@ interface UseCertificateStatsResult {
   error: string | null;
 }
 
+const certificateStatsStore = createResourceStore<CertificateStats>(
+  fetchCertificateStats,
+);
+
 export function useCertificateStats(): UseCertificateStatsResult {
-  const [data, setData] = useState<CertificateStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchCertificateStats()
-      .then((stats) => {
-        if (!cancelled) setData(stats);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled)
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'Failed to load certificate stats',
-          );
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { data, loading, error };
+  return useResourceStore(certificateStatsStore);
 }

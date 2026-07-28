@@ -1,21 +1,22 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { useEducatorStudentsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
-import { useStudentFilter, type SortKey } from './_lib/useStudentFilter';
+import { SortableTh } from '@/components/common/table/SortableTh';
+import { FilterableTh } from '@/components/common/table/FilterableTh';
+import { useStudentFilter } from './_lib/useStudentFilter';
+import {
+  ACTIVITY_DOT,
+  CONCRETE_ACTIVITIES,
+  CONCRETE_STATUSES,
+  STATUS_DOT,
+  STATUS_LABEL,
+} from './_lib/constants';
 import { StudentsToolbar } from './_components/StudentsToolbar';
 import { StudentRow } from './_components/StudentRow';
-import { AddStudentModal } from './_components/AddStudentModal';
 import { StudentProfileModal } from '@/components/pages/educator/students/StudentProfileModal';
 
 const PAGE_SIZE = 10;
@@ -23,25 +24,13 @@ const PAGE_SIZE = 10;
 export default function EducatorStudentsPage() {
   const t = useEducatorStudentsT();
 
-  const TABLE_COLS: {
-    label: string;
-    sort?: Exclude<SortKey, null>;
-    align?: 'right';
-  }[] = [
-    { label: t('colStudent'), sort: 'name' },
-    { label: t('colCourse') },
-    { label: t('colProgress'), sort: 'progress' },
-    { label: t('colActivity') },
-    { label: t('colStatus') },
-    { label: t('colLastActive') },
-    { label: t('colEarnings'), align: 'right' },
-    { label: '' },
-  ];
   const {
     search,
     setSearch,
     statusFilter,
     setStatusFilter,
+    activityFilter,
+    setActivityFilter,
     sortKey,
     sortDir,
     toggleSort,
@@ -49,10 +38,8 @@ export default function EducatorStudentsPage() {
     hasFilters,
     counts,
     filtered,
-    addStudent,
     total,
   } = useStudentFilter();
-  const [addOpen, setAddOpen] = useState(false);
   const [viewStudent, setViewStudent] = useState<
     import('@/constants/educator').StudentRow | null
   >(null);
@@ -66,18 +53,6 @@ export default function EducatorStudentsPage() {
 
   function resetPage() {
     setPage(1);
-  }
-
-  function sortIcon(key: Exclude<SortKey, null>) {
-    if (sortKey !== key)
-      return (
-        <ArrowUpDown className="h-3 w-3 opacity-0 transition-opacity group-hover/th:opacity-60" />
-      );
-    return sortDir === 'asc' ? (
-      <ArrowUp className="text-brand-gold h-3 w-3" />
-    ) : (
-      <ArrowDown className="text-brand-gold h-3 w-3" />
-    );
   }
 
   return (
@@ -98,7 +73,6 @@ export default function EducatorStudentsPage() {
           }}
           counts={counts}
           resultCount={filtered.length}
-          onAddStudent={() => setAddOpen(true)}
         />
 
         {/* Table */}
@@ -107,31 +81,59 @@ export default function EducatorStudentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-border bg-muted/30 border-b">
-                  {TABLE_COLS.map(({ label, sort, align }) => (
-                    <th
-                      key={label || 'actions'}
-                      className={cn(
-                        'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase',
-                        align === 'right' ? 'text-right' : 'text-left',
-                      )}
-                    >
-                      {sort ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleSort(sort)}
-                          className={cn(
-                            'group/th hover:text-foreground inline-flex items-center gap-1 uppercase transition-colors',
-                            sortKey === sort && 'text-foreground',
-                          )}
-                        >
-                          {label}
-                          {sortIcon(sort)}
-                        </button>
-                      ) : (
-                        label
-                      )}
-                    </th>
-                  ))}
+                  <SortableTh
+                    label={t('colStudent')}
+                    active={sortKey === 'name'}
+                    direction={sortDir}
+                    onClick={() => toggleSort('name')}
+                  />
+                  <SortableTh
+                    label={t('colCourse')}
+                    active={sortKey === 'course'}
+                    direction={sortDir}
+                    onClick={() => toggleSort('course')}
+                  />
+                  <SortableTh
+                    label={t('colProgress')}
+                    active={sortKey === 'progress'}
+                    direction={sortDir}
+                    onClick={() => toggleSort('progress')}
+                  />
+                  <FilterableTh
+                    label={t('colActivity')}
+                    options={CONCRETE_ACTIVITIES}
+                    value={activityFilter}
+                    onSelect={(v) => {
+                      setActivityFilter(v);
+                      resetPage();
+                    }}
+                    dot={ACTIVITY_DOT}
+                  />
+                  <FilterableTh
+                    label={t('colStatus')}
+                    options={CONCRETE_STATUSES}
+                    value={statusFilter}
+                    onSelect={(v) => {
+                      setStatusFilter(v);
+                      resetPage();
+                    }}
+                    dot={STATUS_DOT}
+                    labels={STATUS_LABEL}
+                  />
+                  <SortableTh
+                    label={t('colLastActive')}
+                    active={sortKey === 'lastSeen'}
+                    direction={sortDir}
+                    onClick={() => toggleSort('lastSeen')}
+                  />
+                  <SortableTh
+                    label={t('colEarnings')}
+                    active={sortKey === 'earnings'}
+                    direction={sortDir}
+                    onClick={() => toggleSort('earnings')}
+                    align="right"
+                  />
+                  <th className="px-3 py-3.5" />
                 </tr>
               </thead>
               <tbody className="divide-border/50 divide-y">
@@ -228,12 +230,6 @@ export default function EducatorStudentsPage() {
           )}
         </div>
       </div>
-
-      <AddStudentModal
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        onAdd={addStudent}
-      />
 
       <StudentProfileModal
         student={viewStudent}

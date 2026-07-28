@@ -110,58 +110,58 @@ export function flattenItems(modules: ReviewModule[]): ReviewItem[] {
 export const REVIEW_MODULES: ReviewModule[] = [
   {
     id: 'm1',
-    title: 'Module 1: Web Foundations',
+    title: 'Module 1: Innovative Learning Foundations',
     lessons: [
       {
         id: 'l1',
-        title: 'Responsive Design Guide',
+        title: 'Lesson Design Fundamentals',
         documents: [
           {
             id: 'd1',
             kind: 'document',
-            title: 'Responsive Design Guide',
+            title: 'Lesson Design Fundamentals',
             readTime: '3 – 8 min read',
             content: richDoc.doc(
               richDoc.paragraph(
                 'A concise reading guide for ',
-                { text: 'mobile-first layouts', bold: true },
-                ', breakpoints, and readable content blocks.',
+                { text: 'backward design', bold: true },
+                ', pacing, and learning objectives that keep a lesson focused.',
               ),
               richDoc.heading(2, "What You'll Learn"),
               richDoc.bulletList([
                 [
-                  'Understand mobile-first design principles and why they matter',
+                  'Understand backward design and why it starts with learning objectives',
                 ],
                 [
-                  'Apply CSS media queries to build layouts that adapt across screens',
+                  'Apply the "one objective per activity" principle to keep lessons focused',
                 ],
                 [
-                  'Structure content blocks for readability at every viewport size',
+                  'Structure a lesson plan for steady pacing from opening to close',
                 ],
               ]),
-              richDoc.heading(2, 'What is Mobile-First Design?'),
+              richDoc.heading(2, 'What is Backward Design?'),
               richDoc.paragraph(
-                'Mobile-first design means starting with the ',
-                { text: 'smallest screen', bold: true },
-                " in mind and progressively enhancing for larger screens. Begin by asking: does this content serve the learner on a phone? Strip away anything that doesn't. A page that works on mobile nearly always scales up to desktop gracefully.",
+                'Backward design means starting with the ',
+                { text: 'outcome you want learners to reach', bold: true },
+                " before choosing any activity. Begin by asking: what should the learner be able to do by the end of this lesson? Build everything else — the hook, the activities, the assessment — to serve that outcome.",
               ),
               richDoc.blockquote(
-                'Sketch the mobile layout fully before opening any design tool. Constraints drive clarity.',
+                'Write the learning objective before you write a single slide. Constraints drive clarity.',
               ),
-              richDoc.heading(2, 'Working with Breakpoints'),
+              richDoc.heading(2, 'Pacing a Lesson'),
               richDoc.paragraph(
-                'Breakpoints define where your layout shifts. Common values are ',
+                'Pacing determines where attention rises and falls. Common checkpoints are the ',
                 {
-                  text: '640 px (sm), 768 px (md), 1024 px (lg), and 1280 px (xl)',
+                  text: 'opening hook, guided practice, a mid-lesson check, and a closing recap',
                   bold: true,
                 },
-                '. Resist adding a breakpoint every time the design looks off — instead, let the content determine where the layout naturally needs to change.',
+                '. Resist adding a new activity every time energy dips — instead, let the learning objective determine where the lesson naturally needs a change of pace.',
               ),
-              richDoc.heading(2, 'Readable Content Blocks'),
+              richDoc.heading(2, 'Readable Lesson Plans'),
               richDoc.paragraph(
-                'Limit line length to ',
-                { text: '60 – 80 characters', bold: true },
-                ' for comfortable reading. Use a base font size of at least 16 px on body text. When reviewing, slow down at each heading and ask what changed from the previous idea — this habit improves both writing and proofreading.',
+                'Keep each section of your lesson plan to ',
+                { text: 'one idea at a time', bold: true },
+                ' so a substitute teacher or co-facilitator can follow it without extra explanation. Write objectives in plain, observable language. When reviewing, slow down at each heading and ask what changed from the previous idea — this habit improves both lesson writing and self-review.',
               ),
               richDoc.blockquote(
                 { text: 'Key takeaway:', italic: true },
@@ -170,13 +170,13 @@ export const REVIEW_MODULES: ReviewModule[] = [
               richDoc.heading(2, 'Key Takeaways'),
               richDoc.bulletList([
                 [
-                  'Start every layout from the smallest viewport and enhance upward',
+                  'Start every lesson from the intended outcome and design backward from there',
                 ],
                 [
-                  'Breakpoints should follow content needs, not arbitrary pixel values',
+                  'Pacing checkpoints should follow the learning objective, not a fixed clock',
                 ],
                 [
-                  'Comfortable line lengths (60 – 80 chars) significantly reduce eye fatigue',
+                  'Plain, observable objectives make lessons easier to teach, review, and improve',
                 ],
               ]),
             ),
@@ -187,71 +187,74 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'q3',
             kind: 'quiz',
-            title: 'Responsive Design Quiz',
+            title: 'Lesson Design Quiz',
             status: 'Ready',
-            forLesson: 'Responsive Design Guide',
+            forLesson: 'Lesson Design Fundamentals',
             totalQuestions: 6,
             estimatedMinutes: 9,
             description:
-              'Confirm your grasp of mobile-first design, CSS breakpoints, and content readability from the Responsive Design Guide document.',
+              'Confirm your grasp of backward design, pacing, and objective-writing from the Lesson Design Fundamentals document.',
             questions: [
               {
                 question:
-                  'Which design approach should you start with for responsive layouts?',
+                  'Which approach should you start with when designing a lesson?',
                 options: [
-                  'Mobile-first',
-                  'Desktop-first',
-                  'Tablet-first',
-                  'Largest screen first',
+                  'Backward design, starting from the objective',
+                  'Activity-first design',
+                  'Slide-first design',
+                  'Assessment as an afterthought',
                 ],
                 correctIndex: 0,
               },
               {
                 question:
-                  'What is the ideal character line length for comfortable reading?',
+                  'About how long should an opening hook typically last?',
                 options: [
-                  '40 – 50 characters',
-                  '100 – 120 characters',
-                  '60 – 80 characters',
-                  'Line length has no impact',
+                  'The first 5 minutes',
+                  'Half of the lesson',
+                  'The entire first hour',
+                  'Hooks are unnecessary',
                 ],
-                correctIndex: 2,
+                correctIndex: 0,
               },
               {
-                question: 'What is a CSS breakpoint?',
+                question: 'What is a "learning objective" in backward design?',
                 options: [
-                  'A bug in the stylesheet',
-                  'A screen width at which the layout changes',
-                  'A way to pause CSS animations',
-                  'A unit of measurement',
+                  'A grading rubric category',
+                  'A statement of what learners should be able to do by the end of the lesson',
+                  'A list of classroom rules',
+                  'A textbook chapter title',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'Which technique keeps a lesson focused?',
+                options: [
+                  'Adding as many activities as possible',
+                  'One objective per activity',
+                  'Skipping the recap to save time',
+                  'Testing before teaching',
                 ],
                 correctIndex: 1,
               },
               {
                 question:
-                  'Which technique makes images responsive without distortion?',
+                  'Which checkpoint helps you notice if learners are following along mid-lesson?',
                 options: [
-                  'width: auto',
-                  'height: 100%',
-                  'max-width: 100%',
-                  'display: block',
+                  'A mid-lesson check (quick question or discussion)',
+                  'The final exam',
+                  'The course syllabus',
+                  'The enrolment form',
                 ],
-                correctIndex: 2,
+                correctIndex: 0,
               },
               {
-                question:
-                  'Which CSS unit is relative to the width of the viewport?',
-                options: ['em', 'rem', 'vw', 'px'],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'What is the purpose of the <meta name="viewport"> tag?',
+                question: 'What is the purpose of a lesson-closing recap?',
                 options: [
-                  'It sets the page background colour',
-                  'It tells mobile browsers how to scale and size the page',
-                  'It links the site to a CDN',
-                  'It defines the default font size',
+                  'To assign homework only',
+                  'To reinforce the objective and consolidate learning before class ends',
+                  'To introduce a brand new topic',
+                  'To take attendance',
                 ],
                 correctIndex: 1,
               },
@@ -262,17 +265,17 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'a3',
             kind: 'assignment',
-            title: 'Responsive Reading Reflection',
+            title: 'Lesson Design Reflection',
             status: 'Ready',
-            forLesson: 'Responsive Design Guide',
+            forLesson: 'Lesson Design Fundamentals',
             dueDate: 'Jun 2',
             submission: 'Text response',
             instructions:
-              'Write a 300 – 400 word reflection on what you learned from the Responsive Design Guide. Describe one concrete change you will make to a project you are currently working on.',
+              'Write a 300 – 400 word reflection on what you learned from the Lesson Design Fundamentals document. Describe one concrete change you will make to a lesson you are currently planning.',
             requirements: [
               '300 – 400 words (submissions outside this range will not be marked)',
               'Reference at least two specific concepts from the lesson',
-              'Describe one concrete change you will apply to a real project',
+              'Describe one concrete change you will apply to a real lesson plan',
               'Clear paragraph structure: introduction, body, and conclusion',
             ],
           },
@@ -280,28 +283,28 @@ export const REVIEW_MODULES: ReviewModule[] = [
       },
       {
         id: 'l2',
-        title: 'HTML Introduction',
+        title: 'Learner Engagement Basics',
         documents: [],
         videos: [
           {
             id: 'v1',
             kind: 'video',
-            title: 'HTML Introduction',
+            title: 'Learner Engagement Basics',
             duration: '12 min',
             youtubeId: 'it1rTvBcfRg',
             intro:
-              'Meet the building blocks of every web page: elements, tags, attributes, and document structure.',
+              'Meet the building blocks of every engaging lesson: hooks, questions, participation structures, and closure.',
             topics: [
-              'Anatomy of an HTML tag — opening, closing, self-closing',
-              'Document structure: <html>, <head>, and <body>',
-              'Semantic landmark elements: header, nav, main, footer',
-              'Common inline vs. block-level elements',
+              'Anatomy of a lesson hook — curiosity, relevance, and surprise',
+              'Lesson structure: opening, core activity, and closing recap',
+              'Participation structures: think-pair-share, cold-call, and quick polls',
+              'Common engagement blockers and how to avoid them',
             ],
             moments: [
-              { time: '0:00', label: 'Introduction & why HTML matters' },
-              { time: '1:45', label: 'Anatomy of an HTML tag' },
-              { time: '4:20', label: 'Document structure overview' },
-              { time: '7:10', label: 'Semantic landmark elements' },
+              { time: '0:00', label: 'Introduction & why engagement matters' },
+              { time: '1:45', label: 'Anatomy of a strong lesson hook' },
+              { time: '4:20', label: 'Lesson structure overview' },
+              { time: '7:10', label: 'Participation structures that work' },
               { time: '10:30', label: 'Putting it all together' },
             ],
           },
@@ -310,85 +313,117 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'q1',
             kind: 'quiz',
-            title: 'HTML Basics Quiz',
+            title: 'Learner Engagement Quiz',
             status: 'Ready',
-            forLesson: 'HTML Introduction',
+            forLesson: 'Learner Engagement Basics',
             totalQuestions: 10,
             estimatedMinutes: 15,
             description:
-              'Test your understanding of HTML document structure, semantic elements, and tag syntax.',
+              'Test your understanding of lesson hooks, participation structures, and engagement fundamentals.',
             questions: [
               {
-                question: 'What is HTML?',
+                question: 'What is a lesson hook?',
                 options: [
-                  'Programming Language',
-                  'Database',
-                  'Markup Language',
-                  'Operating System',
+                  'A grading tool',
+                  'A seating chart',
+                  'An opening moment that captures learner curiosity',
+                  'A homework tracker',
                 ],
                 correctIndex: 2,
               },
               {
-                question: 'Which HTML element defines the document title?',
-                options: ['<head>', '<meta>', '<title>', '<header>'],
-                correctIndex: 2,
-              },
-              {
-                question: 'Which tag is used to create a hyperlink?',
-                options: ['<link>', '<a>', '<href>', '<url>'],
-                correctIndex: 1,
-              },
-              {
-                question:
-                  'What is the correct HTML element for the largest heading?',
-                options: ['<heading>', '<h6>', '<h1>', '<head>'],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'Which element is a semantic landmark for navigation?',
-                options: ['<div>', '<section>', '<nav>', '<span>'],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'What does the alt attribute on an <img> tag provide?',
+                question: 'Which part of a lesson typically comes first?',
                 options: [
-                  'A tooltip shown on hover',
-                  'Alternative text for screen readers and broken images',
-                  'The image file path',
-                  'A caption displayed below the image',
-                ],
-                correctIndex: 1,
-              },
-              {
-                question:
-                  'What is the purpose of the <!DOCTYPE html> declaration?',
-                options: [
-                  'It links an external stylesheet',
-                  'It sets the page language',
-                  'It tells the browser to render in standards mode',
-                  'It defines the page title',
+                  'Closing recap',
+                  'Assessment',
+                  'Opening hook',
+                  'Independent practice',
                 ],
                 correctIndex: 2,
               },
               {
                 question:
-                  'Which attribute specifies the destination URL of a hyperlink?',
-                options: ['src', 'href', 'link', 'url'],
+                  'Which participation structure asks learners to think alone, then discuss with a partner?',
+                options: [
+                  'Cold-call',
+                  'Think-pair-share',
+                  'Silent reading',
+                  'Lecture',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'What is the purpose of a closing recap?',
+                options: [
+                  'To assign extra homework',
+                  'To reinforce the lesson objective',
+                  'To start a new topic',
+                  'To take attendance',
+                ],
                 correctIndex: 1,
               },
               {
                 question:
-                  'Which HTML element represents an unordered (bulleted) list?',
-                options: ['<ol>', '<li>', '<ul>', '<list>'],
-                correctIndex: 2,
+                  'Which structure gives every learner a planned chance to respond, not just volunteers?',
+                options: [
+                  'Free-for-all discussion',
+                  'Cold-call (equitable, planned)',
+                  'Silent independent work',
+                  'Optional Q&A',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'What does a quick poll during a lesson provide?',
+                options: [
+                  'A final grade',
+                  'Immediate insight into learner understanding',
+                  'A break from learning',
+                  'A seating assignment',
+                ],
+                correctIndex: 1,
               },
               {
                 question:
-                  'Which HTML element defines the main content area of a document?',
-                options: ['<body>', '<section>', '<article>', '<main>'],
-                correctIndex: 3,
+                  'What is the purpose of stating the lesson objective at the start?',
+                options: [
+                  'It links the lesson to outside resources',
+                  'It sets learner expectations for what they will be able to do',
+                  'It replaces the need for activities',
+                  'It defines the classroom seating chart',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'Which is a common engagement blocker?',
+                options: [
+                  'Clear instructions',
+                  'One long, uninterrupted lecture',
+                  'Frequent check-ins',
+                  'Varied activity types',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'Which technique helps quieter learners participate?',
+                options: [
+                  'Cold-calling without warning',
+                  'Think time before sharing',
+                  'Grading participation only by volume',
+                  'Skipping discussion entirely',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  "Which element ties a lesson's opening, activities, and closing together?",
+                options: [
+                  'The classroom seating chart',
+                  'The stated learning objective',
+                  'The bell schedule',
+                  'The attendance sheet',
+                ],
+                correctIndex: 1,
               },
             ],
           },
@@ -397,50 +432,56 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'a1',
             kind: 'assignment',
-            title: 'Create a Semantic Page',
+            title: 'Design a Lesson Opening',
             status: 'Ready',
-            forLesson: 'HTML Introduction',
+            forLesson: 'Learner Engagement Basics',
             dueDate: 'May 28',
             submission: 'File or link upload',
             instructions:
-              'Submit a labelled HTML page structure using header, main, section, and footer elements.',
+              'Submit a short lesson opening — hook, objective statement, and first participation structure — for a topic of your choice.',
             requirements: [
-              'Use at least 5 semantic HTML5 elements (header, nav, main, article, footer)',
-              'Include a navigation bar with 3 or more working links',
-              'Structure a main content area with at least two distinct sections',
-              'Validate your HTML with the W3C Validator — zero critical errors',
+              'Use at least one hook technique from the lesson (curiosity, relevance, or surprise)',
+              'Include a clear, observable learning objective statement',
+              'Build in one participation structure that involves the whole group',
+              'Have a peer review the opening for clarity before submitting',
             ],
           },
         ],
       },
       {
         id: 'l3',
-        title: 'CSS Layout Basics',
+        title: 'Structuring an Active Lesson',
         documents: [],
         videos: [
           {
             id: 'v2',
             kind: 'video',
-            title: 'CSS Layout Basics',
+            title: 'Structuring an Active Lesson',
             duration: '15 min',
             youtubeId: 'AGDDdsiZ0Ko',
             intro:
-              'Position content with the box model, flexbox, and a few reliable layout patterns that work at every screen size.',
+              'Sequence a lesson with a clear arc, active-learning techniques, and a few reliable pacing patterns that work in any classroom.',
             topics: [
-              'The CSS box model: margin, padding, border, content',
-              'Flexbox for one-dimensional (row or column) layouts',
-              'CSS Grid for two-dimensional page layouts',
-              'Responsive patterns: card grids, sidebars, content stacking',
+              'The lesson arc: opening, guided practice, independent practice, closing',
+              'Active-learning techniques for whole-group moments',
+              'Small-group and station-based activity design',
+              'Pacing patterns for whole-group, small-group, and independent work',
             ],
             moments: [
-              { time: '0:00', label: 'Overview of the box model' },
+              { time: '0:00', label: 'Overview of the lesson arc' },
               {
                 time: '2:30',
-                label: 'margin, padding, and border in practice',
+                label: 'Guided vs. independent practice in action',
               },
-              { time: '5:00', label: 'Flexbox: justify-content & align-items' },
-              { time: '9:45', label: 'Grid: rows, columns, and gaps' },
-              { time: '13:00', label: 'Responsive layout patterns' },
+              {
+                time: '5:00',
+                label: 'Active learning: think-alouds & gallery walks',
+              },
+              { time: '9:45', label: 'Small groups: roles, timing, and gaps' },
+              {
+                time: '13:00',
+                label: 'Pacing patterns for mixed-ability classrooms',
+              },
             ],
           },
         ],
@@ -448,80 +489,100 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'q2',
             kind: 'quiz',
-            title: 'CSS Layout Quiz',
+            title: 'Active Lesson Design Quiz',
             status: 'Ready',
-            forLesson: 'CSS Layout Basics',
+            forLesson: 'Structuring an Active Lesson',
             totalQuestions: 8,
             estimatedMinutes: 12,
             description:
-              'Assess your knowledge of the CSS box model, flexbox, and grid layout systems.',
+              'Assess your knowledge of the lesson arc, active-learning techniques, and small-group design.',
             questions: [
               {
-                question: 'Which CSS property creates a flexbox container?',
+                question:
+                  'Which sequence best describes a typical lesson arc?',
                 options: [
-                  'display: flex',
-                  'position: flex',
-                  'layout: flexbox',
-                  'flex: container',
+                  'Independent practice, then hook, then guided practice',
+                  'Opening hook, guided practice, independent practice, closing',
+                  'Assessment, then lesson, then objective',
+                  'Closing, opening, then practice',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  'What does "gradual release of responsibility" mean in guided practice?',
+                options: [
+                  'Learners work alone from the start',
+                  'The teacher models, then supports, then learners work independently',
+                  'The teacher never intervenes',
+                  'Learners grade each other immediately',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  'Which activity type asks small groups to rotate through different tasks?',
+                options: [
+                  'Lecture',
+                  'Station-based activity',
+                  'Silent reading',
+                  'Whole-group quiz',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  'In small-group design, what should you assign to keep groups accountable?',
+                options: [
+                  'Nothing — groups self-organise',
+                  'Clear roles and a time limit',
+                  'A single leader who does all the work',
+                  'No shared goal',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  'Which technique keeps a large group actively thinking during a lecture segment?',
+                options: [
+                  'A think-aloud or turn-and-talk',
+                  'A 30-minute uninterrupted lecture',
+                  'Silent note-taking only',
+                  'Removing all questions',
                 ],
                 correctIndex: 0,
               },
               {
                 question:
-                  'What does "justify-content: space-between" do in flexbox?',
+                  'What determines how a lesson should be paced across whole-group, small-group, and independent work?',
                 options: [
-                  'Centers all items in the middle',
-                  'Adds equal space around every item',
-                  'Places equal space between items only',
-                  'Stretches items to fill the container',
-                ],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'Which CSS property controls gaps between grid items?',
-                options: ['spacing', 'margin', 'padding', 'gap'],
-                correctIndex: 3,
-              },
-              {
-                question:
-                  'In the CSS box model, which property controls space inside the border?',
-                options: ['margin', 'padding', 'border-spacing', 'inset'],
-                correctIndex: 1,
-              },
-              {
-                question:
-                  'Which CSS property aligns flex items along the cross axis?',
-                options: [
-                  'justify-content',
-                  'align-items',
-                  'flex-direction',
-                  'align-self',
+                  'A fixed classroom clock only',
+                  'The learning objective and learner readiness',
+                  'Whichever the teacher prefers that day',
+                  'The length of the textbook chapter',
                 ],
                 correctIndex: 1,
               },
               {
                 question:
-                  'Which CSS property controls the stacking order of overlapping elements?',
-                options: ['order', 'stack', 'z-index', 'layer'],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'Which CSS value makes a flex item grow to fill all remaining space?',
-                options: ['flex: 0', 'flex: auto', 'flex: 1', 'flex: max'],
-                correctIndex: 2,
-              },
-              {
-                question:
-                  'Which CSS display value creates a two-dimensional grid container?',
+                  'Which pattern best supports a mixed-ability classroom?',
                 options: [
-                  'display: block',
-                  'display: inline-flex',
-                  'display: table',
-                  'display: grid',
+                  'One-size-fits-all pacing for every learner',
+                  'Flexible grouping with adjustable task difficulty',
+                  'Only whole-group instruction',
+                  'Removing independent practice entirely',
                 ],
-                correctIndex: 3,
+                correctIndex: 1,
+              },
+              {
+                question: 'What is the purpose of a gallery walk activity?',
+                options: [
+                  "Letting learners silently review and respond to peers' work",
+                  'Collecting homework',
+                  'Replacing assessment entirely',
+                  'Assigning seating for the term',
+                ],
+                correctIndex: 0,
               },
             ],
           },
@@ -530,18 +591,18 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'a2',
             kind: 'assignment',
-            title: 'Rebuild a Responsive Layout',
+            title: 'Redesign a Lesson Sequence',
             status: 'Ready',
-            forLesson: 'CSS Layout Basics',
+            forLesson: 'Structuring an Active Lesson',
             dueDate: 'May 30',
             submission: 'File or link upload',
             instructions:
-              'Take the provided desktop-only layout file and rebuild it to be fully responsive using CSS flexbox or grid.',
+              'Take the provided lecture-only lesson plan and redesign it to include active-learning techniques using the full lesson arc.',
             requirements: [
-              'Apply mobile-first CSS with media queries at 640 px and 1024 px',
-              'Use flexbox or CSS Grid for the primary page layout',
-              'Ensure body text line lengths stay under 80 characters',
-              'Submit screenshots at mobile (375 px), tablet (768 px), and desktop (1280 px)',
+              'Apply the full lesson arc: opening hook, guided practice, independent practice, closing',
+              'Include at least one active-learning or small-group technique from the lesson',
+              'Keep each activity segment to a realistic, stated time block',
+              'Submit a timed run-through plan for a 45-minute, a 60-minute, and a 90-minute version',
             ],
           },
         ],
@@ -550,71 +611,76 @@ export const REVIEW_MODULES: ReviewModule[] = [
   },
   {
     id: 'm2',
-    title: 'Module 2: Applied Smart Workflows',
+    title: 'Module 2: Applied Innovative Learning',
     lessons: [
       {
         id: 'l4',
-        title: 'Accessibility Notes',
+        title: 'Inclusive Classroom Practices',
         documents: [
           {
             id: 'd2',
             kind: 'document',
-            title: 'Accessibility Notes',
+            title: 'Inclusive Classroom Practices',
             readTime: '4 – 6 min read',
             content: richDoc.doc(
               richDoc.paragraph(
-                'Quick reference for colour contrast, focus order, and labelling interactive elements to meet ',
-                { text: 'WCAG 2.1 AA', bold: true },
+                'Quick reference for Universal Design for Learning, accommodations, and creating a classroom where every learner can participate to meet ',
+                { text: 'inclusive teaching standards', bold: true },
                 '.',
               ),
               richDoc.heading(2, "What You'll Learn"),
               richDoc.bulletList([
+                ['Identify common participation barriers in a classroom'],
                 [
-                  'Identify common accessibility barriers in digital interfaces',
+                  'Apply Universal Design for Learning (UDL) principles correctly',
                 ],
-                ['Apply WCAG contrast and keyboard focus standards correctly'],
-                ['Label interactive elements for screen reader compatibility'],
+                [
+                  'Provide accommodations without singling out individual learners',
+                ],
               ]),
-              richDoc.heading(2, 'Colour Contrast & Typography'),
+              richDoc.heading(2, 'Universal Design for Learning'),
               richDoc.paragraph(
-                'Text on a background must pass WCAG AA contrast ratio: ',
+                'Every lesson should offer multiple means of ',
                 {
-                  text: '4.5:1 for normal text, 3:1 for large text',
+                  text: 'engagement, representation, and action',
                   bold: true,
                 },
-                ' (18 pt or 14 pt bold). Never rely on colour alone to convey meaning — always pair it with a shape, icon, or text label for users with colour blindness.',
+                '. Offer content through more than one channel — spoken, written, visual — so learners with different needs and preferences can access it. Never rely on a single format to convey a core idea; always pair it with an alternative such as a visual, written summary, or peer explanation.',
               ),
               richDoc.blockquote(
-                "Use the browser's accessibility inspector to check contrast instantly without leaving the dev environment.",
+                'Run a quick access check before every lesson: can a learner who cannot hear, see, or move easily still fully participate?',
               ),
-              richDoc.heading(2, 'Focus & Keyboard Navigation'),
+              richDoc.heading(2, 'Participation & Physical Access'),
               richDoc.paragraph(
-                'Every interactive element — buttons, links, form fields — must be reachable with the ',
-                { text: 'Tab key', bold: true },
-                ' and operable with Enter or Space. ',
+                'Every activity — discussion, group work, worksheet — must be reachable by learners with different ',
                 {
-                  text: 'Never remove the focus ring',
+                  text: 'mobility, sensory, or processing needs',
+                  bold: true,
+                },
+                '. ',
+                {
+                  text: 'Never remove an accommodation',
                   italic: true,
                 },
-                ' without providing a clearly visible custom alternative.',
+                ' without offering a clearly explained alternative.',
               ),
-              richDoc.heading(2, 'Semantic Markup & Labels'),
+              richDoc.heading(2, 'Clear Instructions & Labels'),
               richDoc.paragraph(
-                'Use the correct HTML element for the job: <button> for actions, <a> for navigation, <nav> and <main> for landmarks. Label every input with a <label> element.',
+                'Use plain, direct language for instructions: state the task, the expected output, and the time limit. Label every station or material clearly so no learner has to guess what to do next.',
               ),
               richDoc.blockquote(
-                "Accessibility is far easier when it's part of the first draft. Retrofitting a finished product is costly.",
+                "Inclusion is far easier when it's part of the first draft of a lesson plan. Retrofitting accommodations into a finished lesson is costly.",
               ),
               richDoc.heading(2, 'Key Takeaways'),
               richDoc.bulletList([
                 [
-                  'Accessibility starts with semantic HTML — ARIA is a patch, not a foundation',
+                  'Inclusion starts with UDL principles — individual accommodations are a patch, not a foundation',
                 ],
                 [
-                  'Contrast ratio minimum: 4.5:1 for normal body text (WCAG AA)',
+                  'Offer content through at least two different channels in every lesson',
                 ],
                 [
-                  'Every interactive element must be fully operable with the keyboard alone',
+                  'Every activity must be fully accessible without requiring a specific accommodation request',
                 ],
               ]),
             ),
@@ -625,55 +691,65 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'q5',
             kind: 'quiz',
-            title: 'Accessibility Practice Quiz',
+            title: 'Inclusive Practices Quiz',
             status: 'Ready',
-            forLesson: 'Accessibility Notes',
+            forLesson: 'Inclusive Classroom Practices',
             totalQuestions: 5,
             estimatedMinutes: 8,
             description:
-              'Test your knowledge of WCAG guidelines, keyboard navigation, and semantic HTML from the Accessibility Notes document.',
+              'Test your knowledge of UDL principles, accommodations, and inclusive instruction from the Inclusive Classroom Practices document.',
             questions: [
               {
-                question:
-                  'What is the minimum contrast ratio for normal body text under WCAG AA?',
-                options: ['3:1', '4.5:1', '7:1', '2:1'],
-                correctIndex: 1,
-              },
-              {
-                question:
-                  'Which HTML element should you use to trigger an action?',
+                question: 'What does UDL stand for?',
                 options: [
-                  '<div onclick>',
-                  '<span>',
-                  '<button>',
-                  '<a href="#">',
-                ],
-                correctIndex: 2,
-              },
-              {
-                question: 'What does WCAG stand for?',
-                options: [
-                  'Web Colour Accessibility Guide',
-                  'Web Content Accessibility Guidelines',
-                  'Wide Content Alignment Grid',
-                  'Web Component Annotation Guide',
+                  'Unified Discussion Learning',
+                  'Universal Design for Learning',
+                  'Uniform Delivery of Lessons',
+                  'Universal Deadline List',
                 ],
                 correctIndex: 1,
               },
               {
-                question: 'What must every interactive element be operable by?',
+                question:
+                  'What is the recommended minimum number of channels for offering lesson content?',
                 options: [
-                  'Mouse only',
-                  'Touch screen only',
-                  'Keyboard alone',
-                  'Voice commands only',
+                  'Exactly one',
+                  'At least two',
+                  'None are required',
+                  'Only for advanced learners',
                 ],
-                correctIndex: 2,
+                correctIndex: 1,
               },
               {
                 question:
-                  'What should never be the sole way to convey information?',
-                options: ['Typography', 'Icons', 'Text labels', 'Colour alone'],
+                  'Which best describes an inclusive instruction habit?',
+                options: [
+                  'Assume all learners process instructions the same way',
+                  'State the task, expected output, and time limit clearly',
+                  'Give instructions only once, quickly',
+                  'Rely on peer learners to explain instructions',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question: 'What must every classroom activity be?',
+                options: [
+                  'Optional for learners with accommodations',
+                  'Reachable by learners with different mobility, sensory, or processing needs',
+                  'Timed identically regardless of task complexity',
+                  'Designed for only the fastest learners',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  'What should never be the sole way to convey information in a lesson?',
+                options: [
+                  'Written text',
+                  'Spoken words',
+                  'Visual images',
+                  'Any single format alone',
+                ],
                 correctIndex: 3,
               },
             ],
@@ -683,47 +759,47 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'a5',
             kind: 'assignment',
-            title: 'Accessibility Audit Checklist',
+            title: 'Inclusion Audit Checklist',
             status: 'Ready',
-            forLesson: 'Accessibility Notes',
+            forLesson: 'Inclusive Classroom Practices',
             dueDate: 'Jun 8',
             submission: 'File or link upload',
             instructions:
-              'Perform an accessibility audit on a website of your choice using the WCAG 2.1 AA standard.',
+              'Perform an inclusion audit on a lesson plan of your choice using Universal Design for Learning principles.',
             requirements: [
-              'Audit at least 5 pages from the same website',
-              'Check and document contrast ratios for all text elements',
-              'Test keyboard navigation through every interactive element',
-              'Document at least 3 distinct accessibility issues with suggested fixes',
+              'Audit at least 5 activities from the same lesson plan',
+              'Check and document available channels (spoken, written, visual) for each activity',
+              'Test whether each activity is reachable by learners with different mobility or sensory needs',
+              'Document at least 3 distinct inclusion gaps with suggested fixes',
             ],
           },
         ],
       },
       {
         id: 'l5',
-        title: 'Smart Office Workflow',
+        title: 'Formative Assessment & Feedback Loops',
         documents: [],
         videos: [
           {
             id: 'v3',
             kind: 'video',
-            title: 'Smart Office Workflow',
+            title: 'Formative Assessment & Feedback Loops',
             duration: '18 min',
             youtubeId: 'zofMnllkVfI',
             intro:
-              'Use AI tools to organise office tasks, summarise long documents, and build faster daily workflows.',
+              'Use quick-check techniques to see what learners actually understand, and close the loop with feedback that changes what happens next.',
             topics: [
-              'Why AI-assisted workflows reduce repetitive manual work',
-              'Summarising meeting notes and long documents automatically',
-              'Setting up a daily task automation routine',
-              'Integrating AI tools with email, calendar, and file storage',
+              'Why formative checks catch misunderstanding before it compounds',
+              'Low-stakes techniques: exit tickets, thumbs-up polls, one-sentence summaries',
+              "Turning check results into the next day's lesson plan",
+              'Giving feedback that learners can act on immediately',
             ],
             moments: [
-              { time: '0:00', label: 'Why AI workflows matter today' },
-              { time: '3:15', label: 'Summarising long documents' },
-              { time: '7:40', label: 'Automating repetitive daily tasks' },
-              { time: '12:20', label: 'Tool integration walkthrough' },
-              { time: '16:00', label: 'Building your personal workflow' },
+              { time: '0:00', label: 'Why formative assessment matters today' },
+              { time: '3:15', label: 'Quick-check techniques in action' },
+              { time: '7:40', label: 'Reading the results and adjusting pace' },
+              { time: '12:20', label: 'Feedback that learners can act on' },
+              { time: '16:00', label: 'Building your own feedback loop' },
             ],
           },
         ],
@@ -731,87 +807,88 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'q4',
             kind: 'quiz',
-            title: 'Smart Office Workflow Quiz',
+            title: 'Formative Assessment Quiz',
             status: 'Ready',
-            forLesson: 'Smart Office Workflow',
+            forLesson: 'Formative Assessment & Feedback Loops',
             totalQuestions: 7,
             estimatedMinutes: 10,
             description:
-              'Evaluate your understanding of AI-powered office workflows, task automation, and tool integration.',
+              'Evaluate your understanding of formative checks, feedback loops, and adjusting instruction in response to results.',
             questions: [
               {
                 question:
-                  'What is the primary benefit of AI document summarisation tools?',
+                  'What is the primary benefit of a formative check like an exit ticket?',
                 options: [
-                  'Save time reviewing long documents',
-                  'Replace human decision-making entirely',
-                  'Translate documents automatically',
-                  'Format text with perfect typography',
+                  'Catch misunderstanding before it compounds',
+                  'Replace the need for any final assessment',
+                  'Assign a final grade',
+                  'Take attendance',
                 ],
                 correctIndex: 0,
               },
               {
                 question:
-                  'When integrating AI tools into an existing workflow, you should:',
+                  'When introducing a new formative-check routine, you should:',
                 options: [
-                  'Replace all current tools at once',
-                  'Start with one workflow and expand gradually',
-                  'Only use AI for creative writing',
-                  'Avoid automation for complex tasks',
-                ],
-                correctIndex: 1,
-              },
-              {
-                question: 'Which task is best suited for AI automation?',
-                options: [
-                  'Strategic decision-making',
-                  'Summarising recurring meeting notes',
-                  'Building interpersonal relationships',
-                  'Creative problem solving',
+                  'Replace every existing routine at once',
+                  'Start with one routine and expand gradually',
+                  'Only use it for advanced learners',
+                  'Avoid it for complex topics',
                 ],
                 correctIndex: 1,
               },
               {
                 question:
-                  'What should you verify after setting up an AI workflow?',
+                  'Which technique is best suited as a quick, low-stakes check?',
                 options: [
-                  'That it looks impressive to colleagues',
-                  'That outputs are accurate and reviewed regularly',
-                  'That it runs as fast as possible',
-                  'That it costs the least',
+                  'A cumulative final exam',
+                  'A one-sentence exit-ticket summary',
+                  'A term-long portfolio',
+                  'A parent conference',
                 ],
                 correctIndex: 1,
               },
               {
                 question:
-                  'What is the main advantage of connecting AI tools to email and calendar apps?',
+                  'What should you do after collecting formative-check results?',
                 options: [
-                  'It deletes low-priority emails automatically',
-                  'It allows AI to schedule meetings without any human input',
-                  'It streamlines scheduling and follow-up reminders in one place',
-                  'It replaces the need for a project manager',
+                  'File them without review',
+                  'Adjust the next lesson based on what the results show',
+                  'Grade them for the report card',
+                  'Ignore results below a certain score',
+                ],
+                correctIndex: 1,
+              },
+              {
+                question:
+                  "What is the main advantage of connecting formative checks directly to the next lesson's plan?",
+                options: [
+                  'It removes the need to plan ahead',
+                  'It lets the teacher skip re-teaching entirely',
+                  'It closes the loop between what learners showed and what happens next',
+                  'It replaces the need for a lesson objective',
                 ],
                 correctIndex: 2,
               },
               {
                 question:
-                  'Which type of task should always remain under direct human control, even when AI assistance is available?',
+                  "Which decision should always remain under the teacher's direct judgement, even with a formative-check routine in place?",
                 options: [
-                  'Formatting a recurring report',
-                  'Sending automated meeting reminders',
-                  'Strategic decisions affecting people or budgets',
-                  'Summarising a long PDF',
+                  'Formatting the exit-ticket template',
+                  'Sending a reminder to complete the check',
+                  'Deciding whether to re-teach a concept before moving on',
+                  'Collecting a one-word answer',
                 ],
                 correctIndex: 2,
               },
               {
                 question:
-                  'What habit best ensures AI-generated outputs remain accurate over time?',
+                  'What habit best ensures feedback loops keep improving instruction over time?',
                 options: [
-                  'Never changing the AI prompts',
-                  'Regularly reviewing and auditing AI outputs',
-                  'Trusting the AI to self-correct',
-                  'Using multiple AI tools simultaneously',
+                  'Never changing the check questions',
+                  'Regularly reviewing check results and adjusting the plan',
+                  'Trusting that learners will self-correct',
+                  'Using as many different checks as possible at once',
                 ],
                 correctIndex: 1,
               },
@@ -822,18 +899,18 @@ export const REVIEW_MODULES: ReviewModule[] = [
           {
             id: 'a4',
             kind: 'assignment',
-            title: 'Draft an AI Workflow Plan',
+            title: 'Design a Feedback Loop',
             status: 'Ready',
-            forLesson: 'Smart Office Workflow',
+            forLesson: 'Formative Assessment & Feedback Loops',
             dueDate: 'Jun 5',
             submission: 'File or link upload',
             instructions:
-              'Design a workflow that uses at least one AI tool to automate a repetitive task in a real or hypothetical office environment.',
+              'Design a formative-check routine that surfaces misunderstanding in a real or hypothetical lesson, and describe how the results would change your next lesson.',
             requirements: [
-              'Identify one specific repetitive task that an AI tool can assist with',
-              'Name at least one concrete AI tool that handles this task',
+              'Identify one specific concept that is easy to misunderstand',
+              'Name at least one concrete formative-check technique that surfaces it',
               'Provide numbered step-by-step implementation instructions',
-              'Estimate the time saved per week and justify your estimate',
+              'Describe how results below and above expectation would each change your next lesson',
             ],
           },
         ],

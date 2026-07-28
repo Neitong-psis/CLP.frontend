@@ -7,16 +7,9 @@ import {
   Star,
   Clock,
   Sparkles,
-  Code2,
-  Server,
-  BarChart3,
-  Palette,
-  Terminal,
-  Database,
-  ShieldCheck,
-  Cloud,
-  Layers,
-  Megaphone,
+  TrendingUp,
+  Baby,
+  BookMarked,
   GraduationCap,
   BookOpen,
   type LucideIcon,
@@ -36,48 +29,23 @@ interface CourseTaskCardProps {
 // ── Thumbnail — category-tinted placeholder (no real cover art yet) ─────────
 
 const CATEGORY_THUMB: Record<string, { icon: LucideIcon; cls: string }> = {
-  AI: {
+  'Innovative Learning': {
     icon: Sparkles,
     cls: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
   },
-  'Web Dev': {
-    icon: Code2,
-    cls: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-  },
-  DevOps: {
-    icon: Server,
-    cls: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400',
-  },
-  'Data Science': {
-    icon: BarChart3,
-    cls: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-  },
-  Design: {
-    icon: Palette,
-    cls: 'bg-pink-500/15 text-pink-600 dark:text-pink-400',
-  },
-  Programming: {
-    icon: Terminal,
-    cls: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
-  },
-  Databases: {
-    icon: Database,
-    cls: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-  },
-  Security: {
-    icon: ShieldCheck,
-    cls: 'bg-red-500/15 text-red-600 dark:text-red-400',
-  },
-  Cloud: { icon: Cloud, cls: 'bg-sky-500/15 text-sky-600 dark:text-sky-400' },
-  Product: {
-    icon: Layers,
+  'Leadership Development': {
+    icon: TrendingUp,
     cls: 'bg-orange-500/15 text-orange-600 dark:text-orange-400',
   },
-  Marketing: {
-    icon: Megaphone,
-    cls: 'bg-teal-500/15 text-teal-600 dark:text-teal-400',
+  'Child Development': {
+    icon: Baby,
+    cls: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
   },
-  Teaching: { icon: GraduationCap, cls: 'bg-brand-gold/15 text-brand-gold' },
+  'Khmer Literature': {
+    icon: BookMarked,
+    cls: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
+  },
+  Leadership: { icon: GraduationCap, cls: 'bg-brand-gold/15 text-brand-gold' },
 };
 
 const DEFAULT_THUMB = {

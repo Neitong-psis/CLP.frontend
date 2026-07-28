@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAdminDashboardT } from '@/i18n';
 import TopBar from '@/components/common/TopBar';
 import { DashboardStatGrid } from '@/components/pages/admin/components/dashboard/DashboardStatGrid';
@@ -57,10 +58,9 @@ export function AdminDashboardContent() {
           <DashboardStatGrid firstVisit={isFirstVisit} />
 
           <div className="grid gap-6 md:grid-cols-[1fr_260px] lg:grid-cols-3">
-            <MonthlyRevenueCard
-              data={monthlyRevenueData}
-              className="lg:col-span-2"
-            />
+            <Link href="/admin/revenue" className="block lg:col-span-2">
+              <MonthlyRevenueCard data={monthlyRevenueData} />
+            </Link>
             <UserDistributionContainer firstVisit={isFirstVisit} />
           </div>
 

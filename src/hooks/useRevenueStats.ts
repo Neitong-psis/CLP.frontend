@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  createResourceStore,
+  useResourceStore,
+} from '@/lib/cache/createResourceStore';
 import {
   fetchRevenueStats,
   fetchRevenueMonthly,
@@ -8,37 +11,28 @@ import {
   type RevenueMonthly,
 } from '@/services/revenue';
 
+interface RevenueData {
+  stats: RevenueStats;
+  monthly: RevenueMonthly;
+}
+
 interface UseRevenueStatsResult {
   stats: RevenueStats | null;
   monthly: RevenueMonthly | null;
   loading: boolean;
 }
 
+const revenueStatsStore = createResourceStore<RevenueData>(() =>
+  Promise.all([fetchRevenueStats(), fetchRevenueMonthly()]).then(
+    ([stats, monthly]) => ({ stats, monthly }),
+  ),
+);
+
 export function useRevenueStats(): UseRevenueStatsResult {
-  const [stats, setStats] = useState<RevenueStats | null>(null);
-  const [monthly, setMonthly] = useState<RevenueMonthly | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    Promise.all([fetchRevenueStats(), fetchRevenueMonthly()])
-      .then(([statsRes, monthlyRes]) => {
-        if (cancelled) return;
-        setStats(statsRes);
-        setMonthly(monthlyRes);
-      })
-      .catch(() => {
-        // Leave null — components fall back to static constants
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { stats, monthly, loading };
+  const { data, loading } = useResourceStore(revenueStatsStore);
+  return {
+    stats: data?.stats ?? null,
+    monthly: data?.monthly ?? null,
+    loading,
+  };
 }

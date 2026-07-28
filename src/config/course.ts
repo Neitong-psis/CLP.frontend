@@ -1,14 +1,11 @@
 import { z } from 'zod';
 
 export const CATEGORIES = [
-  'Web Development',
-  'Programming',
-  'Data Science',
-  'Cloud Computing',
-  'DevOps',
-  'Design',
-  'AI & Machine Learning',
-  'Cybersecurity',
+  'Khmer Literature',
+  'Leadership',
+  'Child Development',
+  'Leadership Development',
+  'Innovative Learning',
 ] as const;
 
 export const LEVELS = ['beginner', 'intermediate', 'advanced'] as const;

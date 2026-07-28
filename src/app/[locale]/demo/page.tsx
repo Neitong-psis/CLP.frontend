@@ -14,8 +14,8 @@ const DEMO_USERS = [
     home: '/admin',
   },
   {
-    initials: 'AY',
-    name: 'Dr. Angela Yu',
+    initials: 'SC',
+    name: 'Dr. Sopheak Chan',
     role: 'Educator',
     description: 'Build and publish courses, track student progress.',
     color: 'bg-emerald-600',

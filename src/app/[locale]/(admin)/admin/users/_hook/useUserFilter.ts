@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   AdminUserRow,
   InviteStatus,
@@ -8,10 +8,13 @@ import type {
   UserStatus,
 } from '@/constants/admin';
 import { PAGE_SIZE } from '@/constants/admin/users';
+import { useColumnSort, type SortDir } from '@/hooks/useColumnSort';
+import { parseDateLoose } from '@/lib/utils/sort';
 
 type RoleFilter = UserRole | 'All';
 type StatusFilter = UserStatus | 'All';
 type InviteFilter = InviteStatus | 'All';
+export type UserSortKey = 'name' | 'courses' | 'joined';
 
 export interface UserFilter {
   search: string;
@@ -24,6 +27,11 @@ export interface UserFilter {
   setRoleFilter: (value: RoleFilter) => void;
   setStatusFilter: (value: StatusFilter) => void;
   setInviteFilter: (value: InviteFilter) => void;
+
+  // ── Sorting ──────────────────────────────────────────────────────────────
+  sortKey: UserSortKey | null;
+  sortDir: SortDir;
+  toggleSort: (key: UserSortKey) => void;
 
   // ── Pagination ───────────────────────────────────────────────────────────
   currentPage: number;
@@ -54,22 +62,47 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
   const [statusFilter, setStatusFilterRaw] = useState<StatusFilter>('All');
   const [inviteFilter, setInviteFilterRaw] = useState<InviteFilter>('All');
   const [page, setPage] = useState(1);
+  const {
+    sortKey,
+    sortDir,
+    toggleSort: toggleSortRaw,
+  } = useColumnSort<UserSortKey>();
 
-  const matchSearch = (u: AdminUserRow) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+  const filtered = useMemo(() => {
+    const matchSearch = (u: AdminUserRow) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      );
+    };
+
+    const rows = users.filter(
+      (u) =>
+        matchSearch(u) &&
+        (roleFilter === 'All' || u.role === roleFilter) &&
+        (statusFilter === 'All' || u.status === statusFilter) &&
+        (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
     );
-  };
 
-  const filtered = users.filter(
-    (u) =>
-      matchSearch(u) &&
-      (roleFilter === 'All' || u.role === roleFilter) &&
-      (statusFilter === 'All' || u.status === statusFilter) &&
-      (inviteFilter === 'All' || u.inviteStatus === inviteFilter),
-  );
+    if (sortKey) {
+      rows.sort((a, b) => {
+        const cmp =
+          sortKey === 'name'
+            ? a.name.localeCompare(b.name)
+            : sortKey === 'courses'
+              ? a.enrolled - b.enrolled
+              : parseDateLoose(a.joined) - parseDateLoose(b.joined);
+        return sortDir === 'asc' ? cmp : -cmp;
+      });
+    }
+    return rows;
+  }, [users, search, roleFilter, statusFilter, inviteFilter, sortKey, sortDir]);
+
+  function toggleSort(key: UserSortKey) {
+    toggleSortRaw(key);
+    setPage(1);
+  }
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -123,6 +156,9 @@ export function useUserFilter(users: AdminUserRow[]): UserFilter {
     setRoleFilter,
     setStatusFilter,
     setInviteFilter,
+    sortKey,
+    sortDir,
+    toggleSort,
     currentPage,
     totalPages,
     pageStart,

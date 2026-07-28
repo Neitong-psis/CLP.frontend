@@ -10,6 +10,7 @@ import { useLearnerExploreT } from '@/i18n';
 import {
   type Course,
   type CourseLevel,
+  DEFAULT_COURSE_THUMBNAIL,
   EXPLORE_CATEGORIES,
 } from '@/constants/learner';
 import { slugify } from '@/lib/utils/slugify';
@@ -21,11 +22,7 @@ import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 // ── Sorting ─────────────────────────────────────────────────────────────────
 
 type SortKey =
-  | 'recommended'
-  | 'rating'
-  | 'price-low'
-  | 'price-high'
-  | 'title-az';
+  'recommended' | 'rating' | 'price-low' | 'price-high' | 'title-az';
 
 const DEFAULT_PRICE = 49;
 
@@ -79,9 +76,6 @@ const LEVEL_STYLE: Record<CourseLevel, string> = {
 
 const PAGE_SIZE = 9;
 
-const MIXED_PLACEHOLDER_BG = 'bg-slate-100 dark:bg-slate-800';
-const TEXT_PLACEHOLDER_BG = 'bg-emerald-50 dark:bg-emerald-950';
-
 // ── Course card ───────────────────────────────────────────────────────────────
 
 interface CourseCardProps {
@@ -126,29 +120,18 @@ function CourseCard({
         href={previewHref}
         className="relative flex aspect-video shrink-0 flex-col items-center justify-center overflow-hidden"
       >
-        {course.thumbnail ? (
-          <>
-            {/* Cover image */}
-            <Image
-              src={course.thumbnail}
-              alt={course.title}
-              fill
-              sizes="(max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-            />
+        {/* Cover image — falls back to the default poster when a course
+            doesn't set its own thumbnail. */}
+        <Image
+          src={course.thumbnail || DEFAULT_COURSE_THUMBNAIL}
+          alt={course.title}
+          fill
+          sizes="(max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        />
 
-            {/* Flat tint so badges stay legible over any cover photo */}
-            <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
-          </>
-        ) : (
-          /* Flat placeholder for courses without a cover image */
-          <div
-            className={cn(
-              'absolute inset-0',
-              isMixed ? MIXED_PLACEHOLDER_BG : TEXT_PLACEHOLDER_BG,
-            )}
-          />
-        )}
+        {/* Flat tint so badges stay legible over any cover photo */}
+        <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
 
         {/* Level badge */}
         <span

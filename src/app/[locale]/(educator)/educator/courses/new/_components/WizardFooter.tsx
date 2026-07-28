@@ -17,6 +17,7 @@ export function WizardFooter({
   canSubmit,
   missingCount,
   statusBlocksSubmit = false,
+  statusBlocksSubmitLabel,
   onBack,
   onNext,
   onSaveDraft,
@@ -28,8 +29,11 @@ export function WizardFooter({
   canSubmit: boolean;
   missingCount: number;
   /** True when required fields are complete but Current Status isn't yet
-   *  set to "Under Review" — the other reason Submit can be disabled. */
+   *  set to the target status — the other reason Submit can be disabled. */
   statusBlocksSubmit?: boolean;
+  /** Overrides the default "set status to Under Review" copy — the admin
+   *  wizard's target status is "Published" instead. */
+  statusBlocksSubmitLabel?: string;
   onBack: () => void;
   onNext: () => void;
   onSaveDraft: () => void;
@@ -43,6 +47,8 @@ export function WizardFooter({
   const nextTitle =
     !isLast && nextStepNum <= STEP_COUNT ? t(`steps.${nextStepNum}.title`) : '';
   const resolvedSubmitLabel = submitLabel ?? t('footer.submitToAdmin');
+  const resolvedStatusBlocksLabel =
+    statusBlocksSubmitLabel ?? t('footer.setStatusToSubmit');
 
   return (
     <div className="border-border bg-card/85 sticky bottom-0 border-t px-6 py-3.5 backdrop-blur-md lg:px-8">
@@ -75,7 +81,7 @@ export function WizardFooter({
             ) : statusBlocksSubmit ? (
               <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
                 <TriangleAlert className="h-4 w-4" />
-                {t('footer.setStatusToSubmit')}
+                {resolvedStatusBlocksLabel}
               </p>
             ) : (
               <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
@@ -116,7 +122,7 @@ export function WizardFooter({
                 canSubmit
                   ? undefined
                   : statusBlocksSubmit
-                    ? t('footer.setStatusToSubmit')
+                    ? resolvedStatusBlocksLabel
                     : t('footer.completeRequired')
               }
             >

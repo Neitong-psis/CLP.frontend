@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, UserPlus, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useEducatorStudentsT } from '@/i18n';
 import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import { STATUS_OPTIONS, type StatusFilter } from '../_lib/constants';
@@ -12,7 +12,6 @@ export function StudentsToolbar({
   onStatusChange,
   counts,
   resultCount,
-  onAddStudent,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
@@ -20,7 +19,6 @@ export function StudentsToolbar({
   onStatusChange: (value: StatusFilter) => void;
   counts: { total: number; active: number; inactive: number; achieved: number };
   resultCount: number;
-  onAddStudent: () => void;
 }) {
   const t = useEducatorStudentsT();
 
@@ -73,14 +71,6 @@ export function StudentsToolbar({
             </button>
           )}
         </div>
-        <button
-          type="button"
-          onClick={onAddStudent}
-          className="bg-brand-gold flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
-        >
-          <UserPlus className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('addStudent')}</span>
-        </button>
       </div>
     </div>
   );

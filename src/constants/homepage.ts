@@ -5,7 +5,7 @@ import {
   BookOpen,
   Target,
   Sparkles,
-  Code2,
+  Lightbulb,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -87,11 +87,11 @@ export const PROGRAMS: readonly Program[] = [
     image: '/programs/advanced_leadership.png',
   },
   {
-    title: 'STEM Excellence',
+    title: 'Innovative Learning',
     description:
-      'Develop critical thinking and technical skills through hands-on robotics, coding, and science projects.',
-    icon: Code2,
-    href: '/programs/stem',
+      'Develop critical and creative thinking through hands-on design projects, prototyping, and inquiry-based learning.',
+    icon: Lightbulb,
+    href: '/programs/innovative-learning',
     tag: 'Innovation',
     image: '/programs/STEM.png',
   },
@@ -267,18 +267,17 @@ export const NEWS_COLUMNS: readonly NewsColumn[] = [
     href: '/news',
     items: [
       {
-        id: 'coding-challenge-2026',
+        id: 'innovation-challenge-2026',
         category: 'Event',
         date: 'Oct 15, 2026',
-        title: 'AYLA Coding Challenge 2026',
+        title: 'AYLA Innovation Challenge 2026',
         excerpt:
-          'Join our students as they showcase their latest robotics and app development projects to the community.',
+          'Join our students as they showcase their latest design projects and community-impact prototypes to the community.',
         readMin: 3,
-        imageAlt:
-          'Laptop showing code editor with a plant and coffee mug on desk',
+        imageAlt: 'Students presenting a project prototype on a table',
         source: 'AYLA Events',
         image: '/news/coding_challenge.png',
-        content: `The AYLA Coding Challenge 2026 is our most anticipated annual event, bringing together the brightest young minds across Cambodia to compete, collaborate, and create. This year's challenge invites students from all AYLA programs to build innovative projects using robotics, web development, and artificial intelligence.\n\nParticipants will have 48 hours to design, build, and present a working prototype that addresses a real-world problem in their community. Teams of two to four students will be guided by industry mentors throughout the competition, ensuring every participant walks away with new skills and knowledge.\n\n**What to expect:**\n- Live robotics demonstrations from STEM Hub students\n- Web and mobile app showcases from Advanced Leadership teams\n- AI-powered project presentations from Youth Excellence participants\n- Keynote address from Cambodia's leading tech entrepreneurs\n- Awards ceremony with scholarships and certificates\n\nThe event is open to the public. Parents, educators, and community leaders are warmly invited to attend and celebrate the achievements of our student innovators. Registration is free for all attendees.\n\nJoin us on October 15, 2026 at the AYLA Learning Centre, Phnom Penh. Doors open at 8:00 AM.`,
+        content: `The AYLA Innovation Challenge 2026 is our most anticipated annual event, bringing together the brightest young minds across Cambodia to compete, collaborate, and create. This year's challenge invites students from all AYLA programs to build innovative projects using design thinking, storytelling, and community research.\n\nParticipants will have 48 hours to design, build, and present a working prototype that addresses a real-world problem in their community. Teams of two to four students will be guided by mentors throughout the competition, ensuring every participant walks away with new skills and knowledge.\n\n**What to expect:**\n- Live prototype demonstrations from Innovative Learning students\n- Leadership project showcases from Advanced Leadership teams\n- Community-impact presentations from Youth Excellence participants\n- Keynote address from Cambodia's leading education and civic innovators\n- Awards ceremony with scholarships and certificates\n\nThe event is open to the public. Parents, educators, and community leaders are warmly invited to attend and celebrate the achievements of our student innovators. Registration is free for all attendees.\n\nJoin us on October 15, 2026 at the AYLA Learning Centre, Phnom Penh. Doors open at 8:00 AM.`,
       },
       {
         id: 'scholarship-2027',
@@ -291,7 +290,7 @@ export const NEWS_COLUMNS: readonly NewsColumn[] = [
         imageAlt: 'Students collaborating over books in a library',
         source: 'AYLA Admissions',
         image: '/news/scolarship.png',
-        content: `AYLA is proud to announce a significant expansion of our merit-based scholarship programme for the 2027 academic year. In partnership with leading educational foundations and corporate sponsors across Southeast Asia, we are opening applications for three distinct scholarship tracks designed to remove financial barriers and reward academic excellence, leadership potential, and community impact.\n\nThis year's expansion represents our largest scholarship investment to date, with over $120,000 in total funding available across more than 80 individual awards. We believe that every motivated student in Cambodia deserves access to a world-class education — and these scholarships are a direct expression of that belief.\n\n**Available Scholarship Tracks:**\n\n**Academic Excellence Award** — Awarded to students with outstanding examination results. Recipients receive full tuition coverage for the academic year, priority enrolment, and a dedicated academic mentor.\n\n**Community Leadership Grant** — For students who demonstrate a measurable positive impact in their community. This scholarship recognises initiative, empathy, and the drive to lead beyond the classroom.\n\n**Financial Need Bursary** — Means-tested support for families facing economic hardship. Applications are reviewed confidentially, and awards cover up to 100% of programme fees plus learning materials.\n\n**Who Can Apply:**\n\nAll applicants must be enrolling in AYLA's 2027 cohort across our STEM Hub, Advanced Leadership, or Youth Excellence programmes. Current AYLA students progressing to a higher level are also eligible to apply for renewal scholarships.\n\n**How to Apply:**\n\nApplications open on October 1, 2026 and close on November 30, 2026. Candidates must submit a completed application form, two letters of recommendation, a personal statement of no more than 500 words, and supporting documentation relevant to the chosen track.\n\nShortlisted candidates will be invited for a brief interview with our Admissions Committee in December, with results announced in January 2027.\n\nFor full eligibility criteria, required documents, and the application portal, visit the Scholarships page on the AYLA website or contact our Admissions Office directly. We encourage all eligible students to apply — do not let financial circumstances stand between you and the future you deserve.`,
+        content: `AYLA is proud to announce a significant expansion of our merit-based scholarship programme for the 2027 academic year. In partnership with leading educational foundations and corporate sponsors across Southeast Asia, we are opening applications for three distinct scholarship tracks designed to remove financial barriers and reward academic excellence, leadership potential, and community impact.\n\nThis year's expansion represents our largest scholarship investment to date, with over $120,000 in total funding available across more than 80 individual awards. We believe that every motivated student in Cambodia deserves access to a world-class education — and these scholarships are a direct expression of that belief.\n\n**Available Scholarship Tracks:**\n\n**Academic Excellence Award** — Awarded to students with outstanding examination results. Recipients receive full tuition coverage for the academic year, priority enrolment, and a dedicated academic mentor.\n\n**Community Leadership Grant** — For students who demonstrate a measurable positive impact in their community. This scholarship recognises initiative, empathy, and the drive to lead beyond the classroom.\n\n**Financial Need Bursary** — Means-tested support for families facing economic hardship. Applications are reviewed confidentially, and awards cover up to 100% of programme fees plus learning materials.\n\n**Who Can Apply:**\n\nAll applicants must be enrolling in AYLA's 2027 cohort across our Innovative Learning, Advanced Leadership, or Youth Excellence programmes. Current AYLA students progressing to a higher level are also eligible to apply for renewal scholarships.\n\n**How to Apply:**\n\nApplications open on October 1, 2026 and close on November 30, 2026. Candidates must submit a completed application form, two letters of recommendation, a personal statement of no more than 500 words, and supporting documentation relevant to the chosen track.\n\nShortlisted candidates will be invited for a brief interview with our Admissions Committee in December, with results announced in January 2027.\n\nFor full eligibility criteria, required documents, and the application portal, visit the Scholarships page on the AYLA website or contact our Admissions Office directly. We encourage all eligible students to apply — do not let financial circumstances stand between you and the future you deserve.`,
       },
       {
         id: 'parent-teacher-meet',
@@ -371,15 +370,16 @@ export const NEWS_COLUMNS: readonly NewsColumn[] = [
         source: 'AYLA Events',
       },
       {
-        id: 'stem-workshop',
+        id: 'innovation-workshop',
         category: 'Event',
         date: 'Jul 20, 2026',
-        title: 'STEM Innovation Workshop for Secondary Students',
+        title: 'Innovation Workshop for Secondary Students',
         excerpt:
-          'A hands-on day of robotics, coding challenges, and science experiments.',
+          'A hands-on day of design challenges, prototyping, and community-research activities.',
         readMin: 2,
-        imageAlt: 'Students working on a robotics kit at a workshop table',
-        source: 'STEM Alliance',
+        imageAlt:
+          'Students collaborating on a design project at a workshop table',
+        source: 'Innovation Alliance',
       },
     ],
   },

@@ -77,12 +77,11 @@ const CURRENCIES = [
 ] as const;
 
 const CATEGORIES = [
-  'Web Development',
-  'Programming',
-  'Data Science',
-  'Cloud Computing',
-  'DevOps',
-  'Design',
+  'Khmer Literature',
+  'Leadership',
+  'Child Development',
+  'Leadership Development',
+  'Innovative Learning',
 ];
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];

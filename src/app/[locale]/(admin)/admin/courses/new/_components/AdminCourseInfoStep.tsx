@@ -5,52 +5,56 @@ import { CourseInfoStep } from '@/app/[locale]/(educator)/educator/courses/new/_
 import { SelectField } from '@/app/[locale]/(educator)/educator/courses/new/_components/form';
 import type { CourseInfo } from '@/app/[locale]/(educator)/educator/courses/new/_lib/types';
 import type { AdminUserRow } from '@/constants/admin';
+import { useAdminCoursesAssignAuthorT } from '@/i18n';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AdminCourseInfoStep({
   info,
   onChange,
-  assignedEducator,
-  onEducatorChange,
-  educators,
+  assignedAuthor,
+  onAuthorChange,
+  authorOptions,
 }: {
   info: CourseInfo;
   onChange: (key: keyof CourseInfo, val: string) => void;
-  assignedEducator: string;
-  onEducatorChange: (educatorId: string) => void;
-  educators: AdminUserRow[];
+  assignedAuthor: string;
+  onAuthorChange: (authorId: string) => void;
+  authorOptions: AdminUserRow[];
 }) {
-  const selectedEducator = educators.find((e) => e.id === assignedEducator);
+  const t = useAdminCoursesAssignAuthorT();
+  const { user } = useAuth();
+  const selectedAuthor = authorOptions.find((a) => a.id === assignedAuthor);
 
   return (
     <div className="space-y-6">
-      {/* ── Assign Educator (admin-only) ──────────────────────────────── */}
+      {/* ── Assign Author (admin-only) ────────────────────────────────── */}
       <section className="border-border bg-card rounded-2xl border p-6">
         <div className="mb-5">
-          <h2 className="text-foreground text-sm font-bold">Assign Educator</h2>
-          <p className="text-muted-foreground text-xs">
-            Choose which educator will own and deliver this course.
-          </p>
+          <h2 className="text-foreground text-sm font-bold">{t('heading')}</h2>
+          <p className="text-muted-foreground text-xs">{t('desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="text-foreground/80 mb-1.5 block text-sm font-semibold">
-              Educator
+              {t('label')}
             </label>
-            <SelectField value={assignedEducator} onChange={onEducatorChange}>
-              <option value="">Select an educator…</option>
-              {educators.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name}
+            <SelectField value={assignedAuthor} onChange={onAuthorChange}>
+              <option value="">{t('placeholder')}</option>
+              {authorOptions.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.id === String(user?.id ?? '')
+                    ? `${a.name} ${t('you')}`
+                    : a.name}
                 </option>
               ))}
             </SelectField>
           </div>
 
-          {selectedEducator && (
+          {selectedAuthor && (
             <div className="border-border bg-surface flex items-center gap-3 rounded-xl border p-3.5">
               <span className="bg-brand-gold/15 text-brand-gold flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold">
-                {selectedEducator.name
+                {selectedAuthor.name
                   .split(' ')
                   .map((n) => n[0])
                   .join('')
@@ -58,11 +62,11 @@ export function AdminCourseInfoStep({
               </span>
               <div className="min-w-0">
                 <p className="text-foreground truncate text-sm font-semibold">
-                  {selectedEducator.name}
+                  {selectedAuthor.name}
                 </p>
                 <p className="text-muted-foreground flex items-center gap-1 truncate text-[11px]">
                   <User className="h-3 w-3 shrink-0" />
-                  {selectedEducator.email}
+                  {selectedAuthor.email}
                 </p>
               </div>
             </div>

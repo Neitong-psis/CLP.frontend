@@ -21,10 +21,10 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-1',
     status: 'todo',
-    title: 'AI Productivity for Office Teams',
+    title: 'Innovative Learning for Modern Classrooms',
     description:
-      'Planning a practical course on using AI tools for daily operations, research, and team workflows.',
-    category: 'AI',
+      'Planning a practical course on active-learning methods, formative assessment, and engagement techniques.',
+    category: 'Innovative Learning',
     price: '$29',
     assignedBy: 'Sarah Wilson',
     priority: 'High',
@@ -35,92 +35,92 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-2',
     status: 'todo',
-    title: 'Advanced Next.js Architecture',
+    title: 'Advanced Leadership Development Framework',
     description:
-      'Draft the initial directory structure, routing strategy, and rendering patterns lesson.',
-    category: 'Web Dev',
+      'Draft the initial coaching model, feedback-loop structure, and succession-planning lesson.',
+    category: 'Leadership Development',
     price: '$49',
     assignedBy: 'David Miller',
     priority: 'High',
     type: 'Video Content',
     dueDate: 'June 15, 2026',
-    notes: 'Prepare outline for routing and middleware integrations.',
+    notes: 'Prepare outline for mentoring and feedback integrations.',
   },
   {
     id: 'task-3',
     status: 'todo',
-    title: 'Docker & Kubernetes for Web Devs',
+    title: 'Child Development Milestones Deep Dive',
     description:
-      'Outline containerization basics, volumes, networking, and multi-stage builds.',
-    category: 'DevOps',
+      'Outline developmental stages, observation checklists, and caregiver-guidance modules.',
+    category: 'Child Development',
     price: '$39',
     assignedBy: 'Sarah Wilson',
     priority: 'Medium',
     type: 'Curriculum',
     dueDate: 'June 20, 2026',
-    notes: 'Incorporate basic cloud deployment exercises.',
+    notes: 'Incorporate basic home-environment exercises.',
   },
   {
     id: 'task-4',
     status: 'todo',
-    title: 'Python for Data Science',
+    title: 'Khmer Poetry for Beginners',
     description:
-      'Create introductory pandas and numpy programming exercises and quiz templates.',
-    category: 'Data Science',
+      'Create introductory recitation exercises and quiz templates covering classical poetic forms.',
+    category: 'Khmer Literature',
     price: '$19',
     assignedBy: 'Alex Johnson',
     priority: 'Low',
     type: 'Assessment',
     dueDate: 'June 28, 2026',
-    notes: 'Define clear dataset specifications for learners.',
+    notes: 'Define clear reading list for learners.',
   },
   {
     id: 'task-5',
     status: 'todo',
-    title: 'UI Design Principles',
+    title: 'Community Leadership Principles',
     description:
-      'Draft typography, layout guidelines, color psychology, and styling frameworks.',
-    category: 'Design',
+      'Draft civic-engagement guidelines, mentorship models, and grassroots-organizing frameworks.',
+    category: 'Leadership',
     price: '$29',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     priority: 'Medium',
     type: 'Guide',
     dueDate: 'July 05, 2026',
-    notes: 'Include mobile vs. desktop responsiveness examples.',
+    notes: 'Include rural vs. urban community examples.',
   },
 
   // --- IN WRITING (5 tasks) ---
   {
     id: 'task-6',
     status: 'writing',
-    title: 'UI/UX Design Fundamentals',
+    title: 'Early Childhood Program Design',
     description:
-      'Building lessons for user research, wireframes, design systems, usability testing, and product handoff.',
-    category: 'Design',
+      'Building lessons for play-based curriculum, caregiver communication, inclusive classrooms, and milestone tracking.',
+    category: 'Child Development',
     price: '$29',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Draft: no students, revenue, completion, or progress tracking until Admin publishes the course. Auto-save ready.',
   },
   {
     id: 'task-7',
     status: 'writing',
-    title: 'TypeScript Generics Masterclass',
+    title: 'Leadership Development Masterclass',
     description:
-      'Creating curriculum exercises for generic constraints, mapped types, utility types, and conditional logic.',
-    category: 'Programming',
+      'Creating curriculum exercises for coaching conversations, 360-degree feedback, and mentoring pipelines.',
+    category: 'Leadership Development',
     price: '$19',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Draft: no students, revenue, completion, or progress tracking until Admin publishes the course. Auto-save ready.',
   },
   {
     id: 'task-8',
     status: 'writing',
-    title: 'SQL Databases for Beginners',
+    title: 'Khmer Literature for Beginners',
     description:
-      'Drafting entity relationships, normalized schemas, joins, indexing, and raw aggregate transaction functions.',
-    category: 'Databases',
+      'Drafting close-reading guides, classical text summaries, and literary-analysis exercises.',
+    category: 'Khmer Literature',
     price: '$29',
     assignedBy: 'Sarah Wilson',
     notes:
@@ -129,24 +129,24 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-9',
     status: 'writing',
-    title: 'Figma Prototyping Techniques',
+    title: 'Project-Based Learning Design',
     description:
-      'Creating lessons for interactive components, hover animations, overlays, smart animate, and variable flows.',
-    category: 'Design',
+      'Creating lessons for inquiry-based units, learner reflection, and creative assessment rubrics.',
+    category: 'Innovative Learning',
     price: '$15',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Draft: no students, revenue, completion, or progress tracking until Admin publishes the course. Auto-save ready.',
   },
   {
     id: 'task-10',
     status: 'writing',
-    title: 'Tailwind CSS Layout Mastery',
+    title: 'Community Organizing Fundamentals',
     description:
-      'Developing guidelines for custom utility configurations, media queries, flexbox containers, and grid templates.',
-    category: 'Web Dev',
+      'Developing guidelines for grassroots organizing, volunteer coordination, and civic partnerships.',
+    category: 'Leadership',
     price: '$25',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Draft: no students, revenue, completion, or progress tracking until Admin publishes the course. Auto-save ready.',
   },
@@ -155,22 +155,22 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-11',
     status: 'review',
-    title: 'Cybersecurity Awareness for Teams',
+    title: 'Child Safety & Wellbeing Awareness',
     description:
-      'Submitted for admin review with modules on phishing, passwords, device safety, and reporting incidents.',
-    category: 'Security',
+      'Submitted for admin review with modules on safeguarding, healthy routines, and caregiver communication.',
+    category: 'Child Development',
     price: '$19',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Review: submitted Submitted 1 day ago. Admin feedback: No revision notes yet.',
   },
   {
     id: 'task-12',
     status: 'review',
-    title: 'AWS Cloud Practitioner Prep',
+    title: 'Leadership Development Certification Prep',
     description:
-      'AWS basic cloud architectural framework, pricing systems, core IAM, S3, EC2, and VPC structure.',
-    category: 'Cloud',
+      'Coaching frameworks, feedback systems, mentoring structures, and succession-planning modules.',
+    category: 'Leadership Development',
     price: '$39',
     assignedBy: 'Sarah Wilson',
     notes:
@@ -179,10 +179,10 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-13',
     status: 'review',
-    title: 'GraphQL API Design with Node.js',
+    title: 'Khmer Literary Analysis Workshop',
     description:
-      'Resolvers, schema queries, mutations, subscriptions, dataloader optimizations, and federation setup.',
-    category: 'Web Dev',
+      'Close-reading techniques, thematic analysis, poetic devices, and comparative essay structure.',
+    category: 'Khmer Literature',
     price: '$49',
     assignedBy: 'David Miller',
     notes:
@@ -191,10 +191,10 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-14',
     status: 'review',
-    title: 'Product Management Essentials',
+    title: 'Youth Leadership Essentials',
     description:
-      'Roadmaps, backlog grooming, agile prioritization, metrics analysis, and user persona mapping lessons.',
-    category: 'Product',
+      'Civic responsibility, team organizing, public advocacy, and community-impact project lessons.',
+    category: 'Leadership',
     price: '$29',
     assignedBy: 'Sarah Wilson',
     notes:
@@ -203,10 +203,10 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-15',
     status: 'review',
-    title: 'Introduction to Machine Learning',
+    title: 'Introduction to Innovative Learning Design',
     description:
-      'Regression models, classification algorithms, gradient descent, training sets, and model evaluation metrics.',
-    category: 'Data Science',
+      'Active-learning models, formative assessment, learner engagement, and reflective-practice metrics.',
+    category: 'Innovative Learning',
     price: '$59',
     assignedBy: 'Alex Johnson',
     notes:
@@ -217,12 +217,12 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-16',
     status: 'published',
-    title: 'React Masterclass for Production Apps',
+    title: 'Leadership Development Masterclass for Educators',
     description:
-      'Approved and publicly available with production React patterns, forms, routing, and performance lessons.',
-    category: 'Web Dev',
+      'Approved and publicly available with mentoring, coaching, and succession-planning lessons.',
+    category: 'Leadership Development',
     price: '$89',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     students: '1,842',
     revenue: '$163,938',
     rating: '4.9',
@@ -231,12 +231,12 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-17',
     status: 'published',
-    title: 'JavaScript Basics: The Complete Guide',
+    title: 'Khmer Literature: The Complete Guide',
     description:
-      'Learn the fundamentals of JavaScript, including variables, functions, DOM manipulation, and modern ES6+ features.',
-    category: 'Programming',
+      'Learn the fundamentals of Khmer literature, including classical poetry, prose forms, and oral storytelling traditions.',
+    category: 'Khmer Literature',
     price: '$49',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     students: '3,412',
     revenue: '$167,188',
     rating: '4.8',
@@ -245,12 +245,12 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-18',
     status: 'published',
-    title: 'Node.js & Express API Development',
+    title: 'Child Development & Early Learning',
     description:
-      'Build fast and scalable server-side applications with Node.js, Express, and databases like MongoDB.',
-    category: 'Web Dev',
+      'Build strong foundations in early-years pedagogy, developmental milestones, and inclusive classroom practices.',
+    category: 'Child Development',
     price: '$79',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     students: '2,150',
     revenue: '$169,850',
     rating: '4.7',
@@ -259,12 +259,12 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-19',
     status: 'published',
-    title: 'Responsive Design with CSS Flexbox & Grid',
+    title: 'Community Leadership in Practice',
     description:
-      'Master CSS layout techniques to build gorgeous, responsive websites that look great on any screen.',
-    category: 'Web Dev',
+      'Master civic-organizing techniques to build community programs that create lasting local impact.',
+    category: 'Leadership',
     price: '$29',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     students: '1,120',
     revenue: '$32,480',
     rating: '4.9',
@@ -273,12 +273,12 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-20',
     status: 'published',
-    title: 'Git & GitHub for Dev Teams',
+    title: 'Innovative Learning for Teaching Teams',
     description:
-      'Learn version control fundamentals, branching strategies, pull requests, and collaborate effectively with Git.',
-    category: 'Programming',
+      'Learn project-based learning fundamentals, facilitation strategies, and collaborative classroom design.',
+    category: 'Innovative Learning',
     price: '$19',
-    assignedBy: 'Dr. Angela Yu',
+    assignedBy: 'Dr. Sopheak Chan',
     students: '950',
     revenue: '$18,050',
     rating: '4.6',
@@ -289,22 +289,22 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
   {
     id: 'task-21',
     status: 'archived',
-    title: 'Legacy WordPress Site Management',
+    title: 'Legacy Khmer Grammar Course',
     description:
       'Retired course kept for records. Editing is locked and only Admin can restore or remove it.',
-    category: 'Web Dev',
-    assignedBy: 'Dr. Angela Yu',
+    category: 'Khmer Literature',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Archived: no price, public visibility, or progress tracking. Content remains editable for future resubmission.',
   },
   {
     id: 'task-22',
     status: 'archived',
-    title: 'Basic Email Marketing Tools',
+    title: 'Basic Parent Newsletter Workshop',
     description:
-      'Older marketing workflow course archived after the curriculum moved to a newer version.',
-    category: 'Marketing',
-    assignedBy: 'Dr. Angela Yu',
+      'Older caregiver-communication course archived after the curriculum moved to a newer version.',
+    category: 'Child Development',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Archived: no price, public visibility, or progress tracking. Content remains editable for future resubmission.',
   },
@@ -313,31 +313,31 @@ export const EDUCATOR_TASKS: EducatorTask[] = [
     status: 'archived',
     title: 'Classroom Presentation Basics',
     description:
-      'Archived teaching fundamentals course retained for historical review.',
-    category: 'Teaching',
-    assignedBy: 'Dr. Angela Yu',
+      'Archived teaching-fundamentals course retained for historical review.',
+    category: 'Innovative Learning',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Archived: no price, public visibility, or progress tracking. Content remains editable for future resubmission.',
   },
   {
     id: 'task-24',
     status: 'archived',
-    title: 'Old SEO optimization guide',
+    title: 'Old Community Outreach Guide',
     description:
-      'SEO strategies from 2021 archived due to search engine algorithm updates.',
-    category: 'Marketing',
-    assignedBy: 'Dr. Angela Yu',
+      'Outreach strategies from 2021 archived due to updated community-engagement practices.',
+    category: 'Leadership',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Archived: no price, public visibility, or progress tracking. Content remains editable for future resubmission.',
   },
   {
     id: 'task-25',
     status: 'archived',
-    title: 'Intro to Ruby on Rails',
+    title: 'Intro to Executive Mentoring',
     description:
       'Introductory course archived due to low student engagement and curriculum revisions.',
-    category: 'Web Dev',
-    assignedBy: 'Dr. Angela Yu',
+    category: 'Leadership Development',
+    assignedBy: 'Dr. Sopheak Chan',
     notes:
       'Archived: no price, public visibility, or progress tracking. Content remains editable for future resubmission.',
   },

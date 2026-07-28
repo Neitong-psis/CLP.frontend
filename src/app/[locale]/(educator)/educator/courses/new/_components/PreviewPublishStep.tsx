@@ -16,9 +16,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-/** Statuses the educator may set directly from the wizard. "Published" is
- *  admin-only and shown disabled so the full lifecycle stays visible. */
+/** Statuses the educator may set directly from the wizard. "Under Review" is
+ *  offered to them as "Publish" instead (see the dedicated SelectItem below) —
+ *  picking it is how an educator requests admin review, and the course still
+ *  lands in the board's "Under Review" tab under the hood. */
 const EDITABLE_STATUSES: CourseTaskStatus[] = [
+  'To Do',
+  'In Writing',
+  'Archived',
+];
+
+/** Admin reuses the same 5-value pipeline verbatim, "Under Review" included,
+ *  since admin has no equivalent renamed action for it. */
+const ADMIN_EDITABLE_STATUSES: CourseTaskStatus[] = [
   'To Do',
   'In Writing',
   'Under Review',
@@ -91,6 +101,7 @@ export function PreviewPublishStep({
   instructor,
   status,
   onStatusChange,
+  canPublish = false,
 }: {
   info: CourseInfo;
   modules: CourseModule[];
@@ -100,6 +111,9 @@ export function PreviewPublishStep({
    *  Review pipeline, so it omits both and the status controls hide. */
   status?: CourseTaskStatus;
   onStatusChange?: (status: CourseTaskStatus) => void;
+  /** Admin wizard only — admin can publish a course directly from Step 3, so
+   *  "Published" is a selectable option instead of the educator's locked one. */
+  canPublish?: boolean;
 }) {
   const t = useCreateCourseT();
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
@@ -226,7 +240,10 @@ export function PreviewPublishStep({
                       alignItemWithTrigger={false}
                       className="w-full min-w-[var(--anchor-width)]"
                     >
-                      {EDITABLE_STATUSES.map((s) => (
+                      {(canPublish
+                        ? ADMIN_EDITABLE_STATUSES
+                        : EDITABLE_STATUSES
+                      ).map((s) => (
                         <SelectItem key={s} value={s}>
                           <span
                             className={cn(
@@ -237,10 +254,17 @@ export function PreviewPublishStep({
                           {s}
                         </SelectItem>
                       ))}
-                      <SelectItem value="Published" disabled>
-                        <span className="bg-muted-foreground/40 size-1.5 shrink-0 rounded-full" />
-                        {t('publish.publishedLocked')}
-                      </SelectItem>
+                      {canPublish ? (
+                        <SelectItem value="Published">
+                          <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                          {t('publish.publishedOption')}
+                        </SelectItem>
+                      ) : (
+                        <SelectItem value="Under Review">
+                          <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                          {t('publish.publishOption')}
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <span
@@ -253,7 +277,9 @@ export function PreviewPublishStep({
                   </span>
                 </div>
                 <p className="text-muted-foreground mt-1.5 text-xs">
-                  {t('publish.currentStatusHint')}
+                  {canPublish
+                    ? t('publish.currentStatusHintAdmin')
+                    : t('publish.currentStatusHint')}
                 </p>
               </FormField>
             )}

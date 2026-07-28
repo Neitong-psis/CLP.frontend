@@ -15,7 +15,10 @@ import {
 import { Button } from '@/components/ui/button/Button';
 import { cn } from '@/lib/utils/cn';
 import type { UserRole } from '@/constants/admin';
-import { generateUserPassword, type SaveUserInput } from '@/services/users';
+import { generateUserPassword } from '@/services/users';
+import type { NewApprovalInput } from '@/context/UserApprovalsContext';
+
+export type NewUserSubmission = Omit<NewApprovalInput, 'registeredDate'>;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -79,12 +82,13 @@ export default function AddUserModal({
   onCreate,
 }: {
   onClose: () => void;
-  onCreate: (input: SaveUserInput) => void;
+  onCreate: (input: NewUserSubmission) => void;
 }) {
   const t = useAdminUsersAddModalT();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [department, setDepartment] = useState('');
   const [password, setPassword] = useState(() => generateUserPassword());
   const [role, setRole] = useState<UserRole>('Learner');
   const [showPwd, setShowPwd] = useState(false);
@@ -112,6 +116,7 @@ export default function AddUserModal({
     if (!email.trim()) next.email = 'Required.';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       next.email = 'Invalid email.';
+    if (!department.trim()) next.department = 'Required.';
     if (password.length < 6) next.password = 'Minimum 6 characters.';
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -122,9 +127,9 @@ export default function AddUserModal({
     onCreate({
       name: [firstName.trim(), lastName.trim()].filter(Boolean).join(' '),
       email: email.trim().toLowerCase(),
+      department: department.trim(),
       password,
       role,
-      status: 'Active',
     });
   }
 
@@ -182,8 +187,8 @@ export default function AddUserModal({
                 >
                   {role}
                 </span>
-                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-500">
-                  {t('active')}
+                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-500">
+                  {t('pendingApproval')}
                 </span>
               </div>
             </div>
@@ -235,6 +240,23 @@ export default function AddUserModal({
                   }));
                 }}
                 className={cn(inputCls, errors.email && inputErrorCls)}
+              />
+            </Field>
+
+            {/* Department */}
+            <Field label={t('department')} error={errors.department}>
+              <input
+                type="text"
+                placeholder={t('departmentPlaceholder')}
+                value={department}
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                  setErrors((p) => ({
+                    ...p,
+                    department: undefined as unknown as string,
+                  }));
+                }}
+                className={cn(inputCls, errors.department && inputErrorCls)}
               />
             </Field>
 
@@ -351,7 +373,7 @@ export default function AddUserModal({
               className="rounded-xl px-6 font-semibold"
               onClick={handleSubmit}
             >
-              {t('createUser')}
+              {t('submitForApproval')}
             </Button>
           </div>
         </div>

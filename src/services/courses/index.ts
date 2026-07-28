@@ -21,3 +21,4 @@ export type {
   SyncCurriculumSection,
   SyncCurriculumQuizOption,
 } from './courses.api';
+export { coursesStore } from './courses.store';

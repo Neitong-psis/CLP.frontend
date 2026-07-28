@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
   Lock,
   MoreVertical,
   X,
@@ -28,8 +26,7 @@ import {
   type ReviewItem,
 } from '@/app/[locale]/(educator)/educator/courses/[id]/_lib/content';
 import {
-  ApproveDialog,
-  RejectDialog,
+  ReviewSummarySheet,
   ItemApproveDialog,
   ItemRejectDialog,
 } from './ReviewDialogs';
@@ -55,7 +52,7 @@ type DialogKind = 'approve' | 'reject' | null;
 
 /** Per-item admin decision, keyed by `ReviewItem.id`. A rejection carries the
  *  reviewer's note; that note is what the educator eventually sees. */
-interface ItemDecision {
+export interface ItemDecision {
   status: 'approved' | 'rejected';
   note?: string;
 }
@@ -132,10 +129,8 @@ export function CourseReviewOverlay({
 
   const active = items.find((i) => i.id === activeId) ?? items[0];
   const currentIndex = items.findIndex((i) => i.id === activeId);
-  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem =
     currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
-  const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
 
   function goTo(id: string) {
     setActiveId(id);
@@ -172,15 +167,15 @@ export function CourseReviewOverlay({
     });
   }
 
-  /** Every item carrying a note — required for rejections, optional for
-   *  approvals — surfaced to the educator as feedback regardless of verdict. */
+  /** Every decided item, approved or rejected, note or not — the full review
+   *  the educator will see, matching the summary the admin just confirmed. */
   function gatherFeedback(
     decisionMap: Record<string, ItemDecision>,
   ): ReviewFeedbackItem[] {
     return flattenLessons(modules).flatMap(
       ({ lesson, items: lessonItemsList }) =>
         lessonItemsList
-          .filter((i) => decisionMap[i.id]?.note)
+          .filter((i) => decisionMap[i.id])
           .map((i) => ({
             itemId: i.id,
             lessonTitle: lesson.title,
@@ -195,6 +190,10 @@ export function CourseReviewOverlay({
     if (!active) return;
     setDecisions((prev) => ({ ...prev, [active.id]: { status, note } }));
     setItemDialog(null);
+    // Click-through, like the educator's own review flow: deciding an item
+    // advances straight to the next one instead of leaving the admin to hunt
+    // for it in the sidebar.
+    if (nextItem) goTo(nextItem.id);
   }
 
   useEffect(() => {
@@ -241,6 +240,7 @@ export function CourseReviewOverlay({
           isItemDone={isItemDone}
           lockingEnabled={false}
           getItemBadge={getItemBadge}
+          showTypeIcon
           onSelect={select}
           collapsed={sidebarCollapsed}
           onCollapse={() => setSidebarCollapsed((v) => !v)}
@@ -304,19 +304,6 @@ export function CourseReviewOverlay({
                         <Download className="text-muted-foreground h-4 w-4 shrink-0" />
                         {t('exportPdf')}
                       </button>
-                      <div className="border-border/60 border-t" />
-                      <button
-                        type="button"
-                        disabled={!allDecided}
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setDialog(anyRejected ? 'reject' : 'approve');
-                        }}
-                        className="text-foreground hover:bg-muted/60 flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        <Check className="h-4 w-4 shrink-0 text-emerald-500" />
-                        {t('submitReview')}
-                      </button>
                     </div>
                   </>
                 )}
@@ -336,20 +323,6 @@ export function CourseReviewOverlay({
               <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-0.5 text-xs font-semibold text-amber-500">
                 {t('pendingReview')}
               </span>
-              <Button
-                size="sm"
-                className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                disabled={!allDecided}
-                title={
-                  !allDecided
-                    ? t('gateHint', { count: pendingCount })
-                    : undefined
-                }
-                onClick={() => setDialog(anyRejected ? 'reject' : 'approve')}
-              >
-                <Check className="h-4 w-4" />
-                {t('submitReview')}
-              </Button>
               <ThemeToggle className="size-8" />
               <NotificationBell />
               <LanguageSwitcher />
@@ -370,7 +343,7 @@ export function CourseReviewOverlay({
                 onChange={setMobileModuleId}
               />
             </div>
-            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex [scrollbar-width:none] gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;
@@ -411,46 +384,44 @@ export function CourseReviewOverlay({
 
           {/* Footer */}
           <footer className="border-border bg-card/90 shrink-0 border-t backdrop-blur-md">
-            {/* Mobile: prev / next lesson */}
+            {/* Mobile: decide the active item until every item is decided,
+                then a single Submit Review action — same pattern as desktop. */}
             <div className="flex items-center gap-2 px-3 py-3 lg:hidden">
-              <button
-                type="button"
-                disabled={!prevItem}
-                onClick={() => prevItem && goTo(prevItem.id)}
-                className="border-border text-foreground/70 hover:bg-muted/60 hover:text-foreground flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-25"
-              >
-                <ChevronLeft className="h-4 w-4 shrink-0" />
-                {prevItem && (
-                  <span className="truncate text-[11px] font-medium">
-                    {prevItem.title}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                disabled={!nextItem || nextLocked}
-                onClick={() => nextItem && !nextLocked && goTo(nextItem.id)}
-                title={nextLocked ? t('lockedNextHint') : undefined}
-                className="bg-brand-gold text-brand-navy hover:bg-brand-gold/90 flex min-w-0 flex-1 items-center justify-end gap-1.5 rounded-xl px-3 py-2.5 text-right font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-25"
-              >
-                {nextLocked ? (
-                  <Lock className="h-4 w-4 shrink-0" />
-                ) : (
-                  <>
-                    {nextItem && (
-                      <span className="truncate text-[11px]">
-                        {nextItem.title}
-                      </span>
-                    )}
-                    <ChevronRight className="h-4 w-4 shrink-0" />
-                  </>
-                )}
-              </button>
+              {allDecided ? (
+                <Button
+                  size="sm"
+                  className="w-full gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                  onClick={() => setDialog(anyRejected ? 'reject' : 'approve')}
+                >
+                  <Check className="h-4 w-4" />
+                  {t('submitReview')}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
+                    onClick={() => setItemDialog('reject')}
+                  >
+                    <X className="h-4 w-4" />
+                    {t('reject')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                    onClick={() => setItemDialog('approve')}
+                  >
+                    <Check className="h-4 w-4" />
+                    {t('approve')}
+                  </Button>
+                </>
+              )}
             </div>
 
-            {/* Desktop: back | reject | approve — acts on the currently
-                open item (not the whole course); course-level submit lives
-                in the header once every item has a decision. */}
+            {/* Desktop: back | reject/approve for the active item until every
+                item has a decision, then a single Submit Review action —
+                mirrors the educator's Next → Resubmit footer pattern. */}
             <div className="hidden items-center justify-between gap-2 px-6 py-3 lg:flex">
               <Button
                 variant="outline"
@@ -461,46 +432,62 @@ export function CourseReviewOverlay({
                 <ArrowLeft className="h-4 w-4" />
                 {t('backToCourses')}
               </Button>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
-                  onClick={() => setItemDialog('reject')}
-                >
-                  <X className="h-4 w-4" />
-                  {t('reject')}
-                </Button>
-                <Button
-                  size="sm"
-                  className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                  onClick={() => setItemDialog('approve')}
-                >
-                  <Check className="h-4 w-4" />
-                  {t('approve')}
-                </Button>
+              <div className="flex items-center gap-3">
+                {!allDecided && pendingCount > 0 && (
+                  <p className="text-muted-foreground hidden text-xs font-medium sm:block">
+                    {t('gateHint', { count: pendingCount })}
+                  </p>
+                )}
+                {allDecided ? (
+                  <Button
+                    size="sm"
+                    className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                    onClick={() =>
+                      setDialog(anyRejected ? 'reject' : 'approve')
+                    }
+                  >
+                    <Check className="h-4 w-4" />
+                    {t('submitReview')}
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
+                      onClick={() => setItemDialog('reject')}
+                    >
+                      <X className="h-4 w-4" />
+                      {t('reject')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                      onClick={() => setItemDialog('approve')}
+                    >
+                      <Check className="h-4 w-4" />
+                      {t('approve')}
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </footer>
         </div>
       </div>
 
-      {dialog === 'approve' && (
-        <ApproveDialog
-          courseTitle={course.title}
-          onConfirm={() => onApprove(course, gatherFeedback(decisions))}
-          onClose={() => setDialog(null)}
-        />
-      )}
-      {dialog === 'reject' && (
-        <RejectDialog
-          flaggedCount={
-            items.filter((i) => decisions[i.id]?.status === 'rejected').length
-          }
-          onConfirm={() => onReject(course, gatherFeedback(decisions))}
-          onClose={() => setDialog(null)}
-        />
-      )}
+      <ReviewSummarySheet
+        open={dialog !== null}
+        courseTitle={course.title}
+        items={items}
+        decisions={decisions}
+        onConfirm={() =>
+          anyRejected
+            ? onReject(course, gatherFeedback(decisions))
+            : onApprove(course, gatherFeedback(decisions))
+        }
+        onClose={() => setDialog(null)}
+      />
       {itemDialog === 'approve' && active && (
         <ItemApproveDialog
           itemTitle={active.title}

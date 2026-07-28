@@ -57,7 +57,7 @@
     },
 
     "coursesPage": {
-      "title": "Course Management",
+      "title": "Course Overview",
       "subtitle": "Live workspace synced for admin@clp.com",
       "searchPlaceholder": "Search courses...",
       "noMatch": "No courses match your search.",
@@ -113,10 +113,6 @@
       },
       "filterBtn": "Filter",
       "createBtn": "Create Course",
-      "filterStatus": "Status",
-      "filterCategory": "Category",
-      "filterLevel": "Level",
-      "filterAll": "All",
       "filterClearAll": "Clear all filters",
       "filterShowResults": "Show {count} results",
       "filterShowResult": "Show 1 result",
@@ -132,6 +128,13 @@
         "status": "Initial Status",
         "cancel": "Cancel",
         "create": "Create Course"
+      },
+      "assignAuthor": {
+        "heading": "Assign Author",
+        "desc": "Choose which educator will own and deliver this course, or assign yourself.",
+        "label": "Author",
+        "placeholder": "Select an author…",
+        "you": "(You)"
       }
     },
 
@@ -182,17 +185,18 @@
       "disabledPreview": "Disabled in admin preview.",
       "assignedAfter": "Assigned after {lesson}",
       "instructions": "Instructions",
-      "approveDialog": {
-        "title": "Approve this course?",
-        "description": "\"{title}\" will be published and visible to learners. You can archive it later from the course list.",
-        "cancel": "Cancel",
-        "confirm": "Approve & publish"
-      },
-      "rejectDialog": {
-        "title": "Reject this course?",
-        "description": "{count} item(s) flagged. The educator will see your feedback and can resubmit after making changes.",
+      "summarySheet": {
+        "title": "Review Summary",
+        "descriptionApprove": "Every item is approved. Confirm to publish \"{title}\".",
+        "descriptionReject": "{count} item(s) flagged for the educator. Review the feedback below before sending.",
+        "approveTitle": "Ready to approve",
+        "rejectTitle": "Sending feedback to the educator",
+        "approvedSection": "Approved ({count})",
+        "rejectedSection": "Needs changes ({count})",
+        "noNote": "No note added.",
         "back": "Back",
-        "sendFeedback": "Send feedback"
+        "confirmApprove": "Approve & publish",
+        "confirmReject": "Send feedback"
       },
       "itemApproveDialog": {
         "title": "Approve \"{title}\"?",
@@ -213,18 +217,10 @@
 
     "usersPage": {
       "title": "User Management",
+      "subtitle": "Live workspace synced for {email}",
       "searchPlaceholder": "Search by name or email…",
       "searchAriaLabel": "Search users by name or email",
-      "addUser": "Add User",
-      "filterBtn": "Filter",
-      "filterRole": "Role",
-      "filterStatus": "Status",
-      "filterInvitation": "Invitation",
-      "filterAll": "All",
-      "filterClearAll": "Clear all filters",
-      "filterShowResults": "Show {count} results",
-      "filterShowResult": "Show 1 result",
-      "filterNoResults": "No matches",
+      "newUser": "New User",
       "noMatch": "No users match your search.",
       "showingOf": "Showing {from}–{to} of {total} users",
       "srShowing": "Showing {from} to {to} of {total} users.",
@@ -261,9 +257,12 @@
         "title": "New User",
         "newUser": "New User",
         "active": "Active",
+        "pendingApproval": "Pending Approval",
         "firstName": "First Name",
         "lastName": "Last Name",
         "emailAddress": "Email Address",
+        "department": "Department",
+        "departmentPlaceholder": "e.g. Academic Affairs",
         "temporaryPassword": "Temporary Password",
         "copyPassword": "Copy password",
         "generatePassword": "Generate new password",
@@ -271,7 +270,8 @@
         "role": "Role",
         "requiredNote": "Fields marked * are required.",
         "cancel": "Cancel",
-        "createUser": "Create User"
+        "createUser": "Create User",
+        "submitForApproval": "Submit for Approval"
       },
       "viewModal": {
         "title": "User Details",
@@ -299,6 +299,30 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "message": "will be permanently removed. This action cannot be undone."
+      },
+      "approvalsPage": {
+        "heading": "Admin Approval Table",
+        "headingDesc": "Review administrator registrations before granting portal access.",
+        "searchPlaceholder": "Search admins…",
+        "newUser": "New User",
+        "tabActive": "Active Admins",
+        "tabPending": "Pending Approval",
+        "tabRejected": "Rejected Requests",
+        "colUser": "ADMIN USER",
+        "colRole": "ROLE",
+        "colRegistered": "REGISTERED DATE",
+        "colDepartment": "DEPARTMENT",
+        "colStatus": "STATUS",
+        "colAction": "ACTION",
+        "approve": "Approve",
+        "reject": "Reject",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "noMatch": "No requests match this view.",
+        "approveSuccess": "\"{name}\" was approved and provisioned.",
+        "approveFailed": "Failed to approve \"{name}\": {message}",
+        "rejectSuccess": "\"{name}\" was rejected.",
+        "submittedSuccess": "\"{name}\" was submitted for approval."
       }
     },
 
@@ -374,7 +398,6 @@
       "issuanceHistory": "Issuance History",
       "issuanceSubtitle": "Search and filter generated learner credentials.",
       "searchPlaceholder": "Search student, course, or ID...",
-      "filter": "Filter",
       "colCertId": "CERTIFICATE ID",
       "colRecipient": "RECIPIENT",
       "colCourse": "COURSE/PROGRAM",

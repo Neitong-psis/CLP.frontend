@@ -10,12 +10,11 @@ export const STATUS_FILTERS: Array<CourseStatus | 'All'> = [
 ];
 
 export const ALL_CATEGORIES = [
-  'Web Development',
-  'Data Science',
-  'Cloud Computing',
-  'Programming',
-  'DevOps',
-  'Design',
+  'Khmer Literature',
+  'Leadership',
+  'Child Development',
+  'Leadership Development',
+  'Innovative Learning',
 ];
 
 export const ALL_LEVELS = ['Beginner', 'Intermediate', 'Advanced'];

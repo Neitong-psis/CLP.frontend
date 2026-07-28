@@ -31,6 +31,8 @@ export const useAdminCoursesEditModalT = () =>
   useTranslations(NS.admin.coursesEditModal);
 export const useAdminCoursesViewModalT = () =>
   useTranslations(NS.admin.coursesViewModal);
+export const useAdminCoursesAssignAuthorT = () =>
+  useTranslations(NS.admin.coursesAssignAuthor);
 export const useAdminReviewOverlayT = () =>
   useTranslations(NS.admin.reviewOverlay);
 export const useAdminUsersT = () => useTranslations(NS.admin.users);
@@ -40,6 +42,8 @@ export const useAdminUsersContextMenuT = () =>
   useTranslations(NS.admin.usersContextMenu);
 export const useAdminUsersPasswordCellT = () =>
   useTranslations(NS.admin.usersPasswordCell);
+export const useAdminUsersApprovalsT = () =>
+  useTranslations(NS.admin.usersApprovals);
 export const useAdminAnalyticsT = () => useTranslations(NS.admin.analytics);
 export const useAdminCertificationsT = () =>
   useTranslations(NS.admin.certifications);
@@ -62,8 +66,6 @@ export const useEducatorGreetingHeroT = () =>
   useTranslations(NS.educator.greetingHero);
 export const useEducatorCoursesT = () => useTranslations(NS.educator.courses);
 export const useEducatorStudentsT = () => useTranslations(NS.educator.students);
-export const useEducatorStudentsModalT = () =>
-  useTranslations(NS.educator.studentsModal);
 export const useEducatorAnalyticsT = () =>
   useTranslations(NS.educator.analytics);
 export const useEducatorAnalyticsCompletionT = () =>

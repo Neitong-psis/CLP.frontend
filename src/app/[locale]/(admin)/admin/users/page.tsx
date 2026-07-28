@@ -1,13 +1,22 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAdminUsersT } from '@/i18n';
 import { Search, UserPlus } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
 import type { AdminUserRow } from '@/constants/admin';
-import type { SaveUserInput } from '@/services/users';
-import { Button } from '@/components/ui/button/Button';
+import {
+  ROLES,
+  STATUSES,
+  INVITE_STATUSES,
+  ROLE_DOT,
+  STATUS_DOT,
+  INVITE_DOT,
+} from '@/constants/admin/users';
+import { useUserApprovals } from '@/context/UserApprovalsContext';
 import TopBar from '@/components/common/TopBar';
+import { SortableTh } from '@/components/common/table/SortableTh';
+import { FilterableTh } from '@/components/common/table/FilterableTh';
 import { useUserManagement } from '@/./app/[locale]/(admin)/admin/users/_hook/useUserManagement';
 import { useUserFilter } from '@/./app/[locale]/(admin)/admin/users/_hook/useUserFilter';
 import {
@@ -15,24 +24,32 @@ import {
   EditModal,
   ViewModal,
 } from '@/components/pages/admin/components/users/UserModals';
-import AddUserModal from './_components/AddUserModal';
 import {
   RowContextMenu,
   type ContextMenuState,
 } from './_components/RowContextMenu';
 import { SkeletonRow, UserTableRow } from './_components/UserTableRow';
 import { TablePagination } from './_components/TablePagination';
-import { UsersFilter } from './_components/UsersFilter';
 
 export default function AdminUsersPage() {
   const t = useAdminUsersT();
-  const { users, loading, saveEdit, remove, suspend, activate, add } =
+  const { users, loading, saveEdit, remove, suspend, activate } =
     useUserManagement();
+  const { approvals } = useUserApprovals();
+  const pendingCount = approvals.filter((a) => a.status === 'Pending').length;
 
-  const filter = useUserFilter(users);
   const {
     search,
     setSearch,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    inviteFilter,
+    setInviteFilter,
+    sortKey,
+    sortDir,
+    toggleSort,
     currentPage,
     totalPages,
     pageStart,
@@ -42,9 +59,8 @@ export default function AdminUsersPage() {
     goToPage,
     prevPage,
     nextPage,
-  } = filter;
+  } = useUserFilter(users);
 
-  const [addOpen, setAddOpen] = useState(false);
   const [viewUser, setViewUser] = useState<AdminUserRow | null>(null);
   const [editUser, setEditUser] = useState<AdminUserRow | null>(null);
   const [deleteUser, setDeleteUser] = useState<AdminUserRow | null>(null);
@@ -94,16 +110,6 @@ export default function AdminUsersPage() {
         onClose={() => setDeleteUser(null)}
       />
 
-      {addOpen && (
-        <AddUserModal
-          onClose={() => setAddOpen(false)}
-          onCreate={(input: SaveUserInput) => {
-            void add(input);
-            setAddOpen(false);
-          }}
-        />
-      )}
-
       {contextMenu && (
         <RowContextMenu
           {...contextMenu}
@@ -141,15 +147,18 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <UsersFilter filter={filter} />
-              <Button
-                variant="ghost"
-                onClick={() => setAddOpen(true)}
+              <Link
+                href="/admin/users/approvals"
                 className="bg-brand-accent hover:bg-brand-accent-hover text-brand-accent-foreground inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors sm:px-4"
               >
                 <UserPlus className="h-4 w-4" aria-hidden="true" />
-                {t('addUser')}
-              </Button>
+                {t('newUser')}
+                {pendingCount > 0 && (
+                  <span className="bg-brand-accent-foreground/15 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums">
+                    {pendingCount}
+                  </span>
+                )}
+              </Link>
             </div>
           </div>
 
@@ -175,26 +184,51 @@ export default function AdminUsersPage() {
                     >
                       #
                     </th>
-                    {[
-                      { label: t('colName'), right: false },
-                      { label: t('colRole'), right: false },
-                      { label: t('colCourses'), right: false },
-                      { label: t('colJoined'), right: false },
-                      { label: t('colStatus'), right: false },
-                      { label: t('colInvitation'), right: false },
-                      { label: t('colActions'), right: true },
-                    ].map(({ label, right }) => (
-                      <th
-                        key={label}
-                        scope="col"
-                        className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
-                          right ? 'text-right' : 'text-left',
-                        )}
-                      >
-                        {label}
-                      </th>
-                    ))}
+                    <SortableTh
+                      label={t('colName')}
+                      active={sortKey === 'name'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('name')}
+                    />
+                    <FilterableTh
+                      label={t('colRole')}
+                      options={ROLES}
+                      value={roleFilter}
+                      onSelect={setRoleFilter}
+                      dot={ROLE_DOT}
+                    />
+                    <SortableTh
+                      label={t('colCourses')}
+                      active={sortKey === 'courses'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('courses')}
+                    />
+                    <SortableTh
+                      label={t('colJoined')}
+                      active={sortKey === 'joined'}
+                      direction={sortDir}
+                      onClick={() => toggleSort('joined')}
+                    />
+                    <FilterableTh
+                      label={t('colStatus')}
+                      options={STATUSES}
+                      value={statusFilter}
+                      onSelect={setStatusFilter}
+                      dot={STATUS_DOT}
+                    />
+                    <FilterableTh
+                      label={t('colInvitation')}
+                      options={INVITE_STATUSES}
+                      value={inviteFilter}
+                      onSelect={setInviteFilter}
+                      dot={INVITE_DOT}
+                    />
+                    <th
+                      scope="col"
+                      className="text-muted-foreground px-5 py-3.5 text-right text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase"
+                    >
+                      {t('colActions')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-border divide-y">

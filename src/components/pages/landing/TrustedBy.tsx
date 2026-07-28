@@ -76,12 +76,12 @@ function MoeysLogo(): ReactElement {
   );
 }
 
-function StemLogo(): ReactElement {
+function InnovationLogo(): ReactElement {
   return (
     <svg
       viewBox={`0 0 ${FIXED_W} ${FIXED_H}`}
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="STEM Alliance"
+      aria-label="Innovation Alliance"
     >
       <text
         x="60"
@@ -93,7 +93,7 @@ function StemLogo(): ReactElement {
         fill="currentColor"
         letterSpacing="1"
       >
-        STEM
+        INNOVATE
       </text>
       <text
         x="60"
@@ -148,7 +148,7 @@ const LOGOS: { name: string; Component: () => ReactElement }[] = [
   { name: 'Cambridge', Component: CambridgeLogo },
   { name: 'IELTS', Component: IeltsLogo },
   { name: 'MoEYS', Component: MoeysLogo },
-  { name: 'STEM Alliance', Component: StemLogo },
+  { name: 'Innovation Alliance', Component: InnovationLogo },
 ];
 
 export default function TrustedBy() {

@@ -1,4 +1,4 @@
-// AYLA logos
+// Ayla logos
 export const AYLA_LOGO_DEFAULT = '/logo/ayla-logo/AYLA%20All%20Logo-11.svg';
 export const AYLA_LOGO_ALT = '/logo/ayla-logo/AYLA%20All%20Logo-21.svg';
 export const AYLA_LOGO_DARK = '/logo/ayla-logo/AYLA%20All%20Logo-24.svg';

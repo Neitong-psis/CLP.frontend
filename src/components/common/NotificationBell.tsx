@@ -39,7 +39,7 @@ const INITIAL: Notification[] = [
     id: 'n1',
     type: 'warning',
     title: 'Course Pending Review',
-    body: 'Web Dev Bootcamp (v2) submitted by Dr. Angela Yu',
+    body: 'Khmer Literature Bootcamp (v2) submitted by Dr. Sopheak Chan',
     time: '2 min ago',
     read: false,
   },
@@ -226,7 +226,7 @@ function NotificationPanel({
 
       {/* List */}
       <div
-        className="overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="[scrollbar-width:none] overflow-y-auto [&::-webkit-scrollbar]:hidden"
         style={{ maxHeight: maxListHeight }}
       >
         {notifs.length === 0 ? (

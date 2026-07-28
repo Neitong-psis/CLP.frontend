@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  createResourceStore,
+  useResourceStore,
+} from '@/lib/cache/createResourceStore';
 import { fetchUserStats, type UserStats } from '@/services/users';
 
 interface UseUserStatsResult {
@@ -9,32 +12,8 @@ interface UseUserStatsResult {
   error: string | null;
 }
 
+const userStatsStore = createResourceStore<UserStats>(fetchUserStats);
+
 export function useUserStats(): UseUserStatsResult {
-  const [data, setData] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchUserStats()
-      .then((stats) => {
-        if (!cancelled) setData(stats);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled)
-          setError(
-            err instanceof Error ? err.message : 'Failed to load user stats',
-          );
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { data, loading, error };
+  return useResourceStore(userStatsStore);
 }

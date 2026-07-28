@@ -318,7 +318,7 @@ function SidebarPanel({
         <div className="border-border/60 flex justify-center border-b py-3">
           {action}
         </div>
-        <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div className="min-h-0 flex-1 scrollbar-none overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {children}
         </div>
       </>
@@ -340,7 +340,7 @@ function SidebarPanel({
         titleAction={titleAction}
       />
       {/* The only scroll container in the expanded sidebar; the header stays pinned. */}
-      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="min-h-0 flex-1 scrollbar-none overflow-y-auto [&::-webkit-scrollbar]:hidden">
         {children}
       </div>
     </>

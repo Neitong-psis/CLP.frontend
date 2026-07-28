@@ -144,7 +144,7 @@ export function DashboardStatGrid({
             label={t('totalEnrollments')}
             value={enrollmentsValue}
             change={enrollmentsChange}
-            href="/admin/courses"
+            href="/admin/users"
             icon={TrendingUp}
           />
         </div>

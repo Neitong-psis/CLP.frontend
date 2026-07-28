@@ -27,6 +27,30 @@ export const ACTIVITY_STYLE: Record<StudentActivity, string> = {
   'At risk': 'border-rose-400/30 bg-rose-500/10 text-rose-500',
 };
 
+export const CONCRETE_STATUSES: StudentStatus[] = [
+  'Active',
+  'Inactive',
+  'Completed',
+];
+
+export const CONCRETE_ACTIVITIES: StudentActivity[] = [
+  'Highly active',
+  'Active',
+  'At risk',
+];
+
+export const STATUS_DOT: Record<StudentStatus, string> = {
+  Active: 'bg-blue-500',
+  Inactive: 'bg-muted-foreground/40',
+  Completed: 'bg-emerald-500',
+};
+
+export const ACTIVITY_DOT: Record<StudentActivity, string> = {
+  'Highly active': 'bg-emerald-500',
+  Active: 'bg-blue-500',
+  'At risk': 'bg-rose-500',
+};
+
 export function initials(name: string) {
   return name
     .split(' ')

@@ -1,7 +1,7 @@
 import {
   BookOpen,
   Target,
-  Code2,
+  Lightbulb,
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
@@ -150,67 +150,67 @@ export const PROGRAM_DETAILS: readonly ProgramDetail[] = [
       'Students aged 16–18 who have completed the Foundation Program or demonstrate equivalent leadership experience. Ideal for those preparing for university admission.',
   },
   {
-    slug: 'stem',
-    title: 'STEM Excellence',
-    tagline: 'Code. Build. Innovate.',
+    slug: 'innovative-learning',
+    title: 'Innovative Learning',
+    tagline: 'Think. Design. Transform.',
     tag: 'Innovation',
     image: '/programs/STEM.png',
-    icon: Code2,
+    icon: Lightbulb,
     description:
-      'The STEM Excellence Program equips students with 21st-century technical skills through hands-on robotics, coding, and scientific inquiry. Aligned with STEM Alliance standards, this program prepares young innovators for the digital economy and fosters computational thinking from the ground up.',
+      'The Innovative Learning Program equips students with 21st-century thinking skills through hands-on design projects, creative problem-solving, and inquiry-based learning. Aligned with modern pedagogy standards, this program prepares young innovators to design solutions and fosters critical, creative thinking from the ground up.',
     stats: [
       { label: 'Age Range', value: '12–18' },
       { label: 'Duration', value: '14 Weeks' },
       { label: 'Sessions', value: '28 Classes' },
-      { label: 'Partner', value: 'STEM Alliance' },
+      { label: 'Partner', value: 'Innovation Alliance' },
     ],
     curriculum: [
       {
         week: 'Week 1–2',
-        topic: 'Computational Thinking',
+        topic: 'Design Thinking',
         description:
-          'Algorithms, logic, and problem decomposition for beginners.',
+          'Empathy, framing, and problem decomposition for beginners.',
       },
       {
         week: 'Week 3–5',
-        topic: 'Programming Fundamentals',
+        topic: 'Creative Problem-Solving Fundamentals',
         description:
-          'Python and JavaScript basics through project-based challenges.',
+          'Brainstorming and ideation basics through project-based challenges.',
       },
       {
         week: 'Week 6–8',
-        topic: 'Robotics & Automation',
-        description: 'Build and program robots to complete real-world tasks.',
+        topic: 'Prototyping & Iteration',
+        description: 'Build and refine prototypes to solve real-world tasks.',
       },
       {
         week: 'Week 9–10',
-        topic: 'Data & AI Literacy',
+        topic: 'Inquiry & Evidence Literacy',
         description:
-          'Introduction to data analysis, machine learning concepts, and responsible AI.',
+          'Introduction to research methods, evidence-based reasoning, and responsible decision-making.',
       },
       {
         week: 'Week 11–12',
-        topic: 'Science Investigation',
+        topic: 'Field Investigation',
         description:
-          'Design and conduct scientific experiments using the inquiry method.',
+          'Design and conduct community-based investigations using the inquiry method.',
       },
       {
         week: 'Week 13–14',
         topic: 'Innovation Showcase',
         description:
-          'Present your STEM project at the AYLA Coding Challenge or Science Fair.',
+          'Present your project at the AYLA Innovation Challenge or Ideas Fair.',
       },
     ],
     outcomes: [
-      'Proficiency in Python and JavaScript fundamentals',
-      'Hands-on robotics build and programming experience',
-      'STEM Alliance verified digital certificate',
+      'Proficiency in design-thinking and ideation fundamentals',
+      'Hands-on prototyping and iteration experience',
+      'Innovation Alliance verified digital certificate',
       'Portfolio of projects for university applications',
-      'Entry to AYLA Coding Challenge competition',
-      'Mentorship from industry engineers and scientists',
+      'Entry to AYLA Innovation Challenge competition',
+      'Mentorship from educators and creative practitioners',
     ],
     whoIsItFor:
-      'Open to all students aged 12–18 with an interest in technology, science, or engineering. No prior coding experience required.',
+      'Open to all students aged 12–18 with an interest in design, creativity, or problem-solving. No prior experience required.',
   },
   {
     slug: 'youth',

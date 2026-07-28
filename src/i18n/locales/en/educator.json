@@ -104,26 +104,7 @@
       "results": "{count} results",
       "result": "{count} result",
       "searchPlaceholder": "Search name, email, or course…",
-      "addStudent": "Add Learner",
-      "achievedLabel": "Achieved",
-      "modal": {
-        "title": "Add Learner",
-        "subtitle": "Invite a learner to one of your courses",
-        "fullName": "Full name",
-        "email": "Email",
-        "course": "Course",
-        "namePlaceholder": "e.g. Dara Chan",
-        "emailPlaceholder": "educator@example.com",
-        "selectCourse": "Select a published course…",
-        "cancel": "Cancel",
-        "sendInvite": "Send Invite",
-        "pendingNote1": "The learner appears as",
-        "inactive": "Inactive",
-        "pendingNote2": "until they accept the invitation.",
-        "errorName": "Enter the learner name",
-        "errorEmail": "Enter a valid email address",
-        "errorCourse": "Choose a course"
-      }
+      "achievedLabel": "Achieved"
     },
 
     "analyticsPage": {
@@ -305,8 +286,10 @@
         "continue": "Continue",
         "submitToAdmin": "Submit to Admin",
         "createCourse": "Create Course",
+        "publishCourse": "Publish Course",
         "completeRequired": "Complete required fields to submit",
-        "setStatusToSubmit": "Set Current Status to \"Under Review\" to submit"
+        "setStatusToSubmit": "Set Current Status to \"Publish\" to submit",
+        "setStatusToPublish": "Set Current Status to \"Published\" to submit"
       },
       "toast": {
         "draftSaved": "Draft saved. You can finish it anytime.",
@@ -321,7 +304,7 @@
         "basicInfo": "Basic Information",
         "basicInfoDesc": "Title and summary learners will see first.",
         "courseTitle": "Course title",
-        "courseTitlePlaceholder": "e.g. Modern Web Development with React",
+        "courseTitlePlaceholder": "e.g. Foundations of Khmer Literature",
         "subtitle": "Subtitle",
         "subtitlePlaceholder": "A short, punchy one-liner",
         "description": "Description",
@@ -460,8 +443,10 @@
         "publishSettings": "3. Publish Settings",
         "publishSettingsDesc": "Current status and authorship.",
         "currentStatusLabel": "Current Status",
-        "currentStatusHint": "Only Admin can publish a course. Set this to \"Under Review\" to unlock Submit to Admin.",
-        "publishedLocked": "Published (Admin only)",
+        "currentStatusHint": "Set this to \"Publish\" to unlock Submit to Admin — the course will then wait in the Under Review tab for Admin's decision.",
+        "currentStatusHintAdmin": "Set this to \"Published\" to make the course live.",
+        "publishOption": "Publish",
+        "publishedOption": "Published",
         "authorLabel": "Author",
         "authorLocked": "Can't be changed.",
         "reviewSummary": "4. Final Review Summary",
@@ -477,7 +462,7 @@
         "titleRequired": "Course title is required.",
         "descriptionRequired": "Course description is required.",
         "moduleRequired": "Add at least one module.",
-        "educatorRequired": "Assign an educator."
+        "authorRequired": "Assign an author."
       }
     }
   }

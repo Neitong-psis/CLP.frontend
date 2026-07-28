@@ -1,8 +1,11 @@
 'use client';
 
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 import { useCourseStats } from '@/hooks/useCourseStats';
 import { TOP_PERFORMING_COURSES, REVENUE_BY_CATEGORY } from '@/constants/admin';
+import { buildCourseReviewUrl } from '@/app/[locale]/(admin)/admin/courses/_lib/reviewUrl';
 import { TopCoursesCard } from './TopCoursesCard';
 import { RevenueByCategoryCard } from './RevenueByCategoryCard';
 
@@ -86,10 +89,24 @@ export function CourseWidgetsContainer({
   firstVisit = false,
   className,
 }: CourseWidgetsContainerProps) {
+  const locale = useLocale();
   const { data, loading } = useCourseStats();
 
   const topCourses = data?.topCourses.length
-    ? data.topCourses
+    ? data.topCourses.map((c) => ({
+        title: c.title,
+        instructor: c.instructor,
+        students: c.students,
+        progress: c.progress,
+        href: buildCourseReviewUrl(locale, {
+          id: c.id,
+          title: c.title,
+          instructor: c.instructor,
+          category: '',
+          level: '',
+          status: c.status,
+        }),
+      }))
     : TOP_PERFORMING_COURSES.map((c) => ({
         title: c.title,
         instructor: c.instructor,
@@ -124,7 +141,9 @@ export function CourseWidgetsContainer({
       )}
     >
       <TopCoursesCard data={topCourses} className="lg:col-span-2" />
-      <RevenueByCategoryCard data={revenueByCategory} />
+      <Link href="/admin/revenue" className="block h-full">
+        <RevenueByCategoryCard data={revenueByCategory} />
+      </Link>
     </div>
   );
 }

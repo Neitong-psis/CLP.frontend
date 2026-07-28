@@ -179,9 +179,7 @@ export function useCreateCourseForm({
           course.level.toLowerCase(),
         )
           ? (course.level.toLowerCase() as
-              | 'beginner'
-              | 'intermediate'
-              | 'advanced')
+              'beginner' | 'intermediate' | 'advanced')
           : undefined,
         price: 0,
         pricingType: 'free',
@@ -309,9 +307,7 @@ export function useCreateCourseForm({
               data.category,
             level: data.level
               ? ((data.level.charAt(0).toUpperCase() + data.level.slice(1)) as
-                  | 'Beginner'
-                  | 'Intermediate'
-                  | 'Advanced')
+                  'Beginner' | 'Intermediate' | 'Advanced')
               : 'Beginner',
             instructor:
               educatorsList.find((e) => e.id === data.assignedEducatorId)

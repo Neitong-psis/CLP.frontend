@@ -11,3 +11,4 @@ export {
 } from './users.api';
 export type { SaveUserInput, UserStats, UserAnalytics } from './users.api';
 export type { AdminUser, UsersPage } from '@/schemas/admin-user.schema';
+export { usersStore } from './users.store';

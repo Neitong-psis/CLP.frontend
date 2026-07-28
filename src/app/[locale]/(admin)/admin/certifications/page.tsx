@@ -9,7 +9,6 @@ import {
   ArrowDownRight,
   Plus,
   Search,
-  Filter,
   Download,
   Link2,
   X,
@@ -23,6 +22,9 @@ import { useAdminCertificationsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
+import { SortableTh } from '@/components/common/table/SortableTh';
+import { useColumnSort } from '@/hooks/useColumnSort';
+import { parseDateLoose } from '@/lib/utils/sort';
 import { exportCertificateToPdf } from '@/lib/utils/certificatePdf';
 import {
   DropdownMenu,
@@ -47,7 +49,7 @@ type CertRecord = {
 /** This admin view has no per-record instructor in its mock data — the
  *  on-screen certificate and the downloaded PDF share this one value so
  *  they can't silently drift apart. */
-const DEFAULT_INSTRUCTOR = 'Dr. Angela Yu';
+const DEFAULT_INSTRUCTOR = 'Dr. Sopheak Chan';
 
 const CERT_STATS_DATA = [
   {
@@ -83,28 +85,28 @@ const RECENT_ISSUANCES: {
   {
     id: 'r1',
     user: 'Sarah Jenkins',
-    course: 'Advanced Data Science',
+    course: 'Advanced Khmer Literature',
     issued: 'May 12, 2026',
     status: 'Verify',
   },
   {
     id: 'r2',
     user: 'Michael Chang',
-    course: 'Leadership in Tech',
+    course: 'Leadership in Practice',
     issued: 'May 11, 2026',
     status: 'Verify',
   },
   {
     id: 'r3',
     user: 'Elena Rodriguez',
-    course: 'Cloud Architecture',
+    course: 'Leadership Development Certification',
     issued: 'May 10, 2026',
     status: 'Pending',
   },
   {
     id: 'r4',
     user: 'David Smith',
-    course: 'UI/UX Design Masterclass',
+    course: 'Innovative Learning Masterclass',
     issued: 'May 09, 2026',
     status: 'Verify',
   },
@@ -180,25 +182,25 @@ const ISSUANCE_HISTORY: CertRecord[] = [
   {
     id: 'CERT-99A81B',
     recipient: 'Sarah Jenkins',
-    course: 'Advanced Data Science',
+    course: 'Advanced Khmer Literature',
     issued: 'May 12, 2026',
   },
   {
     id: 'CERT-44B92C',
     recipient: 'Michael Chang',
-    course: 'Leadership in Tech',
+    course: 'Leadership in Practice',
     issued: 'May 11, 2026',
   },
   {
     id: 'CERT-11X75Y',
     recipient: 'Elena Rodriguez',
-    course: 'Cloud Architecture',
+    course: 'Leadership Development Certification',
     issued: 'May 10, 2026',
   },
   {
     id: 'CERT-88M22P',
     recipient: 'David Smith',
-    course: 'UI/UX Design Masterclass',
+    course: 'Innovative Learning Masterclass',
     issued: 'May 09, 2026',
   },
 ];
@@ -273,7 +275,7 @@ function CertificateModal({
       onClick={onClose}
     >
       <div
-        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl shadow-2xl ring-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl [scrollbar-width:none] overflow-y-auto rounded-2xl shadow-2xl ring-1 [&::-webkit-scrollbar]:hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -943,6 +945,11 @@ export default function AdminCertificationsPage() {
   const t = useAdminCertificationsT();
   const [tab, setTab] = useState<Tab>('dashboard');
   const [histSearch, setHistSearch] = useState('');
+  const {
+    sortKey: histSortKey,
+    sortDir: histSortDir,
+    toggleSort: toggleHistSort,
+  } = useColumnSort<'recipient' | 'course' | 'issued'>();
   const [viewCert, setViewCert] = useState<CertRecord | null>(null);
   const [templates, setTemplates] = useState<CertTemplate[]>(CERT_TEMPLATES);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -1335,13 +1342,6 @@ export default function AdminCertificationsPage() {
                     className="focus:border-brand-gold/50 focus:ring-brand-gold/10 border-border bg-surface text-foreground placeholder:text-muted-foreground h-9 w-full rounded-lg border pr-3 pl-9 text-sm outline-none focus:ring-2 sm:w-56"
                   />
                 </div>
-                <button
-                  onClick={() => toast('Filters coming soon.', 'info')}
-                  className="border-border bg-surface text-foreground hover:bg-muted flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
-                >
-                  <Filter className="h-3.5 w-3.5" />
-                  {t('filter')}
-                </button>
               </div>
             </div>
 
@@ -1349,25 +1349,30 @@ export default function AdminCertificationsPage() {
               <table className="w-full min-w-180 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">
-                    {(
-                      [
-                        { key: 'colCertId', isRight: false },
-                        { key: 'colRecipient', isRight: false },
-                        { key: 'colCourse', isRight: false },
-                        { key: 'colIssueDate', isRight: false },
-                        { key: 'colActions', isRight: true },
-                      ] as const
-                    ).map(({ key, isRight }) => (
-                      <th
-                        key={key}
-                        className={cn(
-                          'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
-                          isRight ? 'text-right' : 'text-left',
-                        )}
-                      >
-                        {t(key)}
-                      </th>
-                    ))}
+                    <th className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
+                      {t('colCertId')}
+                    </th>
+                    <SortableTh
+                      label={t('colRecipient')}
+                      active={histSortKey === 'recipient'}
+                      direction={histSortDir}
+                      onClick={() => toggleHistSort('recipient')}
+                    />
+                    <SortableTh
+                      label={t('colCourse')}
+                      active={histSortKey === 'course'}
+                      direction={histSortDir}
+                      onClick={() => toggleHistSort('course')}
+                    />
+                    <SortableTh
+                      label={t('colIssueDate')}
+                      active={histSortKey === 'issued'}
+                      direction={histSortDir}
+                      onClick={() => toggleHistSort('issued')}
+                    />
+                    <th className="text-muted-foreground px-5 py-3.5 text-right text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
+                      {t('colActions')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-border divide-y">
@@ -1379,55 +1384,67 @@ export default function AdminCertificationsPage() {
                       r.course.toLowerCase().includes(s) ||
                       r.id.toLowerCase().includes(s)
                     );
-                  }).map((row) => (
-                    <tr
-                      key={row.id}
-                      className="hover:bg-muted/50 transition-colors"
-                    >
-                      <td className="px-5 py-4">
-                        <span className="text-muted-foreground font-mono text-xs whitespace-nowrap">
-                          {row.id}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <button
-                          type="button"
-                          onClick={() => setViewCert(row)}
-                          className="text-foreground text-left text-sm font-semibold whitespace-nowrap underline-offset-2 hover:text-teal-500 hover:underline"
-                        >
-                          {row.recipient}
-                        </button>
-                      </td>
-                      <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
-                        {row.course}
-                      </td>
-                      <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
-                        {row.issued}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex justify-end gap-1.5">
+                  })
+                    .sort((a, b) => {
+                      if (!histSortKey) return 0;
+                      const cmp =
+                        histSortKey === 'recipient'
+                          ? a.recipient.localeCompare(b.recipient)
+                          : histSortKey === 'course'
+                            ? a.course.localeCompare(b.course)
+                            : parseDateLoose(a.issued) -
+                              parseDateLoose(b.issued);
+                      return histSortDir === 'asc' ? cmp : -cmp;
+                    })
+                    .map((row) => (
+                      <tr
+                        key={row.id}
+                        className="hover:bg-muted/50 transition-colors"
+                      >
+                        <td className="px-5 py-4">
+                          <span className="text-muted-foreground font-mono text-xs whitespace-nowrap">
+                            {row.id}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
                           <button
-                            aria-label={t('downloadAriaLabel')}
-                            onClick={() => handleDownload(row)}
-                            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                            type="button"
+                            onClick={() => setViewCert(row)}
+                            className="text-foreground text-left text-sm font-semibold whitespace-nowrap underline-offset-2 hover:text-teal-500 hover:underline"
                           >
-                            <Download className="h-3.5 w-3.5" />
+                            {row.recipient}
                           </button>
-                          <button
-                            aria-label={t('copyLinkAriaLabel')}
-                            onClick={() =>
-                              handleCopyLink(
-                                `${window.location.origin}/verify/${row.id}`,
-                              )
-                            }
-                            className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
-                          >
-                            <Link2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
+                          {row.course}
+                        </td>
+                        <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
+                          {row.issued}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex justify-end gap-1.5">
+                            <button
+                              aria-label={t('downloadAriaLabel')}
+                              onClick={() => handleDownload(row)}
+                              className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              aria-label={t('copyLinkAriaLabel')}
+                              onClick={() =>
+                                handleCopyLink(
+                                  `${window.location.origin}/verify/${row.id}`,
+                                )
+                              }
+                              className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                            >
+                              <Link2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

@@ -20,22 +20,14 @@ export type ContentItemType = 'document' | 'video' | 'quiz' | 'assignment';
  * Precedence: locked > completed > current > in-progress > not-started.
  */
 export type ItemState =
-  | 'locked'
-  | 'completed'
-  | 'current'
-  | 'in-progress'
-  | 'not-started';
+  'locked' | 'completed' | 'current' | 'in-progress' | 'not-started';
 
 /**
  * Module lifecycle, also derived. `disabled` is an authoring state (module is
  * unpublished) and outranks everything; `locked` means prerequisites are unmet.
  */
 export type ModuleState =
-  | 'disabled'
-  | 'locked'
-  | 'completed'
-  | 'active'
-  | 'available';
+  'disabled' | 'locked' | 'completed' | 'active' | 'available';
 
 /**
  * How an item reports partial completion.

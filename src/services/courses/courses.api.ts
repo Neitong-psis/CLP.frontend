@@ -40,10 +40,12 @@ function toDisplayLevel(level: string | null | undefined): string {
 // ─── Dashboard stats types ────────────────────────────────────────────────────
 
 export interface DashboardTopCourse {
+  id: string;
   title: string;
   instructor: string;
   students: string;
   progress: number;
+  status: CourseStatus;
 }
 
 export interface DashboardRevenueCategory {
@@ -107,11 +109,13 @@ export function buildCourseStats(
 ): CourseStats {
   const maxCount = topPerforming[0]?.studentsCount ?? 0;
   const topCourses: DashboardTopCourse[] = topPerforming.map((course) => ({
+    id: course.id,
     title: course.title,
     instructor: formatInstructorName(course.instructor),
     students: course.studentsCount.toLocaleString(),
     progress:
       maxCount > 0 ? Math.round((course.studentsCount / maxCount) * 100) : 0,
+    status: toCourseStatusLabel(course.status),
   }));
 
   const maxRevenue = stats.revenueByCategory[0]?.amount ?? 0;

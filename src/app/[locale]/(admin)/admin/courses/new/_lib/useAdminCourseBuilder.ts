@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/hooks/use-auth';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useResourceStore } from '@/lib/cache/createResourceStore';
 import type {
   CourseInfo,
   CourseModule,
@@ -11,12 +14,14 @@ import {
   moveItem,
   deriveAnswerFormat,
 } from '@/app/[locale]/(educator)/educator/courses/new/_lib/builder';
-import { fetchAllCategories, type Category } from '@/services/categories';
-import { fetchAllUsers } from '@/services/users';
+import { categoriesStore } from '@/services/categories';
+import { usersStore } from '@/services/users';
 import type { AdminUserRow } from '@/constants/admin';
+import type { CourseTaskStatus } from '@/constants/educator';
 import {
   createCourse,
   syncCourseCurriculum,
+  updateCourse,
   type SyncCurriculumInput,
   type SyncCurriculumSection,
 } from '@/services/courses';
@@ -76,46 +81,52 @@ export function useAdminCourseBuilder() {
   const router = useRouter();
   const { toast } = useToast();
   const t = useTranslations('educator.createCourse');
+  const { user } = useAuth();
+  const currentAdmin = useCurrentUser();
 
   const [step, setStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [info, setInfo] = useState<CourseInfo>(INITIAL_INFO);
   const [modules, setModules] = useState<CourseModule[]>([]);
-  const [assignedEducator, setAssignedEducator] = useState('');
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [educators, setEducators] = useState<AdminUserRow[]>([]);
+  const [assignedAuthor, setAssignedAuthor] = useState('');
+  const [status, setStatus] = useState<CourseTaskStatus>('To Do');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchAllCategories(), fetchAllUsers()])
-      .then(([fetchedCategories, users]) => {
-        if (cancelled) return;
-        setCategories(fetchedCategories);
-        setEducators(users.filter((u) => u.role === 'Educator'));
-      })
-      .catch(() => {
-        if (!cancelled) toast(t('toast.loadFailed'), 'error');
-      });
-    return () => {
-      cancelled = true;
+  const { data: categoriesData } = useResourceStore(categoriesStore);
+  const { data: users } = useResourceStore(usersStore);
+  const categories = categoriesData ?? [];
+
+  const authorOptions = useMemo<AdminUserRow[]>(() => {
+    const educators = (users ?? []).filter((u) => u.role === 'Educator');
+    if (!user?.id) return educators;
+    const self: AdminUserRow = {
+      id: String(user.id),
+      name: currentAdmin.fullName,
+      email: currentAdmin.email,
+      role: 'Admin',
+      status: 'Active',
+      inviteStatus: 'Approved',
+      enrolled: 0,
+      joined: '—',
+      lastActive: '—',
     };
-  }, [toast, t]);
+    return [self, ...educators];
+  }, [users, user, currentAdmin.fullName, currentAdmin.email]);
 
   const missing = useMemo(() => {
     const list: string[] = [];
     if (!info.title.trim()) list.push('titleRequired');
     if (!info.description.trim()) list.push('descriptionRequired');
-    if (!assignedEducator) list.push('educatorRequired');
+    if (!assignedAuthor) list.push('authorRequired');
     if (modules.length === 0) list.push('moduleRequired');
     return list;
-  }, [info.title, info.description, assignedEducator, modules.length]);
+  }, [info.title, info.description, assignedAuthor, modules.length]);
 
-  const canSubmit = missing.length === 0;
+  const canSubmit = missing.length === 0 && status === 'Published';
 
-  const educatorName = useMemo(
-    () => educators.find((e) => e.id === assignedEducator)?.name ?? '',
-    [educators, assignedEducator],
+  const authorName = useMemo(
+    () => authorOptions.find((a) => a.id === assignedAuthor)?.name ?? '',
+    [authorOptions, assignedAuthor],
   );
 
   const setInfoField = (key: keyof CourseInfo, value: string) =>
@@ -171,15 +182,20 @@ export function useAdminCourseBuilder() {
         thumbnail: info.thumbnail || undefined,
         level: info.level ? info.level.toLowerCase() : undefined,
         categoryId,
-        instructorId: assignedEducator || undefined,
+        instructorId: assignedAuthor || undefined,
       });
 
       if (modules.length > 0) {
         await syncCourseCurriculum(course.id, toSyncCurriculumInput(modules));
       }
 
+      // `status` is only ever 'Published' when `submit()` is reachable
+      // (see `canSubmit` above) — `createCourse` has no status field, so
+      // this is what actually makes the course live.
+      await updateCourse(course.id, { status: 'published' });
+
       toast(
-        t('toast.created', { title: info.title, educator: educatorName }),
+        t('toast.created', { title: info.title, educator: authorName }),
         'success',
       );
       router.push('/admin/courses');
@@ -202,10 +218,12 @@ export function useAdminCourseBuilder() {
     canSubmit,
     submitting,
     categories,
-    educators,
-    educatorName,
-    assignedEducator,
-    setAssignedEducator,
+    authorOptions,
+    authorName,
+    assignedAuthor,
+    setAssignedAuthor,
+    status,
+    setStatus,
     setInfoField,
     addModule,
     updateModule,

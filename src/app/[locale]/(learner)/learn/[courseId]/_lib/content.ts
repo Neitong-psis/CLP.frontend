@@ -55,12 +55,7 @@ import {
 // ── Learner item status ───────────────────────────────────────────────────────
 
 export type LearnerItemStatus =
-  | 'unread'
-  | 'completed'
-  | 'ready'
-  | 'passed'
-  | 'failed'
-  | 'submitted';
+  'unread' | 'completed' | 'ready' | 'passed' | 'failed' | 'submitted';
 
 export const LEARNER_ITEM_STATUSES: Record<string, LearnerItemStatus> = {
   d1: 'completed', // Responsive Design Guide - read

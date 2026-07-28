@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  createResourceStore,
+  useResourceStore,
+} from '@/lib/cache/createResourceStore';
 import {
   fetchCourseStats,
   fetchTopPerformingCourses,
@@ -13,26 +16,13 @@ interface UseCourseStatsResult {
   loading: boolean;
 }
 
+const courseStatsStore = createResourceStore<CourseStats>(() =>
+  Promise.all([fetchCourseStats(), fetchTopPerformingCourses()]).then(
+    ([stats, topPerforming]) => buildCourseStats(stats, topPerforming),
+  ),
+);
+
 export function useCourseStats(): UseCourseStatsResult {
-  const [data, setData] = useState<CourseStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchCourseStats(), fetchTopPerformingCourses()])
-      .then(([stats, topPerforming]) => {
-        if (!cancelled) setData(buildCourseStats(stats, topPerforming));
-      })
-      .catch(() => {
-        // Leave data null — components fall back to static constants
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  const { data, loading } = useResourceStore(courseStatsStore);
   return { data, loading };
 }
