@@ -153,7 +153,7 @@ export function TopCoursesCard({ data, className }: TopCoursesCardProps) {
           {t('noData')}
         </p>
       ) : (
-        <ul className="divide-border flex-1 scrollbar-none divide-y overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <ul className="divide-border scrollbar-none flex-1 divide-y overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {data.map((course, i) => (
             <li key={course.title}>
               {course.href ? (

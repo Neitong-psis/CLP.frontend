@@ -20,7 +20,11 @@ import {
 import { type CourseStatus, type EducatorCourse } from '@/constants/educator';
 
 export type SortKey =
-  'title' | 'enrolled' | 'rating' | 'completionRate' | 'revenue';
+  | 'title'
+  | 'enrolled'
+  | 'rating'
+  | 'completionRate'
+  | 'revenue';
 export type SortDir = 'asc' | 'desc';
 
 export interface SortState {

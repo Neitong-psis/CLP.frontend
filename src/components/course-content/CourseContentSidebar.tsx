@@ -121,7 +121,7 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
         </div>
 
         {/* Tree */}
-        <div className="flex-1 scrollbar-none overflow-y-auto px-2 py-2 [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-2 py-2 [&::-webkit-scrollbar]:hidden">
           <CourseContentTree {...props} />
         </div>
       </div>
@@ -149,7 +149,7 @@ export function CourseContentSidebar(props: CourseContentSidebarProps) {
           </button>
         </div>
 
-        <div className="flex-1 scrollbar-none overflow-y-auto px-1.5 py-3 [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-1.5 py-3 [&::-webkit-scrollbar]:hidden">
           <CourseContentRail {...props} />
         </div>
       </div>

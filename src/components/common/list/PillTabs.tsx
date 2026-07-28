@@ -32,7 +32,7 @@ export function PillTabs<T extends string>({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        'flex scrollbar-none items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden',
+        'scrollbar-none flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden',
         fullWidth ? 'w-full' : 'w-fit max-w-full',
         className,
       )}

@@ -108,7 +108,11 @@ export const EDUCATOR_COURSES: EducatorCourse[] = [
 // through To Do → In Writing → Under Review → Published (or Archived).
 
 export type CourseTaskStatus =
-  'To Do' | 'In Writing' | 'Under Review' | 'Published' | 'Archived';
+  | 'To Do'
+  | 'In Writing'
+  | 'Under Review'
+  | 'Published'
+  | 'Archived';
 
 export type TaskPriority = 'High' | 'Medium' | 'Low';
 

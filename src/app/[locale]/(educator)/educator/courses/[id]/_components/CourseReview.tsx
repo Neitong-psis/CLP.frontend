@@ -525,7 +525,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
               />
             </div>
             {/* Lesson chips — horizontal scroll for selected module */}
-            <div className="flex scrollbar-none gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
+            <div className="scrollbar-none flex gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;

@@ -22,7 +22,11 @@ import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 // ── Sorting ─────────────────────────────────────────────────────────────────
 
 type SortKey =
-  'recommended' | 'rating' | 'price-low' | 'price-high' | 'title-az';
+  | 'recommended'
+  | 'rating'
+  | 'price-low'
+  | 'price-high'
+  | 'title-az';
 
 const DEFAULT_PRICE = 49;
 

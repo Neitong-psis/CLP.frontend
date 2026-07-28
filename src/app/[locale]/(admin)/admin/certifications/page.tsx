@@ -275,7 +275,7 @@ function CertificateModal({
       onClick={onClose}
     >
       <div
-        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl [scrollbar-width:none] overflow-y-auto rounded-2xl shadow-2xl ring-1 [&::-webkit-scrollbar]:hidden"
+        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl shadow-2xl ring-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

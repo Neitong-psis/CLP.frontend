@@ -14,7 +14,8 @@ export function CharacterCounter({ editor }: { editor: Editor | null }) {
     selector: ({ editor }) => {
       if (!editor) return 0;
       const storage = editor.storage.characterCount as
-        CharacterCountStorage | undefined;
+        | CharacterCountStorage
+        | undefined;
       return storage?.characters() ?? 0;
     },
   });

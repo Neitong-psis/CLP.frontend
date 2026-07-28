@@ -89,7 +89,7 @@ export function CourseContentSheet(props: CourseContentSheetProps) {
         </div>
 
         {/* Tree */}
-        <div className="flex-1 scrollbar-none overflow-y-auto px-2.5 pb-8 [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-2.5 pb-8 [&::-webkit-scrollbar]:hidden">
           <CourseContentTree {...props} />
         </div>
       </div>

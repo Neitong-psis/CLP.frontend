@@ -143,7 +143,7 @@ export const REVIEW_MODULES: ReviewModule[] = [
               richDoc.paragraph(
                 'Backward design means starting with the ',
                 { text: 'outcome you want learners to reach', bold: true },
-                " before choosing any activity. Begin by asking: what should the learner be able to do by the end of this lesson? Build everything else — the hook, the activities, the assessment — to serve that outcome.",
+                ' before choosing any activity. Begin by asking: what should the learner be able to do by the end of this lesson? Build everything else — the hook, the activities, the assessment — to serve that outcome.',
               ),
               richDoc.blockquote(
                 'Write the learning objective before you write a single slide. Constraints drive clarity.',
@@ -498,8 +498,7 @@ export const REVIEW_MODULES: ReviewModule[] = [
               'Assess your knowledge of the lesson arc, active-learning techniques, and small-group design.',
             questions: [
               {
-                question:
-                  'Which sequence best describes a typical lesson arc?',
+                question: 'Which sequence best describes a typical lesson arc?',
                 options: [
                   'Independent practice, then hook, then guided practice',
                   'Opening hook, guided practice, independent practice, closing',

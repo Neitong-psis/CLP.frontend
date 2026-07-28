@@ -501,7 +501,7 @@ export default function LearnerCoursePlayer({
           {/* ── Mobile: module tabs + lesson chips ── */}
           <div className="border-border/60 shrink-0 border-b px-3 pt-2.5 pb-1.5 lg:hidden">
             {/* Module tabs — pill bar styled like the certificates status tabs */}
-            <div className="border-border bg-card flex scrollbar-none items-center gap-1 overflow-x-auto rounded-full border p-1 shadow-sm [&::-webkit-scrollbar]:hidden">
+            <div className="border-border bg-card scrollbar-none flex items-center gap-1 overflow-x-auto rounded-full border p-1 shadow-sm [&::-webkit-scrollbar]:hidden">
               {modules.map((mod) => {
                 const isActiveTab = mod.id === mobileModuleId;
                 return (
@@ -532,7 +532,7 @@ export default function LearnerCoursePlayer({
               })}
             </div>
             {/* Lesson chips — horizontal scroll for selected module */}
-            <div className="flex scrollbar-none gap-1.5 overflow-x-auto pt-2 [&::-webkit-scrollbar]:hidden">
+            <div className="scrollbar-none flex gap-1.5 overflow-x-auto pt-2 [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;

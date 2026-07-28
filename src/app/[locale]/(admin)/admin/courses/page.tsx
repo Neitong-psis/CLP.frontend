@@ -68,7 +68,11 @@ const CATEGORY_DOT: Record<string, string> = {
 };
 
 type CourseSortKey =
-  'course' | 'educator' | 'enrollments' | 'rating' | 'created';
+  | 'course'
+  | 'educator'
+  | 'enrollments'
+  | 'rating'
+  | 'created';
 
 export default function AdminCoursesPage() {
   const t = useAdminCoursesT();

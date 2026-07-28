@@ -63,7 +63,7 @@ export function RevenueByCategoryCard({
 
       {/* Rows — flex-1 + justify-between fills card height evenly, scrolls
           internally (scrollbar hidden) once content exceeds the card's cap */}
-      <ul className="flex flex-1 scrollbar-none flex-col justify-between gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <ul className="scrollbar-none flex flex-1 flex-col justify-between gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         {data.map((cat, i) => {
           const isHovered = hoveredIdx === i;
           const isDimmed = hoveredIdx !== null && !isHovered;

@@ -226,7 +226,7 @@ function NotificationPanel({
 
       {/* List */}
       <div
-        className="[scrollbar-width:none] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        className="overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ maxHeight: maxListHeight }}
       >
         {notifs.length === 0 ? (

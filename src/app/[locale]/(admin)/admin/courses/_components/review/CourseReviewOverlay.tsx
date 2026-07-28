@@ -343,7 +343,7 @@ export function CourseReviewOverlay({
                 onChange={setMobileModuleId}
               />
             </div>
-            <div className="flex [scrollbar-width:none] gap-1.5 overflow-x-auto px-3 pb-2.5 [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {mobileItems.map((item) => {
                 const Icon = KIND_ICON[item.kind];
                 const isActive = item.id === activeId;

@@ -159,7 +159,12 @@ export const COURSE_REVIEW_MODULES: ReviewModule[] = [
             id: 'q1-2',
             prompt:
               'Which participation structure has learners think alone, then share with a partner?',
-            choices: ['Think-pair-share', 'Cold-call', 'Silent reading', 'Lecture'],
+            choices: [
+              'Think-pair-share',
+              'Cold-call',
+              'Silent reading',
+              'Lecture',
+            ],
           },
           {
             id: 'q1-3',
