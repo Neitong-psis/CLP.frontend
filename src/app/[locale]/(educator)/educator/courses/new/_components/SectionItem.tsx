@@ -700,6 +700,12 @@ function AssignmentEditor({
         <div>
           <MiniLabel>{t('content.section.submissionType')}</MiniLabel>
           <Select
+            items={Object.fromEntries(
+              SUBMISSION_TYPES.map(({ value, labelKey }) => [
+                value,
+                t(labelKey),
+              ]),
+            )}
             value={section.submissionType}
             onValueChange={(v) =>
               onUpdate({ ...section, submissionType: v ?? '' })

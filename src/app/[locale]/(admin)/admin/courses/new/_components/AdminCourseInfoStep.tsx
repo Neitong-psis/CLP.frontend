@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { User } from 'lucide-react';
 import { CourseInfoStep } from '@/app/[locale]/(educator)/educator/courses/new/_components/CourseInfoStep';
 import type { CourseInfo } from '@/app/[locale]/(educator)/educator/courses/new/_lib/types';
@@ -31,6 +32,19 @@ export function AdminCourseInfoStep({
   const { user } = useAuth();
   const selectedAuthor = authorOptions.find((a) => a.id === assignedAuthor);
 
+  const authorLabel = (a: AdminUserRow) =>
+    a.id === String(user?.id ?? '') ? `${a.name} ${t('you')}` : a.name;
+
+  // Base UI's <Select.Value> can only resolve a value to its label once the
+  // matching <Select.Item> has mounted (i.e. after the popup has opened at
+  // least once) — without `items`, picking an author before ever opening the
+  // list once would show the raw id instead of the name.
+  const authorItems = useMemo(
+    () => Object.fromEntries(authorOptions.map((a) => [a.id, authorLabel(a)])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [authorOptions, user?.id, t],
+  );
+
   return (
     <div className="space-y-6">
       {/* ── Assign Author (admin-only) ────────────────────────────────── */}
@@ -46,6 +60,7 @@ export function AdminCourseInfoStep({
               {t('label')}
             </label>
             <Select
+              items={authorItems}
               value={assignedAuthor || undefined}
               onValueChange={(v) => onAuthorChange(v ?? '')}
             >
@@ -55,9 +70,7 @@ export function AdminCourseInfoStep({
               <SelectContent>
                 {authorOptions.map((a) => (
                   <SelectItem key={a.id} value={a.id}>
-                    {a.id === String(user?.id ?? '')
-                      ? `${a.name} ${t('you')}`
-                      : a.name}
+                    {authorLabel(a)}
                   </SelectItem>
                 ))}
               </SelectContent>
