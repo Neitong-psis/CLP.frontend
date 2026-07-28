@@ -78,9 +78,6 @@ export function CourseReviewOverlay({
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set(modules.map((m) => m.id)),
   );
-  const [viewed, setViewed] = useState<Set<string>>(
-    () => new Set([items[0]?.id]),
-  );
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [itemDialog, setItemDialog] = useState<'approve' | 'reject' | null>(
     null,
@@ -106,11 +103,12 @@ export function CourseReviewOverlay({
     [mobileModule],
   );
 
-  // Reviewer completion: opening an item counts; preview quizzes are non-scored
-  // so they never block.
+  // "Done" means *decided* — approved or rejected. Opening an item to look at
+  // it is never a verdict on its own; only the explicit Approve/Reject
+  // buttons (via `decideActiveItem`) record one.
   const isItemDone = useMemo<ItemDone>(
-    () => (item) => (item.kind === 'quiz' ? true : viewed.has(item.id)),
-    [viewed],
+    () => (item) => Boolean(decisions[item.id]),
+    [decisions],
   );
   // Sequential locking never made sense for a reviewer — admin approves every
   // item regardless of order, so nothing is ever gated here.
@@ -134,7 +132,6 @@ export function CourseReviewOverlay({
 
   function goTo(id: string) {
     setActiveId(id);
-    setViewed((prev) => new Set(prev).add(id));
     const newMod = modules.find((m) =>
       flattenItems([m]).some((item) => item.id === id),
     );

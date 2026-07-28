@@ -8,7 +8,9 @@
       "Bash(echo \"READY\")",
       "Bash(break)",
       "Bash(curl -s \"http://localhost:3000/\")",
-      "Bash(grep -oiE '\\(error[^<]{0,200}|Cannot[^<]{0,160}|Module[^<]{0,160}|Failed to[^<]{0,160}|ENOENT[^<]{0,160}|is not[^<]{0,120}\\)')"
+      "Bash(grep -oiE '\\(error[^<]{0,200}|Cannot[^<]{0,160}|Module[^<]{0,160}|Failed to[^<]{0,160}|ENOENT[^<]{0,160}|is not[^<]{0,120}\\)')",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)"
     ]
   }
 }
