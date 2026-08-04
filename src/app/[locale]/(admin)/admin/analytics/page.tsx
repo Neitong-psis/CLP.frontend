@@ -1,4 +1,3 @@
-﻿import { TrendingUp, Users, BookOpen, Award, ArrowUpRight } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import {
   WEEKLY_ENROLLMENTS,
@@ -9,116 +8,17 @@ import {
   PLATFORM_ANALYTICS_DATA,
 } from '@/constants/admin';
 import AdminTopBar from '@/components/common/TopBar';
-
-const BAR_MAX = Math.max(...WEEKLY_ENROLLMENTS.map((d) => d.count));
-
-// Simple SVG line chart
-function LineChart() {
-  const W = 560;
-  const H = 150;
-  const pad = { t: 10, r: 10, b: 24, l: 10 };
-  const innerW = W - pad.l - pad.r;
-  const innerH = H - pad.t - pad.b;
-  const n = PLATFORM_ANALYTICS_DATA.length;
-  const enrollMax = Math.max(
-    ...PLATFORM_ANALYTICS_DATA.map((d) => d.enrollments),
-  );
-
-  const ex = (i: number) => pad.l + (i / (n - 1)) * innerW;
-  const ey = (v: number) => pad.t + (1 - v / enrollMax) * innerH;
-
-  const path = PLATFORM_ANALYTICS_DATA.map(
-    (d, i) => `${i === 0 ? 'M' : 'L'}${ex(i)},${ey(d.enrollments)}`,
-  ).join(' ');
-  const areaPath =
-    path + ` L${ex(n - 1)},${pad.t + innerH} L${pad.l},${pad.t + innerH} Z`;
-
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="w-full"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        <linearGradient id="aGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f4a300" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#f4a300" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-        <line
-          key={t}
-          x1={pad.l}
-          x2={pad.l + innerW}
-          y1={pad.t + t * innerH}
-          y2={pad.t + t * innerH}
-          stroke="rgba(255,255,255,0.05)"
-          strokeWidth={1}
-        />
-      ))}
-      <path d={areaPath} fill="url(#aGrad)" />
-      <path
-        d={path}
-        fill="none"
-        stroke="#f4a300"
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      {PLATFORM_ANALYTICS_DATA.map((d, i) => (
-        <text
-          key={d.month}
-          x={ex(i)}
-          y={H - 4}
-          textAnchor="middle"
-          fontSize={9}
-          fill="rgba(255,255,255,0.45)"
-        >
-          {d.month}
-        </text>
-      ))}
-    </svg>
-  );
-}
-
-const CAT_MAX = Math.max(...REVENUE_BY_CATEGORY.map((c) => c.pct));
+import { buildAnalyticsMetrics } from './_lib/buildMetrics';
+import { AnalyticsMetricCards } from './_components/AnalyticsMetricCards';
+import { WeeklyEnrollmentsChart } from './_components/WeeklyEnrollmentsChart';
+import { RevenueCategoryBreakdown } from './_components/RevenueCategoryBreakdown';
+import { PlatformAnalyticsChart } from './_components/PlatformAnalyticsChart';
+import { TopCoursesTable } from './_components/TopCoursesTable';
 
 export default async function AdminAnalyticsPage() {
   const t = await getTranslations('admin.analyticsPage');
 
-  const METRICS = [
-    {
-      label: t('metricTotalLearners'),
-      value: ADMIN_USERS.filter((u) => u.role === 'Learner').length.toString(),
-      change: '+8%',
-      icon: Users,
-      color: 'bg-blue-500/20 text-blue-400',
-    },
-    {
-      label: t('metricPublishedCourses'),
-      value: ADMIN_COURSES.filter(
-        (c) => c.status === 'Public',
-      ).length.toString(),
-      change: '+2',
-      icon: BookOpen,
-      color: 'bg-brand-gold/20 text-brand-gold',
-    },
-    {
-      label: t('metricAvgRating'),
-      value: `${(
-        ADMIN_COURSES.reduce((a, c) => a + c.rating, 0) / ADMIN_COURSES.length
-      ).toFixed(1)}`,
-      change: '+5%',
-      icon: TrendingUp,
-      color: 'bg-emerald-500/20 text-emerald-400',
-    },
-    {
-      label: t('metricTotalEnrollments'),
-      value: ADMIN_COURSES.reduce((a, c) => a + c.enrolled, 0).toLocaleString(),
-      change: '+28%',
-      icon: Award,
-      color: 'bg-purple-500/20 text-purple-400',
-    },
-  ];
+  const metrics = buildAnalyticsMetrics(t, ADMIN_USERS, ADMIN_COURSES);
 
   return (
     <div className="bg-brand-navy flex min-h-full flex-col">
@@ -126,83 +26,20 @@ export default async function AdminAnalyticsPage() {
 
       <div className="flex-2 space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         {/* Metric cards */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {METRICS.map(({ label, value, change, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl border border-white/[0.07] bg-white/3 p-4"
-            >
-              <div
-                className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ${color}`}
-              >
-                <Icon className="h-4 w-4" />
-              </div>
-              <p className="text-[11px] text-white/40">{label}</p>
-              <p className="mt-0.5 text-xl font-bold text-white">{value}</p>
-              <p className="mt-1 flex items-center gap-0.5 text-[11px] font-semibold text-emerald-400">
-                <ArrowUpRight className="h-3 w-3" />
-                {change}
-              </p>
-            </div>
-          ))}
-        </div>
+        <AnalyticsMetricCards metrics={metrics} />
 
         <div className="grid gap-4 lg:grid-cols-2">
-          {/* Weekly enrollment chart */}
-          <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
-            <h3 className="mb-0.5 text-sm font-bold text-white">
-              {t('weeklyEnrollments')}
-            </h3>
-            <p className="mb-5 text-[11px] text-white/35">
-              {t('weeklySubtitle')}
-            </p>
-            <div className="flex h-40 items-end gap-2">
-              {WEEKLY_ENROLLMENTS.map(({ day, count }) => (
-                <div
-                  key={day}
-                  className="flex flex-1 flex-col items-center gap-1.5"
-                >
-                  <span className="text-[10px] text-white/40">{count}</span>
-                  <div
-                    className="bg-brand-gold/80 hover:bg-brand-gold w-full rounded-t transition-colors"
-                    style={{ height: `${(count / BAR_MAX) * 100}%` }}
-                  />
-                  <span className="text-[10px] text-white/35">{day}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <WeeklyEnrollmentsChart
+            title={t('weeklyEnrollments')}
+            subtitle={t('weeklySubtitle')}
+            data={WEEKLY_ENROLLMENTS}
+          />
 
-          {/* Category breakdown */}
-          <div className="rounded-xl border border-white/[0.07] bg-white/3 p-5">
-            <h3 className="mb-0.5 text-sm font-bold text-white">
-              {t('revenueByCategory')}
-            </h3>
-            <p className="mb-5 text-[11px] text-white/35">
-              {t('revenueCategorySubtitle')}
-            </p>
-            <ul className="space-y-3">
-              {REVENUE_BY_CATEGORY.map((cat) => (
-                <li key={cat.name} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-xs font-medium text-white/60">
-                    {cat.name}
-                  </span>
-                  <div
-                    className="flex-1 overflow-hidden rounded-full bg-white/[0.07]"
-                    style={{ height: '6px' }}
-                  >
-                    <div
-                      className="bg-brand-gold h-full rounded-full"
-                      style={{ width: `${(cat.pct / CAT_MAX) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-14 shrink-0 text-right text-xs font-semibold text-white/55">
-                    {cat.amount}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <RevenueCategoryBreakdown
+            title={t('revenueByCategory')}
+            subtitle={t('revenueCategorySubtitle')}
+            data={REVENUE_BY_CATEGORY}
+          />
         </div>
 
         {/* Platform analytics line chart */}
@@ -214,78 +51,22 @@ export default async function AdminAnalyticsPage() {
             {t('platformSubtitle')}
           </p>
           <div className="h-36 w-full overflow-hidden">
-            <LineChart />
+            <PlatformAnalyticsChart data={PLATFORM_ANALYTICS_DATA} />
           </div>
         </div>
 
         {/* Top performing courses */}
-        <div className="rounded-xl border border-white/[0.07] bg-white/3">
-          <div className="border-b border-white/[0.07] px-5 py-4">
-            <h3 className="text-sm font-bold text-white">
-              {t('topPerformingCourses')}
-            </h3>
-            <p className="mt-0.5 text-[11px] text-white/35">
-              {t('topCoursesSubtitle')}
-            </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.07]">
-                  {[
-                    t('colRank'),
-                    t('colCourse'),
-                    t('colEnrolled'),
-                    t('colCompletionRate'),
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-3 text-left text-[11px] font-semibold tracking-wide text-white/35 uppercase"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {TOP_COURSES.map((course, i) => (
-                  <tr
-                    key={course.title}
-                    className="border-b border-white/4 hover:bg-white/2"
-                  >
-                    <td className="px-5 py-3.5">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/5 text-[11px] font-bold text-white/40">
-                        {i + 1}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-white">
-                      {course.title}
-                    </td>
-                    <td className="px-5 py-3.5 text-white/55">
-                      {course.enrolled.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="overflow-hidden rounded-full bg-white/8"
-                          style={{ height: '6px', width: '80px' }}
-                        >
-                          <div
-                            className="bg-brand-gold h-full rounded-full"
-                            style={{ width: `${course.completion}%` }}
-                          />
-                        </div>
-                        <span className="text-[11px] font-semibold text-white/40">
-                          {course.completion}%
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TopCoursesTable
+          title={t('topPerformingCourses')}
+          subtitle={t('topCoursesSubtitle')}
+          columns={[
+            t('colRank'),
+            t('colCourse'),
+            t('colEnrolled'),
+            t('colCompletionRate'),
+          ]}
+          courses={TOP_COURSES}
+        />
       </div>
     </div>
   );

@@ -46,20 +46,40 @@ const STATUS_DOT: Record<CourseTaskStatus, string> = {
   Archived: 'bg-muted-foreground/50',
 };
 
+/** Marks a field as required, inline next to its live-preview value — the
+ *  same red in both themes so it reads as an unambiguous warning either way. */
+function RequiredMark() {
+  return (
+    <span className="text-red-500 dark:text-red-400" aria-hidden="true">
+      {' '}
+      *
+    </span>
+  );
+}
+
 function AccordionSection({
   title,
   desc,
   defaultOpen = false,
+  invalid = false,
   children,
 }: {
   title: string;
   desc: string;
   defaultOpen?: boolean;
+  /** Red outline instead of the default border — this section has at least
+   *  one incomplete/invalid field. */
+  invalid?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-border bg-card overflow-hidden rounded-xl border">
+    <div
+      className={cn(
+        'bg-card overflow-hidden rounded-xl border',
+        invalid ? 'border-red-300 dark:border-red-400/40' : 'border-border',
+      )}
+    >
       <button
         type="button"
         className="hover:bg-muted/40 flex w-full items-center justify-between px-5 py-4 text-left transition-colors"
@@ -77,7 +97,14 @@ function AccordionSection({
         />
       </button>
       {open && (
-        <div className="animate-fade-in border-border/50 border-t px-5 py-5">
+        <div
+          className={cn(
+            'animate-fade-in border-t px-5 py-5',
+            invalid
+              ? 'border-red-200/70 dark:border-red-400/20'
+              : 'border-border/50',
+          )}
+        >
           {children}
         </div>
       )}
@@ -85,11 +112,40 @@ function AccordionSection({
   );
 }
 
-function SummaryStat({ label, value }: { label: string; value: string }) {
+function SummaryStat({
+  label,
+  value,
+  invalid = false,
+}: {
+  label: string;
+  value: string;
+  invalid?: boolean;
+}) {
   return (
-    <div className="border-border bg-card rounded-xl border p-3.5">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="text-foreground mt-0.5 text-sm font-bold">{value}</p>
+    <div
+      className={cn(
+        'rounded-xl border p-3.5',
+        invalid
+          ? 'border-red-300 bg-red-50/40 dark:border-red-400/40 dark:bg-red-500/5'
+          : 'border-border bg-card',
+      )}
+    >
+      <p
+        className={cn(
+          'text-xs',
+          invalid ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground',
+        )}
+      >
+        {label}
+      </p>
+      <p
+        className={cn(
+          'mt-0.5 text-sm font-bold',
+          invalid ? 'text-red-600 dark:text-red-400' : 'text-foreground',
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -117,7 +173,20 @@ export function PreviewPublishStep({
 }) {
   const t = useCreateCourseT();
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
-  const ready = missing.length === 0;
+
+  // Single source of truth for every red-outline/asterisk indicator below —
+  // each mirrors exactly what actually blocks Save Draft / Submit, so the
+  // preview never shows a warning that doesn't also gate the buttons (or
+  // vice versa).
+  const titleInvalid = missing.includes('titleRequired');
+  const descriptionInvalid = missing.includes('descriptionRequired');
+  const thumbnailInvalid = missing.includes('thumbnailRequired');
+  const levelInvalid = missing.includes('levelRequired');
+  const priceInvalid = missing.includes('priceRequired');
+  const moduleInvalid = missing.includes('moduleRequired');
+  const authorInvalid = missing.includes('authorRequired');
+  const coursePreviewInvalid =
+    titleInvalid || descriptionInvalid || thumbnailInvalid || priceInvalid;
 
   const mWord =
     modules.length !== 1 ? t('publish.modules') : t('publish.module');
@@ -140,9 +209,17 @@ export function PreviewPublishStep({
           title={t('publish.coursePreview')}
           desc={t('publish.coursePreviewDesc')}
           defaultOpen
+          invalid={coursePreviewInvalid}
         >
           <div className="flex flex-col gap-5 sm:flex-row">
-            <div className="border-border bg-muted/30 text-muted-foreground relative flex h-28 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg border text-xs sm:w-44">
+            <div
+              className={cn(
+                'relative flex h-28 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg border text-xs sm:w-44',
+                thumbnailInvalid
+                  ? 'border-red-300 bg-red-50/40 text-red-500 dark:border-red-400/40 dark:bg-red-500/5 dark:text-red-400'
+                  : 'border-border bg-muted/30 text-muted-foreground',
+              )}
+            >
               {info.thumbnail ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -157,6 +234,7 @@ export function PreviewPublishStep({
             <div className="flex-1 space-y-1">
               <p className="text-foreground text-base font-bold">
                 {info.title || t('publish.untitledCourse')}
+                {titleInvalid && <RequiredMark />}
               </p>
               {info.subtitle && (
                 <p className="text-muted-foreground text-sm">{info.subtitle}</p>
@@ -171,6 +249,7 @@ export function PreviewPublishStep({
               )}
               <p className="text-muted-foreground text-sm">
                 {info.description || t('publish.noDescription')}
+                {descriptionInvalid && <RequiredMark />}
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
                 {info.category && (
@@ -183,7 +262,14 @@ export function PreviewPublishStep({
                     {info.level}
                   </span>
                 )}
-                <span className="rounded-md bg-blue-950 px-2.5 py-0.5 text-xs font-semibold text-white dark:bg-amber-400">
+                <span
+                  className={cn(
+                    'rounded-md px-2.5 py-0.5 text-xs font-semibold text-white',
+                    priceInvalid
+                      ? 'bg-red-500 dark:bg-red-500'
+                      : 'bg-blue-950 dark:bg-amber-400',
+                  )}
+                >
                   {info.pricingType === 'free'
                     ? t('publish.freeBadge')
                     : `${t('publish.paidBadge')} ${priceLabel(info)}`}
@@ -193,7 +279,11 @@ export function PreviewPublishStep({
           </div>
         </AccordionSection>
 
-        <AccordionSection title={t('publish.curriculum')} desc={curriculumDesc}>
+        <AccordionSection
+          title={t('publish.curriculum')}
+          desc={curriculumDesc}
+          invalid={moduleInvalid}
+        >
           {modules.length === 0 ? (
             <p className="text-muted-foreground text-sm">
               {t('publish.noModules')}
@@ -284,11 +374,30 @@ export function PreviewPublishStep({
               </FormField>
             )}
             <FormField
-              label={t('publish.authorLabel')}
+              label={
+                <>
+                  {t('publish.authorLabel')}
+                  {authorInvalid && <RequiredMark />}
+                </>
+              }
               className={!status ? 'sm:col-span-2' : undefined}
             >
-              <div className="border-border bg-muted/40 text-foreground flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm">
-                <Lock className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+              <div
+                className={cn(
+                  'flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm',
+                  authorInvalid
+                    ? 'border-red-300 bg-red-50/40 text-red-600 dark:border-red-400/40 dark:bg-red-500/5 dark:text-red-400'
+                    : 'border-border bg-muted/40 text-foreground',
+                )}
+              >
+                <Lock
+                  className={cn(
+                    'h-3.5 w-3.5 shrink-0',
+                    authorInvalid
+                      ? 'text-red-500 dark:text-red-400'
+                      : 'text-muted-foreground',
+                  )}
+                />
                 <span className="truncate">{instructor || '—'}</span>
               </div>
               <p className="text-muted-foreground mt-1.5 text-xs">
@@ -307,48 +416,20 @@ export function PreviewPublishStep({
             <SummaryStat
               label={t('publish.modulesLabel')}
               value={String(modules.length)}
+              invalid={moduleInvalid}
             />
             <SummaryStat
               label={t('publish.levelLabel')}
               value={info.level || '—'}
+              invalid={levelInvalid}
             />
             <SummaryStat
               label={t('publish.priceLabel')}
               value={priceLabel(info)}
+              invalid={priceInvalid}
             />
             {status && (
               <SummaryStat label={t('publish.statusLabel')} value={status} />
-            )}
-          </div>
-
-          <div
-            className={cn(
-              'mt-4 rounded-xl border p-4',
-              ready
-                ? 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-500/10'
-                : 'border-amber-200 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/10',
-            )}
-          >
-            {ready ? (
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                {t('publish.readyMessage')}
-              </p>
-            ) : (
-              <>
-                <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
-                  {t('publish.missingFields')}
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {missing.map((key) => (
-                    <li
-                      key={key}
-                      className="text-sm text-amber-700 dark:text-amber-400"
-                    >
-                      {t(`validation.${key}`)}
-                    </li>
-                  ))}
-                </ul>
-              </>
             )}
           </div>
         </AccordionSection>

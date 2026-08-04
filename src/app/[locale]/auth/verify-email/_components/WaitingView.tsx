@@ -113,9 +113,12 @@ function PulsingDots() {
 
 interface WaitingViewProps {
   email: string | null;
+  from: string | null;
 }
 
-export function WaitingView({ email }: WaitingViewProps) {
+export function WaitingView({ email, from }: WaitingViewProps) {
+  const loginHref = from ? `/auth?from=${encodeURIComponent(from)}` : '/auth';
+
   return (
     <div className="flex flex-col items-center text-center">
       {/* Floating icon with ping ring */}
@@ -154,7 +157,7 @@ export function WaitingView({ email }: WaitingViewProps) {
       <p className="mt-8 text-xs text-slate-400">
         Already confirmed?{' '}
         <Link
-          href="/auth"
+          href={loginHref}
           className="text-brand-gold font-semibold hover:underline"
         >
           Go to Login

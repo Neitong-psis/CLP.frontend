@@ -8,7 +8,7 @@ export function FormField({
   children,
   className,
 }: {
-  label: string;
+  label: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }) {

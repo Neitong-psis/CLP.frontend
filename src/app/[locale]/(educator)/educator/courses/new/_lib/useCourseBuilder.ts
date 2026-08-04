@@ -26,8 +26,8 @@ const INITIAL_INFO: CourseInfo = {
   thumbnail: '',
 };
 
-let _idSeq = 0;
-const generateTaskId = () => `ct-${Date.now()}-${++_idSeq}`;
+let taskIdCounter = 0;
+const generateTaskId = () => `ct-${Date.now()}-${++taskIdCounter}`;
 
 const formatToday = () =>
   new Date().toLocaleDateString('en-US', {
@@ -36,20 +36,18 @@ const formatToday = () =>
     year: 'numeric',
   });
 
-/** Coerces a `?step=` value into a valid step number, defaulting to 1. Powers
- *  fast-path entry points (Course Review's "Resubmit" → Step 3, "Edit whole
- *  course" → Step 2) without any other change to wizard behavior. */
+/** Coerces a `?step=` value into a step between 1 and 3, defaulting to 1. */
 function clampStep(value?: string | null): number {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 1;
-  return Math.min(Math.max(Math.trunc(n), 1), 3);
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 1;
+  return Math.min(Math.max(Math.trunc(parsed), 1), 3);
 }
 
-/** When `draftId` matches an existing task, the wizard opens pre-populated
- *  with that draft's real saved content (from `draftStorage`) or, failing
- *  that, a fixture-based placeholder for the pre-seeded mock "In Writing" rows.
- *  `initialStep` jumps straight to a later step (unlocking everything up to
- *  it in the StepBar) instead of always starting at Step 1. */
+/**
+ * Drives the three-step course creation wizard: draft state, validation,
+ * autosave, and navigation. Opens pre-populated when `draftId` names an
+ * existing task, and at `initialStep` when resuming mid-wizard.
+ */
 export function useCourseBuilder(
   draftId?: string | null,
   initialStep?: string | null,
@@ -93,13 +91,9 @@ export function useCourseBuilder(
     () => seedTask?.status ?? 'To Do',
   );
 
-  // The first real edit to content while status is still "To Do" claims the
-  // draft — auto-advancing it to "In Writing". Adjusted during render (React's
-  // sanctioned pattern for state derived from other state) rather than in an
-  // effect: `setInfoField`/`addModule`/etc. are the only things that ever
-  // produce a new `info`/`modules` reference, so comparing against what was
-  // seen on the previous render is a safe, idempotent no-op otherwise — including
-  // through React Strict Mode's double-render in development.
+  // The first edit to a "To Do" draft claims it as "In Writing". Adjusted
+  // during render rather than in an effect — only the setters below produce a
+  // new `info`/`modules` reference, so the comparison is an idempotent no-op.
   const [seenInfo, setSeenInfo] = useState(info);
   const [seenModules, setSeenModules] = useState(modules);
   if (info !== seenInfo || modules !== seenModules) {
@@ -112,9 +106,23 @@ export function useCourseBuilder(
     const list: string[] = [];
     if (!info.title.trim()) list.push('titleRequired');
     if (!info.description.trim()) list.push('descriptionRequired');
+    if (!info.thumbnail) list.push('thumbnailRequired');
+    if (!info.level) list.push('levelRequired');
+    // A "paid" course with no real price isn't paid — it just hasn't been
+    // priced yet, so it still needs fixing before it can go live.
+    if (info.pricingType === 'paid' && (!info.price || Number(info.price) <= 0))
+      list.push('priceRequired');
     if (modules.length === 0) list.push('moduleRequired');
     return list;
-  }, [info.title, info.description, modules.length]);
+  }, [
+    info.title,
+    info.description,
+    info.thumbnail,
+    info.level,
+    info.pricingType,
+    info.price,
+    modules.length,
+  ]);
 
   /** Submitting to admin needs both complete content and an explicit
    *  "Under Review" selection — the sole path into that status. */
@@ -177,14 +185,20 @@ export function useCourseBuilder(
   const addModule = () =>
     setModules((prev) => [...prev, makeModule(prev.length + 1)]);
 
-  const updateModule = (i: number, updated: CourseModule) =>
-    setModules((prev) => prev.map((m, j) => (j === i ? updated : m)));
+  const updateModule = (index: number, updatedModule: CourseModule) =>
+    setModules((prev) =>
+      prev.map((module, moduleIndex) =>
+        moduleIndex === index ? updatedModule : module,
+      ),
+    );
 
-  const deleteModule = (i: number) =>
-    setModules((prev) => prev.filter((_, j) => j !== i));
+  const deleteModule = (index: number) =>
+    setModules((prev) =>
+      prev.filter((_, moduleIndex) => moduleIndex !== index),
+    );
 
-  const moveModule = (i: number, dir: 'up' | 'down') =>
-    setModules((prev) => moveItem(prev, i, dir));
+  const moveModule = (index: number, direction: 'up' | 'down') =>
+    setModules((prev) => moveItem(prev, index, direction));
 
   // Autosave — debounced, and only once the draft has actually started
   // (nothing worth persisting for an untouched "To Do" card).
@@ -205,18 +219,18 @@ export function useCourseBuilder(
   function goBack() {
     if (status !== 'To Do') persistNow(status);
     if (step === 1) goToBoard(status);
-    else setStep((s) => s - 1);
+    else setStep((current) => current - 1);
   }
 
   const goNext = () => {
-    const next = Math.min(step + 1, 3);
-    setStep(next);
-    setMaxStep((m) => Math.max(m, next));
+    const nextStep = Math.min(step + 1, 3);
+    setStep(nextStep);
+    setMaxStep((furthest) => Math.max(furthest, nextStep));
   };
 
   /** Any step the user has already reached is revisitable, in either direction. */
-  const goToStep = (n: number) => {
-    if (n >= 1 && n <= maxStep) setStep(n);
+  const goToStep = (targetStep: number) => {
+    if (targetStep >= 1 && targetStep <= maxStep) setStep(targetStep);
   };
 
   function saveDraft() {

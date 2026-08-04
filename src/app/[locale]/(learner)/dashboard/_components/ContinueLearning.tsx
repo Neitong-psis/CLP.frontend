@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight, Play } from 'lucide-react';
-import { ENROLLED_COURSES } from '@/config/learner';
+import { ENROLLED_COURSES } from '@/constants/learner';
 import { slugify } from '@/lib/utils/slugify';
 
 export default function ContinueLearning() {

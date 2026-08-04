@@ -37,6 +37,15 @@
   --font-heading: 'KantumruyPro', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Same font, scoped to any individual element tagged lang="km" — not just
+   the document root. Covers Khmer text rendered while the rest of the page
+   is in another language, e.g. the "ខ្មែរ" option label inside an
+   English-locale language switcher, which otherwise falls back to the
+   Latin-only UI font and renders with mismatched glyph metrics/height. */
+:lang(km) {
+  font-family: 'KantumruyPro', ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -489,6 +498,17 @@
 }
 @utility delay-500 {
   animation-delay: 0.5s;
+}
+
+/* Hides the scrollbar on an otherwise-scrollable element (still keyboard/
+   wheel/touch scrollable) — used by scroll containers across the dashboard
+   so a native scrollbar never eats into one side's padding. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer utilities {

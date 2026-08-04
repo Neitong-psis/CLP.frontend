@@ -3,11 +3,12 @@
 import { useState, useCallback } from 'react';
 import { Ticket } from 'lucide-react';
 import { useLearnerExploreT } from '@/i18n';
-import { EXPLORE_COURSES } from '@/config/learner';
+import { EXPLORE_COURSES, EXPLORE_CATEGORIES } from '@/constants/learner';
+import { slugify } from '@/lib/utils/slugify';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import TopBar from '@/components/pages/learner/TopBar';
 import { PageHero } from '@/components/common/PageHero';
-import ExploreFilter from './_components/ExploreFilter';
+import CourseBrowser from '@/components/course/CourseBrowser';
 import { RedeemCodeModal } from './_components/RedeemCodeModal';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 
@@ -15,7 +16,7 @@ export default function ExplorePage() {
   const t = useLearnerExploreT();
   const { firstName, email } = useCurrentUser();
   const [redeemOpen, setRedeemOpen] = useState(false);
-  // Bumped after a successful redeem so ExploreFilter re-reads localStorage
+  // Bumped after a successful redeem so CourseBrowser re-reads localStorage
   // and immediately reflects the new enrollment (e.g. the "Enrolled" badge).
   const [redeemedAt, setRedeemedAt] = useState(0);
 
@@ -47,7 +48,14 @@ export default function ExplorePage() {
             </button>
           }
         />
-        <ExploreFilter key={redeemedAt} courses={EXPLORE_COURSES} />
+        <CourseBrowser
+          key={redeemedAt}
+          courses={EXPLORE_COURSES}
+          categories={EXPLORE_CATEGORIES}
+          mode="learner"
+          previewHref={(course) => `/explore/${slugify(course.title)}`}
+          checkoutHref={(course) => `/checkout/${slugify(course.title)}`}
+        />
       </div>
 
       <FooterBottomBar theme="light" />

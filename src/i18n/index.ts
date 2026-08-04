@@ -66,16 +66,6 @@ export const useEducatorGreetingHeroT = () =>
   useTranslations(NS.educator.greetingHero);
 export const useEducatorCoursesT = () => useTranslations(NS.educator.courses);
 export const useEducatorStudentsT = () => useTranslations(NS.educator.students);
-export const useEducatorAnalyticsT = () =>
-  useTranslations(NS.educator.analytics);
-export const useEducatorAnalyticsCompletionT = () =>
-  useTranslations(NS.educator.analyticsCompletion);
-export const useEducatorAnalyticsMetricsT = () =>
-  useTranslations(NS.educator.analyticsMetrics);
-export const useEducatorAnalyticsPerformanceT = () =>
-  useTranslations(NS.educator.analyticsPerformance);
-export const useEducatorAnalyticsWeeklyT = () =>
-  useTranslations(NS.educator.analyticsWeekly);
 export const useEducatorSettingsT = () => useTranslations(NS.educator.settings);
 export const useEducatorReviewT = () => useTranslations(NS.educator.review);
 export const useCreateCourseT = () => useTranslations(NS.educator.createCourse);
@@ -89,3 +79,10 @@ export const useLearnerCertificatesT = () =>
   useTranslations(NS.learner.certificates);
 export const useLearnerExploreT = () => useTranslations(NS.learner.explore);
 export const useLearnerCheckoutT = () => useTranslations(NS.learner.checkout);
+
+// ── Shared course catalog/preview components ────────────────────────────────
+// Alias onto the same copy as the learner Explore surface — shared components
+// under src/components/course/ render on both public and learner pages, so
+// they use this neutrally-named hook instead of importing a learner-specific
+// one directly.
+export const useCourseCatalogT = () => useTranslations(NS.learner.explore);

@@ -140,8 +140,11 @@
 
     "reviewOverlay": {
       "heading": "ការពិនិត្យវគ្គ",
+      "coursePreview": "មើលវគ្គជាមុន",
       "submittedBy": "ដាក់ស្នើដោយ",
       "pendingReview": "កំពុងរង់ចាំពិនិត្យ",
+      "published": "បានផ្សព្វផ្សាយ",
+      "archived": "បានទុកក្នុងបណ្ណសារ",
       "closeReview": "បិទការពិនិត្យ",
       "backToCourses": "ត្រឡប់ទៅវគ្គ",
       "reject": "បដិសេធ",
@@ -152,6 +155,10 @@
       "modules": "{count} ម៉ូឌុល",
       "lessons": "{count} មេរៀន",
       "itemsReviewed": "បានពិនិត្យ {reviewed} នៃ {total} ធាតុ",
+      "itemsCompleted": "បានបញ្ចប់ {reviewed} នៃ {total} ធាតុ",
+      "markComplete": "សម្គាល់ថាបានបញ្ចប់",
+      "finishPreview": "បញ្ចប់ការមើលជាមុន",
+      "editCourse": "កែសម្រួលថ្នាក់",
       "collapseSidebar": "បង្រួមរបារចំហៀង",
       "expandSidebar": "ពង្រីករបារចំហៀង",
       "locked": "ជាប់សោ",

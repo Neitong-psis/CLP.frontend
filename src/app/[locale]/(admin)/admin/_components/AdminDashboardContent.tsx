@@ -58,7 +58,7 @@ export function AdminDashboardContent() {
           <DashboardStatGrid firstVisit={isFirstVisit} />
 
           <div className="grid gap-6 md:grid-cols-[1fr_260px] lg:grid-cols-3">
-            <Link href="/admin/revenue" className="block lg:col-span-2">
+            <Link href="/admin/revenue" className="block h-full lg:col-span-2">
               <MonthlyRevenueCard data={monthlyRevenueData} />
             </Link>
             <UserDistributionContainer firstVisit={isFirstVisit} />

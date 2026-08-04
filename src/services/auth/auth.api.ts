@@ -28,6 +28,33 @@ const PORTAL_ENDPOINT: Record<NonNullable<LoginOptions['role']>, string> = {
   learner: BFF_ENDPOINTS.learnerLogin,
 };
 
+/** POSTs to a BFF endpoint and parses the session it returns. */
+async function postForSession(
+  endpoint: string,
+  body: unknown,
+): Promise<LoginResult> {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const data: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw fromResponseData(response.status, data);
+  }
+  try {
+    return loginResultSchema.parse(data);
+  } catch (error) {
+    throw normalizeError(
+      error instanceof ZodError
+        ? error
+        : new Error('Unexpected login response shape.'),
+    );
+  }
+}
+
+/** Logs in with email and password, optionally through a role-gated portal. */
 export async function login(
   input: LoginRequest,
   options: LoginOptions = {},
@@ -35,70 +62,19 @@ export async function login(
   const endpoint = options.role
     ? PORTAL_ENDPOINT[options.role]
     : BFF_ENDPOINTS.login;
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-
-  const data: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw fromResponseData(response.status, data);
-  }
-  try {
-    return loginResultSchema.parse(data);
-  } catch (err) {
-    throw normalizeError(
-      err instanceof ZodError
-        ? err
-        : new Error('Unexpected login response shape.'),
-    );
-  }
+  return postForSession(endpoint, input);
 }
 
-/**
- * Logs in with a social provider token via the BFF (`/api/auth/oauth`),
- * which exchanges it with the backend and sets the same httpOnly session
- * cookies as the email flow.
- *
- * @param input - Provider name plus its credential (`idToken` for
- *   Google/Apple, `accessToken` for Facebook).
- * @returns The same {@link LoginResult} shape as {@link login}.
- * @throws {@link ApiError} if the token is rejected or the service is down.
- */
+/** Logs in with a social provider token, yielding the same session as email login. */
 export async function oauthLogin(
   input: OAuthLoginRequest,
 ): Promise<LoginResult> {
-  const response = await fetch(BFF_ENDPOINTS.oauth, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-
-  const data: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw fromResponseData(response.status, data);
-  }
-  try {
-    return loginResultSchema.parse(data);
-  } catch (err) {
-    throw normalizeError(
-      err instanceof ZodError
-        ? err
-        : new Error('Unexpected login response shape.'),
-    );
-  }
+  return postForSession(BFF_ENDPOINTS.oauth, input);
 }
 
 /**
- * Registers a new learner account directly with the backend.
- *
- * No session is established — the returned user is inactive until email
- * verification is completed (backend sets status `Inactive` on creation).
- *
- * @param input - First name, last name, email, and password.
- * @returns The newly created (inactive) {@link User} object.
- * @throws {@link ApiError} on duplicate email (422), validation error, or network failure.
+ * Registers a new learner account. Establishes no session — the account stays
+ * inactive until the email is confirmed.
  */
 export async function register(input: RegisterRequest): Promise<User> {
   try {
@@ -112,16 +88,7 @@ export async function register(input: RegisterRequest): Promise<User> {
   }
 }
 
-/**
- * Confirms a newly registered email address using the hash from the
- * confirmation email link (`/confirm-email?hash=...`).
- *
- * On success the backend flips the account status to Active so the user
- * can log in.
- *
- * @param hash - The JWT hash from the confirmation link's query string.
- * @throws {@link ApiError} if the hash is invalid/expired (422) or already used (404).
- */
+/** Confirms a registration using the hash from the email link, activating the account. */
 export async function confirmEmail(hash: string): Promise<void> {
   try {
     await http.post(`/${AUTH_ENDPOINTS.confirmEmail}`, { hash });
@@ -130,15 +97,7 @@ export async function confirmEmail(hash: string): Promise<void> {
   }
 }
 
-/**
- * Fetches the currently authenticated user's profile from the backend.
- *
- * Uses the shared Axios instance, which automatically injects the Bearer access
- * token and handles the 401 → silent refresh → retry flow transparently.
- *
- * @returns The authenticated {@link User}.
- * @throws {@link ApiError} if the token is invalid, unrefreshable, or the network is down.
- */
+/** Fetches the authenticated user's profile. Token injection and 401-refresh are handled by `http`. */
 export async function getMe(): Promise<User> {
   try {
     if (isMockModeEnabled()) {
@@ -160,12 +119,8 @@ export async function getMe(): Promise<User> {
 }
 
 /**
- * Requests a password reset email for the given address.
- *
- * Always resolves — the backend returns a generic message whether or not the
- * email is registered (security by design). Only throws on network failure.
- *
- * @param email - The account email to send the reset link to.
+ * Requests a password reset email. Succeeds even for unregistered addresses —
+ * the backend answers generically so it cannot be used to enumerate accounts.
  */
 export async function forgotPassword(email: string): Promise<void> {
   try {
@@ -175,13 +130,7 @@ export async function forgotPassword(email: string): Promise<void> {
   }
 }
 
-/**
- * Resets the account password using the one-time hash from the reset email.
- *
- * @param hash - The JWT hash from the reset link's query string.
- * @param password - The new plaintext password (must meet the policy).
- * @throws {@link ApiError} if the hash is invalid/expired (422) or already used.
- */
+/** Sets a new password using the one-time hash from the reset email. */
 export async function resetPassword(
   hash: string,
   password: string,
@@ -196,15 +145,7 @@ export async function resetPassword(
 /** Refresh the access token (single-flight). Returns null if no valid session. */
 export const refresh = refreshSession;
 
-/**
- * Signs the user out by revoking the session on the backend and clearing all cookies via the BFF.
- *
- * Best-effort: the backend revocation call is attempted with the current access token,
- * but cookie clearing always runs regardless of whether the backend call succeeds.
- * A network failure does not prevent the local session from being cleared.
- *
- * @returns Resolves when all cookies are cleared; does not throw.
- */
+/** Signs out: revokes the backend session and clears the session cookies. */
 export async function logout(): Promise<void> {
   const accessToken = getAccessToken();
   await fetch(BFF_ENDPOINTS.logout, {

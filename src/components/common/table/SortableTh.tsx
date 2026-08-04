@@ -2,6 +2,7 @@
 
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { TableHead } from '@/components/ui/table';
 
 export interface SortableThProps {
   label: string;
@@ -13,12 +14,7 @@ export interface SortableThProps {
   className?: string;
 }
 
-/**
- * A `<th>` whose label doubles as a sort toggle: hovering reveals a faint
- * `ArrowUpDown` icon, clicking cycles asc → desc → off (see the column's
- * owning hook), and the active column shows a solid colored arrow instead.
- * Same visual language across every table so the affordance is unambiguous.
- */
+/** Table header cell whose label toggles sorting for its column. */
 export function SortableTh({
   label,
   active,
@@ -27,14 +23,17 @@ export function SortableTh({
   align = 'left',
   className,
 }: SortableThProps) {
+  const icon = !active ? (
+    <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover/th:opacity-60" />
+  ) : direction === 'asc' ? (
+    <ArrowUp className="text-brand-gold h-3.5 w-3.5 shrink-0" />
+  ) : (
+    <ArrowDown className="text-brand-gold h-3.5 w-3.5 shrink-0" />
+  );
+
   return (
-    <th
-      scope="col"
-      className={cn(
-        'text-muted-foreground px-5 py-3.5 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
-        align === 'right' ? 'text-right' : 'text-left',
-        className,
-      )}
+    <TableHead
+      className={cn(align === 'right' ? 'text-right' : 'text-left', className)}
     >
       <button
         type="button"
@@ -44,15 +43,11 @@ export function SortableTh({
           active && 'text-foreground',
         )}
       >
+        {/* Icon leads on right-aligned columns so the label stays flush right. */}
+        {align === 'right' && icon}
         {label}
-        {!active ? (
-          <ArrowUpDown className="h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover/th:opacity-60" />
-        ) : direction === 'asc' ? (
-          <ArrowUp className="text-brand-gold h-3.5 w-3.5 shrink-0" />
-        ) : (
-          <ArrowDown className="text-brand-gold h-3.5 w-3.5 shrink-0" />
-        )}
+        {align !== 'right' && icon}
       </button>
-    </th>
+    </TableHead>
   );
 }

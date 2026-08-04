@@ -55,18 +55,15 @@ function RevenueCategorySkeleton({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'border-border bg-card flex h-full flex-col rounded-2xl border-[0.5px] p-6',
+        'border-border bg-card flex h-full flex-col overflow-hidden rounded-2xl border-[0.5px]',
         className,
       )}
     >
-      <div className="mb-6 flex items-start justify-between gap-2">
-        <div className="space-y-1.5">
-          <div className="bg-muted h-3.5 w-36 animate-pulse rounded" />
-          <div className="bg-muted h-2.5 w-28 animate-pulse rounded" />
-        </div>
+      <div className="border-border flex items-center justify-between gap-2 border-b px-6 py-4">
+        <div className="bg-muted h-3.5 w-36 animate-pulse rounded" />
         <div className="bg-muted h-5 w-6 animate-pulse rounded-full" />
       </div>
-      <ul className="flex flex-1 flex-col justify-between">
+      <ul className="flex flex-1 flex-col justify-between px-6 py-5">
         {Array.from({ length: 6 }).map((_, i) => (
           <li key={i} className="animate-pulse">
             <div className="mb-2 flex items-center gap-2">
@@ -112,6 +109,14 @@ export function CourseWidgetsContainer({
         instructor: c.instructor,
         students: c.students,
         progress: c.progress,
+        href: buildCourseReviewUrl(locale, {
+          id: c.id,
+          title: c.title,
+          instructor: c.instructor,
+          category: c.category,
+          level: c.level,
+          status: c.visibility,
+        }),
       }));
 
   const revenueByCategory = data?.revenueByCategory.length

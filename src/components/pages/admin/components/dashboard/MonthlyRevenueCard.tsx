@@ -1,12 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import {
-  ArrowUpRight,
-  ArrowDownRight,
-  DollarSign,
-  TrendingUp,
-} from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { useAdminMonthlyRevenueT } from '@/i18n';
 import { MONTHLY_REVENUE } from '@/constants/admin';
 import { formatCurrencyCompact } from '@/lib/utils/stats';
@@ -280,68 +275,30 @@ export function MonthlyRevenueCard({
   const isEmpty = data.length === 0 || data.every((d) => d.amount === 0);
   const hi = highlightIndex ?? data.length - 1;
   const current = data[hi];
-  const prev = data[hi - 1];
-  const pctChange =
-    prev && prev.amount > 0
-      ? (((current?.amount ?? 0) - prev.amount) / prev.amount) * 100
-      : null;
-  const isPositive = pctChange === null || pctChange >= 0;
-  const ChangeIcon = isPositive ? ArrowUpRight : ArrowDownRight;
 
   return (
     <section
       className={cn(
-        'border-border bg-card flex flex-col rounded-2xl border-[0.5px]',
+        'border-border bg-card flex h-full flex-col rounded-2xl border-[0.5px]',
         className,
       )}
     >
-      {/* Header */}
-      <div className="border-border flex items-start justify-between gap-4 border-b px-6 py-5">
-        <div className="flex items-center gap-3">
-          <span
-            className="bg-accent-blue/10 text-accent-blue dark:bg-accent-blue/20 flex size-8 shrink-0 items-center justify-center rounded-full"
-            aria-hidden="true"
-          >
-            <DollarSign className="size-4" />
-          </span>
-          <div>
-            <h3 className="text-foreground text-[14px] font-semibold">
-              {t('title')}
-            </h3>
-            <p className="text-muted-foreground mt-0.5 text-[12.5px]">
-              {t('last12')}
-            </p>
-          </div>
-        </div>
+      {/* Header — mirrors UserDistributionCard's header exactly (padding,
+          items-baseline, label/value type scale) so both cards' dividers
+          land at the same height when placed side by side. */}
+      <div className="border-border flex items-baseline justify-between border-b px-5 py-4">
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+          {t('title')}
+        </p>
         {current && !isEmpty && (
-          <div className="text-right">
-            <p className="text-foreground text-[28px] leading-none font-semibold tabular-nums">
-              {fmt(current.amount)}
-            </p>
-            {pctChange !== null && (
-              <p className="mt-2 flex items-center justify-end gap-1.5">
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums',
-                    isPositive
-                      ? 'bg-emerald-500/10 text-emerald-500'
-                      : 'bg-rose-500/10 text-rose-500',
-                  )}
-                >
-                  <ChangeIcon className="size-3" aria-hidden="true" />
-                  {Math.abs(pctChange).toFixed(1)}%
-                </span>
-                <span className="text-muted-foreground text-[11px]">
-                  {t('vsPrevMonth')}
-                </span>
-              </p>
-            )}
-          </div>
+          <span className="text-foreground text-[20px] leading-none font-semibold tabular-nums">
+            {fmt(current.amount)}
+          </span>
         )}
       </div>
 
       {/* Chart */}
-      <div className="px-4 pt-3 pb-4">
+      <div className="flex flex-1 flex-col justify-center px-4 pt-3 pb-4">
         {isEmpty ? (
           <div
             className="flex flex-col items-center justify-center gap-2 text-center"

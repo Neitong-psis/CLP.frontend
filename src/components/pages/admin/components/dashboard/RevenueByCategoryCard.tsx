@@ -42,20 +42,17 @@ export function RevenueByCategoryCard({
     <section
       ref={ref}
       className={cn(
-        'border-border bg-card flex h-full max-h-110 flex-col rounded-2xl border-[0.5px] p-6',
+        'border-border bg-card flex h-full max-h-110 flex-col overflow-hidden rounded-2xl border-[0.5px]',
         className,
       )}
     >
-      {/* Header */}
-      <div className="mb-6 flex shrink-0 items-start justify-between gap-2">
-        <div>
-          <h3 className="text-foreground text-[14px] font-medium">
-            {t('revByCategory')}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-[12px]">
-            {t('topEarners')}
-          </p>
-        </div>
+      {/* Header — matches TopCoursesCard's (px-6 py-4, border-b, single
+          line) and MonthlyRevenueCard's (py-4, border-b) header padding so
+          all three cards' dividers land at the same height when paired. */}
+      <div className="border-border flex shrink-0 items-center justify-between gap-2 border-b px-6 py-4">
+        <h3 className="text-foreground text-[14px] font-medium">
+          {t('revByCategory')}
+        </h3>
         <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium">
           {data.length}
         </span>
@@ -63,7 +60,7 @@ export function RevenueByCategoryCard({
 
       {/* Rows — flex-1 + justify-between fills card height evenly, scrolls
           internally (scrollbar hidden) once content exceeds the card's cap */}
-      <ul className="scrollbar-none flex flex-1 flex-col justify-between gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <ul className="scrollbar-none flex flex-1 flex-col justify-between gap-3 overflow-y-auto px-6 py-5 [&::-webkit-scrollbar]:hidden">
         {data.map((cat, i) => {
           const isHovered = hoveredIdx === i;
           const isDimmed = hoveredIdx !== null && !isHovered;

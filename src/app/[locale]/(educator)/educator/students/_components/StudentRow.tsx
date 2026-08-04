@@ -84,11 +84,11 @@ export function StudentRow({
       <td className="px-5 py-4">
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
+            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
             ACTIVITY_STYLE[student.activity],
           )}
         >
-          <span className="size-1.5 rounded-full bg-current" />
+          <span className="size-1.5 shrink-0 rounded-full bg-current" />
           {student.activity}
         </span>
       </td>
@@ -96,7 +96,7 @@ export function StudentRow({
       <td className="px-5 py-4">
         <span
           className={cn(
-            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
+            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
             STATUS_STYLE[student.status],
           )}
         >

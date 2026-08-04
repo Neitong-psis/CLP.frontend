@@ -1,9 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { useAdminSettingsT } from '@/i18n';
 import { DatePicker } from '@/components/ui/DatePicker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { AvatarCard } from './AvatarCard';
 import { SettingsSection } from './SettingsSection';
@@ -99,19 +105,21 @@ export function PersonalInfoSection() {
         <div className={sectionLabelCls}>{t('personalDetails')}</div>
         <div>
           <label className={labelCls}>{t('gender')}</label>
-          <div className="relative">
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className={`${inputCls} cursor-pointer appearance-none pr-9`}
-            >
-              <option value="">{t('selectGender')}</option>
-              <option>{t('female')}</option>
-              <option>{t('male')}</option>
-              <option>{t('preferNotToSay')}</option>
-            </select>
-            <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-          </div>
+          <Select
+            value={gender || undefined}
+            onValueChange={(v) => setGender(v ?? '')}
+          >
+            <SelectTrigger className="w-full justify-between rounded-xl px-3 data-[size=default]:h-11">
+              <SelectValue placeholder={t('selectGender')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={t('female')}>{t('female')}</SelectItem>
+              <SelectItem value={t('male')}>{t('male')}</SelectItem>
+              <SelectItem value={t('preferNotToSay')}>
+                {t('preferNotToSay')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <label className={labelCls}>{t('dateOfBirth')}</label>

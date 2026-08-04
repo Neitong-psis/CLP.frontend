@@ -48,7 +48,11 @@ export function PillTabs<T extends string>({
             onClick={() => onChange(tabValue)}
             className={cn(
               'group flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold whitespace-nowrap transition-all duration-150',
-              fullWidth ? 'flex-1 justify-center' : 'shrink-0',
+              // `fullWidth` only evenly fills the row once there's room for
+              // it (sm+) — forcing flex-1 on mobile too would shrink tabs
+              // below their content width instead of letting the row
+              // scroll, cutting off whichever tab lands last.
+              fullWidth ? 'shrink-0 justify-center sm:flex-1' : 'shrink-0',
               active
                 ? 'border-brand-gold bg-brand-gold/10 text-brand-gold shadow-sm'
                 : 'border-border text-muted-foreground hover:border-brand-gold/40 hover:bg-brand-gold/5 hover:text-foreground',

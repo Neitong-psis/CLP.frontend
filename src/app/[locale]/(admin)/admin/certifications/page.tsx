@@ -2,19 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import {
-  BadgeCheck,
   Award,
-  FileText,
   ArrowUpRight,
   ArrowDownRight,
   Plus,
   Search,
   Download,
   Link2,
-  X,
-  Printer,
-  Share2,
-  Copy,
   Upload,
   ExternalLink,
 } from 'lucide-react';
@@ -22,6 +16,15 @@ import { useAdminCertificationsT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 import TopBar from '@/components/common/TopBar';
 import { useToast } from '@/components/ui/toast';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 import { SortableTh } from '@/components/common/table/SortableTh';
 import { useColumnSort } from '@/hooks/useColumnSort';
 import { parseDateLoose } from '@/lib/utils/sort';
@@ -32,914 +35,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-const CANVA_URL_PATTERN = /^https:\/\/(www\.)?canva\.com\//i;
-
-type Tab = 'dashboard' | 'templates' | 'issuance';
-type IssuanceStatus = 'Verify' | 'Pending';
-type TemplateStatus = 'Active' | 'Draft';
-
-type CertRecord = {
-  id: string;
-  recipient: string;
-  course: string;
-  issued: string;
-};
-
-/** This admin view has no per-record instructor in its mock data — the
- *  on-screen certificate and the downloaded PDF share this one value so
- *  they can't silently drift apart. */
-const DEFAULT_INSTRUCTOR = 'Dr. Sopheak Chan';
-
-const CERT_STATS_DATA = [
-  {
-    labelKey: 'statTotalIssued' as const,
-    value: '12,450',
-    change: '+9%',
-    icon: Award,
-    color: 'bg-blue-500/10 text-blue-500',
-  },
-  {
-    labelKey: 'statVerifiedClaims' as const,
-    value: '8,920',
-    change: '+14%',
-    icon: BadgeCheck,
-    color: 'bg-emerald-500/10 text-emerald-500',
-  },
-  {
-    labelKey: 'statActiveTemplates' as const,
-    value: '14',
-    change: '+2',
-    icon: FileText,
-    color: 'bg-amber-500/10 text-amber-500',
-  },
-];
-
-const RECENT_ISSUANCES: {
-  id: string;
-  user: string;
-  course: string;
-  issued: string;
-  status: IssuanceStatus;
-}[] = [
-  {
-    id: 'r1',
-    user: 'Sarah Jenkins',
-    course: 'Advanced Khmer Literature',
-    issued: 'May 12, 2026',
-    status: 'Verify',
-  },
-  {
-    id: 'r2',
-    user: 'Michael Chang',
-    course: 'Leadership in Practice',
-    issued: 'May 11, 2026',
-    status: 'Verify',
-  },
-  {
-    id: 'r3',
-    user: 'Elena Rodriguez',
-    course: 'Leadership Development Certification',
-    issued: 'May 10, 2026',
-    status: 'Pending',
-  },
-  {
-    id: 'r4',
-    user: 'David Smith',
-    course: 'Innovative Learning Masterclass',
-    issued: 'May 09, 2026',
-    status: 'Verify',
-  },
-];
-
-const ISSUANCE_STATUS_STYLE: Record<IssuanceStatus, string> = {
-  Verify: 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
-  Pending: 'border border-amber-500/20 bg-amber-500/10 text-amber-500',
-};
-
-const VERIFICATION_OPS = [
-  {
-    label: 'Verify',
-    count: 3,
-    style: 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
-  },
-  {
-    label: 'Pending',
-    count: 1,
-    style: 'border border-amber-500/20 bg-amber-500/10 text-amber-500',
-  },
-  {
-    label: 'Terminate',
-    count: 0,
-    style: 'border border-rose-500/20 bg-rose-500/10 text-rose-500',
-  },
-];
-
-interface CertTemplate {
-  name: string;
-  category: string;
-  status: TemplateStatus;
-  issued: number;
-  /** Set when the template was created from an uploaded image — renders as
-   *  the card's real preview instead of the placeholder mockup. */
-  thumbnailUrl?: string;
-  /** Set when the uploaded file wasn't an image (e.g. a PDF) — there's no
-   *  thumbnail to show, but the card can still name the attached file. */
-  fileName?: string;
-  /** Canva design link for this template. When present, "Open Canva
-   *  Editor" / "Edit Template" jump straight to it; otherwise they prompt
-   *  the admin to link one. */
-  canvaUrl?: string;
-}
-
-const CERT_TEMPLATES: CertTemplate[] = [
-  {
-    name: 'Corporate Bootcamp',
-    category: 'Corporate',
-    status: 'Draft',
-    issued: 0,
-  },
-  {
-    name: 'Technical Mastery',
-    category: 'Specialized',
-    status: 'Active',
-    issued: 850,
-  },
-  {
-    name: 'Executive Completion',
-    category: 'Standard',
-    status: 'Active',
-    issued: 1240,
-  },
-];
-
-const TEMPLATE_STATUS_STYLE: Record<TemplateStatus, string> = {
-  Active: 'text-emerald-500',
-  Draft: 'text-amber-500',
-};
-
-const ISSUANCE_HISTORY: CertRecord[] = [
-  {
-    id: 'CERT-99A81B',
-    recipient: 'Sarah Jenkins',
-    course: 'Advanced Khmer Literature',
-    issued: 'May 12, 2026',
-  },
-  {
-    id: 'CERT-44B92C',
-    recipient: 'Michael Chang',
-    course: 'Leadership in Practice',
-    issued: 'May 11, 2026',
-  },
-  {
-    id: 'CERT-11X75Y',
-    recipient: 'Elena Rodriguez',
-    course: 'Leadership Development Certification',
-    issued: 'May 10, 2026',
-  },
-  {
-    id: 'CERT-88M22P',
-    recipient: 'David Smith',
-    course: 'Innovative Learning Masterclass',
-    issued: 'May 09, 2026',
-  },
-];
-
-// ─── QR code mockup ───────────────────────────────────────────────────────────
-
-function QRMockup() {
-  return (
-    <svg
-      width="52"
-      height="52"
-      viewBox="0 0 13 13"
-      className="rounded border border-gray-200"
-    >
-      {/* Finder TL */}
-      <rect x="0" y="0" width="4" height="4" fill="#0f2044" />
-      <rect x="1" y="1" width="2" height="2" fill="white" />
-      {/* Finder TR */}
-      <rect x="9" y="0" width="4" height="4" fill="#0f2044" />
-      <rect x="10" y="1" width="2" height="2" fill="white" />
-      {/* Finder BL */}
-      <rect x="0" y="9" width="4" height="4" fill="#0f2044" />
-      <rect x="1" y="10" width="2" height="2" fill="white" />
-      {/* Data modules */}
-      <rect x="5" y="0" width="1" height="1" fill="#0f2044" />
-      <rect x="7" y="1" width="1" height="1" fill="#0f2044" />
-      <rect x="5" y="2" width="2" height="1" fill="#0f2044" />
-      <rect x="5" y="4" width="3" height="1" fill="#0f2044" />
-      <rect x="0" y="5" width="1" height="2" fill="#0f2044" />
-      <rect x="3" y="5" width="1" height="1" fill="#0f2044" />
-      <rect x="5" y="5" width="1" height="1" fill="#0f2044" />
-      <rect x="8" y="5" width="1" height="1" fill="#0f2044" />
-      <rect x="10" y="5" width="2" height="1" fill="#0f2044" />
-      <rect x="4" y="7" width="2" height="1" fill="#0f2044" />
-      <rect x="8" y="7" width="1" height="2" fill="#0f2044" />
-      <rect x="5" y="9" width="1" height="2" fill="#0f2044" />
-      <rect x="7" y="9" width="2" height="1" fill="#0f2044" />
-      <rect x="11" y="9" width="2" height="2" fill="#0f2044" />
-      <rect x="9" y="11" width="1" height="2" fill="#0f2044" />
-    </svg>
-  );
-}
-
-// ─── Certificate modal ────────────────────────────────────────────────────────
-
-function CertificateModal({
-  cert,
-  onClose,
-  onDownload,
-  onCopyLink,
-  onShare,
-}: {
-  cert: CertRecord;
-  onClose: () => void;
-  onDownload: () => void;
-  onCopyLink: (url: string) => void;
-  onShare: (url: string) => void;
-}) {
-  const verifyUrl = `${window.location.origin}/verify/${cert.id}`;
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="ring-border bg-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl shadow-2xl ring-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between px-6 pt-5 pb-4">
-          <div>
-            <h2 className="text-foreground text-sm font-bold">
-              Official certificate
-            </h2>
-            <p className="text-muted-foreground mt-0.5 text-xs">
-              Your verified credential is ready to download, print, or share.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground hover:bg-muted ml-4 shrink-0 rounded-lg p-1.5 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Certificate body — always white regardless of app theme */}
-        <div
-          className="mx-6 overflow-hidden rounded-xl"
-          style={{ border: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}
-        >
-          <div className="bg-white px-8 pt-7 pb-8">
-            {/* Logo + QR row */}
-            <div className="mb-8 flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#dde3eb] bg-[#f0f4f8]">
-                  <Award className="h-6 w-6 text-[#0f2044]" />
-                </div>
-                <div>
-                  <p
-                    className="text-[10px] font-bold tracking-widest uppercase"
-                    style={{ color: '#0f2044' }}
-                  >
-                    Content Learning Platform
-                  </p>
-                  <p
-                    className="mt-0.5 text-[10px]"
-                    style={{ color: '#6b7280' }}
-                  >
-                    Excellence in Education
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <QRMockup />
-                <p
-                  className="text-[9px] font-semibold tracking-wider uppercase"
-                  style={{ color: '#6b7280' }}
-                >
-                  VERIFY: {cert.id.slice(-1)}
-                </p>
-              </div>
-            </div>
-
-            {/* Main text */}
-            <div className="text-center">
-              <h1
-                style={{
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: '2.25rem',
-                  fontWeight: 700,
-                  color: '#0f2044',
-                  lineHeight: 1.2,
-                }}
-              >
-                Certificate of Completion
-              </h1>
-
-              <p
-                className="mt-3 text-[11px] font-bold tracking-widest uppercase"
-                style={{ color: '#c9922b' }}
-              >
-                This Certifies That
-              </p>
-
-              <p
-                className="mx-10 mt-4 border-b pb-3"
-                style={{
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: '1.875rem',
-                  color: '#0f2044',
-                  borderColor: '#d1d5db',
-                }}
-              >
-                {cert.recipient}
-              </p>
-
-              <p
-                className="mt-4 text-[11px] font-semibold tracking-widest uppercase"
-                style={{ color: '#6b7280' }}
-              >
-                Has Completed The Course
-              </p>
-
-              <p
-                className="mt-2 text-lg font-bold"
-                style={{ color: '#0f2044' }}
-              >
-                {cert.course}
-              </p>
-            </div>
-
-            {/* Signature row */}
-            <div className="mt-9 grid grid-cols-2 gap-8 px-2">
-              <div
-                className="border-t pt-2"
-                style={{ borderColor: 'rgba(15, 32, 68, 0.2)' }}
-              >
-                <p className="text-sm" style={{ color: '#0f2044' }}>
-                  {cert.issued}
-                </p>
-                <p
-                  className="mt-0.5 text-[9px] font-semibold tracking-widest uppercase"
-                  style={{ color: '#9ca3af' }}
-                >
-                  Date of Issue
-                </p>
-              </div>
-              <div
-                className="border-t pt-2 text-right"
-                style={{ borderColor: 'rgba(15, 32, 68, 0.2)' }}
-              >
-                <p
-                  className="text-[11px] font-medium"
-                  style={{ color: '#0f2044' }}
-                >
-                  {DEFAULT_INSTRUCTOR}
-                </p>
-                <p
-                  className="mt-0.5 text-[9px] font-semibold tracking-widest uppercase"
-                  style={{ color: '#9ca3af' }}
-                >
-                  Lead Instructor
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Download / share section */}
-        <div className="px-6 pt-4 pb-6">
-          <p className="text-foreground text-sm font-bold">
-            Download or share your certificate
-          </p>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            These actions unlock after verification is submitted successfully.
-          </p>
-
-          {/* URL strip */}
-          <div className="border-border bg-surface mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5">
-            <span className="text-muted-foreground flex-1 truncate font-mono text-xs">
-              {verifyUrl}
-            </span>
-            <button
-              onClick={() => onCopyLink(verifyUrl)}
-              className="text-foreground hover:text-brand-gold flex shrink-0 items-center gap-1.5 text-xs font-semibold transition-colors"
-            >
-              <Copy className="h-3.5 w-3.5" />
-              Copy Link
-            </button>
-          </div>
-
-          {/* Action buttons — same outline treatment on all three, so
-              Download doesn't read as more "primary" than Print/Share. */}
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <button
-              onClick={onDownload}
-              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" />
-              Download Official PDF
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
-            >
-              <Printer className="h-3.5 w-3.5" />
-              Print Certificate
-            </button>
-            <button
-              onClick={() => onShare(verifyUrl)}
-              className="border-border text-foreground hover:bg-muted flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition-colors"
-            >
-              <Share2 className="h-3.5 w-3.5" />
-              Share Certificate
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Cert preview (templates tab) ────────────────────────────────────────────
-
-function CertPreview({
-  name,
-  category,
-  certOfCompletion,
-  learnerName,
-  courseTitle,
-  thumbnailUrl,
-}: {
-  name: string;
-  category: string;
-  certOfCompletion: string;
-  learnerName: string;
-  courseTitle: string;
-  thumbnailUrl?: string;
-}) {
-  if (thumbnailUrl) {
-    return (
-      <div className="border-border bg-card flex flex-col overflow-hidden rounded-xl border shadow">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={thumbnailUrl}
-          alt={name}
-          className="h-40 w-full object-cover"
-        />
-        <p className="text-muted-foreground px-3 py-2 text-center text-[10px] font-semibold">
-          {name}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="border-border bg-card flex flex-col rounded-xl border p-4 shadow">
-      <div className="text-muted-foreground flex items-start justify-between text-[10px] font-bold tracking-wider uppercase">
-        <span>CLP</span>
-        <span>{category}</span>
-      </div>
-      <div className="mt-3 text-center">
-        <p className="text-brand-gold text-[9px] font-bold tracking-widest uppercase">
-          {certOfCompletion}
-        </p>
-        <p className="text-foreground mt-2 text-sm font-bold">{learnerName}</p>
-        <p className="text-muted-foreground mt-0.5 text-[11px]">
-          {courseTitle}
-        </p>
-      </div>
-      <div className="mt-3 text-center">
-        <p className="text-muted-foreground text-[10px] font-semibold">
-          {name}
-        </p>
-      </div>
-      <div className="text-muted-foreground mt-3 flex items-end justify-between text-[10px]">
-        <span>Date</span>
-        <span>Signature</span>
-      </div>
-    </div>
-  );
-}
-
-// ─── Template card ────────────────────────────────────────────────────────────
-
-function TemplateCard({
-  tpl,
-  onEdit,
-  issuedTimesLabel,
-  editTemplateLabel,
-}: {
-  tpl: CertTemplate;
-  onEdit: (tpl: CertTemplate) => void;
-  issuedTimesLabel: string;
-  editTemplateLabel: string;
-}) {
-  return (
-    <div className="border-border bg-card hover:border-border/80 overflow-hidden rounded-xl border shadow transition-colors">
-      {tpl.thumbnailUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={tpl.thumbnailUrl}
-          alt={tpl.name}
-          className="bg-surface h-32 w-full object-cover"
-        />
-      ) : tpl.fileName ? (
-        <div className="bg-surface flex h-32 flex-col items-center justify-center gap-2 px-4">
-          <FileText className="h-6 w-6 text-blue-500" />
-          <p className="text-muted-foreground max-w-full truncate text-[11px] font-medium">
-            {tpl.fileName}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-surface p-5">
-          <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10">
-            <Award className="h-4 w-4 text-blue-500" />
-          </div>
-          <div className="space-y-2">
-            <div className="bg-muted h-2 w-full rounded-full" />
-            <div className="bg-muted h-2 w-4/5 rounded-full" />
-            <div className="h-2 w-3/5 rounded-full bg-blue-500/20" />
-            <div className="bg-muted h-2 w-full rounded-full" />
-            <div className="bg-muted h-2 w-2/3 rounded-full" />
-          </div>
-          <div className="bg-muted mt-3 h-1.5 w-1/3 rounded-full" />
-        </div>
-      )}
-      <div className="border-border border-t px-4 py-3">
-        <div className="flex items-center justify-between">
-          <p className="text-foreground text-sm font-bold">{tpl.name}</p>
-          <span
-            className={cn(
-              'text-xs font-semibold',
-              TEMPLATE_STATUS_STYLE[tpl.status],
-            )}
-          >
-            {tpl.status}
-          </span>
-        </div>
-        <p className="text-muted-foreground mt-0.5 text-[11px]">
-          {tpl.category}
-        </p>
-        <p className="text-muted-foreground mt-1.5 flex items-center gap-1 text-[11px]">
-          <FileText className="h-3 w-3" />
-          {issuedTimesLabel}
-        </p>
-        <button
-          onClick={() => onEdit(tpl)}
-          className="border-border text-foreground hover:bg-muted mt-3 w-full rounded-lg border py-1.5 text-xs font-semibold transition-colors"
-        >
-          {editTemplateLabel}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Upload template modal ────────────────────────────────────────────────────
-
-function UploadTemplateModal({
-  onClose,
-  onCreate,
-}: {
-  onClose: () => void;
-  onCreate: (template: CertTemplate) => void;
-}) {
-  const t = useAdminCertificationsT();
-  const { toast } = useToast();
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('Custom');
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  function handleFile(picked: File | undefined) {
-    if (!picked) return;
-    const isAllowed =
-      picked.type.startsWith('image/') || picked.type === 'application/pdf';
-    if (!isAllowed) {
-      toast(t('uploadInvalidFile'), 'error');
-      return;
-    }
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setFile(picked);
-    setPreviewUrl(
-      picked.type.startsWith('image/') ? URL.createObjectURL(picked) : null,
-    );
-    if (!name) {
-      setName(picked.name.replace(/\.[^/.]+$/, ''));
-    }
-  }
-
-  function handleSubmit() {
-    if (!file || !name.trim()) return;
-    onCreate({
-      name: name.trim(),
-      category: category.trim() || 'Custom',
-      status: 'Draft',
-      issued: 0,
-      thumbnailUrl: previewUrl ?? undefined,
-      fileName: previewUrl ? undefined : file.name,
-    });
-    toast(t('uploadSuccess', { name: name.trim() }), 'success');
-    onClose();
-  }
-
-  const canSubmit = Boolean(file) && name.trim().length > 0;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card ring-border w-full max-w-md rounded-2xl shadow-2xl ring-1"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="border-border flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-foreground text-base font-bold">
-            {t('uploadTemplate')}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="space-y-4 px-6 py-5">
-          <p className="text-muted-foreground text-xs">
-            {t('uploadTemplateDesc')}
-          </p>
-
-          {/* File picker / preview */}
-          <label className="border-border hover:border-brand-gold/40 hover:bg-muted/40 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-6 text-center transition-colors">
-            {previewUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewUrl}
-                alt=""
-                className="h-24 w-full rounded-lg object-cover"
-              />
-            ) : file ? (
-              <>
-                <FileText className="text-muted-foreground h-6 w-6" />
-                <p className="text-foreground text-xs font-medium">
-                  {file.name}
-                </p>
-              </>
-            ) : (
-              <>
-                <Upload className="text-muted-foreground h-6 w-6" />
-                <p className="text-foreground text-xs font-medium">
-                  {t('chooseFile')}
-                </p>
-                <p className="text-muted-foreground text-[11px]">
-                  {t('fileTypeHint')}
-                </p>
-              </>
-            )}
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              className="hidden"
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-          </label>
-          {file && (
-            <p className="text-muted-foreground -mt-2 text-[11px]">
-              {t('changeFileHint')}
-            </p>
-          )}
-
-          <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
-              {t('templateName')}
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('templateNamePlaceholder')}
-              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
-            />
-          </div>
-
-          <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
-              {t('templateCategory')}
-            </label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Corporate, Specialized, Standard…"
-              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
-            />
-          </div>
-        </div>
-
-        <div className="border-border flex items-center justify-end gap-2 border-t px-6 py-4">
-          <button
-            onClick={onClose}
-            className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
-          >
-            {t('cancel')}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {t('createTemplate')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Canva design link modal ─────────────────────────────────────────────────
-
-/** Canva has no client-only "create and return the design URL" API, so this
- *  modal just opens canva.com in a new tab and lets the admin paste the
- *  resulting share/edit link back in — the same link-out-and-paste-back
- *  pattern used for the rest of this (fully mocked, backend-less) page. */
-function CanvaTemplateModal({
-  mode,
-  templateName,
-  onClose,
-  onSave,
-}: {
-  mode: 'link' | 'create';
-  templateName?: string;
-  onClose: () => void;
-  onSave: (input: { url: string; name?: string; category?: string }) => void;
-}) {
-  const t = useAdminCertificationsT();
-  const [url, setUrl] = useState('');
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('Custom');
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const trimmedUrl = url.trim();
-  const isValidUrl = CANVA_URL_PATTERN.test(trimmedUrl);
-  const canSubmit = isValidUrl && (mode === 'link' || name.trim().length > 0);
-
-  function handleSubmit() {
-    if (!canSubmit) return;
-    onSave({
-      url: trimmedUrl,
-      name: mode === 'create' ? name.trim() : undefined,
-      category: mode === 'create' ? category.trim() || 'Custom' : undefined,
-    });
-    onClose();
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card ring-border w-full max-w-md rounded-2xl shadow-2xl ring-1"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="border-border flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-foreground text-base font-bold">
-            {mode === 'create' ? t('designInCanva') : t('linkCanvaDesign')}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-1.5 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="space-y-4 px-6 py-5">
-          <p className="text-muted-foreground text-xs">
-            {mode === 'create'
-              ? t('designInCanvaDesc')
-              : t('linkCanvaDesignDesc', { name: templateName ?? '' })}
-          </p>
-
-          <a
-            href="https://www.canva.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border-border text-foreground hover:bg-muted flex w-full items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-semibold transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            {t('openCanvaToDesign')}
-          </a>
-
-          {mode === 'create' && (
-            <div>
-              <label className="text-muted-foreground mb-1 block text-xs font-semibold">
-                {t('templateName')}
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('templateNamePlaceholder')}
-                className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
-              />
-            </div>
-          )}
-
-          {mode === 'create' && (
-            <div>
-              <label className="text-muted-foreground mb-1 block text-xs font-semibold">
-                {t('templateCategory')}
-              </label>
-              <input
-                type="text"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Corporate, Specialized, Standard…"
-                className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold">
-              {t('canvaLinkLabel')}
-            </label>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder={t('canvaLinkPlaceholder')}
-              className="border-border bg-surface text-foreground placeholder:text-muted-foreground focus:border-brand-gold/50 focus:ring-brand-gold/10 h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
-            />
-            {trimmedUrl.length > 0 && !isValidUrl && (
-              <p className="mt-1 text-[11px] text-rose-500">
-                {t('canvaLinkInvalid')}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="border-border flex items-center justify-end gap-2 border-t px-6 py-4">
-          <button
-            onClick={onClose}
-            className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
-          >
-            {t('cancel')}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {t('saveLink')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import {
+  type Tab,
+  type CertRecord,
+  type CertTemplate,
+  DEFAULT_INSTRUCTOR,
+  CERT_STATS_DATA,
+  RECENT_ISSUANCES,
+  ISSUANCE_STATUS_STYLE,
+  VERIFICATION_OPS,
+  CERT_TEMPLATES,
+  ISSUANCE_HISTORY,
+} from './_lib/data';
+import { CertificateModal } from './_components/CertificateModal';
+import { CertPreview } from './_components/CertPreview';
+import { TemplateCard } from './_components/TemplateCard';
+import { UploadTemplateModal } from './_components/UploadTemplateModal';
+import { CanvaTemplateModal } from './_components/CanvaTemplateModal';
 
 export default function AdminCertificationsPage() {
   const t = useAdminCertificationsT();
@@ -1086,28 +198,29 @@ export default function AdminCertificationsPage() {
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         {/* Tab bar + Create button */}
         <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="border-border bg-card flex gap-1 overflow-x-auto rounded-xl border p-1 shadow-sm">
+          <div className="border-border bg-card scrollbar-none flex gap-1 overflow-x-auto rounded-xl border p-1 shadow-sm">
             {TABS.map(({ key, label }) => (
-              <button
+              <Button
                 key={key}
+                variant="ghost"
                 onClick={() => setTab(key)}
                 className={cn(
-                  'shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+                  'h-auto shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
                   tab === key
                     ? 'border-brand-gold/40 bg-brand-gold/5 text-brand-gold border'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="bg-brand-accent hover:bg-brand-accent-hover dark:text-brand-navy flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow transition-colors">
+              <Button className="h-auto gap-2 rounded-xl px-5 py-2.5 shadow">
                 <Plus className="h-4 w-4" />
                 {t('createTemplate')}
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent theme="light" align="end">
               <DropdownMenuItem
@@ -1252,12 +365,13 @@ export default function AdminCertificationsPage() {
                     </li>
                   ))}
                 </ul>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => setTab('issuance')}
-                  className="border-border text-foreground hover:bg-muted mt-5 w-full rounded-lg border py-2 text-xs font-semibold transition-colors"
+                  className="border-border text-foreground hover:bg-muted mt-5 h-auto w-full rounded-lg border py-2 text-xs font-semibold transition-colors"
                 >
                   {t('openIssuanceHistory')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1284,12 +398,13 @@ export default function AdminCertificationsPage() {
                       courseTitle={t('courseTitle')}
                       thumbnailUrl={tpl.thumbnailUrl}
                     />
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => handleOpenCanvaEditor(tpl)}
-                      className="bg-brand-gold w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                      className="bg-brand-gold h-auto w-full rounded-lg py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
                     >
                       {t('openCanva')}
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -1345,13 +460,11 @@ export default function AdminCertificationsPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-180 text-sm">
-                <thead>
-                  <tr className="border-border bg-surface border-b">
-                    <th className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
-                      {t('colCertId')}
-                    </th>
+            <div className="scrollbar-none overflow-x-auto">
+              <Table className="min-w-180">
+                <TableHeader>
+                  <TableRow className="border-border bg-surface border-b">
+                    <TableHead>{t('colCertId')}</TableHead>
                     <SortableTh
                       label={t('colRecipient')}
                       active={histSortKey === 'recipient'}
@@ -1370,12 +483,12 @@ export default function AdminCertificationsPage() {
                       direction={histSortDir}
                       onClick={() => toggleHistSort('issued')}
                     />
-                    <th className="text-muted-foreground px-5 py-3.5 text-right text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase">
+                    <TableHead className="text-right">
                       {t('colActions')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-border divide-y">
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {ISSUANCE_HISTORY.filter((r) => {
                     if (!histSearch) return true;
                     const s = histSearch.toLowerCase();
@@ -1397,16 +510,16 @@ export default function AdminCertificationsPage() {
                       return histSortDir === 'asc' ? cmp : -cmp;
                     })
                     .map((row) => (
-                      <tr
+                      <TableRow
                         key={row.id}
                         className="hover:bg-muted/50 transition-colors"
                       >
-                        <td className="px-5 py-4">
+                        <TableCell>
                           <span className="text-muted-foreground font-mono text-xs whitespace-nowrap">
                             {row.id}
                           </span>
-                        </td>
-                        <td className="px-5 py-4">
+                        </TableCell>
+                        <TableCell>
                           <button
                             type="button"
                             onClick={() => setViewCert(row)}
@@ -1414,39 +527,43 @@ export default function AdminCertificationsPage() {
                           >
                             {row.recipient}
                           </button>
-                        </td>
-                        <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
+                        </TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
                           {row.course}
-                        </td>
-                        <td className="text-muted-foreground px-5 py-4 whitespace-nowrap">
+                        </TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
                           {row.issued}
-                        </td>
-                        <td className="px-5 py-4">
+                        </TableCell>
+                        <TableCell>
                           <div className="flex justify-end gap-1.5">
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
                               aria-label={t('downloadAriaLabel')}
                               onClick={() => handleDownload(row)}
-                              className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                              className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg"
                             >
                               <Download className="h-3.5 w-3.5" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
                               aria-label={t('copyLinkAriaLabel')}
                               onClick={() =>
                                 handleCopyLink(
                                   `${window.location.origin}/verify/${row.id}`,
                                 )
                               }
-                              className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                              className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg"
                             >
                               <Link2 className="h-3.5 w-3.5" />
-                            </button>
+                            </Button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}

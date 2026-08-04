@@ -77,7 +77,7 @@ export default function EducatorStudentsPage() {
 
         {/* Table */}
         <div className="animate-fade-in-up border-border bg-card overflow-hidden rounded-2xl border delay-200">
-          <div className="overflow-x-auto">
+          <div className="scrollbar-none overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-border bg-muted/30 border-b">

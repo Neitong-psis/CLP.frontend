@@ -1,5 +1,5 @@
 import { Flame, BookOpen, Trophy, Award } from 'lucide-react';
-import { MOCK_USER, ENROLLED_COURSES } from '@/config/learner';
+import { MOCK_USER, ENROLLED_COURSES } from '@/constants/learner';
 
 function AvatarRing({ pct, initials }: { pct: number; initials: string }) {
   const size = 72;

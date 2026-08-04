@@ -7,7 +7,7 @@ import { useThemeT } from '@/i18n';
 import { cn } from '@/lib/utils/cn';
 
 const BASE =
-  'inline-flex size-9 items-center justify-center rounded-lg bg-foreground/[0.07] text-foreground/70 transition-colors hover:bg-foreground/[0.12] hover:text-foreground';
+  'inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground';
 
 const subscribe = () => () => {};
 
@@ -54,7 +54,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   );
 }
 
-/** Sliding ON/OFF toggle — same row height as LanguageSwitcher pill. */
+/** Sliding ON/OFF toggle — same row height as LanguageSwitcher pill.
+ *  Only ever rendered inside MobileSidebarDrawer, which is always on a dark
+ *  (brand navy) background regardless of theme, so the off-state track uses
+ *  a light-on-dark treatment rather than the theme-relative `foreground`
+ *  token. */
 export function ThemeSwitchToggle({ className }: { className?: string }) {
   const { theme, toggle } = useTheme();
   const hydrated = useHydrated();
@@ -64,7 +68,7 @@ export function ThemeSwitchToggle({ className }: { className?: string }) {
       <span
         aria-hidden
         className={cn(
-          'bg-foreground/20 inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent',
+          'inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent bg-white/20',
           className,
         )}
       />
@@ -84,7 +88,7 @@ export function ThemeSwitchToggle({ className }: { className?: string }) {
         'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
         isDark
           ? 'bg-brand-gold focus-visible:ring-brand-gold/50'
-          : 'bg-foreground/20 focus-visible:ring-foreground/30',
+          : 'bg-white/20 focus-visible:ring-white/30',
         className,
       )}
     >

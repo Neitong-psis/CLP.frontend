@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight, BookOpen, Clock, Target, Calendar } from 'lucide-react';
-import { QUIZZES } from '@/config/learner';
-import type { QuizStatus } from '@/config/learner';
+import { QUIZZES } from '@/constants/learner';
+import type { QuizStatus } from '@/constants/learner';
 
 const ACCENT: Record<QuizStatus, string> = {
   'in-progress': 'border-l-brand-gold',

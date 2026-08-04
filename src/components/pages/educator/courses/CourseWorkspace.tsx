@@ -65,7 +65,13 @@ const PRIORITY_STYLE: Record<TaskPriority, string> = {
  *  stretching (and badly cropping) to match the row's full height. To Do
  *  shows an empty-cover placeholder since nothing has been written yet;
  *  everything else falls back to the generic poster only if the course has
- *  no `thumbnailUrl` of its own. */
+ *  no `thumbnailUrl` of its own.
+ *
+ *  Full-width at the card's own mobile stacked layout (see `TaskCard`) —
+ *  squeezing a fixed-width image beside the text column left almost no room
+ *  for the title/badges/actions, forcing them to wrap into a tall, uneven
+ *  mess. From `sm:` up the card goes back to a side-by-side row, so the
+ *  thumbnail reverts to a compact fixed width there. */
 function CardThumbnail({
   title,
   isToDo,
@@ -77,18 +83,18 @@ function CardThumbnail({
 }) {
   if (isToDo) {
     return (
-      <div className="border-border/70 text-muted-foreground/40 flex aspect-3/2 w-28 shrink-0 items-center justify-center rounded-xl border border-dashed sm:w-40">
+      <div className="border-border/70 text-muted-foreground/40 flex aspect-video w-full shrink-0 items-center justify-center rounded-xl border border-dashed sm:aspect-3/2 sm:w-28 md:w-40">
         <ImageOff className="h-6 w-6" strokeWidth={1.5} />
       </div>
     );
   }
   return (
-    <div className="border-border relative aspect-3/2 w-28 shrink-0 overflow-hidden rounded-xl border sm:w-40">
+    <div className="border-border relative aspect-video w-full shrink-0 overflow-hidden rounded-xl border sm:aspect-3/2 sm:w-28 md:w-40">
       <Image
         src={thumbnailUrl || '/image/web_design_poster.png'}
         alt={title}
         fill
-        sizes="(max-width: 640px) 7rem, 10rem"
+        sizes="(max-width: 640px) 100vw, 10rem"
         quality={85}
         className="object-cover"
       />
@@ -296,7 +302,7 @@ function TaskCard({
   return (
     <article
       onClick={onOpen}
-      className="group border-border bg-card hover:border-brand-navy/20 flex cursor-pointer items-start gap-4 rounded-2xl border p-3 transition-all duration-200 hover:shadow-md sm:p-4 dark:hover:border-white/12 dark:hover:shadow-none"
+      className="group border-border bg-card hover:border-brand-navy/20 flex cursor-pointer flex-col items-start gap-3 rounded-2xl border p-3 transition-all duration-200 hover:shadow-md sm:flex-row sm:gap-4 sm:p-4 dark:hover:border-white/12 dark:hover:shadow-none"
     >
       <CardThumbnail
         title={task.title}

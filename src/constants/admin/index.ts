@@ -1,5 +1,5 @@
 export const ADMIN_USER = {
-  role: 'Platform Admin',
+  role: 'Admin',
 };
 
 export type UserStatus = 'Active' | 'Inactive' | 'Suspended' | 'Achieved';
@@ -124,6 +124,14 @@ export interface AdminCourseRow {
   priority?: string;
   workProgress?: number;
   workStatus?: string;
+  /** Present when sourced from the live API (`toAdminCourseRow`) — powers
+   *  the course-builder wizard's edit mode, which the mock fixtures below
+   *  never feed into. */
+  description?: string;
+  price?: number;
+  thumbnail?: string;
+  categoryId?: string;
+  instructorId?: string;
 }
 
 export const ADMIN_COURSES: AdminCourseRow[] = [
@@ -365,9 +373,11 @@ export type TopCourseVisibility = 'Public' | 'Pending' | 'Archive';
 
 export const TOP_PERFORMING_COURSES = [
   {
+    id: 'ac11',
     title: 'Complete Storytelling Bootcamp',
     instructor: 'Chenda Prak',
     category: 'Khmer Literature',
+    level: 'Beginner',
     students: '315,758',
     visibility: 'Public' as TopCourseVisibility,
     progress: 90,
@@ -375,9 +385,11 @@ export const TOP_PERFORMING_COURSES = [
     revenue: '$84.2k',
   },
   {
+    id: 'ac4',
     title: 'The Complete Khmer Literature Course',
     instructor: 'Sok Chanthou',
     category: 'Khmer Literature',
+    level: 'Beginner',
     students: '245,678',
     visibility: 'Public' as TopCourseVisibility,
     progress: 78,
@@ -385,9 +397,11 @@ export const TOP_PERFORMING_COURSES = [
     revenue: '$65.5k',
   },
   {
+    id: 'ac5',
     title: 'Full Community Leadership Program',
     instructor: 'Dara Kim',
     category: 'Leadership',
+    level: 'Intermediate',
     students: '178,765',
     visibility: 'Pending' as TopCourseVisibility,
     progress: 65,
@@ -395,9 +409,11 @@ export const TOP_PERFORMING_COURSES = [
     revenue: '$48.1k',
   },
   {
+    id: 'ac7',
     title: 'Leadership Development Certification',
     instructor: 'Vandy Chhorn',
     category: 'Leadership Development',
+    level: 'Intermediate',
     students: '234,567',
     visibility: 'Archive' as TopCourseVisibility,
     progress: 72,
@@ -405,9 +421,11 @@ export const TOP_PERFORMING_COURSES = [
     revenue: '$62.3k',
   },
   {
+    id: 'ac2',
     title: 'Child Psychology A-Z: Growth & Behavior',
     instructor: 'Dr. Ratanak Sok',
     category: 'Child Development',
+    level: 'Intermediate',
     students: '190,810',
     visibility: 'Public' as TopCourseVisibility,
     progress: 60,

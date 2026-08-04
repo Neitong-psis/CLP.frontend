@@ -11,27 +11,7 @@ export interface NavLink {
 }
 
 export const NAV_LINKS: readonly NavLink[] = [
-  {
-    label: 'Courses',
-    href: '/courses',
-    children: [
-      {
-        label: 'All Courses',
-        href: '/courses',
-        description: 'Browse the full catalog',
-      },
-      {
-        label: 'Featured',
-        href: '/courses/featured',
-        description: 'Top-rated picks',
-      },
-      {
-        label: 'By Category',
-        href: '/courses/categories',
-        description: 'Explore by topic',
-      },
-    ],
-  },
+  { label: 'Courses', href: '/courses' },
   {
     label: 'Programs',
     href: '/programs',
@@ -43,18 +23,13 @@ export const NAV_LINKS: readonly NavLink[] = [
       },
       {
         label: 'Advanced Leadership',
-        href: '/programs/advanced',
+        href: '/programs/advanced-leadership',
         description: 'Lead with confidence',
       },
       {
         label: 'Youth Excellence',
         href: '/programs/youth',
         description: 'Built for young leaders',
-      },
-      {
-        label: 'Alumni Network',
-        href: '/programs/alumni',
-        description: 'Stay connected',
       },
     ],
   },
@@ -70,9 +45,9 @@ export const FOOTER_QUICK_LINKS: readonly NavLink[] = [
 
 export const FOOTER_PROGRAMS: readonly NavLink[] = [
   { label: 'Foundation Program', href: '/programs/foundation' },
-  { label: 'Advanced Leadership', href: '/programs/advanced' },
+  { label: 'Advanced Leadership', href: '/programs/advanced-leadership' },
   { label: 'Youth Excellence', href: '/programs/youth' },
-  { label: 'Alumni Network', href: '/programs/alumni' },
+  { label: 'Innovative Learning', href: '/programs/innovative-learning' },
 ];
 
 export const FOOTER_LEGAL_LINKS: readonly NavLink[] = [

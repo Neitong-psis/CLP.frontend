@@ -134,7 +134,7 @@ function NotificationItem({
         <Icon className="size-3.5" aria-hidden="true" />
       </span>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 pr-5">
         <p
           className={cn(
             'text-[13px] leading-snug',
@@ -151,20 +151,26 @@ function NotificationItem({
         <p className="text-muted-foreground mt-1.5 text-[11px]">{notif.time}</p>
       </div>
 
-      {!notif.read && (
-        <span className="mt-1.5 size-2 shrink-0 rounded-full bg-blue-500" />
-      )}
-
-      <button
-        className="text-muted-foreground hover:text-foreground absolute top-2.5 right-2.5 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDismiss(notif.id);
-        }}
-        aria-label="Dismiss notification"
-      >
-        <X className="size-3" />
-      </button>
+      {/* Corner indicator — unread dot at rest, crossfades into the dismiss
+          button on hover so the two never overlap. */}
+      <div className="absolute top-3 right-3 flex size-4 items-center justify-center">
+        {!notif.read && (
+          <span
+            className="size-2 rounded-full bg-blue-500 transition-opacity duration-150 group-hover:opacity-0"
+            aria-hidden="true"
+          />
+        )}
+        <button
+          className="text-muted-foreground hover:text-foreground absolute inset-0 flex items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDismiss(notif.id);
+          }}
+          aria-label="Dismiss notification"
+        >
+          <X className="size-3" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -343,9 +349,7 @@ export function NotificationBell({
 
   const badgeLabel = unreadCount > 0 ? `, ${unreadCount} unread` : '';
   const badgeNode = unreadCount > 0 && (
-    <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-      {unreadCount > 9 ? '9+' : unreadCount}
-    </span>
+    <span className="border-card absolute top-1.5 right-1.5 size-2.5 rounded-full border-2 bg-red-500" />
   );
 
   // ── Mobile: slide-up bottom sheet ─────────────────────────────────────────

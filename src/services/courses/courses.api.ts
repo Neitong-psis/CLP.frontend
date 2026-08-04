@@ -89,6 +89,12 @@ export function toAdminCourseRow(course: BackendCourse): AdminCourseRow {
     rating: 0,
     status: toCourseStatusLabel(course.status),
     createdAt: '—',
+    description: course.description ?? undefined,
+    price: course.price,
+    thumbnail: course.thumbnail ?? undefined,
+    categoryId: course.category?.id,
+    instructorId:
+      course.instructor?.id != null ? String(course.instructor.id) : undefined,
   };
 }
 
@@ -179,6 +185,10 @@ export interface UpdateCourseInput {
   status?: CourseStatusValue;
   level?: string;
   categoryId?: string;
+  description?: string;
+  price?: number;
+  thumbnail?: string;
+  instructorId?: string;
   /** Full meta replacement — callers must merge with existing meta first. */
   meta?: Record<string, unknown>;
 }

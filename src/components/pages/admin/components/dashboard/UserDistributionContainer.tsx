@@ -92,7 +92,7 @@ export function UserDistributionContainer({
     : undefined;
 
   return (
-    <Link href="/admin/users" className={cn('block', className)}>
+    <Link href="/admin/users" className={cn('block h-full', className)}>
       <UserDistributionCard
         data={segments}
         period={t('liveUserRecords')}

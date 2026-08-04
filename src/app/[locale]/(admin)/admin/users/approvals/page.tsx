@@ -178,7 +178,7 @@ export default function AdminUserApprovalsPage() {
           </div>
 
           <div className="border-border bg-card overflow-hidden rounded-xl border">
-            <div className="overflow-x-auto">
+            <div className="scrollbar-none overflow-x-auto">
               <table className="w-full min-w-200 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">

@@ -71,7 +71,7 @@ export default function TopBar({ role, title, subtitle, action }: TopBarProps) {
         </span>
 
         {/* Controls — desktop only; theme + language live in profile dropdown on mobile */}
-        <div className="hidden lg:flex lg:items-center lg:gap-1.5">
+        <div className="hidden lg:flex lg:items-center lg:gap-1">
           <ThemeToggle className="size-8" />
           <NotificationBell />
           <LanguageSwitcher />

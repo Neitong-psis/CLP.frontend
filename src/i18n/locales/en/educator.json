@@ -186,6 +186,7 @@
 
     "review": {
       "heading": "Course Review",
+      "coursePreviewHeading": "Course Preview",
       "backToCourses": "Back to My Courses",
       "backShort": "Back",
       "editCourse": "Edit Course",
@@ -270,6 +271,7 @@
 
     "createCourse": {
       "pageTitle": "Create a Course",
+      "pageTitleEdit": "Edit Course",
       "stepOf": "Step {current} of {total}",
       "steps": {
         "1": { "title": "Course Info", "desc": "Details, thumbnail & pricing" },
@@ -287,6 +289,7 @@
         "submitToAdmin": "Submit to Admin",
         "createCourse": "Create Course",
         "publishCourse": "Publish Course",
+        "saveChanges": "Save Changes",
         "completeRequired": "Complete required fields to submit",
         "setStatusToSubmit": "Set Current Status to \"Publish\" to submit",
         "setStatusToPublish": "Set Current Status to \"Published\" to submit"
@@ -296,8 +299,10 @@
         "fixMissing": "Fix the missing fields before submitting.",
         "submitted": "Course submitted to admin for review.",
         "created": "\"{title}\" created and assigned to {educator}.",
+        "updated": "\"{title}\" updated.",
         "fixMissingAdmin": "Fix the missing fields before creating.",
         "createFailed": "Failed to create the course. Please try again.",
+        "updateFailed": "Failed to save the changes. Please try again.",
         "loadFailed": "Failed to load categories and educators."
       },
       "info": {
@@ -461,6 +466,9 @@
       "validation": {
         "titleRequired": "Course title is required.",
         "descriptionRequired": "Course description is required.",
+        "thumbnailRequired": "Upload a course thumbnail.",
+        "levelRequired": "Select a course level.",
+        "priceRequired": "Enter a price for this paid course.",
         "moduleRequired": "Add at least one module.",
         "authorRequired": "Assign an author."
       }

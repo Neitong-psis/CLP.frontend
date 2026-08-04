@@ -165,19 +165,31 @@ export default function ProfileMenu({
             </DropdownMenuItem>
 
             {langOpen && (
-              <div className="mb-1 ml-4 space-y-0.5 pl-5">
+              <div className="mb-1 space-y-0.5">
                 {routing.locales.map((option) => (
                   <DropdownMenuItem
                     key={option}
+                    asChild
                     className="text-foreground focus:bg-muted focus:text-foreground rounded-lg"
                     onSelect={() => switchLocale(option)}
                   >
-                    <div className="flex w-full items-center justify-between px-2 py-1.5">
-                      <span className="text-sm">{LOCALE_LABELS[option]}</span>
+                    {/* Same [icon-slot][gap][text] structure as the "Language"
+                        row above (an invisible size-6 spacer standing in for
+                        its icon) so the labels line up under "Language"
+                        exactly, not at whatever the default item padding
+                        happens to produce. */}
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2.5 px-2 py-1.5"
+                    >
+                      <span className="size-6 shrink-0" aria-hidden="true" />
+                      <span className="flex-1 text-left text-sm" lang={option}>
+                        {LOCALE_LABELS[option]}
+                      </span>
                       {option === locale && (
-                        <Check className="text-brand-gold size-3.5" />
+                        <Check className="text-brand-gold size-3.5 shrink-0" />
                       )}
-                    </div>
+                    </button>
                   </DropdownMenuItem>
                 ))}
               </div>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
-import { MOCK_USER } from '@/config/learner';
+import { MOCK_USER } from '@/constants/learner';
 import WeeklyStreak from './WeeklyStreak';
 
 const XP_PCT = Math.round((MOCK_USER.xp / MOCK_USER.nextLevelXp) * 100);

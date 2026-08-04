@@ -20,7 +20,7 @@ export function EducatorMobileNav() {
     },
     { href: '/educator/students', icon: Users, label: tEducator('learners') },
     {
-      href: '/educator/analytics',
+      href: '/educator/earnings',
       icon: BarChart3,
       label: tEducator('earnings'),
     },

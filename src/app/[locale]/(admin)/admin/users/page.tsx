@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
             <div className="flex shrink-0 items-center gap-3">
               <Link
                 href="/admin/users/approvals"
-                className="bg-brand-accent hover:bg-brand-accent-hover text-brand-accent-foreground inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors sm:px-4"
+                className="bg-brand-accent text-brand-accent-foreground inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-medium sm:px-4"
               >
                 <UserPlus className="h-4 w-4" aria-hidden="true" />
                 {t('newUser')}
@@ -174,7 +174,7 @@ export default function AdminUsersPage() {
 
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">
-            <div className="overflow-x-auto">
+            <div className="scrollbar-none overflow-x-auto">
               <table className="w-full min-w-220 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">

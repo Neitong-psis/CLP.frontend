@@ -1,5 +1,5 @@
 import { Flame, Target, Zap } from 'lucide-react';
-import { MOCK_USER, WEEKLY_ACTIVITY } from '@/config/learner';
+import { MOCK_USER, WEEKLY_ACTIVITY } from '@/constants/learner';
 import { cn } from '@/lib/utils/cn';
 
 const MAX_MINUTES = Math.max(...WEEKLY_ACTIVITY.map((d) => d.minutes));

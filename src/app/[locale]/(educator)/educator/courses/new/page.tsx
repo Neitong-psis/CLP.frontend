@@ -31,7 +31,12 @@ function NewCourseWizard() {
     <div className="bg-background flex min-h-full flex-col">
       <TopBar role="educator" title={t('pageTitle')} />
 
-      <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      {/* pb-28 reserves room for the sticky WizardFooter below — without it,
+          the footer (position: sticky, no flow height of its own once
+          pinned) overlaps the last bit of scrolled content instead of
+          sitting cleanly after it, worst on Step 2 where the module list
+          can run long. */}
+      <div className="flex-1 px-4 py-6 pb-28 sm:px-6 lg:px-8">
         <StepBar
           current={builder.step}
           maxStep={builder.maxStep}

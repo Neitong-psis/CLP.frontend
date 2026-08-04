@@ -1,7 +1,7 @@
 'use client';
 
 import { BookOpen, Zap, Flame, Trophy } from 'lucide-react';
-import { MOCK_USER } from '@/config/learner';
+import { MOCK_USER } from '@/constants/learner';
 import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { useCountUp } from '@/hooks/useCountUp';

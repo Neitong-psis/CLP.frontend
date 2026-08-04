@@ -41,7 +41,9 @@ export function LanguageSwitcher({ scrolled }: LanguageSwitcherProps) {
           )}
         >
           <Globe aria-hidden className="h-4 w-4" />
-          <span className="uppercase">{locale}</span>
+          <span lang={locale}>
+            {locale === 'km' ? LOCALE_LABELS.km : locale.toUpperCase()}
+          </span>
         </button>
       </DropdownMenuTrigger>
 
@@ -57,7 +59,7 @@ export function LanguageSwitcher({ scrolled }: LanguageSwitcherProps) {
             onClick={() => switchLocale(option)}
             className="flex items-center justify-between"
           >
-            {LOCALE_LABELS[option]}
+            <span lang={option}>{LOCALE_LABELS[option]}</span>
             {option === locale && (
               <Check aria-hidden className="text-brand-gold h-4 w-4" />
             )}

@@ -35,7 +35,6 @@ import { SortableTh } from '@/components/common/table/SortableTh';
 import { FilterableTh } from '@/components/common/table/FilterableTh';
 import { useColumnSort } from '@/hooks/useColumnSort';
 import { parseDateLoose } from '@/lib/utils/sort';
-import { EditModal } from './_components/EditModal';
 import { DeleteModal } from './_components/DeleteModal';
 import { RowContextMenu } from './_components/RowContextMenu';
 import {
@@ -46,6 +45,7 @@ import {
   ALL_CATEGORIES,
 } from './_lib/constants';
 import { buildCourseReviewUrl } from './_lib/reviewUrl';
+import { buildCourseEditUrl } from './_lib/editUrl';
 
 interface ContextMenuState {
   course: AdminCourseRow;
@@ -78,14 +78,13 @@ export default function AdminCoursesPage() {
   const t = useAdminCoursesT();
   const locale = useLocale();
   const router = useRouter();
-  const { courses, loading, saveEdit, remove, publish } = useCourseManagement();
+  const { courses, loading, remove, publish } = useCourseManagement();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatus | 'All'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [page, setPage] = useState(1);
-  const [editCourse, setEditCourse] = useState<AdminCourseRow | null>(null);
   const [deleteCourse, setDeleteCourse] = useState<AdminCourseRow | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const {
@@ -101,6 +100,10 @@ export default function AdminCoursesPage() {
 
   function reviewUrl(course: AdminCourseRow) {
     return buildCourseReviewUrl(locale, course);
+  }
+
+  function editUrl(course: AdminCourseRow) {
+    return buildCourseEditUrl(locale, course);
   }
 
   // Close context menu on outside click / Escape
@@ -173,16 +176,6 @@ export default function AdminCoursesPage() {
   return (
     <>
       {/* Modals */}
-      {editCourse && (
-        <EditModal
-          course={editCourse}
-          onSave={(updated) => {
-            void saveEdit(updated);
-            setEditCourse(null);
-          }}
-          onClose={() => setEditCourse(null)}
-        />
-      )}
       {deleteCourse && (
         <DeleteModal
           title={deleteCourse.title}
@@ -199,7 +192,7 @@ export default function AdminCoursesPage() {
           x={contextMenu.x}
           y={contextMenu.y}
           onView={() => router.push(reviewUrl(contextMenu.course))}
-          onEdit={() => setEditCourse(contextMenu.course)}
+          onEdit={() => router.push(editUrl(contextMenu.course))}
           onReview={() => router.push(reviewUrl(contextMenu.course))}
           onPublish={() => void publish(contextMenu.course.id)}
           onDelete={() => setDeleteCourse(contextMenu.course)}
@@ -241,7 +234,7 @@ export default function AdminCoursesPage() {
 
           {/* Table */}
           <div className="border-border bg-card overflow-hidden rounded-xl border">
-            <div className="overflow-x-auto">
+            <div className="scrollbar-none overflow-x-auto">
               <table className="w-full min-w-240 text-sm">
                 <thead>
                   <tr className="border-border bg-surface border-b">
@@ -442,7 +435,7 @@ export default function AdminCoursesPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-foreground focus:bg-muted"
-                                  onSelect={() => setEditCourse(course)}
+                                  onSelect={() => router.push(editUrl(course))}
                                 >
                                   <Pencil className="h-3.5 w-3.5" />{' '}
                                   {t('editAction')}

@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { authHref } from '@/constants/auth-links';
 
 export default function CTASection() {
   return (
@@ -39,7 +40,7 @@ export default function CTASection() {
             <div className="motion-safe:animate-fade-in-up mt-3 flex flex-wrap items-center justify-center gap-3 motion-safe:delay-400">
               {/* Primary — white glow ring expands + brightness sweep */}
               <Link
-                href="/auth/signin"
+                href={authHref('login', 'learner')}
                 className="group bg-brand-navy relative inline-flex items-center gap-2 overflow-hidden rounded-full px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_0_4px_rgba(255,255,255,0.3)]"
               >
                 <span

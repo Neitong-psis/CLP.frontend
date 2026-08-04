@@ -170,7 +170,7 @@ export function ReviewSummarySheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="scrollbar-none flex-1 overflow-y-auto px-5 py-4">
           <div
             className={cn(
               'mb-4 flex items-center gap-2.5 rounded-xl border px-3.5 py-3',

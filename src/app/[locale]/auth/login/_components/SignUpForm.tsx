@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, Mail, User } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
 import {
@@ -16,6 +16,7 @@ import {
   FieldError,
 } from '@/components/ui/Field';
 import { useAuth } from '@/hooks/use-auth';
+import { safeRedirect } from '@/lib/utils/safeRedirect';
 import { isApiError } from '@/lib/api/errors';
 import {
   InputWrapper,
@@ -43,6 +44,8 @@ function getPasswordStrength(password: string): number {
 
 export default function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = safeRedirect(searchParams.get('from'));
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const { register } = useAuth();
@@ -66,9 +69,9 @@ export default function SignUpForm() {
           email: value.email,
           password: value.password,
         });
-        router.push(
-          `/auth/verify-email?email=${encodeURIComponent(value.email)}`,
-        );
+        const query = new URLSearchParams({ email: value.email });
+        if (from) query.set('from', from);
+        router.push(`/auth/verify-email?${query.toString()}`);
       } catch (error) {
         setFormError(
           isApiError(error)

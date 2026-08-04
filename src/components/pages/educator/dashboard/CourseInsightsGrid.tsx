@@ -1,15 +1,18 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { DASHBOARD_TOP_COURSES, COMPLETION_RATES } from '@/constants/educator';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface TopCourse {
+  id: string;
   title: string;
   students: number;
   rating: number;
 }
 
 interface CompletionRate {
+  id: string;
   title: string;
   rate: number;
 }
@@ -33,16 +36,23 @@ function InsightCard({
 
 function TopCourseRow({ course }: { course: TopCourse }) {
   return (
-    <li className="border-border flex items-center justify-between gap-4 border-b py-3 last:border-0">
-      <div className="min-w-0">
-        <p className="text-foreground text-sm font-semibold">{course.title}</p>
-        <p className="text-muted-foreground mt-0.5 text-[11px]">
-          {course.students.toLocaleString()} students
-        </p>
-      </div>
-      <span className="text-muted-foreground shrink-0 text-[11px] font-medium">
-        {course.rating} rating
-      </span>
+    <li className="border-border border-b last:border-0">
+      <Link
+        href={`/educator/courses/${course.id}`}
+        className="hover:bg-muted/50 -mx-2 flex items-center justify-between gap-4 rounded-lg px-2 py-3 transition-colors"
+      >
+        <div className="min-w-0">
+          <p className="text-foreground text-sm font-semibold">
+            {course.title}
+          </p>
+          <p className="text-muted-foreground mt-0.5 text-[11px]">
+            {course.students.toLocaleString()} students
+          </p>
+        </div>
+        <span className="text-muted-foreground shrink-0 text-[11px] font-medium">
+          {course.rating} rating
+        </span>
+      </Link>
     </li>
   );
 }
@@ -56,19 +66,26 @@ function CompletionRateRow({
 }) {
   return (
     <li>
-      <div className="mb-1.5 flex items-center justify-between">
-        <p className="text-foreground text-sm font-semibold">{item.title}</p>
-        <span className="text-brand-gold text-sm font-bold">{item.rate}%</span>
-      </div>
-      <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-        <div
-          className="bg-brand-gold animate-highlight-in h-full rounded-full"
-          style={{
-            width: `${item.rate}%`,
-            animationDelay: `${0.4 + index * 0.12}s`,
-          }}
-        />
-      </div>
+      <Link
+        href={`/educator/courses/${item.id}`}
+        className="hover:bg-muted/50 -mx-2 block rounded-lg px-2 py-1.5 transition-colors"
+      >
+        <div className="mb-1.5 flex items-center justify-between">
+          <p className="text-foreground text-sm font-semibold">{item.title}</p>
+          <span className="text-brand-gold text-sm font-bold">
+            {item.rate}%
+          </span>
+        </div>
+        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+          <div
+            className="bg-brand-gold animate-highlight-in h-full rounded-full"
+            style={{
+              width: `${item.rate}%`,
+              animationDelay: `${0.4 + index * 0.12}s`,
+            }}
+          />
+        </div>
+      </Link>
     </li>
   );
 }
@@ -91,7 +108,7 @@ export function CourseInsightsGrid({
       <InsightCard title="Top Courses">
         <ul>
           {topCourses.slice(0, 4).map((course) => (
-            <TopCourseRow key={course.title} course={course} />
+            <TopCourseRow key={course.id} course={course} />
           ))}
         </ul>
       </InsightCard>
@@ -99,7 +116,7 @@ export function CourseInsightsGrid({
       <InsightCard title="Completion Rates">
         <ul className="space-y-4">
           {completionRates.slice(0, 4).map((item, i) => (
-            <CompletionRateRow key={item.title} item={item} index={i} />
+            <CompletionRateRow key={item.id} item={item} index={i} />
           ))}
         </ul>
       </InsightCard>

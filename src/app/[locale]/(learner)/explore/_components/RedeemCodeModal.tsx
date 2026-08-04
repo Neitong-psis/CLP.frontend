@@ -5,12 +5,9 @@ import { X, Check, Ticket } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/slugify';
 import { useLearnerExploreT } from '@/i18n';
-import { ALL_COURSES, EXPLORE_COURSES, type Course } from '@/constants/learner';
-import { readEnrolledIds, addEnrolledId } from '@/lib/utils/enrollmentStorage';
-
-// Every explorable course lives in one of these two catalogs (see the
-// course-preview page's slug resolution, which combines them the same way).
-const CATALOG: Course[] = [...ALL_COURSES, ...EXPLORE_COURSES];
+import { type Course } from '@/constants/learner';
+import { CATALOG } from '@/lib/courses/catalog';
+import { isEnrolledIn, addToEnrolled } from '@/lib/utils/enrollment';
 
 const FORM_ID = 'redeem-code-form';
 
@@ -39,9 +36,8 @@ export function RedeemCodeModal({ onClose, onSuccess }: RedeemCodeModalProps) {
       return;
     }
 
-    const wasEnrolled =
-      course.enrolled || readEnrolledIds().includes(course.id);
-    addEnrolledId(course.id);
+    const wasEnrolled = course.enrolled || isEnrolledIn(course.id);
+    addToEnrolled(course.id);
     onSuccess(course.id);
     setError(null);
     setAlreadyEnrolled(wasEnrolled);

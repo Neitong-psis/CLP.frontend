@@ -52,11 +52,11 @@ export function QuizAnalyticsCard({ data }: QuizAnalyticsCardProps) {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="scrollbar-none -mx-6 flex gap-4 overflow-x-auto px-6 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
         {data.map((q, qi) => (
           <div
             key={q.title}
-            className="group border-border hover:border-brand-gold/50 relative cursor-default overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_28px_-8px_rgba(0,0,0,0.2)]"
+            className="group border-border hover:border-brand-gold/50 relative w-[75%] shrink-0 cursor-default overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_28px_-8px_rgba(0,0,0,0.2)] sm:w-auto sm:shrink"
           >
             {/* Subtle gold wash that fades in — works in both modes */}
             <div className="bg-brand-gold/5 pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

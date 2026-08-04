@@ -1,20 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { slugify } from './slugify';
 
-/**
- * Hand-drawn with jsPDF's vector/text primitives rather than rasterizing the
- * on-screen `<div>` (which would need html2canvas, a new dependency, for a
- * result that's a flat image — not text, bigger, and blurrier at zoom). This
- * mirrors the on-screen layout closely enough to read as the same document
- * while staying a real, selectable-text PDF, matching the pattern already
- * established by `exportCourseToPdf`.
- *
- * Takes plain fields rather than a `Certificate` — the learner's own
- * certificate record and the admin's issuance-history record are two
- * different shapes, and neither should have to fake the other's fields just
- * to call this.
- */
-
 export interface CertificatePdfData {
   readonly learnerName: string;
   readonly courseTitle: string;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { EMAIL_CONFIRMED_CHANNEL } from '@/lib/auth/constants';
+import { safeRedirect } from '@/lib/utils/safeRedirect';
 import { WaitingView } from './WaitingView';
 import { ConfirmedView } from './ConfirmedView';
 
@@ -19,6 +20,7 @@ type Status = 'waiting' | 'confirmed';
 export function VerifyEmailCard() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
+  const from = safeRedirect(searchParams.get('from'));
   const [status, setStatus] = useState<Status>('waiting');
 
   useEffect(() => {
@@ -32,9 +34,9 @@ export function VerifyEmailCard() {
     <div className="animate-fade-in w-full max-w-md rounded-2xl bg-white px-8 py-10 shadow-2xl shadow-black/40">
       <div key={status} className="animate-fade-in">
         {status === 'waiting' ? (
-          <WaitingView email={email} />
+          <WaitingView email={email} from={from} />
         ) : (
-          <ConfirmedView />
+          <ConfirmedView from={from} />
         )}
       </div>
     </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import {
   ArrowLeft,
   Lock,
@@ -8,8 +10,12 @@ import {
   X,
   Check,
   Download,
+  CheckCircle2,
+  Trophy,
+  Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { buildCourseEditUrl } from '../../_lib/editUrl';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NotificationBell } from '@/components/common/NotificationBell';
@@ -71,6 +77,24 @@ export function CourseReviewOverlay({
   onClose,
 }: CourseReviewOverlayProps) {
   const t = useAdminReviewOverlayT();
+  const router = useRouter();
+  const locale = useLocale();
+  // Only a Pending course is actually awaiting a decision — Public/Archive
+  // courses were already decided, so they open read-only: no Approve/Reject
+  // workflow, and the badge/heading reflect their real status instead of a
+  // hardcoded "Pending review".
+  const isPending = course.status === 'Pending';
+  const isArchived = course.status === 'Archive';
+  const STATUS_BADGE: Record<AdminCourseRow['status'], string> = {
+    Pending: 'border-amber-400/30 bg-amber-500/10 text-amber-500',
+    Public: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-500',
+    Archive: 'border-border bg-muted text-muted-foreground',
+  };
+  const statusLabel: Record<AdminCourseRow['status'], string> = {
+    Pending: t('pendingReview'),
+    Public: t('published'),
+    Archive: t('archived'),
+  };
   const modules = REVIEW_MODULES;
   const items = useMemo(() => flattenItems(modules), [modules]);
 
@@ -211,7 +235,9 @@ export function CourseReviewOverlay({
   const labels: SidebarLabels = {
     courseContent: t('courseContent'),
     formatProgress: (done, total) =>
-      t('itemsReviewed', { reviewed: done, total }),
+      isPending
+        ? t('itemsReviewed', { reviewed: done, total })
+        : t('itemsCompleted', { reviewed: done, total }),
     backAria: t('backToCourses'),
     collapseAria: t('collapseSidebar'),
     expandAria: t('expandSidebar'),
@@ -310,15 +336,20 @@ export function CourseReviewOverlay({
             {/* Desktop */}
             <div className="hidden min-w-0 flex-1 lg:block">
               <h1 className="text-foreground truncate text-lg font-bold">
-                {t('heading')}
+                {isPending ? t('heading') : t('coursePreview')}
               </h1>
               <p className="text-muted-foreground truncate text-[11px]">
                 {course.title} · {t('submittedBy')} {course.instructor}
               </p>
             </div>
             <div className="hidden items-center gap-1.5 lg:flex">
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-0.5 text-xs font-semibold text-amber-500">
-                {t('pendingReview')}
+              <span
+                className={cn(
+                  'rounded-full border px-3 py-0.5 text-xs font-semibold',
+                  STATUS_BADGE[course.status],
+                )}
+              >
+                {statusLabel[course.status]}
               </span>
               <ThemeToggle className="size-8" />
               <NotificationBell />
@@ -375,100 +406,158 @@ export function CourseReviewOverlay({
           </div>
 
           {/* Content */}
-          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <main className="scrollbar-none min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
             {active && <PreviewPanel item={active} />}
           </main>
 
           {/* Footer */}
           <footer className="border-border bg-card/90 shrink-0 border-t backdrop-blur-md">
-            {/* Mobile: decide the active item until every item is decided,
-                then a single Submit Review action — same pattern as desktop. */}
-            <div className="flex items-center gap-2 px-3 py-3 lg:hidden">
-              {allDecided ? (
-                <Button
-                  size="sm"
-                  className="w-full gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                  onClick={() => setDialog(anyRejected ? 'reject' : 'approve')}
-                >
-                  <Check className="h-4 w-4" />
-                  {t('submitReview')}
-                </Button>
-              ) : (
-                <>
+            {isPending ? (
+              <>
+                {/* Mobile: decide the active item until every item is decided,
+                    then a single Submit Review action — same pattern as desktop. */}
+                <div className="flex items-center gap-2 px-3 py-3 lg:hidden">
+                  {allDecided ? (
+                    <Button
+                      size="sm"
+                      className="w-full gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                      onClick={() =>
+                        setDialog(anyRejected ? 'reject' : 'approve')
+                      }
+                    >
+                      <Check className="h-4 w-4" />
+                      {t('submitReview')}
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
+                        onClick={() => setItemDialog('reject')}
+                      >
+                        <X className="h-4 w-4" />
+                        {t('reject')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                        onClick={() => setItemDialog('approve')}
+                      >
+                        <Check className="h-4 w-4" />
+                        {t('approve')}
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {/* Desktop: back | reject/approve for the active item until every
+                    item has a decision, then a single Submit Review action —
+                    mirrors the educator's Next → Resubmit footer pattern. */}
+                <div className="hidden items-center justify-between gap-2 px-6 py-3 lg:flex">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
-                    onClick={() => setItemDialog('reject')}
+                    className="gap-1.5"
+                    onClick={onClose}
                   >
-                    <X className="h-4 w-4" />
-                    {t('reject')}
+                    <ArrowLeft className="h-4 w-4" />
+                    {t('backToCourses')}
                   </Button>
+                  <div className="flex items-center gap-3">
+                    {!allDecided && pendingCount > 0 && (
+                      <p className="text-muted-foreground hidden text-xs font-medium sm:block">
+                        {t('gateHint', { count: pendingCount })}
+                      </p>
+                    )}
+                    {allDecided ? (
+                      <Button
+                        size="sm"
+                        className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                        onClick={() =>
+                          setDialog(anyRejected ? 'reject' : 'approve')
+                        }
+                      >
+                        <Check className="h-4 w-4" />
+                        {t('submitReview')}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
+                          onClick={() => setItemDialog('reject')}
+                        >
+                          <X className="h-4 w-4" />
+                          {t('reject')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                          onClick={() => setItemDialog('approve')}
+                        >
+                          <Check className="h-4 w-4" />
+                          {t('approve')}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Public/Archive courses were already decided, so there's no
+              // Approve/Reject workflow — but admin can still page through
+              // content and mark it complete, same as a learner would,
+              // instead of only being able to leave.
+              <div className="flex items-center justify-between gap-2 px-3 py-3 lg:px-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={onClose}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('backToCourses')}
+                </Button>
+                {isArchived ? (
+                  // An archived course isn't being browsed for QA — it needs
+                  // fixing before it can go live again, so the primary action
+                  // is straight into the editor's Publish Settings step.
                   <Button
                     size="sm"
-                    className="flex-1 gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                    onClick={() => setItemDialog('approve')}
-                  >
-                    <Check className="h-4 w-4" />
-                    {t('approve')}
-                  </Button>
-                </>
-              )}
-            </div>
-
-            {/* Desktop: back | reject/approve for the active item until every
-                item has a decision, then a single Submit Review action —
-                mirrors the educator's Next → Resubmit footer pattern. */}
-            <div className="hidden items-center justify-between gap-2 px-6 py-3 lg:flex">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={onClose}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t('backToCourses')}
-              </Button>
-              <div className="flex items-center gap-3">
-                {!allDecided && pendingCount > 0 && (
-                  <p className="text-muted-foreground hidden text-xs font-medium sm:block">
-                    {t('gateHint', { count: pendingCount })}
-                  </p>
-                )}
-                {allDecided ? (
-                  <Button
-                    size="sm"
-                    className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
+                    className="gap-1.5"
                     onClick={() =>
-                      setDialog(anyRejected ? 'reject' : 'approve')
+                      router.push(buildCourseEditUrl(locale, course, 3))
                     }
                   >
-                    <Check className="h-4 w-4" />
-                    {t('submitReview')}
+                    <Pencil className="h-4 w-4" />
+                    {t('editCourse')}
                   </Button>
                 ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-800 dark:hover:bg-rose-950"
-                      onClick={() => setItemDialog('reject')}
-                    >
-                      <X className="h-4 w-4" />
-                      {t('reject')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-500"
-                      onClick={() => setItemDialog('approve')}
-                    >
-                      <Check className="h-4 w-4" />
-                      {t('approve')}
-                    </Button>
-                  </>
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => {
+                      decideActiveItem('approved');
+                      if (!nextItem) onClose();
+                    }}
+                  >
+                    {nextItem ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t('markComplete')}
+                      </>
+                    ) : (
+                      <>
+                        <Trophy className="h-4 w-4" />
+                        {t('finishPreview')}
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
-            </div>
+            )}
           </footer>
         </div>
       </div>

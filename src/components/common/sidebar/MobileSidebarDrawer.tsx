@@ -73,7 +73,6 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
           href: '/my-learning',
           icon: BookOpen,
           label: tNav('myLearning'),
-          badge: 3,
         },
         { href: '/certificates', icon: Award, label: tNav('certificates') },
         { href: '/explore', icon: Compass, label: tNav('exploreCourses') },
@@ -97,7 +96,6 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
           href: '/educator/courses',
           icon: BookOpen,
           label: tEducator('myCourses'),
-          badge: 2,
         },
         {
           href: '/educator/students',
@@ -105,7 +103,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
           label: tEducator('learners'),
         },
         {
-          href: '/educator/analytics',
+          href: '/educator/earnings',
           icon: BarChart3,
           label: tEducator('earnings'),
         },
@@ -195,10 +193,12 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         aria-hidden
       />
 
-      {/* Dropdown card — white in light mode, dark navy in dark mode */}
+      {/* Dropdown card — brand navy in both modes (matches the desktop
+          sidebar's own always-navy background), so this stays visibly "ours"
+          instead of a generic white popover in light mode. */}
       <div
         className={cn(
-          'fixed top-14 right-3 z-50 w-76 origin-top-right overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 shadow-black/10 ring-black/8 transition-all duration-200 sm:top-16 sm:right-5 lg:hidden dark:bg-[#071225] dark:shadow-none dark:ring-white/10',
+          'bg-brand-navy fixed top-14 right-3 z-50 w-76 origin-top-right overflow-hidden rounded-2xl shadow-2xl ring-1 shadow-black/20 ring-white/10 transition-all duration-200 sm:top-16 sm:right-5 lg:hidden dark:bg-[#071225] dark:shadow-none',
           open
             ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
             : 'pointer-events-none -translate-y-2 scale-95 opacity-0',
@@ -211,12 +211,10 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
             {user.initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-foreground truncate text-sm font-semibold dark:text-white">
+            <p className="truncate text-sm font-semibold text-white">
               {user.name}
             </p>
-            <p className="text-muted-foreground truncate text-[12px] dark:text-white/45">
-              {user.email}
-            </p>
+            <p className="truncate text-[12px] text-white/45">{user.email}</p>
           </div>
           <span className="border-brand-gold/25 bg-brand-gold/10 text-brand-gold inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold">
             <RoleIcon className="h-2.5 w-2.5" />
@@ -226,7 +224,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
 
         {/* ── Nav items ── */}
         <nav className="px-2 pb-2">
-          <p className="text-muted-foreground/50 px-3 pt-1 pb-1.5 text-[10px] font-semibold tracking-wider uppercase dark:text-white/30">
+          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold tracking-wider text-white/30 uppercase">
             {tNav('menu')}
           </p>
           <div className="flex flex-col gap-0.5">
@@ -250,7 +248,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
                       'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150',
                       active
                         ? 'bg-brand-gold text-brand-navy font-semibold'
-                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium dark:text-white/55 dark:hover:bg-white/4 dark:hover:text-white/90',
+                        : 'font-medium text-white/55 hover:bg-white/4 hover:text-white/90',
                     )}
                   >
                     <Icon
@@ -258,7 +256,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
                         'h-4.5 w-4.5 shrink-0',
                         active
                           ? 'text-brand-navy'
-                          : 'text-muted-foreground/60 group-hover:text-foreground/70 dark:text-white/40 dark:group-hover:text-white/70',
+                          : 'text-white/40 group-hover:text-white/70',
                       )}
                     />
                     <span className="flex-1">{label}</span>
@@ -268,7 +266,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
                           'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
                           active
                             ? 'bg-brand-navy/15 text-brand-navy'
-                            : 'bg-muted-foreground/15 text-muted-foreground dark:bg-white/10 dark:text-white/70',
+                            : 'bg-white/10 text-white/70',
                         )}
                       >
                         {badge}
@@ -282,43 +280,43 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
         </nav>
 
         {/* ── Preferences + secondary actions — unified, no dividers between them ── */}
-        <div className="border-border border-t px-2 py-2 dark:border-white/[0.07]">
+        <div className="border-t border-white/[0.07] px-2 py-2">
           {/* Theme */}
           <div className="flex items-center justify-between rounded-lg px-3 py-2">
-            <span className="text-muted-foreground text-sm font-medium dark:text-white/55">
+            <span className="text-sm font-medium text-white/55">
               {tNav('theme')}
             </span>
             <ThemeSwitchToggle />
           </div>
           {/* Language */}
           <div className="flex items-center justify-between rounded-lg px-3 py-2">
-            <span className="text-muted-foreground text-sm font-medium dark:text-white/55">
+            <span className="text-sm font-medium text-white/55">
               {tNav('language')}
             </span>
-            <LanguageSwitcher />
+            <LanguageSwitcher scrolled={false} />
           </div>
           {/* Settings */}
           <Link
             href={settingsHref}
             onClick={close}
-            className="group text-muted-foreground hover:bg-muted/50 hover:text-foreground flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors dark:text-white/55 dark:hover:bg-white/4 dark:hover:text-white/90"
+            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/55 transition-colors hover:bg-white/4 hover:text-white/90"
           >
-            <Settings className="text-muted-foreground/60 group-hover:text-foreground/70 h-4.5 w-4.5 shrink-0 dark:text-white/40 dark:group-hover:text-white/70" />
+            <Settings className="h-4.5 w-4.5 shrink-0 text-white/40 group-hover:text-white/70" />
             {tNav('settings')}
           </Link>
           {/* Help */}
           <Link
             href={learnMoreHref ?? '#'}
             onClick={close}
-            className="group text-muted-foreground hover:bg-muted/50 hover:text-foreground flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors dark:text-white/55 dark:hover:bg-white/4 dark:hover:text-white/90"
+            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/55 transition-colors hover:bg-white/4 hover:text-white/90"
           >
-            <HelpCircle className="text-muted-foreground/60 group-hover:text-foreground/70 h-4.5 w-4.5 shrink-0 dark:text-white/40 dark:group-hover:text-white/70" />
+            <HelpCircle className="h-4.5 w-4.5 shrink-0 text-white/40 group-hover:text-white/70" />
             {tNav('help')}
           </Link>
         </div>
 
         {/* ── Log out ── */}
-        <div className="border-border border-t p-2 dark:border-white/[0.07]">
+        <div className="border-t border-white/[0.07] p-2">
           <button
             type="button"
             onClick={() => {
@@ -326,7 +324,7 @@ export function MobileSidebarDrawer({ role }: { role: SidebarRole }) {
               setShowLogoutConfirm(true);
             }}
             disabled={isLoggingOut}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-500/80 transition-colors hover:bg-rose-500/8 hover:text-rose-500 disabled:opacity-50 dark:text-rose-400/90 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-400/90 transition-colors hover:bg-rose-500/10 hover:text-rose-400 disabled:opacity-50"
           >
             <LogOut className="h-4.5 w-4.5 shrink-0" />
             {isLoggingOut ? tNav('signingOut') : tNav('logout')}

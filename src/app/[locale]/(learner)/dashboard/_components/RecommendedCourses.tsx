@@ -15,8 +15,8 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { ALL_COURSES } from '@/config/learner';
-import type { Course, CourseLevel } from '@/config/learner';
+import { ALL_COURSES } from '@/constants/learner';
+import type { Course, CourseLevel } from '@/constants/learner';
 
 type Meta = { icon: React.ElementType; bg: string; fg: string };
 

@@ -217,6 +217,10 @@ export function CourseReview({ task }: { task: CourseTask }) {
     currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
   const nextLocked = nextItem ? locks.lockedItemIds.has(nextItem.id) : false;
   const isPublishedView = task.status === 'Published';
+  // Published/Archived courses were already decided — this is a read-only
+  // browse, not something awaiting a decision, so the header should read
+  // "Course Preview" rather than "Course Review".
+  const isPreviewMode = isPublishedView || isArchived;
 
   // Show type icons in sidebar for both Published and Under Review statuses
   const shouldShowTypeIcons =
@@ -481,7 +485,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
             {/* ── Desktop: review title | role badge + controls ── */}
             <div className="hidden min-w-0 flex-1 lg:block">
               <h1 className="text-foreground truncate text-lg font-bold">
-                {t('heading')}
+                {isPreviewMode ? t('coursePreviewHeading') : t('heading')}
               </h1>
               <p className="text-muted-foreground truncate text-[11px]">
                 Live workspace synced for {currentUser.email}
@@ -560,7 +564,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
           </div>
 
           {/* Content */}
-          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <main className="scrollbar-none min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
             {active && (
               <PreviewPanel
                 item={active}
@@ -726,7 +730,7 @@ export function CourseReview({ task }: { task: CourseTask }) {
                 : t('decisionRejectedBody', { count: rejectedFeedbackCount })}
             </SheetDescription>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-5 py-4">
+          <div className="scrollbar-none flex-1 overflow-y-auto px-5 py-4">
             <div
               className={cn(
                 'mb-4 flex items-center gap-2.5 rounded-xl border px-3.5 py-3',

@@ -3,7 +3,8 @@
 import { useState, useMemo, useSyncExternalStore } from 'react';
 import { Search } from 'lucide-react';
 import { useLearnerMyLearningT } from '@/i18n';
-import { type Course, ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
+import { type Course } from '@/constants/learner';
+import { CATALOG } from '@/lib/courses/catalog';
 import { COURSE_MODULES_MAP } from '@/app/[locale]/(learner)/learn/[courseId]/_lib/content';
 import { getCourseProgressPercent } from '@/lib/utils/courseStorage';
 import { Pagination } from '@/components/common/list/Pagination';
@@ -22,9 +23,6 @@ function readEnrolledIds(): string[] {
     return [];
   }
 }
-
-// All possible courses a learner could have enrolled in via the Explore page
-const EXPLORE_LOOKUP: Course[] = [...ALL_COURSES, ...EXPLORE_COURSES];
 
 // Detects "we've hydrated on the client" without an effect + setState —
 // localStorage snapshots differ between the server render and the client,
@@ -64,7 +62,7 @@ export default function CourseGrid({ courses, userName }: CourseGridProps) {
     if (!mounted) return courses;
     const enrolledIds = readEnrolledIds();
     const existingIds = new Set(courses.map((c) => c.id));
-    const extra = EXPLORE_LOOKUP.filter(
+    const extra = CATALOG.filter(
       (c) => enrolledIds.includes(c.id) && !existingIds.has(c.id),
     ).map((c) => ({ ...c, enrolled: true }));
     return [...courses, ...extra].map(withRealProgress);

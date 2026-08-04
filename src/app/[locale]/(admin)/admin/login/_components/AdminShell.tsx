@@ -50,7 +50,7 @@ export default function AdminShell({
         <MobileSidebarDrawer role="admin" />
 
         <main className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="scrollbar-none flex flex-1 flex-col overflow-y-auto">
             <div className="flex-1">{children}</div>
             <div className="hidden lg:block">
               <FooterBottomBar theme="light" />

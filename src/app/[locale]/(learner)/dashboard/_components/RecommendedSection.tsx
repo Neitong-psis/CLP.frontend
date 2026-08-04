@@ -8,7 +8,11 @@ import {
   ArrowUpRight,
   ChevronRight,
 } from 'lucide-react';
-import { ALL_COURSES, type Course, type CourseLevel } from '@/config/learner';
+import {
+  ALL_COURSES,
+  type Course,
+  type CourseLevel,
+} from '@/constants/learner';
 import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';

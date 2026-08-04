@@ -14,6 +14,7 @@ export const PROTECTED_ROUTES: readonly ProtectedRoute[] = [
   { prefix: '/certificates', role: ROLE.LEARNER },
   { prefix: '/quizzes', role: ROLE.LEARNER },
   { prefix: '/learn', role: ROLE.LEARNER },
+  { prefix: '/checkout', role: ROLE.LEARNER },
 ];
 
 export function matchProtectedRoute(

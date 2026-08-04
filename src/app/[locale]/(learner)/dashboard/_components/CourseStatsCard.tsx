@@ -1,5 +1,5 @@
 import { GraduationCap, BadgeCheck, Clock } from 'lucide-react';
-import { ENROLLED_COURSES } from '@/config/learner';
+import { ENROLLED_COURSES } from '@/constants/learner';
 
 const totalEnrolled = ENROLLED_COURSES.length;
 const completed = ENROLLED_COURSES.filter((c) => c.completed).length;

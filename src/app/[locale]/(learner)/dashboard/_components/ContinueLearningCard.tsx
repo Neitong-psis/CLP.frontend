@@ -7,7 +7,7 @@ import {
   ENROLLED_COURSES,
   EXPLORE_COURSES,
   type Course,
-} from '@/config/learner';
+} from '@/constants/learner';
 import { useLearnerDashboardT } from '@/i18n';
 import { useInView } from '@/hooks/useInView';
 import { entranceClass, entranceStyle } from '@/lib/utils/animation';

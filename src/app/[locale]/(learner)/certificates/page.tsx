@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useLearnerCertificatesT } from '@/i18n';
 import TopBar from '@/components/pages/learner/TopBar';
 import { PageHero } from '@/components/common/PageHero';
@@ -9,98 +8,35 @@ import { SearchInput } from '@/components/common/list/SearchInput';
 import { Pagination } from '@/components/common/list/Pagination';
 import { PillTabs, type PillTab } from '@/components/common/list/PillTabs';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
-import { CERTIFICATES, type Certificate } from '@/config/learner';
+import { CERTIFICATES } from '@/constants/learner';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils/cn';
-import {
-  readVerifiedCerts,
-  readVerifiedCertName,
-} from '@/lib/utils/certStorage';
 import { CertificateCard } from './_components/CertificateCard';
-
-const PAGE_SIZE = 6;
-
-type StatusFilter = 'all' | 'verify' | 'view';
-type SortKey = 'recent' | 'title-az' | 'title-za' | 'status';
-
-function sortCertificates(
-  list: Certificate[],
-  sort: SortKey,
-  verifiedIds: string[],
-): Certificate[] {
-  if (sort === 'recent') return list;
-  return [...list].sort((a, b) => {
-    switch (sort) {
-      case 'title-az':
-        return a.fullTitle.localeCompare(b.fullTitle);
-      case 'title-za':
-        return b.fullTitle.localeCompare(a.fullTitle);
-      case 'status': {
-        // Unverified (still actionable) certificates first.
-        const av = a.verified || verifiedIds.includes(a.id);
-        const bv = b.verified || verifiedIds.includes(b.id);
-        return Number(av) - Number(bv);
-      }
-      default:
-        return 0;
-    }
-  });
-}
+import { useVerifiedCertificates } from './_hooks/useVerifiedCertificates';
+import {
+  useCertificateFilters,
+  type StatusFilter,
+  type SortKey,
+} from './_hooks/useCertificateFilters';
 
 export default function CertificatesPage() {
   const t = useLearnerCertificatesT();
   const { firstName, email } = useCurrentUser();
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [sort, setSort] = useState<SortKey>('recent');
-  const [page, setPage] = useState(1);
-  const [mounted, setMounted] = useState(false);
-  // IDs verified in this session or a previous session (persisted in localStorage).
-  // Starts empty; populated on mount so SSR/hydration is always consistent.
-  const [verifiedIds, setVerifiedIds] = useState<string[]>([]);
-  const [verifiedNames, setVerifiedNames] = useState<Record<string, string>>(
-    {},
-  );
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      const ids = readVerifiedCerts();
-      const names: Record<string, string> = {};
-      ids.forEach((certId) => {
-        const n = readVerifiedCertName(certId);
-        if (n) names[certId] = n;
-      });
-      setVerifiedIds(ids);
-      setVerifiedNames(names);
-      setMounted(true);
-    }, 60);
-    return () => clearTimeout(id);
-  }, []);
-
-  const filtered = CERTIFICATES.filter((c) => {
-    const matchSearch =
-      c.fullTitle.toLowerCase().includes(search.toLowerCase()) ||
-      c.certificateId.toLowerCase().includes(search.toLowerCase());
-    if (!matchSearch) return false;
-
-    const isVerified = c.verified || verifiedIds.includes(c.id);
-    if (statusFilter === 'verify') return !isVerified;
-    if (statusFilter === 'view') return isVerified;
-    return true;
-  });
-
-  const sorted = sortCertificates(filtered, sort, verifiedIds);
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const paginated = sorted.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  const verifiedCount = CERTIFICATES.filter(
-    (c) => c.verified || verifiedIds.includes(c.id),
-  ).length;
+  const { verifiedIds, verifiedNames, mounted } = useVerifiedCertificates();
+  const {
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    sort,
+    setSort,
+    setPage,
+    sorted,
+    paginated,
+    totalPages,
+    currentPage,
+    verifiedCount,
+  } = useCertificateFilters(verifiedIds);
 
   const STATUS_TABS: PillTab<StatusFilter>[] = [
     { value: 'all', label: t('filterAll'), count: CERTIFICATES.length },

@@ -586,6 +586,138 @@ export const EDUCATOR_COURSE_TASKS: CourseTask[] = [
     dueDate: 'Archived Jan 9',
     thumbnailUrl: '/image/Complete_Storytelling_Bootcamp.png',
   },
+
+  // ── Published — backs the dashboard's Top Courses / Completion Rates
+  // widgets (see DASHBOARD_TOP_COURSES / COMPLETION_RATES) so each row
+  // there links to a real course instead of a dead id. ─────────────────────
+  {
+    id: 'ct26',
+    title: 'Leadership Masterclass',
+    description:
+      'Flagship leadership course covering coaching, delegation, and team performance for program leads.',
+    category: 'Leadership Development',
+    price: '$79',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 12',
+    students: 1842,
+    revenue: '$145,518',
+    rating: 4.9,
+    updatedAgo: '1 day ago',
+  },
+  {
+    id: 'ct27',
+    title: 'Child Development Fundamentals',
+    description:
+      'Core child-development theory and classroom practice for educators working with young learners.',
+    category: 'Child Development',
+    price: '$59',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 9',
+    students: 1203,
+    revenue: '$70,977',
+    rating: 4.7,
+    updatedAgo: '3 days ago',
+  },
+  {
+    id: 'ct28',
+    title: 'Khmer Literature Deep Dive',
+    description:
+      'An in-depth study of classic and contemporary Khmer literature, from close reading to critical analysis.',
+    category: 'Khmer Literature',
+    price: '$49',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published May 6',
+    students: 876,
+    revenue: '$42,924',
+    rating: 4.8,
+    updatedAgo: '4 days ago',
+  },
+  {
+    id: 'ct29',
+    title: 'Innovative Learning Essentials',
+    description:
+      'Foundational strategies for designing engaging, technology-enabled learning experiences.',
+    category: 'Innovative Learning',
+    price: '$39',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 30',
+    students: 654,
+    revenue: '$25,506',
+    rating: 4.6,
+    updatedAgo: '6 days ago',
+  },
+  {
+    id: 'ct30',
+    title: 'Advanced Khmer Poetry',
+    description:
+      'Advanced study of Khmer poetic form, meter, and performance for experienced literature students.',
+    category: 'Khmer Literature',
+    price: '$69',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 24',
+    students: 521,
+    revenue: '$35,949',
+    rating: 4.5,
+    updatedAgo: '1 week ago',
+  },
+  {
+    id: 'ct31',
+    title: 'Mentoring for Program Leads',
+    description:
+      'Practical mentoring frameworks and coaching conversations for community program leads.',
+    category: 'Leadership Development',
+    price: '$45',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 18',
+    students: 438,
+    revenue: '$19,710',
+    rating: 4.7,
+    updatedAgo: '2 weeks ago',
+  },
+  {
+    id: 'ct32',
+    title: 'Classroom Assessment Design',
+    description:
+      'Designing fair, actionable assessments — from rubrics to formative checks — for everyday classrooms.',
+    category: 'Innovative Learning',
+    price: '$35',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 11',
+    students: 312,
+    revenue: '$10,920',
+    rating: 4.4,
+    updatedAgo: '3 weeks ago',
+  },
+  {
+    id: 'ct33',
+    title: 'Storytelling in Practice',
+    description:
+      'Hands-on storytelling techniques for community outreach, classroom engagement, and program messaging.',
+    category: 'Leadership',
+    price: '$55',
+    assignedBy: 'Sarah Wilson',
+    status: 'Published',
+    priority: 'Low',
+    dueDate: 'Published Apr 3',
+    students: 289,
+    revenue: '$15,895',
+    rating: 4.8,
+    updatedAgo: '1 month ago',
+  },
 ];
 
 export type StudentStatus = 'Active' | 'Inactive' | 'Completed';
@@ -959,7 +1091,7 @@ export const EDUCATOR_STAT_CONFIG: DashboardStatConfig[] = [
     icon: Star,
     iconBg: 'bg-brand-gold',
     gradient: 'from-violet-600 to-purple-900',
-    href: '/educator/analytics',
+    href: '/educator/courses',
   },
   {
     label: 'Monthly Earnings',
@@ -968,7 +1100,7 @@ export const EDUCATOR_STAT_CONFIG: DashboardStatConfig[] = [
     icon: DollarSign,
     iconBg: 'bg-brand-navy',
     gradient: 'from-emerald-500 to-teal-800',
-    href: '/educator/analytics',
+    href: '/educator/earnings',
   },
 ];
 
@@ -1002,26 +1134,58 @@ export const MONTHLY_ENROLLMENTS = [
   { month: 'May', count: 420 },
 ];
 
+// `id` matches the backing `CourseTask` in EDUCATOR_COURSE_TASKS (ct26-ct33)
+// so each dashboard row links to a real course instead of a dead id.
 export const DASHBOARD_TOP_COURSES = [
-  { title: 'Leadership Masterclass', students: 1842, rating: 4.9 },
-  { title: 'Child Development Fundamentals', students: 1203, rating: 4.7 },
-  { title: 'Khmer Literature Deep Dive', students: 876, rating: 4.8 },
-  { title: 'Innovative Learning Essentials', students: 654, rating: 4.6 },
-  { title: 'Advanced Khmer Poetry', students: 521, rating: 4.5 },
-  { title: 'Mentoring for Program Leads', students: 438, rating: 4.7 },
-  { title: 'Classroom Assessment Design', students: 312, rating: 4.4 },
-  { title: 'Storytelling in Practice', students: 289, rating: 4.8 },
+  { id: 'ct26', title: 'Leadership Masterclass', students: 1842, rating: 4.9 },
+  {
+    id: 'ct27',
+    title: 'Child Development Fundamentals',
+    students: 1203,
+    rating: 4.7,
+  },
+  {
+    id: 'ct28',
+    title: 'Khmer Literature Deep Dive',
+    students: 876,
+    rating: 4.8,
+  },
+  {
+    id: 'ct29',
+    title: 'Innovative Learning Essentials',
+    students: 654,
+    rating: 4.6,
+  },
+  { id: 'ct30', title: 'Advanced Khmer Poetry', students: 521, rating: 4.5 },
+  {
+    id: 'ct31',
+    title: 'Mentoring for Program Leads',
+    students: 438,
+    rating: 4.7,
+  },
+  {
+    id: 'ct32',
+    title: 'Classroom Assessment Design',
+    students: 312,
+    rating: 4.4,
+  },
+  {
+    id: 'ct33',
+    title: 'Storytelling in Practice',
+    students: 289,
+    rating: 4.8,
+  },
 ];
 
 export const COMPLETION_RATES = [
-  { title: 'Leadership Masterclass', rate: 74 },
-  { title: 'Child Development Fundamentals', rate: 68 },
-  { title: 'Khmer Literature Deep Dive', rate: 81 },
-  { title: 'Innovative Learning Essentials', rate: 59 },
-  { title: 'Advanced Khmer Poetry', rate: 71 },
-  { title: 'Mentoring for Program Leads', rate: 63 },
-  { title: 'Classroom Assessment Design', rate: 55 },
-  { title: 'Storytelling in Practice', rate: 77 },
+  { id: 'ct26', title: 'Leadership Masterclass', rate: 74 },
+  { id: 'ct27', title: 'Child Development Fundamentals', rate: 68 },
+  { id: 'ct28', title: 'Khmer Literature Deep Dive', rate: 81 },
+  { id: 'ct29', title: 'Innovative Learning Essentials', rate: 59 },
+  { id: 'ct30', title: 'Advanced Khmer Poetry', rate: 71 },
+  { id: 'ct31', title: 'Mentoring for Program Leads', rate: 63 },
+  { id: 'ct32', title: 'Classroom Assessment Design', rate: 55 },
+  { id: 'ct33', title: 'Storytelling in Practice', rate: 77 },
 ];
 
 export const QUIZ_ANALYTICS = [

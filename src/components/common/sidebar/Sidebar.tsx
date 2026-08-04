@@ -64,7 +64,6 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
           href: '/my-learning',
           icon: BookOpen,
           label: tNav('myLearning'),
-          badge: 3,
         },
         { href: '/certificates', icon: Award, label: tNav('certificates') },
         { href: '/explore', icon: Compass, label: tNav('exploreCourses') },
@@ -127,7 +126,6 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
           href: '/admin/courses',
           icon: BookOpen,
           label: tAdmin('courses'),
-          badge: 3,
         },
         { href: '/admin/users', icon: Users, label: tAdmin('users') },
         {
@@ -294,7 +292,11 @@ export default function Sidebar({ role }: { role: SidebarRole }) {
         })()}
       </nav>
 
-      <div className="shrink-0 border-t border-white/[0.07] px-3 py-1">
+      {/* h-16 matches FooterBottomBar's rendered height exactly, so this
+          border-top lines up with the footer's border-top across the
+          sidebar/content seam on pages short enough for both to sit flush
+          against the viewport bottom. */}
+      <div className="flex h-16 shrink-0 items-center border-t border-white/[0.07] px-3">
         <ProfileMenu
           user={user}
           roleLabel={roleChip.label}

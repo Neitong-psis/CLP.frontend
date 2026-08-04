@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation';
-import { ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
+import { findCourse } from '@/lib/courses/catalog';
 import {
   COURSE_MODULES_MAP,
   REVIEW_MODULES,
   lessonCount,
 } from '../../learn/[courseId]/_lib/content';
-import { slugify } from '@/lib/utils/slugify';
 import CheckoutPage from '@/components/pages/learner/checkout/CheckoutPage';
 
 interface PageProps {
@@ -15,9 +14,7 @@ interface PageProps {
 export default async function CoursePurchasePage({ params }: PageProps) {
   const { courseId } = await params;
 
-  const course = [...ALL_COURSES, ...EXPLORE_COURSES].find(
-    (c) => slugify(c.title) === courseId,
-  );
+  const course = findCourse(courseId);
   if (!course) notFound();
 
   const modules = COURSE_MODULES_MAP[course.id] ?? REVIEW_MODULES;

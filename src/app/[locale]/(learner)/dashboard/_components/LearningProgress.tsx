@@ -14,8 +14,8 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { ENROLLED_COURSES } from '@/config/learner';
-import type { Course } from '@/config/learner';
+import { ENROLLED_COURSES } from '@/constants/learner';
+import type { Course } from '@/constants/learner';
 
 type Meta = { icon: React.ElementType; bg: string; fg: string };
 

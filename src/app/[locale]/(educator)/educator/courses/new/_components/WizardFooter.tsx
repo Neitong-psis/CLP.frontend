@@ -18,6 +18,7 @@ export function WizardFooter({
   missingCount,
   statusBlocksSubmit = false,
   statusBlocksSubmitLabel,
+  canSaveDraft = true,
   onBack,
   onNext,
   onSaveDraft,
@@ -34,6 +35,10 @@ export function WizardFooter({
   /** Overrides the default "set status to Under Review" copy — the admin
    *  wizard's target status is "Published" instead. */
   statusBlocksSubmitLabel?: string;
+  /** Educator drafts are meant to hold incomplete work, so Save Draft stays
+   *  enabled there regardless of `missingCount`. The admin wizard has no
+   *  such in-progress concept, so it gates Save Draft on completeness too. */
+  canSaveDraft?: boolean;
   onBack: () => void;
   onNext: () => void;
   onSaveDraft: () => void;
@@ -99,6 +104,8 @@ export function WizardFooter({
             variant="ghost"
             className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-border gap-2"
             onClick={onSaveDraft}
+            disabled={!canSaveDraft}
+            title={canSaveDraft ? undefined : t('footer.completeRequired')}
           >
             <Save className="h-4 w-4" />
             {t('footer.saveDraft')}

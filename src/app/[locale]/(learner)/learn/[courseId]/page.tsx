@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { ALL_COURSES, EXPLORE_COURSES } from '@/constants/learner';
+import { findCourse } from '@/lib/courses/catalog';
 import {
   COURSE_MODULES_MAP,
   REVIEW_MODULES,
@@ -7,7 +7,6 @@ import {
   flattenItems,
 } from './_lib/content';
 import LearnerCoursePlayer from '@/components/pages/learner/learn/LearnerCoursePlayer';
-import { slugify } from '@/lib/utils/slugify';
 import type { LearnerItemStatus } from './_lib/content';
 
 interface PageProps {
@@ -22,10 +21,7 @@ export default async function CoursePlayerPage({
   const { courseId } = await params;
   const { mode } = await searchParams;
 
-  // Resolve course by title slug across all known courses
-  const course = [...ALL_COURSES, ...EXPLORE_COURSES].find(
-    (c) => slugify(c.title) === courseId,
-  );
+  const course = findCourse(courseId);
   if (!course) notFound();
 
   // Resolve modules using the course's actual ID

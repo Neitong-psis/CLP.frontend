@@ -6,7 +6,9 @@ import { CheckCircle2 } from 'lucide-react';
  * Each element enters with a staggered delay so the user's eye follows
  * the reveal top-to-bottom rather than everything popping in at once.
  */
-export function ConfirmedView() {
+export function ConfirmedView({ from }: { from: string | null }) {
+  const loginHref = from ? `/auth?from=${encodeURIComponent(from)}` : '/auth';
+
   return (
     <div className="flex flex-col items-center text-center">
       {/* Icon — outer ring pulses once, inner ring is static, check scales in */}
@@ -36,7 +38,7 @@ export function ConfirmedView() {
         style={{ animationDelay: '340ms' }}
       >
         <Link
-          href="/auth"
+          href={loginHref}
           className="bg-brand-gold shadow-brand-gold/25 flex items-center justify-center rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
         >
           Go to Login

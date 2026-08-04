@@ -1,9 +1,15 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
 import { useEducatorSettingsT } from '@/i18n';
 import { EDUCATOR_USER } from '@/constants/educator';
 import { DatePicker } from '@/components/ui/DatePicker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { ProfileForm } from '../_lib/useProfileForm';
 
 const inputCls =
@@ -66,19 +72,21 @@ export function ProfileFields({
       <div className={sectionLabelCls}>{t('personalDetails')}</div>
       <div>
         <label className={labelCls}>{t('gender')}</label>
-        <div className="relative">
-          <select
-            value={form.gender}
-            onChange={(e) => onChange('gender', e.target.value)}
-            className={`${inputCls} cursor-pointer appearance-none pr-9`}
-          >
-            <option value="">{t('selectGender')}</option>
-            <option>{t('female')}</option>
-            <option>{t('male')}</option>
-            <option>{t('preferNotToSay')}</option>
-          </select>
-          <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-        </div>
+        <Select
+          value={form.gender || undefined}
+          onValueChange={(v) => onChange('gender', v ?? '')}
+        >
+          <SelectTrigger className="w-full justify-between rounded-xl px-3 data-[size=default]:h-11">
+            <SelectValue placeholder={t('selectGender')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={t('female')}>{t('female')}</SelectItem>
+            <SelectItem value={t('male')}>{t('male')}</SelectItem>
+            <SelectItem value={t('preferNotToSay')}>
+              {t('preferNotToSay')}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <label className={labelCls}>{t('dob')}</label>

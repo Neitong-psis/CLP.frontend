@@ -16,7 +16,7 @@ import { useToast } from '@/components/ui/toast';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import Logo from '@/components/common/Logo';
-import { type Certificate } from '@/config/learner';
+import { type Certificate } from '@/constants/learner';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { getCertById } from '../_lib/cert';
 import { readVerifiedCertName } from '@/lib/utils/certStorage';

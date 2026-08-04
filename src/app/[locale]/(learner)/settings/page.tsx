@@ -2,11 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { UserCircle, Upload, ChevronDown } from 'lucide-react';
+import { UserCircle, Upload } from 'lucide-react';
 import TopBar from '@/components/pages/learner/TopBar';
 import FooterBottomBar from '@/components/common/footer/FooterBottomBar';
 import { useToast } from '@/components/ui/toast';
 import { DatePicker } from '@/components/ui/DatePicker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 const LEARNER_ROLE_LABEL = 'Learner';
@@ -227,19 +234,21 @@ export default function LearnerSettingsPage() {
             <div className={sectionLabelCls}>Personal Details</div>
             <div>
               <label className={labelCls}>Gender</label>
-              <div className="relative">
-                <select
-                  value={form.gender}
-                  onChange={(e) => setField('gender', e.target.value)}
-                  className={`${inputCls} cursor-pointer appearance-none pr-9`}
-                >
-                  <option value="">Select gender</option>
-                  <option>Female</option>
-                  <option>Male</option>
-                  <option>Prefer not to say</option>
-                </select>
-                <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-              </div>
+              <Select
+                value={form.gender || undefined}
+                onValueChange={(v) => setField('gender', v ?? '')}
+              >
+                <SelectTrigger className="w-full justify-between rounded-xl px-3 data-[size=default]:h-11">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Prefer not to say">
+                    Prefer not to say
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className={labelCls}>Date of Birth</label>

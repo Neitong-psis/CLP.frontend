@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils/cn';
 import { useHeaderT } from '@/i18n';
-import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import { authHref } from '@/constants/auth-links';
 import { scrolledTheme } from '@/components/header/scrolledTheme';
 
@@ -98,8 +97,6 @@ export function AuthMenu({ scrolled }: { scrolled: boolean }) {
           <RoleMenuItems tab="signup" />
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <LanguageSwitcher scrolled={scrolled} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { validateEmail, validatePassword } from '@/config/auth';
 import { FieldGroup } from '@/components/ui/Field';
 import { useAuth } from '@/hooks/use-auth';
 import { resolveHome } from '@/lib/rbac/has-role';
+import { safeRedirect } from '@/lib/utils/safeRedirect';
 import { isApiError } from '@/lib/api/errors';
 import {
   FormField,
@@ -49,7 +50,7 @@ export default function LogInForm() {
           { email: value.email, password: value.password },
           { role: role },
         );
-        const from = searchParams.get('from');
+        const from = safeRedirect(searchParams.get('from'));
         router.replace(from ?? resolveHome(user));
       } catch (error) {
         if (isMounted.current) {

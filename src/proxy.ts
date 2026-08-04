@@ -51,7 +51,10 @@ export function proxy(request: NextRequest): NextResponse {
       if (!isAuthenticated) {
         const loginPath = rest.startsWith('/admin') ? ADMIN_LOGIN : '/auth';
         const loginUrl = new URL(`${prefix}${loginPath}`, request.url);
-        loginUrl.searchParams.set('from', pathname);
+        loginUrl.searchParams.set(
+          'from',
+          `${pathname}${request.nextUrl.search}`,
+        );
         return NextResponse.redirect(loginUrl);
       }
 

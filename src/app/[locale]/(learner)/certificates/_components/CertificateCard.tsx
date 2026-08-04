@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ShieldCheck, ShieldAlert, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import type { Certificate } from '@/config/learner';
+import type { Certificate } from '@/constants/learner';
 import type { useLearnerCertificatesT } from '@/i18n';
 import { CertPreview } from './CertPreview';
 

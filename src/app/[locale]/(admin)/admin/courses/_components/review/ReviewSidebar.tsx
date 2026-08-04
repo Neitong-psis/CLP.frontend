@@ -90,7 +90,7 @@ export function ReviewSidebar({
       </div>
 
       {/* Modules — tree */}
-      <div className="flex-1 overflow-y-auto px-3 py-2">
+      <div className="scrollbar-none flex-1 overflow-y-auto px-3 py-2">
         {modules.map((module) => (
           <ModuleTree
             key={module.id}
